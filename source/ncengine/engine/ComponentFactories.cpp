@@ -14,9 +14,9 @@
 
 namespace nc
 {
-auto CreateAudioSource(Entity entity, const std::any&) -> audio::AudioSource
+auto CreateAudioSource(Entity entity, const std::any&) -> AudioSource
 {
-    return audio::AudioSource{entity, {asset::DefaultAudioClip}};
+    return AudioSource{entity, {asset::DefaultAudioClip}};
 }
 
 auto CreateFrameLogic(Entity entity, const std::any&) -> FrameLogic

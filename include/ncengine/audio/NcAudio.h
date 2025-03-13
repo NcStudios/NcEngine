@@ -22,13 +22,11 @@ namespace config
 struct AudioSettings;
 } // namespace config
 
-namespace audio
-{
 /** @brief Id representing a system's default audio device. */
-constexpr auto DefaultDeviceId = std::numeric_limits<uint32_t>::max();
+constexpr auto DefaultAudioDeviceId = std::numeric_limits<uint32_t>::max();
 
 /** @brief Id representing a null audio device. */
-constexpr auto InvalidDeviceId = DefaultDeviceId - 1u;
+constexpr auto InvalidAudioDeviceId = DefaultAudioDeviceId - 1u;
 
 /** @brief The name and device id of an available audio device. */
 struct AudioDevice
@@ -104,7 +102,7 @@ struct NcAudio : public Module
      * If the operation fails using the provided id, an attempt will be made to fallback
      * to another suitable device, preferring the system default.
      */
-    virtual auto SetOutputDevice(uint32_t deviceId = DefaultDeviceId) noexcept -> bool = 0;
+    virtual auto SetOutputDevice(uint32_t deviceId = DefaultAudioDeviceId) noexcept -> bool = 0;
 
     /**
      * @brief Get the signal for device change events.
@@ -115,5 +113,4 @@ struct NcAudio : public Module
 
 /** @brief Build an NcAudio module instance. */
 auto BuildAudioModule(const config::AudioSettings& settings, ecs::ExplicitEcs<Entity, Transform, AudioSource> gameState) -> std::unique_ptr<NcAudio>;
-} // namespace audio
 } // namespace nc

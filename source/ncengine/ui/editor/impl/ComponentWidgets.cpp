@@ -31,7 +31,7 @@ namespace
 {
 namespace audio_source_ext
 {
-using T = nc::audio::AudioSource;
+using T = nc::AudioSource;
 
 constexpr auto gainProp        = nc::ui::Property{ &T::GetGain,        &T::SetGain,        "gain"       };
 constexpr auto innerRadiusProp = nc::ui::Property{ &T::GetInnerRadius, &T::SetInnerRadius, "innerRadius"};
@@ -1032,7 +1032,7 @@ void TransformUIWidget(Transform& transform, EditorContext& ctx, const std::any&
     }
 }
 
-void AudioSourceUIWidget(audio::AudioSource& audioSource, EditorContext&, const std::any&)
+void AudioSourceUIWidget(AudioSource& audioSource, EditorContext&, const std::any&)
 {
     IMGUI_SCOPE(ui::ImGuiId, "AudioSource");
     ui::PropertyWidget(audio_source_ext::gainProp, audioSource, &ui::DragFloat, 0.1f, 0.0f, 1.0f);

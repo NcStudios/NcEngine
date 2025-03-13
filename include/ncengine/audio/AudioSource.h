@@ -9,8 +9,13 @@
 
 #include <span>
 
-namespace nc::audio
+namespace nc
 {
+namespace audio
+{
+class NcAudioImpl;
+} // namespace audio
+
 /** @brief Flags applying to all clips in an AudioSource. */
 struct AudioSourceFlags
 {
@@ -123,6 +128,6 @@ class AudioSource : public ComponentBase
         void WriteSpatialSamples(double* buffer, size_t frames, const Vector3& sourcePosition, const Vector3& listenerPosition, const Vector3& rightEar);
         void WriteNonSpatialSamples(double* buffer, size_t frames);
 
-        friend class NcAudioImpl;
+        friend class audio::NcAudioImpl;
 };
-} // namespace nc::audio
+} // namespace nc

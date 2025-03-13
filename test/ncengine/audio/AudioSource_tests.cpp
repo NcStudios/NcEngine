@@ -18,27 +18,27 @@ const auto g_clip3 = std::string{"clip3.nca"};
 TEST(AudioSourceTests, Constructor_playFlag_handlesInitialClipSelection)
 {
     {
-        const auto uut = nc::audio::AudioSource{g_entity, {g_clip1}};
-        EXPECT_EQ(nc::audio::NullClipIndex, uut.GetRecentClipIndex());
+        const auto uut = nc::AudioSource{g_entity, {g_clip1}};
+        EXPECT_EQ(nc::NullClipIndex, uut.GetRecentClipIndex());
     }
 
     {
-        const auto props = nc::audio::AudioSourceProperties{.flags = nc::audio::AudioSourceFlags::Play};
-        const auto uut = nc::audio::AudioSource{g_entity, {g_clip1}, props};
+        const auto props = nc::AudioSourceProperties{.flags = nc::AudioSourceFlags::Play};
+        const auto uut = nc::AudioSource{g_entity, {g_clip1}, props};
         EXPECT_EQ(0ull, uut.GetRecentClipIndex());
     }
 
     {
-        const auto props = nc::audio::AudioSourceProperties{.flags = nc::audio::AudioSourceFlags::Play};
-        EXPECT_THROW(nc::audio::AudioSource(g_entity, {}, props), nc::NcError);
+        const auto props = nc::AudioSourceProperties{.flags = nc::AudioSourceFlags::Play};
+        EXPECT_THROW(nc::AudioSource(g_entity, {}, props), nc::NcError);
     }
 }
 
 TEST(AudioSourceTests, Play_validClipIndex_setsPlayState)
 {
-    auto uut = nc::audio::AudioSource{g_entity, {g_clip1}};
+    auto uut = nc::AudioSource{g_entity, {g_clip1}};
     ASSERT_FALSE(uut.IsPlaying());
-    ASSERT_EQ(nc::audio::NullClipIndex, uut.GetRecentClipIndex());
+    ASSERT_EQ(nc::NullClipIndex, uut.GetRecentClipIndex());
     uut.Play(0);
     EXPECT_TRUE(uut.IsPlaying());
     EXPECT_EQ(0, uut.GetRecentClipIndex());
@@ -46,13 +46,13 @@ TEST(AudioSourceTests, Play_validClipIndex_setsPlayState)
 
 TEST(AudioSourceTests, Play_invalidClipIndex_throws)
 {
-    auto uut = nc::audio::AudioSource{g_entity, {g_clip1}};
+    auto uut = nc::AudioSource{g_entity, {g_clip1}};
     EXPECT_THROW(uut.Play(1), nc::NcError);
 }
 
 TEST(AudioSourceTests, PlayNext_hasPreviousState_advancesRoundRobin)
 {
-    auto uut = nc::audio::AudioSource{g_entity, {g_clip1, g_clip2, g_clip3}};
+    auto uut = nc::AudioSource{g_entity, {g_clip1, g_clip2, g_clip3}};
     uut.Play(0);
     uut.PlayNext();
     EXPECT_TRUE(uut.IsPlaying());
@@ -67,7 +67,7 @@ TEST(AudioSourceTests, PlayNext_hasPreviousState_advancesRoundRobin)
 
 TEST(AudioSourceTests, PlayNext_noPreviousState_startsFromBeginning)
 {
-    auto uut = nc::audio::AudioSource{g_entity, {g_clip1}};
+    auto uut = nc::AudioSource{g_entity, {g_clip1}};
     uut.PlayNext();
     EXPECT_TRUE(uut.IsPlaying());
     EXPECT_EQ(0, uut.GetRecentClipIndex());
@@ -75,13 +75,13 @@ TEST(AudioSourceTests, PlayNext_noPreviousState_startsFromBeginning)
 
 TEST(AudioSourceTests, PlayNext_empty_throws)
 {
-    auto uut = nc::audio::AudioSource{g_entity, {}};
+    auto uut = nc::AudioSource{g_entity, {}};
     EXPECT_THROW(uut.PlayNext(), nc::NcError);
 }
 
 TEST(AudioSourceTests, Stop_setsPlayState)
 {
-    auto uut = nc::audio::AudioSource{g_entity, {g_clip1}};
+    auto uut = nc::AudioSource{g_entity, {g_clip1}};
     uut.Play(0);
     uut.Stop();
     EXPECT_FALSE(uut.IsPlaying());
@@ -90,15 +90,15 @@ TEST(AudioSourceTests, Stop_setsPlayState)
 
 TEST(AudioSourceTests, Stop_notPlaying_preservesPlayState)
 {
-    auto uut = nc::audio::AudioSource{g_entity, {g_clip1}};
+    auto uut = nc::AudioSource{g_entity, {g_clip1}};
     uut.Stop();
     EXPECT_FALSE(uut.IsPlaying());
-    EXPECT_EQ(nc::audio::NullClipIndex, uut.GetRecentClipIndex());
+    EXPECT_EQ(nc::NullClipIndex, uut.GetRecentClipIndex());
 }
 
 TEST(AudioSourceTests, AddClip_updatesClipsAndPaths)
 {
-    auto uut = nc::audio::AudioSource{g_entity, {g_clip1}};
+    auto uut = nc::AudioSource{g_entity, {g_clip1}};
     const auto actualIndex = uut.AddClip(g_clip2);
     ASSERT_EQ(1, actualIndex);
     EXPECT_EQ(2, uut.GetClips().size());
@@ -109,7 +109,7 @@ TEST(AudioSourceTests, AddClip_updatesClipsAndPaths)
 
 TEST(AudioSourceTests, SetClip_validClipIndex_replacesClip)
 {
-    auto uut = nc::audio::AudioSource{g_entity, {g_clip1, g_clip2}};
+    auto uut = nc::AudioSource{g_entity, {g_clip1, g_clip2}};
     uut.SetClip(0, g_clip3);
     EXPECT_EQ(2, uut.GetClips().size());
     const auto paths = uut.GetAssetPaths();
@@ -119,22 +119,22 @@ TEST(AudioSourceTests, SetClip_validClipIndex_replacesClip)
 
 TEST(AudioSourceTests, SetClip_invalidClipIndex_throws)
 {
-    auto uut = nc::audio::AudioSource{g_entity, {g_clip1, g_clip2}};
+    auto uut = nc::AudioSource{g_entity, {g_clip1, g_clip2}};
     EXPECT_THROW(uut.SetClip(2, g_clip3), nc::NcError);
 }
 
 TEST(AudioSourceTests, SetClip_replacesLastPlayedClip_resetsPlayState)
 {
-    auto uut = nc::audio::AudioSource{g_entity, {g_clip1, g_clip2}};
+    auto uut = nc::AudioSource{g_entity, {g_clip1, g_clip2}};
     uut.Play(0);
     uut.SetClip(0, g_clip3);
     EXPECT_FALSE(uut.IsPlaying());
-    EXPECT_EQ(nc::audio::NullClipIndex, uut.GetRecentClipIndex());
+    EXPECT_EQ(nc::NullClipIndex, uut.GetRecentClipIndex());
 }
 
 TEST(AudioSourceTests, RemoveClip_validClipIndex_removesClip)
 {
-    auto uut = nc::audio::AudioSource{g_entity, {g_clip1, g_clip2, g_clip3}};
+    auto uut = nc::AudioSource{g_entity, {g_clip1, g_clip2, g_clip3}};
     uut.RemoveClip(0);
     ASSERT_EQ(2, uut.GetClips().size());
     ASSERT_EQ(2, uut.GetAssetPaths().size());
@@ -151,22 +151,22 @@ TEST(AudioSourceTests, RemoveClip_validClipIndex_removesClip)
 
 TEST(AudioSourceTests, RemoveClip_invalidClipIndex_throws)
 {
-    auto uut = nc::audio::AudioSource{g_entity, {g_clip1}};
+    auto uut = nc::AudioSource{g_entity, {g_clip1}};
     EXPECT_THROW(uut.RemoveClip(2), nc::NcError);
 }
 
 TEST(AudioSourceTests, RemoveClip_removesLastPlayedClip_resetsPlayState)
 {
-    auto uut = nc::audio::AudioSource{g_entity, {g_clip1}};
+    auto uut = nc::AudioSource{g_entity, {g_clip1}};
     uut.Play(0);
     uut.RemoveClip(0);
     EXPECT_FALSE(uut.IsPlaying());
-    EXPECT_EQ(nc::audio::NullClipIndex, uut.GetRecentClipIndex());
+    EXPECT_EQ(nc::NullClipIndex, uut.GetRecentClipIndex());
 }
 
 TEST(AudioSourceTests, FlagGettersAndSetters_updateProperties)
 {
-    auto uut = nc::audio::AudioSource{g_entity, {g_clip1}};
+    auto uut = nc::AudioSource{g_entity, {g_clip1}};
 
     EXPECT_FALSE(uut.IsSpatial());
     uut.SetSpatial(true);

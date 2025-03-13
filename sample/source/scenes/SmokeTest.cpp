@@ -160,7 +160,7 @@ void SmokeTest::Load(ecs::Ecs world, ModuleProvider modules)
     auto ncGraphics = modules.Get<NcGraphics>();
     ncGraphics->SetCamera(&camera);
     ncGraphics->SetSkybox(asset::DefaultSkyboxCubeMap);
-    modules.Get<audio::NcAudio>()->RegisterListener(cameraHandle);
+    modules.Get<NcAudio>()->RegisterListener(cameraHandle);
 
     const auto particles = world.Emplace<Entity>({});
     world.Emplace<ParticleEmitter>(
@@ -189,14 +189,14 @@ void SmokeTest::Load(ecs::Ecs world, ModuleProvider modules)
     });
 
     world.Emplace<SkinnedMesh>(animatedCube, mesh::Cube, material::Default, utility::Fnv1a("DefaultCubeAnimation.nca"));
-    world.Emplace<audio::AudioSource>(
+    world.Emplace<AudioSource>(
         animatedCube,
         std::vector<std::string>{
             std::string{asset::DefaultAudioClip}
         },
-        audio::AudioSourceProperties{
-            .flags = audio::AudioSourceFlags::Play |
-                     audio::AudioSourceFlags::Loop
+        AudioSourceProperties{
+            .flags = AudioSourceFlags::Play |
+                     AudioSourceFlags::Loop
         }
     );
 

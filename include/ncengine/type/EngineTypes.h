@@ -26,7 +26,7 @@ REGISTER_TYPE(Entity);
 REGISTER_TYPE(FrameLogic);
 REGISTER_TYPE(Tag);
 REGISTER_TYPE(Transform);
-REGISTER_TYPE(audio::AudioSource);
+REGISTER_TYPE(AudioSource);
 REGISTER_TYPE(ecs::detail::FreeComponentGroup);
 REGISTER_TYPE(Camera);
 REGISTER_TYPE(DirectionalLight);

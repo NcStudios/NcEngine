@@ -25,7 +25,7 @@ auto CalculateAttenuation(double innerRadius, double outerRadius, double squareD
 }
 } // anonymous namespace
 
-namespace nc::audio
+namespace nc
 {
 AudioSource::AudioSource(Entity entity,
                          std::vector<std::string> clips,
@@ -150,4 +150,4 @@ void AudioSource::WriteNonSpatialSamples(double* buffer, size_t frames)
         }
     }
 }
-} // namespace nc::audio
+} // namespace nc

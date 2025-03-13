@@ -59,10 +59,10 @@ auto CreateStreamParams(uint32_t deviceId, uint32_t bufferFrames, nc::audio::NcA
     };
 }
 
-struct NcAudioStub : public nc::audio::NcAudio
+struct NcAudioStub : public nc::NcAudio
 {
-    nc::audio::AudioDevice nullDevice{"NoDevice", nc::audio::InvalidDeviceId};
-    nc::Signal<const nc::audio::AudioDevice&> nullSignal;
+    nc::AudioDevice nullDevice{"NoDevice", nc::InvalidAudioDeviceId};
+    nc::Signal<const nc::AudioDevice&> nullSignal;
 
     void OnBuildTaskGraph(nc::task::UpdateTasks& update, nc::task::RenderTasks&)
     {
@@ -77,30 +77,32 @@ struct NcAudioStub : public nc::audio::NcAudio
     void RegisterListener(nc::Entity) noexcept override{}
     auto GetStreamTime() const noexcept -> double override { return 0.0; }
     void SetStreamTime(double) noexcept override {}
-    auto EnumerateOutputDevices() noexcept -> std::vector<nc::audio::AudioDevice> override { return {}; }
-    auto GetOutputDevice() const noexcept -> const nc::audio::AudioDevice& override { return nullDevice; }
+    auto EnumerateOutputDevices() noexcept -> std::vector<nc::AudioDevice> override { return {}; }
+    auto GetOutputDevice() const noexcept -> const nc::AudioDevice& override { return nullDevice; }
     auto SetOutputDevice(uint32_t) noexcept -> bool override { return false; }
-    auto OnChangeOutputDevice() noexcept -> nc::Signal<const nc::audio::AudioDevice&>& override { return nullSignal; }
+    auto OnChangeOutputDevice() noexcept -> nc::Signal<const nc::AudioDevice&>& override { return nullSignal; }
 };
 } // anonymous namespace
 
-namespace nc::audio
+namespace nc
 {
 auto BuildAudioModule(const config::AudioSettings& settings, ecs::ExplicitEcs<Entity, Transform, AudioSource> gameState) -> std::unique_ptr<NcAudio>
 {
     if(settings.enabled)
     {
         NC_LOG_TRACE("Building NcAudio module");
-        return std::make_unique<NcAudioImpl>(settings, gameState);
+        return std::make_unique<audio::NcAudioImpl>(settings, gameState);
     }
 
     NC_LOG_TRACE("Audio disabled - building NcAudio stub");
     return std::make_unique<NcAudioStub>();
 }
 
+namespace audio
+{
 NcAudioImpl::NcAudioImpl(const config::AudioSettings& settings, ecs::ExplicitEcs<Entity, Transform, AudioSource> gameState)
     : m_gameState{gameState},
-      m_deviceStream{::CreateStreamParams(DefaultDeviceId, settings.bufferFrames, this)},
+      m_deviceStream{::CreateStreamParams(DefaultAudioDeviceId, settings.bufferFrames, this)},
       m_bufferMemory(::BuildBufferPool(m_deviceStream.GetBufferFrames())),
       m_readyBuffers{},
       m_staleBuffers{::BuildBufferQueue(m_bufferMemory)},
@@ -275,4 +277,5 @@ void NcAudioImpl::MixToBuffer(double* buffer)
         }
     }
 }
-} // namespace nc::audio
+} // namespace audio
+} // namespace nc

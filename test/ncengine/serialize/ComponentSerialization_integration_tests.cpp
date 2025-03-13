@@ -127,9 +127,9 @@ TEST(ComponentSerializationTests, RoundTrip_audioSource_preservesValues)
 {
     auto stream = std::stringstream{};
     const auto expectedClips = std::vector<std::string>{"sound1.nca", "sound2.nca"};
-    const auto expectedFlags = nc::audio::AudioSourceFlags::Spatial;
-    const auto expectedProperties = nc::audio::AudioSourceProperties{.flags = expectedFlags};
-    const auto expected = nc::audio::AudioSource{g_entity, expectedClips, expectedProperties};
+    const auto expectedFlags = nc::AudioSourceFlags::Spatial;
+    const auto expectedProperties = nc::AudioSourceProperties{.flags = expectedFlags};
+    const auto expected = nc::AudioSource{g_entity, expectedClips, expectedProperties};
     nc::SerializeAudioSource(stream, expected, g_serializationContext, nullptr);
     const auto actual = nc::DeserializeAudioSource(stream, g_deserializationContext, nullptr);
     EXPECT_TRUE(std::ranges::equal(expectedClips, actual.GetAssetPaths()));
