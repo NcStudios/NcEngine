@@ -86,7 +86,7 @@ struct NcPhysics : public Module
      * In order to reference a dynamically constructed CompoundShape in a Shape, RigidBody, or CollisionQuery, it must
      * be made known to internal asset storage. Once cooked, call this with a unique AssetId to make it available.
      */
-    virtual void AddRuntimeCompoundShape(CookedShape&& cookedShape, asset::AssetId id) = 0;
+    virtual void AddRuntimeCompoundShape(const CookedShape& cookedShape, asset::AssetId id) = 0;
 };
 
 /** @brief Build an NcPhysics module instance. */

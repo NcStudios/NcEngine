@@ -41,7 +41,7 @@ class NcPhysicsStub : public nc::NcPhysics
         auto RestoreSnapshot(nc::PhysicsSnapshot&) -> bool { return false; }
         void BeginRigidBodyBatch(size_t) override {}
         void EndRigidBodyBatch() override {}
-        void AddRuntimeCompoundShape(nc::CookedShape&&, nc::asset::AssetId) override {}
+        void AddRuntimeCompoundShape(const nc::CookedShape&, nc::asset::AssetId) override {}
         void OnBuildTaskGraph(nc::task::UpdateTasks& update, nc::task::RenderTasks&)
         {
             update.Add(
@@ -352,10 +352,9 @@ void NcPhysicsImpl::EndRigidBodyBatch()
     m_vehicleManager.EndBatch(std::exchange(m_deferredState->vehicleBatchIndex, DeferredPhysicsCreateState::NullBatch));
 }
 
-void NcPhysicsImpl::AddRuntimeCompoundShape(CookedShape&& cookedShape, asset::AssetId id)
+void NcPhysicsImpl::AddRuntimeCompoundShape(const CookedShape& cookedShape, asset::AssetId id)
 {
-    auto& shape = ShapeStorageRTTI::ToShape(cookedShape.GetShapeData());
-    m_shapeFactory.AddRuntimeAsset(std::move(shape), id);
+    m_shapeFactory.AddRuntimeAsset(ShapeStorageRTTI::ToShape(cookedShape.GetShapeData()), id);
 }
 } // namespace physics
 } // namespace nc
