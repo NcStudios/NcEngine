@@ -123,7 +123,7 @@ auto ShapeFactory::GetMeshCollider(asset::AssetId id) -> JPH::Shape*
     return m_meshColliders.at(id).GetPtr();
 }
 
-auto ShapeFactory::GetRuntimeAsset(asset::AssetId id, ShapeType type) -> JPH::Shape*
+auto ShapeFactory::GetRuntimeAsset(asset::AssetId id, [[maybe_unused]] ShapeType type) -> JPH::Shape*
 {
     NC_ASSERT(m_runtimeAssets.contains(id), fmt::format("Runtime asset '{}' is not loaded", id));
     auto& ref = m_runtimeAssets.at(id);
