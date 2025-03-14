@@ -23,7 +23,7 @@ void Serialize(std::ostream& stream, const TextureView& in)
 
 void Deserialize(std::istream& stream, TextureView& out)
 {
-    auto textureId = uint64_t{};
+    auto textureId = AssetId{};
     serialize::Deserialize(stream, textureId);
     out = asset::AcquireTextureAsset(textureId);
 }
@@ -35,7 +35,7 @@ void Serialize(std::ostream& stream, const AudioClipView& in)
 
 void Deserialize(std::istream& stream, AudioClipView& out)
 {
-    auto clipId = uint64_t{};
+    auto clipId = AssetId{};
     serialize::Deserialize(stream, clipId);
     out = asset::AcquireAudioClipAsset(clipId);
 }
@@ -81,31 +81,17 @@ auto DeserializeMaterialDesc(std::istream& stream) -> MaterialDesc
 void SerializeAudioSource(std::ostream& stream, const AudioSource& out, const SerializationContext& ctx, const std::any&)
 {
     serialize::Serialize(stream, ctx.entityMap.at(out.ParentEntity()));
-    const auto& clips = out.GetClips();
-    serialize::Serialize(stream, clips.size());
-    for (const auto& clip : clips)
-    {
-        serialize::Serialize(stream, clip.id);
-    }
-    // serialize::Serialize(stream, out.GetClips());
+    serialize::Serialize(stream, out.GetClips());
     serialize::Serialize(stream, out.GetProperties());
 }
 
 auto DeserializeAudioSource(std::istream& stream, const DeserializationContext& ctx, const std::any&) -> AudioSource
 {
     auto id = uint32_t{};
-    auto clipCount = size_t{};
     auto clips = std::vector<asset::AudioClipView>{};
     auto properties = AudioSourceProperties{};
     serialize::Deserialize(stream, id);
-    serialize::Deserialize(stream, clipCount);
-    clips.reserve(clipCount);
-    for (auto i = 0ull; i < clipCount; ++i)
-    {
-        auto clipId = asset::AssetId{};
-        serialize::Deserialize(stream, clipId);
-        clips.push_back(asset::AcquireAudioClipAsset(clipId));
-    }
+    serialize::Deserialize(stream, clips);
     serialize::Deserialize(stream, properties);
     return AudioSource{ctx.entityMap.at(id), std::move(clips), properties};
 }
