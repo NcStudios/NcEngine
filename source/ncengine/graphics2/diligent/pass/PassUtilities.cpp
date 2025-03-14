@@ -73,7 +73,10 @@ void ClearUniShadowMapRenderTarget(Diligent::IDeviceContext& context,
                                    uint32_t shadowMapRenderTargetIndex)
 {
     Diligent::ITextureView* pDSV = shadowMapSinkBufferResource.GetRenderTargetView(shadowMapRenderTargetIndex);
-    context.SetRenderTargets(0, nullptr, pDSV, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
+    if (pDSV)
+    {
+        context.ClearDepthStencil(pDSV, Diligent::CLEAR_DEPTH_FLAG, 1.f, 0, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
+    }
 }
 
 void BindRenderTarget(Diligent::IDeviceContext& context,
