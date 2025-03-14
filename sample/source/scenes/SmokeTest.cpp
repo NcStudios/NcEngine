@@ -193,7 +193,7 @@ void SmokeTest::Load(ecs::Ecs world, ModuleProvider modules)
     world.Emplace<AudioSource>(
         animatedCube,
         std::vector<asset::AudioClipView>{
-            audio_clip::Default
+            audio_clip::silence
         },
         AudioSourceProperties{
             .flags = AudioSourceFlags::Play |

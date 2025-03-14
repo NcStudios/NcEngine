@@ -23,7 +23,7 @@ void ReloadPrefabs();
 // Audio Clips
 namespace audio_clip
 {
-extern asset::AudioClipView Default;
+extern asset::AudioClipView silence;
 } // namespace audio_clip
 
 namespace font
