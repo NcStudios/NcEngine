@@ -60,18 +60,28 @@ class AudioSource : public ComponentBase
         auto IsPlaying() const noexcept -> bool { return m_properties.flags & AudioSourceFlags::Play; }
 
         /**
-         * @brief Get the index of the most recently played clip.
+         * @brief Preemptively set the next clip to be played. This can be started with Resume() instead of Play().
+         * @note Stops any playing clips and resets the play position.
+         */
+        void Queue(uint32_t clipIndex);
+
+        /**
+         * @brief Get the index of the most recently queued or played clip.
          * @note Returns NullClipIndex if no clip has been played or the most recent clip was removed.
          */
-        auto GetRecentClipIndex() const noexcept -> uint32_t { return m_currentClipIndex; }
+        auto GetQueuedClipIndex() const noexcept -> uint32_t { return m_currentClipIndex; }
 
         /** @brief Stop the currently playing audio clip, preserving the current position in the clip. */
         void Stop() noexcept { m_properties.flags &= ~AudioSourceFlags::Play; }
 
         /**
          * @brief Continue playing from the last position.
-         * @note Requires a valid clip to be queued (GetRecentClipIndex() returns an existing clip). */
+         * @note Requires a valid clip to be queued.
+         */
         void Resume();
+
+        /** @brief Go back the beginning of the current playing or queued clip. */
+        void ResetPlayPosition() { m_currentSampleIndex = 0; }
 
         /**
          * @brief Add an audio clip.

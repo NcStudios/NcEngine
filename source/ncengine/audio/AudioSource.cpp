@@ -49,12 +49,19 @@ void AudioSource::PlayNext()
     SetPlaying();
 }
 
+void AudioSource::Queue(uint32_t clipIndex)
+{
+    NC_ASSERT(clipIndex < m_clips.size(), "AudioSource has an invalid clip queued");
+    SetStopped();
+    m_currentClipIndex = clipIndex;
+    m_currentSampleIndex = 0u;
+}
+
 void AudioSource::Resume()
 {
     NC_ASSERT(m_currentClipIndex < m_clips.size(), "AudioSource has an invalid clip queued");
     SetPlaying();
 }
-
 
 auto AudioSource::AddClip(const asset::AudioClipView& clip) -> uint32_t
 {

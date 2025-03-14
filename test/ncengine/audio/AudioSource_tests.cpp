@@ -19,13 +19,13 @@ TEST(AudioSourceTests, Constructor_playFlag_handlesInitialClipSelection)
 {
     {
         const auto uut = nc::AudioSource{g_entity, {g_clip1}};
-        EXPECT_EQ(nc::NullClipIndex, uut.GetRecentClipIndex());
+        EXPECT_EQ(nc::NullClipIndex, uut.GetQueuedClipIndex());
     }
 
     {
         const auto props = nc::AudioSourceProperties{.flags = nc::AudioSourceFlags::Play};
         const auto uut = nc::AudioSource{g_entity, {g_clip1}, props};
-        EXPECT_EQ(0ull, uut.GetRecentClipIndex());
+        EXPECT_EQ(0ull, uut.GetQueuedClipIndex());
     }
 
     {
@@ -38,10 +38,10 @@ TEST(AudioSourceTests, Play_validClipIndex_setsPlayState)
 {
     auto uut = nc::AudioSource{g_entity, {g_clip1}};
     ASSERT_FALSE(uut.IsPlaying());
-    ASSERT_EQ(nc::NullClipIndex, uut.GetRecentClipIndex());
+    ASSERT_EQ(nc::NullClipIndex, uut.GetQueuedClipIndex());
     uut.Play(0);
     EXPECT_TRUE(uut.IsPlaying());
-    EXPECT_EQ(0, uut.GetRecentClipIndex());
+    EXPECT_EQ(0, uut.GetQueuedClipIndex());
 }
 
 TEST(AudioSourceTests, Play_invalidClipIndex_throws)
@@ -56,13 +56,13 @@ TEST(AudioSourceTests, PlayNext_hasPreviousState_advancesRoundRobin)
     uut.Play(0);
     uut.PlayNext();
     EXPECT_TRUE(uut.IsPlaying());
-    EXPECT_EQ(1, uut.GetRecentClipIndex());
+    EXPECT_EQ(1, uut.GetQueuedClipIndex());
     uut.PlayNext();
     EXPECT_TRUE(uut.IsPlaying());
-    EXPECT_EQ(2, uut.GetRecentClipIndex());
+    EXPECT_EQ(2, uut.GetQueuedClipIndex());
     uut.PlayNext();
     EXPECT_TRUE(uut.IsPlaying());
-    EXPECT_EQ(0, uut.GetRecentClipIndex());
+    EXPECT_EQ(0, uut.GetQueuedClipIndex());
 }
 
 TEST(AudioSourceTests, PlayNext_noPreviousState_startsFromBeginning)
@@ -70,7 +70,7 @@ TEST(AudioSourceTests, PlayNext_noPreviousState_startsFromBeginning)
     auto uut = nc::AudioSource{g_entity, {g_clip1}};
     uut.PlayNext();
     EXPECT_TRUE(uut.IsPlaying());
-    EXPECT_EQ(0, uut.GetRecentClipIndex());
+    EXPECT_EQ(0, uut.GetQueuedClipIndex());
 }
 
 TEST(AudioSourceTests, PlayNext_empty_throws)
@@ -79,13 +79,22 @@ TEST(AudioSourceTests, PlayNext_empty_throws)
     EXPECT_THROW(uut.PlayNext(), nc::NcError);
 }
 
+TEST(AudioSourceTests, Queue_updatesPlayState)
+{
+    auto uut = nc::AudioSource{g_entity, {g_clip1, g_clip2}};
+    uut.Play(0);
+    uut.Queue(1);
+    EXPECT_FALSE(uut.IsPlaying());
+    EXPECT_EQ(1, uut.GetQueuedClipIndex());
+}
+
 TEST(AudioSourceTests, Stop_setsPlayState)
 {
     auto uut = nc::AudioSource{g_entity, {g_clip1}};
     uut.Play(0);
     uut.Stop();
     EXPECT_FALSE(uut.IsPlaying());
-    EXPECT_EQ(0, uut.GetRecentClipIndex());
+    EXPECT_EQ(0, uut.GetQueuedClipIndex());
 }
 
 TEST(AudioSourceTests, Stop_notPlaying_preservesPlayState)
@@ -93,7 +102,7 @@ TEST(AudioSourceTests, Stop_notPlaying_preservesPlayState)
     auto uut = nc::AudioSource{g_entity, {g_clip1}};
     uut.Stop();
     EXPECT_FALSE(uut.IsPlaying());
-    EXPECT_EQ(nc::NullClipIndex, uut.GetRecentClipIndex());
+    EXPECT_EQ(nc::NullClipIndex, uut.GetQueuedClipIndex());
 }
 
 TEST(AudioSourceTests, Resume_previouslyPlaying_continues)
@@ -103,7 +112,7 @@ TEST(AudioSourceTests, Resume_previouslyPlaying_continues)
     uut.Stop();
     uut.Resume();
     EXPECT_TRUE(uut.IsPlaying());
-    EXPECT_EQ(0, uut.GetRecentClipIndex());
+    EXPECT_EQ(0, uut.GetQueuedClipIndex());
 }
 
 TEST(AudioSourceTests, Resume_invalidClip_throws)
@@ -144,7 +153,7 @@ TEST(AudioSourceTests, SetClip_replacesLastPlayedClip_resetsPlayState)
     uut.Play(0);
     uut.SetClip(0, g_clip3);
     EXPECT_FALSE(uut.IsPlaying());
-    EXPECT_EQ(nc::NullClipIndex, uut.GetRecentClipIndex());
+    EXPECT_EQ(nc::NullClipIndex, uut.GetQueuedClipIndex());
 }
 
 TEST(AudioSourceTests, RemoveClip_validClipIndex_removesClip)
@@ -174,7 +183,7 @@ TEST(AudioSourceTests, RemoveClip_removesLastPlayedClip_resetsPlayState)
     uut.Play(0);
     uut.RemoveClip(0);
     EXPECT_FALSE(uut.IsPlaying());
-    EXPECT_EQ(nc::NullClipIndex, uut.GetRecentClipIndex());
+    EXPECT_EQ(nc::NullClipIndex, uut.GetQueuedClipIndex());
 }
 
 TEST(AudioSourceTests, FlagGettersAndSetters_updateProperties)

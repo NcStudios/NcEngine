@@ -101,6 +101,7 @@ void SmokeTest::Load(ecs::Ecs world, ModuleProvider modules)
         asset::UnloadAllSkeletalAnimationAssets();
         asset::UnloadAllTextureAssets();
         ::LoadScene(world, modules);
+        ReloadPrefabs();
     }
     else
     {
