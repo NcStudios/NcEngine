@@ -1,4 +1,5 @@
 #include "SinkBufferResource.h"
+#include "graphics2/diligent/pass/PassTypes.h"
 #include "ResourceTypes.h"
 
 #include "ncutility/NcError.h"
@@ -29,6 +30,24 @@ auto MakeTextureDesc(const nc::graphics::SinkBufferResourceDesc& desc,
     return textureDesc;
 }
 
+auto MakeTextureCubeDesc(const nc::graphics::SinkBufferResourceDesc& desc,
+    uint32_t width,
+    uint32_t height,
+    uint32_t numSamples) -> Diligent::TextureDesc
+{
+Diligent::TextureDesc textureDesc{};
+textureDesc.Type = Diligent::RESOURCE_DIM_TEX_CUBE;
+textureDesc.ArraySize = 6; // ArrayLayers
+textureDesc.Width = width;
+textureDesc.Height = height;
+textureDesc.MipLevels = 1;
+textureDesc.Format = desc.format;
+textureDesc.BindFlags = desc.bindFlags;
+textureDesc.ClearValue = desc.clearValue;
+textureDesc.SampleCount = numSamples;
+return textureDesc;
+}
+
 auto MakeTexture(Diligent::IRenderDevice& device,
                  const Diligent::TextureDesc& desc) -> Diligent::RefCntAutoPtr<Diligent::ITexture>
 {
@@ -50,10 +69,10 @@ auto MakeColorSinkBufferDesc(uint32_t maxTextures) -> SinkBufferResourceDesc
     return SinkBufferResourceDesc{
         .name = "Color Render Target",
         .viewType = Diligent::TEXTURE_VIEW_RENDER_TARGET,
-        .format = Diligent::TEX_FORMAT_RGBA8_UNORM_SRGB,
+        .format = OffScreenColorRTFormat,
         .bindFlags = Diligent::BIND_SHADER_RESOURCE | Diligent::BIND_RENDER_TARGET,
         .clearValue = Diligent::OptimizedClearValue{
-            .Format = Diligent::TEX_FORMAT_RGBA8_UNORM_SRGB,
+            .Format = OffScreenColorRTFormat,
             .Color = {0.0f, 0.0f, 0.0f, 0.0f},
             .DepthStencil = Diligent::DepthStencilClearValue{}
         },
@@ -71,6 +90,22 @@ auto MakeDepthSinkBufferDesc(uint32_t maxTextures) -> SinkBufferResourceDesc
         .clearValue = Diligent::OptimizedClearValue{
             .Format = Diligent::TEX_FORMAT_D32_FLOAT,
             .DepthStencil = Diligent::DepthStencilClearValue{1.0f, 0}
+        },
+        .maxTextures = maxTextures
+    };
+}
+
+auto MakeShadowSinkBufferDesc(uint32_t maxTextures) -> SinkBufferResourceDesc
+{
+    return SinkBufferResourceDesc{
+        .name = "Shadow Render Target",
+        .viewType = Diligent::TEXTURE_VIEW_RENDER_TARGET,
+        .format = OffScreenShadowMapRTFormat,
+        .bindFlags = Diligent::BIND_SHADER_RESOURCE | Diligent::BIND_RENDER_TARGET,
+        .clearValue = Diligent::OptimizedClearValue{
+            .Format = OffScreenShadowMapRTFormat,
+            .Color = {0.0f, 0.0f, 0.0f, 0.0f},
+            .DepthStencil = Diligent::DepthStencilClearValue{}
         },
         .maxTextures = maxTextures
     };
@@ -100,7 +135,6 @@ auto SinkBufferResource::MakeShadowSamplerDesc(std::string_view variableName) ->
     samplerDesc.BorderColor[1] = 1.0f;
     samplerDesc.BorderColor[2] = 1.0f;
     samplerDesc.BorderColor[3] = 1.0f;
-    samplerDesc.ComparisonFunc = Diligent::COMPARISON_FUNC_LESS;
     samplerDesc.MagFilter = Diligent::FILTER_TYPE::FILTER_TYPE_LINEAR;
     samplerDesc.MinFilter = Diligent::FILTER_TYPE::FILTER_TYPE_LINEAR;
     samplerDesc.MipFilter = Diligent::FILTER_TYPE::FILTER_TYPE_LINEAR;
@@ -125,6 +159,7 @@ void SinkBufferResource::Add(Diligent::IRenderDevice& device,
 
     if (!m_initialLoadComplete)
     {
+        // @todo may need to do for all subresources for cube maps
         InitializeArray(context, device, m_variable, maxTextures, false);
         m_initialLoadComplete = true;
     }
@@ -134,7 +169,7 @@ void SinkBufferResource::Add(Diligent::IRenderDevice& device,
         return;
     }
 
-    numRenderTargets = m_isCubeMap ? numRenderTargets * 6 : numRenderTargets;
+    // numRenderTargets = m_isCubeMap ? numRenderTargets * 6 : numRenderTargets;
 
     auto targets = numSamples > 1
         ? SinkTargets{m_texturesMsaa, m_renderTargetViewsMsaa, nullptr}
@@ -152,21 +187,18 @@ void SinkBufferResource::Add(Diligent::IRenderDevice& device,
         targets.shaderResourceViews->reserve(targets.shaderResourceViews->size() + numRenderTargets);
     }
 
-    auto renderTargetDesc = MakeTextureDesc(m_desc, renderTargetWidth, renderTargetHeight, numSamples);
-    auto numFaces = m_isCubeMap ? 6u : 1u;
+    auto renderTargetDesc = m_isCubeMap ? MakeTextureCubeDesc(m_desc, renderTargetWidth, renderTargetHeight, numSamples) : MakeTextureDesc(m_desc, renderTargetWidth, renderTargetHeight, numSamples);
+    // auto numFaces = m_isCubeMap ? 6u : 1u;
     for (auto i = 0u; i < numRenderTargets; i++)
     {
-        for (auto j = 0u; j < numFaces; j++)
-        {
-            const auto rtName = m_isCubeMap ? fmt::format("{}: {} Face: {}", m_desc.name, i, j) : fmt::format("{}: {}", m_desc.name, i);
-            renderTargetDesc.Name = rtName.data();
+        const auto rtName = fmt::format("{}: {}", m_desc.name, i);
+        renderTargetDesc.Name = rtName.data();
+        auto& renderTarget = targets.textures.emplace_back(MakeTexture(device, renderTargetDesc));
 
-            auto& renderTarget = targets.textures.emplace_back(MakeTexture(device, renderTargetDesc));
-            targets.renderTargetViews.push_back(renderTarget->GetDefaultView(m_desc.viewType));
-            if (targets.shaderResourceViews)
-            {
-                targets.shaderResourceViews->push_back(renderTarget->GetDefaultView(TEXTURE_VIEW_SHADER_RESOURCE));
-            }
+        targets.renderTargetViews.push_back(renderTarget->GetDefaultView(m_desc.viewType));
+        if (targets.shaderResourceViews)
+        {
+            targets.shaderResourceViews->push_back(renderTarget->GetDefaultView(TEXTURE_VIEW_SHADER_RESOURCE));
         }
     }
 

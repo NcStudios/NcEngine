@@ -38,6 +38,7 @@ void ClearPostProcessRenderTarget(Diligent::IDeviceContext& context,
                                   uint32_t postProcessIndex);
 
 void ClearShadowMapRenderTarget(Diligent::IDeviceContext& context,
+                                Diligent::ISwapChain& swapChain,
                                 SinkBufferResource& shadowMapSinkBufferResource,
                                 uint32_t shadowMapIndex);
 
@@ -54,7 +55,8 @@ void BindPostProcessRenderTarget(Diligent::IDeviceContext& context,
                                  uint32_t postProcessIndex);
 
 void BindShadowMapRenderTarget(Diligent::IDeviceContext& context,
-                               SinkBufferResource& shadowMapSinkBufferResource,
+                                Diligent::ISwapChain& swapChain,
+                                SinkBufferResource& shadowMapSinkBufferResource,
                                uint32_t shadowMapIndex);
 
 auto ToDepthRenderTargetView(Diligent::ISwapChain& swapChain,

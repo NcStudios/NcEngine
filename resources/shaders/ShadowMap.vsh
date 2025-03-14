@@ -11,6 +11,8 @@ struct VSInput
 struct PSInput 
 {
     float4 Pos : SV_POSITION;
+    float4 WorldPos;
+    float ZDepth;
 };
 
 struct TransformData
@@ -57,6 +59,7 @@ void main(in  VSInput VSIn, uint InstanceID : SV_InstanceID,  out PSInput PSIn)
 {
     uint transformIndex = StaticInstances[InstanceID].transformIndex;
     float4 TransformedPos = mul(float4(VSIn.Pos, 1.0), Transforms[transformIndex].model);
+    PSIn.WorldPos = TransformedPos;
 
     LightData light = Lights[lightIndex];
     if (light.type == 1) // Point Light
@@ -67,4 +70,6 @@ void main(in  VSInput VSIn, uint InstanceID : SV_InstanceID,  out PSInput PSIn)
     {
         PSIn.Pos = mul(TransformedPos, light.viewProj);
     }
+
+    PSIn.ZDepth = PSIn.Pos.z;
 }

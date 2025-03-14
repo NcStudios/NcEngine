@@ -165,7 +165,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .flag = MaterialPassFlag::Shadow,
                     .name = "Shadow",
                     .type = PassType::Material,
-                    .shaderPaths = ShaderPaths{.vertexShaderPath = "ShadowMap.vsh"},
+                    .shaderPaths = ShaderPaths{"ShadowMap.psh", "ShadowMap.vsh"},
                     .shadowMapSink = ShadowMapTarget::Uni,
                     .isMsaa = false,
                     .useDepthTest = true
@@ -174,7 +174,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .flag = MaterialPassFlag::Shadow,
                     .name = "Shadow",
                     .type = PassType::SkinnedMaterial,
-                    .shaderPaths = ShaderPaths{.vertexShaderPath = "ShadowMapSkinned.vsh"},
+                    .shaderPaths = ShaderPaths{"ShadowMap.psh", "ShadowMapSkinned.vsh"},
                     .shadowMapSink = ShadowMapTarget::Uni,
                     .isMsaa = false,
                     .useDepthTest = true

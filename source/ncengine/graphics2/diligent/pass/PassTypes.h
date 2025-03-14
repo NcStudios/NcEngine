@@ -17,6 +17,7 @@ constexpr auto NoTarget = std::numeric_limits<uint32_t>::max() - 1;
 
 constexpr auto OffScreenColorRTFormat = Diligent::TEX_FORMAT_RGBA8_UNORM_SRGB;
 constexpr auto OffScreenDepthRTFormat = Diligent::TEX_FORMAT_D32_FLOAT;
+constexpr auto OffScreenShadowMapRTFormat = Diligent::TEX_FORMAT_R32_FLOAT;
 
 enum class ColorTarget : uint8_t
 {

@@ -20,6 +20,7 @@ struct SinkBufferResourceDesc
 
 auto MakeColorSinkBufferDesc(uint32_t maxTextures) -> SinkBufferResourceDesc;
 auto MakeDepthSinkBufferDesc(uint32_t maxTextures) -> SinkBufferResourceDesc;
+auto MakeShadowSinkBufferDesc(uint32_t maxTextures) -> SinkBufferResourceDesc;
 
 class SinkBufferResource
 {

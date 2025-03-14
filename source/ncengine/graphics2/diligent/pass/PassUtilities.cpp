@@ -55,14 +55,17 @@ void ClearPostProcessRenderTarget(Diligent::IDeviceContext& context,
 }
 
 void ClearShadowMapRenderTarget(Diligent::IDeviceContext& context,
-                                SinkBufferResource& shadowMapSinkBufferResource,
+                                 Diligent::ISwapChain& swapChain,
+                                 SinkBufferResource& shadowMapSinkBufferResource,
                                 uint32_t shadowMapRenderTargetIndex)
 {
-    Diligent::ITextureView* pDSV = shadowMapSinkBufferResource.GetRenderTargetView(shadowMapRenderTargetIndex);
-    if (pDSV)
+    Diligent::ITextureView* pRTV = shadowMapSinkBufferResource.GetRenderTargetView(shadowMapRenderTargetIndex);
+    if (pRTV)
     {
-        context.ClearDepthStencil(pDSV, Diligent::CLEAR_DEPTH_FLAG, 1.f, 0, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
+        context.ClearRenderTarget(pRTV, &ClearColor.x, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
     }
+
+    context.ClearDepthStencil(swapChain.GetDepthBufferDSV(), Diligent::CLEAR_DEPTH_FLAG, 1.f, 0, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
 }
 
 void BindRenderTarget(Diligent::IDeviceContext& context,
@@ -87,11 +90,12 @@ void BindPostProcessRenderTarget(Diligent::IDeviceContext& context,
 }
 
 void BindShadowMapRenderTarget(Diligent::IDeviceContext& context,
-                               SinkBufferResource& shadowMapSinkBufferResource,
+                                 Diligent::ISwapChain& swapChain,
+                                 SinkBufferResource& shadowMapSinkBufferResource,
                                uint32_t shadowMapRenderTargetIndex)
 {
-    Diligent::ITextureView* pDSV = shadowMapSinkBufferResource.GetRenderTargetView(shadowMapRenderTargetIndex);
-    context.SetRenderTargets(0, nullptr, pDSV, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
+    Diligent::ITextureView* pRTV = shadowMapSinkBufferResource.GetRenderTargetView(shadowMapRenderTargetIndex);
+    context.SetRenderTargets(1, &pRTV, swapChain.GetDepthBufferDSV(), Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
 }
 
 auto CreateShaderFromSourceIfInitialized(ShaderFactory& shaderFactory, Diligent::SHADER_TYPE shaderType, const nc::graphics::ShaderPaths& shaderPaths) -> Diligent::RefCntAutoPtr<Diligent::IShader>
