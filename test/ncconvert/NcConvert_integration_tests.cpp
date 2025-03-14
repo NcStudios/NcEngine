@@ -172,6 +172,7 @@ TEST_F(NcConvertIntegration, Manifest_succeeds)
     EXPECT_TRUE(std::filesystem::exists(ncaTestOutDirectory / "myMesh.nca"));
     EXPECT_TRUE(std::filesystem::exists(ncaTestOutDirectory / "myMultiOutputMesh.nca"));
     EXPECT_TRUE(std::filesystem::exists(ncaTestOutDirectory / "myTexture.nca"));
+    EXPECT_TRUE(std::filesystem::exists(ncaTestOutDirectory / "myNormal.nca"));
     EXPECT_TRUE(std::filesystem::exists(ncaTestOutDirectory / "cube1.nca"));
     EXPECT_TRUE(std::filesystem::exists(ncaTestOutDirectory / "cube1a.nca"));
     EXPECT_TRUE(std::filesystem::exists(ncaTestOutDirectory / "cube2.nca"));

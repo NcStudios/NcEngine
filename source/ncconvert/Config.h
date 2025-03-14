@@ -22,7 +22,10 @@ enum class OperationMode
     Manifest,
 
     /** @brief Print details of an existing .nca file. */
-    Inspect
+    Inspect,
+
+    /** @brief Generate source code with enumerated assets and loading functions. */
+    GenerateSource
 };
 
 /** @brief Build controls generated from command line options. */
@@ -54,8 +57,14 @@ struct Config
 
     /**
      * @brief A path to a manifest containing .nca conversion instructions.
-     * @note Specific to manifest mode.
+     * @note Specific to manifest and generate modes.
      */
     std::optional<std::filesystem::path> manifestPath;
+
+    /**
+     * @brief Root namespace to use in generated source files.
+     * @note Specific to generate mode.
+     */
+    std::string rootNamespace = "nc";
 };
 } // namespace nc::convert

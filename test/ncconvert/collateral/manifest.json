@@ -73,10 +73,18 @@
             ]
         }
     ],
-    "texture": [
-        {
-            "sourcePath": "rgb_corners_4x8.png",
-            "assetName": "myTexture"
-        }
-    ]
+    "texture": {
+        "diffuse" : [
+            {
+                "sourcePath": "rgb_corners_4x8.png",
+                "assetName": "myTexture"
+            }
+        ],
+        "normal" : [
+            {
+                "sourcePath": "rgb_corners_4x8.png",
+                "assetName": "myNormal"
+            }
+        ]
+    }
 }
