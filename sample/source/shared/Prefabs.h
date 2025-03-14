@@ -1,5 +1,12 @@
 #pragma once
 
+/**
+ * @note To generate an updated assets file, run:
+ * 
+ * nc-convert -g sample/assets/manifest.json -o sample/source/shared -r nc::sample
+ */
+#include "GeneratedAssets.h"
+
 #include "ncengine/asset/AssetViews.h"
 #include "ncengine/asset/NcAsset.h"
 #include "ncengine/graphics/Material.h"
@@ -13,90 +20,39 @@ void InitializeResources();
 // Reload cached global asset views
 void ReloadPrefabs();
 
-// Animations
-namespace animation
+namespace font
 {
-extern asset::AssetId OgreIdle;
-extern asset::AssetId OgreAttack;
-extern asset::AssetId SkeletonIdle;
-extern asset::AssetId SkeletonJump;
-extern asset::AssetId SkeletonWalkRight;
-extern asset::AssetId SkeletonWalkLeft;
-extern asset::AssetId SkeletonWalkForward;
-extern asset::AssetId SkeletonWalkBackward;
-}
+extern asset::FontInfo ui;
+} // namespace font
 
-// Mesh
 namespace mesh
 {
-constexpr auto Guy2Path = "guy2.nca";
-constexpr auto HalfPipePath = "halfpipe.nca";
-constexpr auto RampPath = "ramp.nca";
-constexpr auto OgrePath = "ogre.nca";
-constexpr auto SkeletonPath = "skeleton.nca";
-constexpr auto CavePath = "cave.nca";
-
-// Mesh
-extern asset::MeshView Cube;
-extern asset::MeshView Sphere;
-extern asset::MeshView Capsule;
-extern asset::MeshView Guy2;
-extern asset::MeshView Plane;
-extern asset::MeshView Wheel;
-extern asset::MeshView HalfPipe;
-extern asset::MeshView Ramp;
-extern asset::MeshView Ogre;
-extern asset::MeshView Skeleton;
-extern asset::MeshView Cave;
+extern asset::MeshView cube;
+extern asset::MeshView sphere;
+extern asset::MeshView capsule;
+extern asset::MeshView plane;
+extern asset::MeshView wheel;
 } // namespace mesh
 
-// Materials
 namespace material
 {
-extern MaterialDesc Blue;
-extern MaterialDesc Cave;
-extern MaterialDesc Default;
-extern MaterialDesc Green;
-extern MaterialDesc Guy2;
-extern MaterialDesc Ogre;
-extern MaterialDesc Orange;
-extern MaterialDesc Purple;
-extern MaterialDesc Red;
-extern MaterialDesc Skeleton;
-extern MaterialDesc Teal;
-extern MaterialDesc Yellow;
+extern MaterialDesc blue;
+extern MaterialDesc cave;
+extern MaterialDesc green;
+extern MaterialDesc guy2;
+extern MaterialDesc ogre;
+extern MaterialDesc orange;
+extern MaterialDesc purple;
+extern MaterialDesc red;
+extern MaterialDesc skeleton;
+extern MaterialDesc teal;
+extern MaterialDesc white;
+extern MaterialDesc yellow;
 } // namespace material
-
-// Colliders
-constexpr auto HalfPipeConcaveCollider = "halfpipe.nca";
-constexpr auto RampHullCollider = "ramp.nca";
-
-// CubeMaps
-namespace cubemap
-{
-constexpr auto NightSkyPath = "night_sky.nca";
-} // namespace cubemap
-
-// ConvexHulls
-namespace convex_hull
-{
-constexpr auto RampPath = "ramp.nca";
-extern asset::AssetId Ramp;
-} // namespace collider
-
-// MeshColliders
-namespace mesh_collider
-{
-constexpr auto HalfpipePath = "halfpipe.nca";
-extern asset::AssetId Halfpipe;
-} // namespace mesh_collider
-
-// Fonts
-extern asset::FontInfo UIFont;
 
 namespace post_process
 {
-extern OutlinePassProperties Outline;
-extern NoisePassProperties Noise;
+extern OutlinePassProperties outline;
+extern NoisePassProperties noise;
 } // namespace post_process
 } // namespace nc::sample

@@ -42,28 +42,28 @@ constexpr auto g_assets = std::array{
     std::string_view{nc::asset::CubeMesh},
     std::string_view{nc::asset::SphereMesh},
     std::string_view{nc::asset::CapsuleMesh},
-    std::string_view{nc::sample::mesh::RampPath},
-    std::string_view{nc::sample::mesh::HalfPipePath}
+    std::string_view{nc::sample::mesh::path::ramp},
+    std::string_view{nc::sample::mesh::path::halfpipe}
 };
 
 const auto g_meshViews = std::array{
-    &nc::sample::mesh::Cube,
-    &nc::sample::mesh::Sphere,
-    &nc::sample::mesh::Capsule,
-    &nc::sample::mesh::Ramp,
-    &nc::sample::mesh::HalfPipe
+    &nc::sample::mesh::cube,
+    &nc::sample::mesh::sphere,
+    &nc::sample::mesh::capsule,
+    &nc::sample::mesh::ramp,
+    &nc::sample::mesh::halfpipe
 };
 
 // Need to store ptrs b/c deferred initialization
 const auto g_materials = std::array{
-    &nc::sample::material::Default,
-    &nc::sample::material::Red,
-    &nc::sample::material::Green,
-    &nc::sample::material::Blue,
-    &nc::sample::material::Orange,
-    &nc::sample::material::Purple,
-    &nc::sample::material::Teal,
-    &nc::sample::material::Yellow
+    &nc::sample::material::white,
+    &nc::sample::material::red,
+    &nc::sample::material::green,
+    &nc::sample::material::blue,
+    &nc::sample::material::orange,
+    &nc::sample::material::purple,
+    &nc::sample::material::teal,
+    &nc::sample::material::yellow
 };
 
 auto MeshFromPath(std::string_view path) -> const nc::asset::MeshView&
@@ -89,7 +89,7 @@ auto AssetCombo(std::string& selection) -> bool
 
 auto AssetComboExcludeMeshCollider(std::string& selection) -> bool
 {
-    const auto disableMeshCollider = [](const auto& entry){ return entry == nc::sample::mesh::HalfPipePath; };
+    const auto disableMeshCollider = [](const auto& entry){ return entry == nc::sample::mesh::path::halfpipe; };
     return nc::ui::FilteredCombobox(selection, "##assetcombo", g_assets, disableMeshCollider);
 }
 
@@ -103,10 +103,10 @@ auto AddRigidBodyForMesh(nc::ecs::Ecs world, nc::Entity entity, std::string_view
             return nc::Shape::MakeSphere();
         else if (mesh == nc::asset::CapsuleMesh)
             return nc::Shape::MakeCapsule();
-        else if (mesh == nc::sample::convex_hull::RampPath)
-            return nc::Shape::MakeConvexHull(nc::sample::convex_hull::Ramp);
-        else if (mesh == nc::sample::mesh_collider::HalfpipePath)
-            return nc::Shape::MakeMesh(nc::sample::mesh_collider::Halfpipe);
+        else if (mesh == nc::sample::convex_hull::path::ramp)
+            return nc::Shape::MakeConvexHull(nc::sample::convex_hull::ramp);
+        else if (mesh == nc::sample::mesh_collider::path::halfpipe)
+            return nc::Shape::MakeMesh(nc::sample::mesh_collider::halfpipe);
         else
             throw nc::NcError(fmt::format("Unexpected mesh '{}'", mesh));
     }();
@@ -456,7 +456,7 @@ void Benchmarks::Load(ecs::Ecs world, ModuleProvider modules)
         .flags = Entity::Flags::Static
     });
 
-    world.Emplace<StaticMesh>(ground, mesh::Cube, material::Blue);
+    world.Emplace<StaticMesh>(ground, mesh::cube, material::blue);
     world.Emplace<RigidBody>(ground, Shape::MakeBox());
 
     const auto spawnBehavior = SpawnBehavior{
@@ -498,9 +498,9 @@ void Benchmarks::Load(ecs::Ecs world, ModuleProvider modules)
             [world](Entity entity) mutable{
                 world.Emplace<SkinnedMesh>(
                     entity,
-                    mesh::Ogre,
-                    material::Ogre,
-                    animation::OgreIdle
+                    mesh::ogre,
+                    material::ogre,
+                    animation::ogre_idle
                 );
             }
         );
@@ -657,8 +657,8 @@ void Benchmarks::Load(ecs::Ecs world, ModuleProvider modules)
 
     // Post process
     ncGraphics->SetPostProcessEffectEnabled(nc::OutlinedToonEffectId, true);
-    ncGraphics->SetPostProcessEffectProperties(nc::OutlinedToonEffectId, PostProcessPassFlag::Outline, post_process::Outline);
-    ncGraphics->SetPostProcessEffectProperties(nc::OutlinedToonEffectId, PostProcessPassFlag::Noise, post_process::Noise);
+    ncGraphics->SetPostProcessEffectProperties(nc::OutlinedToonEffectId, PostProcessPassFlag::Outline, post_process::outline);
+    ncGraphics->SetPostProcessEffectProperties(nc::OutlinedToonEffectId, PostProcessPassFlag::Noise, post_process::noise);
 
     g_currentEntities += static_cast<unsigned>(world.GetAll<Entity>().size());
 }

@@ -43,6 +43,7 @@ install(
 
 add_subdirectory(analysis)
 add_subdirectory(builder)
+add_subdirectory(code_gen)
 add_subdirectory(converters)
 add_subdirectory(optimizer)
 add_subdirectory(utility)

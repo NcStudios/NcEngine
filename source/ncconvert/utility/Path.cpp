@@ -15,9 +15,8 @@ auto ValidateInputFileExtension(const std::filesystem::path& path, std::span<con
     return std::ranges::find(validExtensions, extension) != validExtensions.end();
 }
 
-auto AssetNameToNcaPath(std::string assetName, const std::filesystem::path& outDir) -> std::filesystem::path
+auto AssetNameToNcaPath(const std::filesystem::path& assetName, const std::filesystem::path& outDir) -> std::filesystem::path
 {
-    const auto ncaFileName = std::filesystem::path{assetName}.replace_extension(".nca");
-    return (outDir / ncaFileName).make_preferred();
+    return (outDir / assetName).replace_extension(".nca").make_preferred();
 }
 }

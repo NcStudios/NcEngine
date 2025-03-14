@@ -118,74 +118,83 @@
             ]
         }
     ],
-    "texture": [
-        {
-            "sourcePath": "raw/image/cave/BaseColor.png",
-            "assetName": "texture/cave/BaseColor"
-        },
-        {
-            "sourcePath": "raw/image/cave/Normal.png",
-            "assetName": "texture/cave/Normal"
-        },
-        {
-            "sourcePath": "raw/image/guy_2_base_color.png",
-            "assetName": "texture/guy_2_base_color"
-        },
-        {
-            "sourcePath": "raw/image/guy_2_normal.png",
-            "assetName": "texture/guy_2_normal.nca"
-        },
-        {
-            "sourcePath": "raw/image/linear_hatch.png",
-            "assetName": "texture/linear_hatch.nca"
-        },
-        {
-            "sourcePath": "raw/image/noise.png",
-            "assetName": "texture/noise.nca"
-        },
-        {
-            "sourcePath": "raw/image/ogre/BaseColor.png",
-            "assetName": "texture/ogre/BaseColor"
-        },
-        {
-            "sourcePath": "raw/image/ogre/Normal.png",
-            "assetName": "texture/ogre/Normal"
-        },
-        {
-            "sourcePath": "raw/image/skeleton/BaseColor.png",
-            "assetName": "texture/skeleton/BaseColor"
-        },
-        {
-            "sourcePath": "raw/image/skeleton/Normal.png",
-            "assetName": "texture/skeleton/Normal"
-        },
-        {
-            "sourcePath": "raw/image/solid_color/Blue.png",
-            "assetName": "texture/solid_color/Blue"
-        },
-        {
-            "sourcePath": "raw/image/solid_color/Orange.png",
-            "assetName": "texture/solid_color/Orange"
-        },
-        {
-            "sourcePath": "raw/image/solid_color/Purple.png",
-            "assetName": "texture/solid_color/Purple"
-        },
-        {
-            "sourcePath": "raw/image/solid_color/Red.png",
-            "assetName": "texture/solid_color/Red"
-        },
-        {
-            "sourcePath": "raw/image/solid_color/Teal.png",
-            "assetName": "texture/solid_color/Teal"
-        },
-        {
-            "sourcePath": "raw/image/solid_color/Yellow.png",
-            "assetName": "texture/solid_color/Yellow"
-        },
-        {
-            "sourcePath": "raw/image/cube_maps/night_sky.png",
-            "assetName": "cube_map/night_sky.nca"
-        }
-    ]
+    "texture" : {
+        "diffuse" : [
+            {
+                "sourcePath": "raw/image/diffuse/cave.png",
+                "assetName": "texture/diffuse/cave"
+            },
+            {
+                "sourcePath": "raw/image/diffuse/guy.png",
+                "assetName": "texture/diffuse/guy"
+            },
+            {
+                "sourcePath": "raw/image/diffuse/ogre.png",
+                "assetName": "texture/diffuse/ogre"
+            },
+            {
+                "sourcePath": "raw/image/diffuse/skeleton.png",
+                "assetName": "texture/diffuse/skeleton"
+            },
+            {
+                "sourcePath": "raw/image/diffuse/blue.png",
+                "assetName": "texture/diffuse/blue"
+            },
+            {
+                "sourcePath": "raw/image/diffuse/green.png",
+                "assetName": "texture/diffuse/green"
+            },
+            {
+                "sourcePath": "raw/image/diffuse/orange.png",
+                "assetName": "texture/diffuse/orange"
+            },
+            {
+                "sourcePath": "raw/image/diffuse/purple.png",
+                "assetName": "texture/diffuse/purple"
+            },
+            {
+                "sourcePath": "raw/image/diffuse/red.png",
+                "assetName": "texture/diffuse/red"
+            },
+            {
+                "sourcePath": "raw/image/diffuse/teal.png",
+                "assetName": "texture/diffuse/teal"
+            },
+            {
+                "sourcePath": "raw/image/diffuse/yellow.png",
+                "assetName": "texture/diffuse/yellow"
+            }
+        ],
+        "normal" : [
+            {
+                "sourcePath": "raw/image/normal/cave.png",
+                "assetName": "texture/normal/cave"
+            },
+            {
+                "sourcePath": "raw/image/normal/guy.png",
+                "assetName": "texture/normal/guy.nca"
+            },
+
+            {
+                "sourcePath": "raw/image/normal/ogre.png",
+                "assetName": "texture/normal/ogre"
+            },
+            {
+                "sourcePath": "raw/image/normal/skeleton.png",
+                "assetName": "texture/normal/skeleton"
+            }
+        ],
+        "particle" : [
+        ],
+        "effect" : [
+            {
+                "sourcePath": "raw/image/effect/linear_hatch.png",
+                "assetName": "texture/effect/linear_hatch.nca"
+            },
+            {
+                "sourcePath": "raw/image/effect/noise.png",
+                "assetName": "texture/effect/noise.nca"
+            }
+        ]
+    }
 }
