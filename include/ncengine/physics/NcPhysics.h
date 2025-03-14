@@ -13,6 +13,7 @@
 
 namespace nc
 {
+class CookedShape;
 struct SystemEvents;
 
 namespace asset
@@ -78,6 +79,17 @@ struct NcPhysics : public Module
      */
     virtual void BeginRigidBodyBatch(size_t bodyCountHint = 0ull) = 0;
     virtual void EndRigidBodyBatch() = 0;
+
+    /**
+     * @name Runtime Asset Operations
+     * 
+     * In order to reference a dynamically constructed CompoundShape in a Shape, RigidBody, or CollisionQuery, it must
+     * be made known to internal asset storage. Once cooked, call AddRuntimeCompoundShape() with a unique AssetId to
+     * make it available.
+     */
+    virtual void AddRuntimeCompoundShape(const CookedShape& cookedShape, asset::AssetId id) = 0;
+    virtual void RemoveRuntimeCompoundShape(asset::AssetId id) = 0;
+    virtual void RemoveAllRuntimeCompoundShapes() = 0;
 };
 
 /** @brief Build an NcPhysics module instance. */

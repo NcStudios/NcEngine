@@ -15,7 +15,7 @@ auto ClampScale(const nc::Vector3& out) -> nc::Vector3
     };
 }
 
-void FixSphereScale(const nc::Vector3& current, nc::Vector3& desired)
+void FixNonUniformScale(const nc::Vector3& current, nc::Vector3& desired)
 {
     if (!nc::FloatEqual(current.x, desired.x))
         desired = nc::Vector3::Splat(desired.x);
@@ -54,11 +54,12 @@ auto NormalizeScaleForShape(ShapeType shape,
         case ShapeType::ConvexHull:
         case ShapeType::Mesh:
             break;
+        case ShapeType::Compound:
         case ShapeType::Sphere:
         {
             if (!HasUniformElements(allowedScale))
             {
-                FixSphereScale(currentScale, allowedScale);
+                FixNonUniformScale(currentScale, allowedScale);
             }
 
             break;

@@ -9,6 +9,24 @@
 
 namespace nc
 {
+/** @brief Flags describing internal structure of a CookedShape. */
+struct ShapeDecorationFlags
+{
+    using type = uint8_t;
+
+    static constexpr type None                       = 0;      // shape matches ShapeType exactly
+    static constexpr type HasScalingTransformation   = 1 << 0; // shape has additional scaling; never set for primitives
+    static constexpr type HasIsometricTransformation = 1 << 1; // shape has position/rotation offsets
+    static constexpr type IsStaticCompound           = 1 << 2; // shape was cooked as a static compound
+};
+
+/** @brief Properties of a CookedShape. */
+struct CookedShapeProperties
+{
+    ShapeType type = ShapeType::Box;
+    ShapeDecorationFlags::type decorations = ShapeDecorationFlags::None;
+};
+
 /** @brief Handle to a processed Shape instance. */
 class CookedShape
 {
@@ -35,6 +53,9 @@ class CookedShape
 
         /** @brief Check if the internal shape is still valid (e.g. hasn't been moved from). */
         auto HasShape() const noexcept -> bool;
+
+        /** @brief Get the type and decorations of the CookedShape. */
+        auto GetProperties() const -> CookedShapeProperties;
 
         /** @brief Get the shape's translation (will be the origin, unless the shape was cooked with a position). */
         auto GetPosition() const -> Vector3;

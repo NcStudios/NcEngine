@@ -58,11 +58,13 @@ auto ShapeFactory::MakeShape(const Shape& shape,
         case ShapeType::Sphere:
             return MakeSphere(worldScale.GetX() * 0.5f);
         case ShapeType::Capsule:
-            return MakeCapsule(worldScale.GetY() - worldScale.GetX() * 0.5f, worldScale.GetX() * 0.5f);
+            return MakeCapsule(worldScale.GetY(), worldScale.GetX() * 0.5f);
         case ShapeType::ConvexHull:
             return MakeConvexHull(shape.GetAssetId(), worldScale);
         case ShapeType::Mesh:
             return MakeMesh(shape.GetAssetId(), worldScale);
+        case ShapeType::Compound:
+            return MakeCompound(shape.GetAssetId(), worldScale);
         default:
             NC_ASSERT(false, fmt::format("Unhandled ShapeType '{}'", std::to_underlying(type)));
             std::unreachable();
@@ -90,20 +92,67 @@ auto ShapeFactory::MakeSphere(float radius) -> JPH::Ref<JPH::Shape>
 
 auto ShapeFactory::MakeCapsule(float halfHeight, float radius) -> JPH::Ref<JPH::Shape>
 {
-    return MakeRef<JPH::CapsuleShape>(halfHeight, radius);
+    const auto cylinderHalfHeight = std::max(halfHeight - radius, capsuleMinHalfHeight);
+    return MakeRef<JPH::CapsuleShape>(cylinderHalfHeight, radius);
 }
 
-auto ShapeFactory::MakeConvexHull(asset::AssetId id,
-                                  const JPH::Vec3& scale) -> JPH::Ref<JPH::Shape>
+auto ShapeFactory::MakeConvexHull(asset::AssetId id, const JPH::Vec3& scale) -> JPH::Ref<JPH::Shape>
 {
-    NC_ASSERT(m_convexHulls.contains(id), "ConvexHull not loaded");
-    return MakeDecoratedShape(m_convexHulls.at(id), scale);
+    return MakeDecoratedShape(GetConvexHull(id), scale);
 }
 
 auto ShapeFactory::MakeMesh(asset::AssetId id, const JPH::Vec3& scale) -> JPH::Ref<JPH::Shape>
 {
+    return MakeDecoratedShape(GetMeshCollider(id), scale);
+}
+
+auto ShapeFactory::MakeCompound(asset::AssetId id, const JPH::Vec3& scale) -> JPH::Ref<JPH::Shape>
+{
+    return MakeDecoratedShape(GetRuntimeAsset(id, ShapeType::Compound), scale);
+}
+
+auto ShapeFactory::GetConvexHull(asset::AssetId id) -> JPH::Shape*
+{
+    NC_ASSERT(m_convexHulls.contains(id), "ConvexHull not loaded");
+    return m_convexHulls.at(id).GetPtr();
+}
+
+auto ShapeFactory::GetMeshCollider(asset::AssetId id) -> JPH::Shape*
+{
     NC_ASSERT(m_meshColliders.contains(id), "MeshCollider not loaded");
-    return MakeDecoratedShape(m_meshColliders.at(id), scale);
+    return m_meshColliders.at(id).GetPtr();
+}
+
+auto ShapeFactory::GetRuntimeAsset(asset::AssetId id, [[maybe_unused]] ShapeType type) -> JPH::Shape*
+{
+    NC_ASSERT(m_runtimeAssets.contains(id), fmt::format("Runtime asset '{}' is not loaded", id));
+    auto& ref = m_runtimeAssets.at(id);
+    NC_ASSERT(
+        ToShapeType(ref->GetSubType()) == type,
+        fmt::format(
+            "Runtime asset type '{}' does not match expected '{}'",
+            std::to_underlying(ToShapeType(ref->GetSubType())),
+            std::to_underlying(type)
+        )
+    );
+
+    return ref.GetPtr();
+}
+
+void ShapeFactory::AddRuntimeAsset(JPH::Ref<JPH::Shape> shape, asset::AssetId id)
+{
+    NC_ASSERT(!m_runtimeAssets.contains(id), fmt::format("AssetId '{}' already assigned to a runtime asset", id));
+    m_runtimeAssets.emplace(id, std::move(shape));
+}
+
+void ShapeFactory::RemoveRuntimeAsset(asset::AssetId id)
+{
+    m_runtimeAssets.erase(id);
+}
+
+void ShapeFactory::RemoveAllRuntimeAssets()
+{
+    m_runtimeAssets.clear();
 }
 
 void ShapeFactory::OnConvexHullUpdate(const asset::ConvexHullUpdateEventData& event)

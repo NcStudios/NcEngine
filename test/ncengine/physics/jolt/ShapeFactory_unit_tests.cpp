@@ -1,8 +1,10 @@
 #include "JoltApiFixture.inl"
 #include "physics/jolt/ShapeFactory.h"
 #include "physics/jolt/Conversion.h"
+#include "physics/jolt/CookedShapeUtility.h"
 #include "ncengine/asset/AssetData.h"
 #include "ncengine/physics/Shape.h"
+#include "ncengine/physics/CompoundShape.h"
 
 #include "ncjolt/JoltApi.h"
 #include "ncjolt/ShapeUtility.h"
@@ -315,4 +317,51 @@ TEST_F(ShapeFactoryTest, MakeShape_mesh_notLoaded_throws)
     LoadMockMeshCollider();
     UnloadAllMockMeshColliders();
     EXPECT_THROW(uut.MakeShape(inShape, JPH::Vec3{}), nc::NcError);
+}
+
+TEST_F(ShapeFactoryTest, AddRuntimeAsset_compoundShape_addsAsset)
+{
+    const auto id = nc::asset::AssetId{42};
+    const auto shapes = std::array{
+        nc::SubShapeInfo{ nc::Shape::MakeBox()    },
+        nc::SubShapeInfo{ nc::Shape::MakeSphere() }
+    };
+
+    auto cooked = nc::CreateStaticCompoundShape(shapes);
+    uut.AddRuntimeAsset(nc::ShapeStorageRTTI::ToShape(cooked.GetShapeData()), id);
+    const auto actual = uut.GetRuntimeAsset(id, nc::ShapeType::Compound);
+    EXPECT_EQ(JPH::EShapeSubType::StaticCompound, actual->GetSubType());
+}
+
+TEST_F(ShapeFactoryTest, AddRuntimeAsset_afterRemove_addsAsset)
+{
+    const auto id = nc::asset::AssetId{42};
+    const auto shapes = std::array{
+        nc::SubShapeInfo{ nc::Shape::MakeBox()    },
+        nc::SubShapeInfo{ nc::Shape::MakeSphere() }
+    };
+
+    auto cooked = nc::CreateStaticCompoundShape(shapes);
+    auto& shape = nc::ShapeStorageRTTI::ToShape(cooked.GetShapeData());
+    uut.AddRuntimeAsset(shape, id);
+    uut.RemoveRuntimeAsset(id);
+    uut.AddRuntimeAsset(shape, id);
+    const auto actual = uut.GetRuntimeAsset(id, nc::ShapeType::Compound);
+    EXPECT_EQ(JPH::EShapeSubType::StaticCompound, actual->GetSubType());
+}
+
+TEST_F(ShapeFactoryTest, GetRuntimeAsset_badInputs_throws)
+{
+    const auto id = nc::asset::AssetId{42};
+    const auto shapes = std::array{
+        nc::SubShapeInfo{ nc::Shape::MakeBox()    },
+        nc::SubShapeInfo{ nc::Shape::MakeSphere() }
+    };
+
+    auto cooked = nc::CreateStaticCompoundShape(shapes);
+    auto shape = nc::ShapeStorageRTTI::ToShape(cooked.GetShapeData());
+    uut.AddRuntimeAsset(shape, id);
+    EXPECT_THROW(uut.AddRuntimeAsset(shape, id), nc::NcError);
+    EXPECT_THROW(uut.GetRuntimeAsset(id, nc::ShapeType::Mesh), nc::NcError);
+    EXPECT_THROW(uut.GetRuntimeAsset(id + 1, nc::ShapeType::Compound), nc::NcError);
 }

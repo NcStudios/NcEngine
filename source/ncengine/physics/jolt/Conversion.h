@@ -3,6 +3,7 @@
 #include "Layers.h"
 #include "ncengine/physics/CollisionQuery.h"
 #include "ncengine/physics/RigidBody.h"
+#include "ncutility/NcError.h"
 
 #include "DirectXMath.h"
 #include "Jolt/Physics/Collision/RayCast.h"
@@ -118,5 +119,22 @@ inline auto ToAllowedDOFs(DegreeOfFreedom::Type dof) -> JPH::EAllowedDOFs
 inline auto ToRay(const Ray& ray) -> JPH::RRayCast
 {
     return JPH::RRayCast{ToJoltVec3(ray.origin), ToJoltVec3(ray.direction)};
+}
+
+inline auto ToShapeType(JPH::EShapeSubType subtype) -> ShapeType
+{
+    switch (subtype)
+    {
+        case JPH::EShapeSubType::Box:             return ShapeType::Box;
+        case JPH::EShapeSubType::Sphere:          return ShapeType::Sphere;
+        case JPH::EShapeSubType::Capsule:         return ShapeType::Capsule;
+        case JPH::EShapeSubType::ConvexHull:      return ShapeType::ConvexHull;
+        case JPH::EShapeSubType::Mesh:            return ShapeType::Mesh;
+        case JPH::EShapeSubType::StaticCompound:  return ShapeType::Compound;
+        case JPH::EShapeSubType::MutableCompound: return ShapeType::Compound;
+        default:
+            NC_ASSERT(false, fmt::format("Unhandled shape subtype '{}'", std::to_underlying(subtype)));
+            std::unreachable();
+    }
 }
 } // namespace nc::physics

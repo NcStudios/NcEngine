@@ -61,6 +61,20 @@ auto CookedShape::HasShape() const noexcept -> bool
     return ShapeStorageRTTI::ToShape(m_storage).GetPtr() != nullptr;
 }
 
+auto CookedShape::GetProperties() const -> CookedShapeProperties
+{
+    auto properties = CookedShapeProperties{};
+    const auto& outerShape = ShapeStorageRTTI::ToShape(m_storage);
+    const auto innerShape = GetInnerShape(outerShape.GetPtr(), properties.decorations);
+    properties.type = physics::ToShapeType(innerShape->GetSubType());
+    if (innerShape->GetSubType() == JPH::EShapeSubType::StaticCompound)
+    {
+        properties.decorations |= ShapeDecorationFlags::IsStaticCompound;
+    }
+
+    return properties;
+}
+
 auto CookedShape::GetPosition() const -> Vector3
 {
     const auto& shape = ShapeStorageRTTI::ToShape(m_storage);
