@@ -46,7 +46,7 @@ enum class ShadowMapTarget : uint8_t
 {
     None,
     Uni,
-    Omni
+    Point
 };
 
 struct Sources

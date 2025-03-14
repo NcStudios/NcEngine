@@ -95,7 +95,7 @@ auto MakeDepthSinkBufferDesc(uint32_t maxTextures) -> SinkBufferResourceDesc
     };
 }
 
-auto MakeShadowSinkBufferDesc(uint32_t maxTextures) -> SinkBufferResourceDesc
+auto MakePointShadowSinkBufferDesc(uint32_t maxTextures) -> SinkBufferResourceDesc
 {
     return SinkBufferResourceDesc{
         .name = "Shadow Render Target",
@@ -104,6 +104,22 @@ auto MakeShadowSinkBufferDesc(uint32_t maxTextures) -> SinkBufferResourceDesc
         .bindFlags = Diligent::BIND_SHADER_RESOURCE | Diligent::BIND_RENDER_TARGET,
         .clearValue = Diligent::OptimizedClearValue{
             .Format = OffScreenShadowMapRTFormat,
+            .Color = {0.0f, 0.0f, 0.0f, 0.0f},
+            .DepthStencil = Diligent::DepthStencilClearValue{}
+        },
+        .maxTextures = maxTextures
+    };
+}
+
+auto MakeUniShadowSinkBufferDesc(uint32_t maxTextures) -> SinkBufferResourceDesc
+{
+    return SinkBufferResourceDesc{
+        .name = "Shadow Render Target",
+        .viewType = Diligent::TEXTURE_VIEW_DEPTH_STENCIL,
+        .format = OffScreenDepthRTFormat,
+        .bindFlags = Diligent::BIND_SHADER_RESOURCE | Diligent::BIND_DEPTH_STENCIL,
+        .clearValue = Diligent::OptimizedClearValue{
+            .Format = OffScreenDepthRTFormat,
             .Color = {0.0f, 0.0f, 0.0f, 0.0f},
             .DepthStencil = Diligent::DepthStencilClearValue{}
         },

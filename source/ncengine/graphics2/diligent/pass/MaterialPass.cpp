@@ -35,18 +35,18 @@ auto CreatePipeline(Diligent::IRenderDevice& device,
     {
       colorFormat = OffScreenColorRTFormat;
     }
-    else if (passDesc.shadowMapSink != ShadowMapTarget::None)
+    else if (passDesc.shadowMapSink == ShadowMapTarget::Point)
     {
       colorFormat = OffScreenShadowMapRTFormat;
     }
     
 
     auto numColorTargets = 0u;
-    if (passDesc.colorSink != ColorTarget::None || passDesc.shadowMapSink == ShadowMapTarget::Uni)
+    if (passDesc.colorSink != ColorTarget::None)
     {
         numColorTargets = 1;
     }
-    else if (passDesc.shadowMapSink == ShadowMapTarget::Omni)
+    else if (passDesc.shadowMapSink == ShadowMapTarget::Point)
     {
         numColorTargets = 6;
     }

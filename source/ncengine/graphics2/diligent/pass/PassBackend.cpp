@@ -162,7 +162,7 @@ PassBackend::PassBackend(IRenderDevice& device,
     }
 
     // Make all the shadow map render targets that will be used by the passes
-    uniShadowMapSinks.Add(device, context, memorySettings.maxSpotLights + memorySettings.maxDirectionalLights, graphicsSettings.screenWidth, graphicsSettings.screenHeight);
+    uniShadowMapSinks.Add(device, context, memorySettings.maxSpotLights + memorySettings.maxDirectionalLights, graphicsSettings.shadowMapResolution, graphicsSettings.shadowMapResolution);
     pointShadowMapSinks.Add(device, context, memorySettings.maxPointLights, graphicsSettings.screenWidth, graphicsSettings.screenHeight);
 
     // Make the pass and pipeline objects
@@ -222,8 +222,8 @@ void PassBackend::RenderShadowPass(IDeviceContext& context,
             sinkIndexBuffer.Update(context, std::vector<uint32_t>{}, std::vector<uint32_t>{}, false, static_cast<uint32_t>(lightDataIndex));
             perPassResourceSignature.Commit(context);
 
-            BindShadowMapRenderTarget(context, swapChain, uniShadowMapsBuffer, renderTargetIndex);
-            ClearShadowMapRenderTarget(context, swapChain, uniShadowMapsBuffer, renderTargetIndex);
+            BindUniShadowMapRenderTarget(context, uniShadowMapsBuffer, renderTargetIndex);
+            ClearUniShadowMapRenderTarget(context, uniShadowMapsBuffer, renderTargetIndex);
 
             context.SetPipelineState(staticPass.pso);
             DrawIndexed(context, staticBatches);
@@ -239,8 +239,8 @@ void PassBackend::RenderShadowPass(IDeviceContext& context,
                 sinkIndexBuffer.Update(context, std::vector<uint32_t>{}, std::vector<uint32_t>{}, false, static_cast<uint32_t>(lightDataIndex), faceIndex);
                 perPassResourceSignature.Commit(context);
 
-                BindShadowMapRenderTarget(context,swapChain, pointShadowMapsBuffer, renderTargetIndex);
-                ClearShadowMapRenderTarget(context,swapChain, pointShadowMapsBuffer, renderTargetIndex);
+                BindPointShadowMapRenderTarget(context,swapChain, pointShadowMapsBuffer, renderTargetIndex);
+                ClearPointShadowMapRenderTarget(context,swapChain, pointShadowMapsBuffer, renderTargetIndex);
         
                 context.SetPipelineState(staticPass.pso);
                 DrawIndexed(context, staticBatches);

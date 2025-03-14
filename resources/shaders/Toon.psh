@@ -227,14 +227,14 @@ void main(in  PSInput  PSIn, out PSOutput PSOut)
     float4 gradientApplied = float4(lerp(result.rgb, result.rgb + gradient, Materials[PSIn.MaterialIndex].gradientAmount), 1.0f);
     float4 outputColor = float4(lerp(gradientApplied, gradientApplied * gradient, 0.5f), 1.0f);
 
-    // PSOut.Color = outputColor;
+    PSOut.Color = outputColor;
 
 
-    Texture2D depthTex = UniShadowMapSinks[shadowMapIndex];
-    float4 fragPosLightSPace = mul(mul(PSIn.WorldPos, Lights[0].viewProj), biasMat);
-    float3 projCoords = fragPosLightSPace.xyz / fragPosLightSPace.w;
-    projCoords.y = 1-projCoords.y;
-    float currentDepth = projCoords.z;
-    float sampledDepth = depthTex.Sample(UniShadowMapSinks_sampler, projCoords.xy) * 2;
-    PSOut.Color = float4(sampledDepth, sampledDepth, sampledDepth, 1.0f);
+    // Texture2D depthTex = UniShadowMapSinks[shadowMapIndex];
+    // float4 fragPosLightSPace = mul(mul(PSIn.WorldPos, Lights[0].viewProj), biasMat);
+    // float3 projCoords = fragPosLightSPace.xyz / fragPosLightSPace.w;
+    // projCoords.y = 1-projCoords.y;
+    // float currentDepth = projCoords.z;
+    // float sampledDepth = depthTex.Sample(UniShadowMapSinks_sampler, projCoords.xy) * 2;
+    // PSOut.Color = float4(sampledDepth, sampledDepth, sampledDepth, 1.0f);
 }

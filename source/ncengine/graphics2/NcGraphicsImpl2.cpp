@@ -163,19 +163,37 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
             {
                 PassDesc{
                     .flag = MaterialPassFlag::Shadow,
-                    .name = "Shadow",
+                    .name = "UniShadow",
                     .type = PassType::Material,
-                    .shaderPaths = ShaderPaths{"ShadowMap.psh", "ShadowMap.vsh"},
+                    .shaderPaths = ShaderPaths{.vertexShaderPath = "UniShadowMap.vsh"},
                     .shadowMapSink = ShadowMapTarget::Uni,
                     .isMsaa = false,
                     .useDepthTest = true
                 },
                 PassDesc{
                     .flag = MaterialPassFlag::Shadow,
-                    .name = "Shadow",
+                    .name = "UniShadow",
                     .type = PassType::SkinnedMaterial,
-                    .shaderPaths = ShaderPaths{"ShadowMap.psh", "ShadowMapSkinned.vsh"},
+                    .shaderPaths = ShaderPaths{.vertexShaderPath =  "UniShadowMapSkinned.vsh"},
                     .shadowMapSink = ShadowMapTarget::Uni,
+                    .isMsaa = false,
+                    .useDepthTest = true
+                },
+                PassDesc{
+                    .flag = MaterialPassFlag::Shadow,
+                    .name = "PointShadow",
+                    .type = PassType::Material,
+                    .shaderPaths = ShaderPaths{"PointShadowMap.psh", "PointShadowMap.vsh"},
+                    .shadowMapSink = ShadowMapTarget::Point,
+                    .isMsaa = false,
+                    .useDepthTest = true
+                },
+                PassDesc{
+                    .flag = MaterialPassFlag::Shadow,
+                    .name = "PointShadow",
+                    .type = PassType::SkinnedMaterial,
+                    .shaderPaths = ShaderPaths{"PointShadowMap.psh", "PointShadowMapSkinned.vsh"},
+                    .shadowMapSink = ShadowMapTarget::Point,
                     .isMsaa = false,
                     .useDepthTest = true
                 },

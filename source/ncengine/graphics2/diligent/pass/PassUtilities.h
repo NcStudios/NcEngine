@@ -37,10 +37,14 @@ void ClearPostProcessRenderTarget(Diligent::IDeviceContext& context,
                                   SinkBufferResource& postProcessSinkBufferResource,
                                   uint32_t postProcessIndex);
 
-void ClearShadowMapRenderTarget(Diligent::IDeviceContext& context,
-                                Diligent::ISwapChain& swapChain,
-                                SinkBufferResource& shadowMapSinkBufferResource,
-                                uint32_t shadowMapIndex);
+void ClearPointShadowMapRenderTarget(Diligent::IDeviceContext& context,
+                                     Diligent::ISwapChain& swapChain,
+                                     SinkBufferResource& shadowMapSinkBufferResource,
+                                     uint32_t shadowMapIndex);
+
+void ClearUniShadowMapRenderTarget(Diligent::IDeviceContext& context,
+                                   SinkBufferResource& shadowMapSinkBufferResource,
+                                   uint32_t shadowMapIndex);
 
 void BindRenderTarget(Diligent::IDeviceContext& context,
                       Diligent::ISwapChain& swapChain,
@@ -54,10 +58,14 @@ void BindPostProcessRenderTarget(Diligent::IDeviceContext& context,
                                  SinkBufferResource& postProcessSinkBufferResource,
                                  uint32_t postProcessIndex);
 
-void BindShadowMapRenderTarget(Diligent::IDeviceContext& context,
-                                Diligent::ISwapChain& swapChain,
-                                SinkBufferResource& shadowMapSinkBufferResource,
-                               uint32_t shadowMapIndex);
+void BindPointShadowMapRenderTarget(Diligent::IDeviceContext& context,
+                                    Diligent::ISwapChain& swapChain,
+                                    SinkBufferResource& shadowMapSinkBufferResource,
+                                    uint32_t shadowMapIndex);
+
+void BindUniShadowMapRenderTarget(Diligent::IDeviceContext& context,
+                                  SinkBufferResource& shadowMapSinkBufferResource,
+                                  uint32_t shadowMapIndex);
 
 auto ToDepthRenderTargetView(Diligent::ISwapChain& swapChain,
                              SinkBufferResource& depthSinkBufferResource,

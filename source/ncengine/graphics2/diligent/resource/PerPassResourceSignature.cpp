@@ -93,13 +93,13 @@ PerPassResourceSignature::PerPassResourceSignature(Diligent::IRenderDevice& devi
 
     m_uniShadowMapSinksResource = std::make_unique<SinkBufferResource>(
         GetVariable(uniShadowMapSinksDesc.shaderType, uniShadowMapSinksDesc.resourceKey.data(), m_srb),
-        MakeShadowSinkBufferDesc(uniShadowMapSinksDesc.maxElementCount)
+        MakeUniShadowSinkBufferDesc(uniShadowMapSinksDesc.maxElementCount)
     );
     m_uniShadowMapSinksResource->Update();
 
     m_pointShadowMapSinksResource = std::make_unique<SinkBufferResource>(
         GetVariable(pointShadowMapSinksDesc.shaderType, pointShadowMapSinksDesc.resourceKey.data(), m_srb),
-        MakeShadowSinkBufferDesc(pointShadowMapSinksDesc.maxElementCount)
+        MakePointShadowSinkBufferDesc(pointShadowMapSinksDesc.maxElementCount)
     );
     m_pointShadowMapSinksResource->Update();
 }
