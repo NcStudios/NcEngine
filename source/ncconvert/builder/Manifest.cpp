@@ -11,23 +11,16 @@
 
 namespace
 {
+const auto jsonAssetObjectTags = std::array<std::string, 1>{
+    "texture"
+};
+
 const auto jsonAssetArrayTags = std::array<std::string, 7> {
-    "audio-clip", "convex-hull", "cube-map", "mesh", "mesh-collider", "skeletal-animation", "texture"
+    "audio-clip", "convex-hull", "cube-map", "mesh", "mesh-collider", "skeletal-animation"
 };
 
-struct GlobalManifestOptions
-{
-    std::filesystem::path outputDirectory;
-    std::filesystem::path workingDirectory;
-};
-
-void from_json(const nlohmann::json& json, GlobalManifestOptions& options)
-{
-    options.outputDirectory = json.value("outputDirectory", "./");
-    options.workingDirectory = json.value("workingDirectory", "./");
-}
-
-void ProcessOptions(GlobalManifestOptions& options, const std::filesystem::path& manifestPath)
+void ProcessOptions(nc::convert::GlobalManifestOptions& options,
+                    const std::filesystem::path& manifestPath)
 {
     options.outputDirectory.make_preferred();
     options.workingDirectory.make_preferred();
@@ -56,28 +49,6 @@ void ProcessOptions(GlobalManifestOptions& options, const std::filesystem::path&
     }
 }
 
-auto BuildTarget(const std::string& assetName,
-                 const std::string& sourcePath,
-                 const std::filesystem::path& outputDirectory,
-                 const std::optional<std::string>& subResourceName = std::nullopt,
-                 const nc::convert::TargetOptions& options = nc::convert::TargetOptions{}) -> nc::convert::Target
-{
-    auto target = nc::convert::Target
-    {
-        sourcePath,
-        nc::convert::AssetNameToNcaPath(assetName, outputDirectory),
-        subResourceName,
-        options
-    };
-
-    if (!std::filesystem::is_regular_file(target.sourcePath))
-    {
-        throw nc::NcError("Invalid source file: ", target.sourcePath.string());
-    }
-
-    return target;
-}
-
 auto IsUpToDate(const nc::convert::Target& target) -> bool
 {
     if (!std::filesystem::exists(target.destinationPath))
@@ -87,26 +58,166 @@ auto IsUpToDate(const nc::convert::Target& target) -> bool
 
     return std::filesystem::last_write_time(target.destinationPath) > std::filesystem::last_write_time(target.sourcePath);
 }
+
+auto ToAssetSubtype(std::string_view str) -> nc::convert::AssetSubtype
+{
+    using enum nc::convert::AssetSubtype;
+    if (str == "diffuse")  return DiffuseTexture;
+    if (str == "normal")   return NormalTexture;
+    if (str == "particle") return ParticleTexture;
+    if (str == "effect")   return EffectTexture;
+    return None;
+}
+
+auto AssetNameToRelativePath(const std::filesystem::path& name) -> std::filesystem::path
+{
+    auto strippedPath = std::filesystem::path{};
+    for (auto it = ++name.begin(); it != name.end(); ++it)
+    {
+        strippedPath /= *it;
+    }
+
+    strippedPath.replace_extension(".nca");
+    return strippedPath;
+}
+
+auto RelativePathToIdentifier(std::filesystem::path path) -> std::string
+{
+    path.replace_extension("");
+    auto it = path.begin();
+    auto end = path.end();
+
+    auto string = std::string{it->string()};
+    for (++it; it != end; ++it)
+    {
+        string.append("_");
+        string.append(it->string());
+    }
+
+    return string;
+}
 } // anonymous namespace
 
 namespace nc::convert
 {
+void from_json(const nlohmann::json& json, GlobalManifestOptions& options)
+{
+    options.outputDirectory = json.value("outputDirectory", "./");
+    options.workingDirectory = json.value("workingDirectory", "./");
+}
+
 void from_json(const nlohmann::json& json, nc::convert::TargetOptions& options)
 {
     options.optimizeMesh = json.value("optimizeMesh", false);
 }
 
-void ReadManifest(const std::filesystem::path& manifestPath, std::unordered_map<asset::AssetType, std::vector<Target>>& instructions)
+Manifest::Manifest(std::filesystem::path path)
+    : m_path{std::move(path)}
 {
-    auto file = std::ifstream{manifestPath};
+    m_targets.emplace(nc::asset::AssetType::AudioClip, std::vector<nc::convert::Target>{});
+    m_targets.emplace(nc::asset::AssetType::ConvexHull, std::vector<nc::convert::Target>{});
+    m_targets.emplace(nc::asset::AssetType::CubeMap, std::vector<nc::convert::Target>{});
+    m_targets.emplace(nc::asset::AssetType::Mesh, std::vector<nc::convert::Target>{});
+    m_targets.emplace(nc::asset::AssetType::MeshCollider, std::vector<nc::convert::Target>{});
+    m_targets.emplace(nc::asset::AssetType::SkeletalAnimation, std::vector<nc::convert::Target>{});
+    m_targets.emplace(nc::asset::AssetType::Texture, std::vector<nc::convert::Target>{});
+    ReadManifest(m_path);
+}
+
+void Manifest::PrepareForBuild()
+{
+    ::ProcessOptions(m_options, m_path);
+    for (auto& [_, targetList] : m_targets)
+    {
+        for (auto& target : targetList)
+        {
+            if (!std::filesystem::is_regular_file(target.sourcePath))
+            {
+                throw nc::NcError("Invalid source file: ", target.sourcePath.string());
+            }
+
+            target.destinationPath = AssetNameToNcaPath(target.destinationPath, m_options.outputDirectory);
+        }
+
+        std::erase_if(
+            targetList,
+            [](const Target& target) {
+                if (::IsUpToDate(target))
+                {
+                    LOG("Up-to-date: {}", target.destinationPath.string());
+                    return true;
+                }
+
+                return false;
+            }
+        );
+    }
+}
+
+auto Manifest::ExtractTargetsForBuild() -> TargetMap
+{
+    PrepareForBuild();
+    return std::move(m_targets);
+}
+
+auto Manifest::GetTargetsForSourceGeneration() -> ReflectedTargetMap
+{
+    auto out = ReflectedTargetMap{};
+    for (const auto& [type, targetList] : m_targets)
+    {
+        auto reflectedTargets = std::vector<ReflectedTarget>{};
+        reflectedTargets.reserve(targetList.size());
+        for (const auto& target : targetList)
+        {
+            auto path = AssetNameToRelativePath(target.destinationPath);
+            auto name = RelativePathToIdentifier(path);
+            reflectedTargets.emplace_back(
+                std::move(name),
+                path.generic_string(), // normalize directory separators to '/'
+                target.options.subtype
+            );
+        }
+
+        out.emplace(type, std::move(reflectedTargets));
+    }
+
+    return out;
+}
+
+void Manifest::ReadManifest(const std::filesystem::path& path)
+{
+    auto file = std::ifstream{path};
     if (!file.is_open())
     {
-        throw nc::NcError{"Failed to open manifest: ", manifestPath.string()};
+        throw nc::NcError{"Failed to open manifest: ", path.string()};
     }
 
     auto json = nlohmann::json::parse(file);
-    auto globalOptions = json.value("globalOptions", ::GlobalManifestOptions{});
-    ::ProcessOptions(globalOptions, manifestPath);
+    m_options = json.value("globalOptions", GlobalManifestOptions{});
+
+    for (const auto& typeTag : ::jsonAssetObjectTags)
+    {
+        if (!json.contains(typeTag))
+        {
+            continue;
+        }
+
+        const auto type = ToAssetType(typeTag);
+        for (const auto& [subtypeName, assets] : json.at(typeTag).items())
+        {
+            for (const auto& asset : assets)
+            {
+                m_targets.at(type).emplace_back(
+                    asset.at("sourcePath"),
+                    asset.at("assetName"),
+                    std::nullopt,
+                    TargetOptions{
+                        .subtype = ToAssetSubtype(subtypeName)
+                    }
+                );
+            }
+        }
+    }
 
     for (const auto& typeTag : ::jsonAssetArrayTags)
     {
@@ -122,45 +233,30 @@ void ReadManifest(const std::filesystem::path& manifestPath, std::unordered_map<
             // Types that CanOutputMany support both single target (legacy) mode and multiple output mode.
             if (CanOutputMany(type))
             {
-                // // Multiple output mode
+                // Multiple output mode
                 if (asset.contains("assetNames"))
                 {
                     for (const auto& subResource : asset.at("assetNames"))
                     {
-                        auto target = BuildTarget(
-                            subResource.at("assetName"),
+                        m_targets.at(type).emplace_back(
                             asset.at("sourcePath"),
-                            globalOptions.outputDirectory,
+                            subResource.at("assetName"),
                             subResource.at("subResourceName"),
                             targetOptions
                         );
-
-                        if (::IsUpToDate(target))
-                        {
-                            LOG("Up-to-date: {}", target.destinationPath.string());
-                            continue;
-                        }
-                        instructions.at(type).push_back(std::move(target));
                     }
+
                     continue;
                 }
             }
 
             // Single target mode
-            auto target = BuildTarget(
-                asset.at("assetName"),
+            m_targets.at(type).emplace_back(
                 asset.at("sourcePath"),
-                globalOptions.outputDirectory,
+                asset.at("assetName"),
                 std::nullopt,
                 targetOptions
             );
-
-            if (::IsUpToDate(target))
-            {
-                LOG("Up-to-date: {}", target.destinationPath.string());
-                continue;
-            }
-            instructions.at(type).push_back(std::move(target));
         }
     }
 }

@@ -110,7 +110,7 @@ void SmokeTest::Load(ecs::Ecs world, ModuleProvider modules)
             .scale = Vector3{10.0f, 1.0f, 10.0f}
         });
 
-        world.Emplace<StaticMesh>(ground, mesh::Cube, material::Default);
+        world.Emplace<StaticMesh>(ground, mesh::cube, material::white);
         auto& groundBody = world.Emplace<RigidBody>(
             ground,
             Shape::MakeBox(),
@@ -189,7 +189,7 @@ void SmokeTest::Load(ecs::Ecs world, ModuleProvider modules)
         .position = Vector3::Up() * 4.0f
     });
 
-    world.Emplace<SkinnedMesh>(animatedCube, mesh::Cube, material::Default, utility::Fnv1a("DefaultCubeAnimation.nca"));
+    world.Emplace<SkinnedMesh>(animatedCube, mesh::cube, material::white, utility::Fnv1a("DefaultCubeAnimation.nca"));
     world.Emplace<AudioSource>(
         animatedCube,
         std::vector<asset::AudioClipView>{
@@ -217,14 +217,14 @@ void SmokeTest::Load(ecs::Ecs world, ModuleProvider modules)
     const auto hull     = world.Emplace<Entity>({.position = Vector3{ 1.0f,  1.0f, 1.0f}});
     const auto halfpipe = world.Emplace<Entity>({.position = Vector3{ 0.0f, -7.0f, 0.0f}, .flags = Entity::Flags::Static});
 
-    world.Emplace<StaticMesh>(box1,     mesh::Cube,     material::Default);
-    world.Emplace<StaticMesh>(box2,     mesh::Cube,     material::Default);
-    world.Emplace<StaticMesh>(sphere1,  mesh::Sphere,   material::Default);
-    world.Emplace<StaticMesh>(sphere2,  mesh::Sphere,   material::Default);
-    world.Emplace<StaticMesh>(capsule1, mesh::Capsule,  material::Default);
-    world.Emplace<StaticMesh>(capsule2, mesh::Capsule,  material::Default);
-    world.Emplace<StaticMesh>(hull,     mesh::Ramp,     material::Default);
-    world.Emplace<StaticMesh>(halfpipe, mesh::HalfPipe, material::Default);
+    world.Emplace<StaticMesh>(box1,     mesh::cube,     material::white);
+    world.Emplace<StaticMesh>(box2,     mesh::cube,     material::white);
+    world.Emplace<StaticMesh>(sphere1,  mesh::sphere,   material::white);
+    world.Emplace<StaticMesh>(sphere2,  mesh::sphere,   material::white);
+    world.Emplace<StaticMesh>(capsule1, mesh::capsule,  material::white);
+    world.Emplace<StaticMesh>(capsule2, mesh::capsule,  material::white);
+    world.Emplace<StaticMesh>(hull,     mesh::ramp,     material::white);
+    world.Emplace<StaticMesh>(halfpipe, mesh::halfpipe, material::white);
 
     auto& box1Body     = world.Emplace<RigidBody>(box1,     Shape::MakeBox());
     auto& box2Body     = world.Emplace<RigidBody>(box2,     Shape::MakeBox());
@@ -232,8 +232,8 @@ void SmokeTest::Load(ecs::Ecs world, ModuleProvider modules)
     auto& sphere2Body  = world.Emplace<RigidBody>(sphere2,  Shape::MakeSphere());
     auto& capsule1Body = world.Emplace<RigidBody>(capsule1, Shape::MakeCapsule());
     auto& capsule2Body = world.Emplace<RigidBody>(capsule2, Shape::MakeCapsule());
-    auto& hullBody     = world.Emplace<RigidBody>(hull,     Shape::MakeConvexHull(convex_hull::Ramp));
-    world.Emplace<RigidBody>(halfpipe, Shape::MakeMesh(mesh_collider::Halfpipe));
+    auto& hullBody     = world.Emplace<RigidBody>(hull,     Shape::MakeConvexHull(convex_hull::ramp));
+    world.Emplace<RigidBody>(halfpipe, Shape::MakeMesh(mesh_collider::halfpipe));
 
     world.Emplace<CollisionListener>(
         box1,

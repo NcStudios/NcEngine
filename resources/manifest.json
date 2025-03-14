@@ -70,24 +70,30 @@
             "assetName": "mesh_collider/DefaultMeshCollider"
         }
     ],
-    "texture": [
-        {
-            "sourcePath": "raw/image/DefaultBaseColor.png",
-            "assetName": "texture/DefaultBaseColor"
-        },
-        {
-            "sourcePath": "raw/image/DefaultMetallic.png",
-            "assetName": "texture/DefaultMetallic"
-        },
-        {
-            "sourcePath": "raw/image/DefaultNormal.png",
-            "assetName": "texture/DefaultNormal"
-        },
-        {
-            "sourcePath": "raw/image/DefaultParticle.png",
-            "assetName": "texture/DefaultParticle"
-        }
-    ],
+    "texture": {
+        "diffuse" : [
+            {
+                "sourcePath": "raw/image/DefaultBaseColor.png",
+                "assetName": "texture/DefaultBaseColor"
+            },
+            {
+                "sourcePath": "raw/image/DefaultMetallic.png",
+                "assetName": "texture/DefaultMetallic"
+            }
+        ],
+        "normal" : [
+            {
+                "sourcePath": "raw/image/DefaultNormal.png",
+                "assetName": "texture/DefaultNormal"
+            }
+        ],
+        "particle" : [
+            {
+                "sourcePath": "raw/image/DefaultParticle.png",
+                "assetName": "texture/DefaultParticle"
+            }
+        ]
+    },
     "skeletal-animation": [
         {
             "sourcePath": "raw/skeletal_animation/DefaultCube.fbx",
