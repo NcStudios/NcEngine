@@ -13,6 +13,12 @@ void InitializeResources();
 // Reload cached global asset views
 void ReloadPrefabs();
 
+// Audio Clips
+namespace audio_clip
+{
+extern asset::AudioClipView Default;
+} // namespace audio_clip
+
 // Animations
 namespace animation
 {

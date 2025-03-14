@@ -38,9 +38,9 @@ auto g_mockAudioClipView = AudioClipView{};
 auto g_mockMeshView = MeshView{.id = 1};
 auto g_mockTextureView = TextureView{.id = 1, .index = 1};
 
-auto AcquireAudioClipAsset(const std::string&) -> AudioClipView { return g_mockAudioClipView; }
-auto AcquireMeshAsset(AssetId)                 -> MeshView      { return g_mockMeshView; }
-auto AcquireTextureAsset(AssetId)              -> TextureView   { return g_mockTextureView; }
+auto AcquireAudioClipAsset(AssetId) -> AudioClipView { return g_mockAudioClipView; }
+auto AcquireMeshAsset(AssetId)      -> MeshView      { return g_mockMeshView; }
+auto AcquireTextureAsset(AssetId)   -> TextureView   { return g_mockTextureView; }
 } // namespace asset
 
 namespace graphics
@@ -126,13 +126,20 @@ auto g_deserializationContext = nc::DeserializationContext
 TEST(ComponentSerializationTests, RoundTrip_audioSource_preservesValues)
 {
     auto stream = std::stringstream{};
-    const auto expectedClips = std::vector<std::string>{"sound1.nca", "sound2.nca"};
+    const auto expectedClips = std::vector<nc::asset::AudioClipView>{
+        nc::asset::AudioClipView{.id = 1},
+        nc::asset::AudioClipView{.id = 2}
+    };
     const auto expectedFlags = nc::AudioSourceFlags::Spatial;
     const auto expectedProperties = nc::AudioSourceProperties{.flags = expectedFlags};
     const auto expected = nc::AudioSource{g_entity, expectedClips, expectedProperties};
     nc::SerializeAudioSource(stream, expected, g_serializationContext, nullptr);
     const auto actual = nc::DeserializeAudioSource(stream, g_deserializationContext, nullptr);
-    EXPECT_TRUE(std::ranges::equal(expectedClips, actual.GetAssetPaths()));
+    EXPECT_TRUE(std::ranges::equal(
+        std::views::transform(expectedClips, &nc::asset::AudioClipView::id),
+        std::views::transform(actual.GetClips(), &nc::asset::AudioClipView::id)
+    ));
+
     const auto& actualProperties = actual.GetProperties();
     EXPECT_EQ(expectedProperties.gain, actualProperties.gain);
     EXPECT_EQ(expectedProperties.innerRadius, actualProperties.innerRadius);

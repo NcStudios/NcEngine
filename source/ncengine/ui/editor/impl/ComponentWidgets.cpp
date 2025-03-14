@@ -1032,28 +1032,37 @@ void TransformUIWidget(Transform& transform, EditorContext& ctx, const std::any&
     }
 }
 
-void AudioSourceUIWidget(AudioSource& audioSource, EditorContext&, const std::any&)
+void AudioSourceUIWidget(AudioSource& audioSource, EditorContext& ctx, const std::any&)
 {
     IMGUI_SCOPE(ui::ImGuiId, "AudioSource");
-    ui::PropertyWidget(audio_source_ext::gainProp, audioSource, &ui::DragFloat, 0.1f, 0.0f, 1.0f);
+    ui::PropertyWidget(audio_source_ext::gainProp,        audioSource, &ui::DragFloat, 0.1f, 0.0f, 1.0f);
     ui::PropertyWidget(audio_source_ext::innerRadiusProp, audioSource, &ui::DragFloat, 0.1f, 0.0f, 20.0f);
     ui::PropertyWidget(audio_source_ext::outerRadiusProp, audioSource, &ui::DragFloat, 0.1f, 0.0f, 200.0f);
-    ui::PropertyWidget(audio_source_ext::spatialProp, audioSource, &ui::Checkbox);
+    ui::PropertyWidget(audio_source_ext::spatialProp,     audioSource, &ui::Checkbox);
     ImGui::SameLine();
-    ui::PropertyWidget(audio_source_ext::loopProp, audioSource, &ui::Checkbox);
+    ui::PropertyWidget(audio_source_ext::loopProp,        audioSource, &ui::Checkbox);
 
+    auto& ncAsset = *ctx.modules.Get<asset::NcAsset>();
     auto clips = ui::editor::GetLoadedAssets(asset::AssetType::AudioClip);
-    auto curPath = std::string{};
-    for (auto [i, path] : std::views::enumerate(audioSource.GetAssetPaths()))
+    for (auto [i, view] : std::views::enumerate(audioSource.GetClips()))
     {
         IMGUI_SCOPE(ui::ImGuiId, (unsigned)i);
-        curPath = path;
+        auto curPath = std::string{ncAsset.GetAssetPath(asset::AssetType::AudioClip, view.id)};
+
         if (ui::Combobox(curPath, "", clips))
-            audioSource.SetClip(static_cast<uint32_t>(i), curPath);
+        {
+            const auto selectedClip = nc::asset::AcquireAudioClipAsset(curPath);
+            audioSource.SetClip(static_cast<uint32_t>(i), selectedClip);
+        }
 
         ImGui::SameLine();
         if (ImGui::Button("-"))
+        {
+            // NOTE: Removing invalidates our current place so we need to bail. Make sure future code added below
+            //       accounts for this..
             audioSource.RemoveClip(static_cast<uint32_t>(i));
+            return;
+        }
 
         ImGui::SameLine();
         if (ImGui::Button("Play"))
@@ -1061,7 +1070,10 @@ void AudioSourceUIWidget(AudioSource& audioSource, EditorContext&, const std::an
     }
 
     if (ImGui::Button("Add Clip"))
-        audioSource.AddClip(asset::DefaultAudioClip);
+    {
+        const auto defaultClip = nc::asset::AcquireAudioClipAsset(asset::DefaultAudioClip);
+        audioSource.AddClip(defaultClip);
+    }
 }
 
 void StaticMeshUIWidget(StaticMesh& staticMesh, EditorContext& ctx, const std::any&)

@@ -191,8 +191,8 @@ void SmokeTest::Load(ecs::Ecs world, ModuleProvider modules)
     world.Emplace<SkinnedMesh>(animatedCube, mesh::Cube, material::Default, utility::Fnv1a("DefaultCubeAnimation.nca"));
     world.Emplace<AudioSource>(
         animatedCube,
-        std::vector<std::string>{
-            std::string{asset::DefaultAudioClip}
+        std::vector<asset::AudioClipView>{
+            audio_clip::Default
         },
         AudioSourceProperties{
             .flags = AudioSourceFlags::Play |

@@ -1,6 +1,6 @@
 /**
  * @file AudioSource.h
- * @copyright Jaremie Romer and McCallister Romer 2024
+ * @copyright Jaremie Romer and McCallister Romer 2025
  */
 #pragma once
 
@@ -47,7 +47,7 @@ class AudioSource : public ComponentBase
 {
     public:
         AudioSource(Entity entity,
-                    std::vector<std::string> clips,
+                    std::vector<asset::AudioClipView> clips = {},
                     AudioSourceProperties properties = AudioSourceProperties{});
 
         /** @brief Play the audio clip at a given index. */
@@ -65,17 +65,22 @@ class AudioSource : public ComponentBase
          */
         auto GetRecentClipIndex() const noexcept -> uint32_t { return m_currentClipIndex; }
 
-        /** @brief Stop the currently playing audio clip. */
+        /** @brief Stop the currently playing audio clip, preserving the current position in the clip. */
         void Stop() noexcept { m_properties.flags &= ~AudioSourceFlags::Play; }
+
+        /**
+         * @brief Continue playing from the last position.
+         * @note Requires a valid clip to be queued (GetRecentClipIndex() returns an existing clip). */
+        void Resume();
 
         /**
          * @brief Add an audio clip.
          * @return The index where the clip was added.
          */
-        auto AddClip(std::string clip) -> uint32_t;
+        auto AddClip(const asset::AudioClipView& clip) -> uint32_t;
 
         /** @brief Replace the audio clip at a given index. */
-        void SetClip(uint32_t clipIndex, std::string clip);
+        void SetClip(uint32_t clipIndex, const asset::AudioClipView& clip);
 
         /**
          * @brief Remove the audio clip at a given index.
@@ -83,19 +88,18 @@ class AudioSource : public ComponentBase
          */
         void RemoveClip(uint32_t clipIndex);
 
-        auto GetClips() const noexcept -> const std::vector<asset::AudioClipView>& { return m_clips; }
-        auto GetAssetPaths() const noexcept -> const std::vector<std::string>& { return m_coldData->assetPaths; }
-        auto GetProperties() const noexcept -> const AudioSourceProperties& { return m_properties; }
-        auto GetGain() const noexcept -> float { return m_properties.gain; }
-        auto GetInnerRadius() const noexcept -> float { return m_properties.innerRadius; }
-        auto GetOuterRadius() const noexcept -> float { return m_properties.outerRadius; }
-        auto IsSpatial() const noexcept -> bool { return m_properties.flags & AudioSourceFlags::Spatial; }
-        auto IsLooping() const noexcept -> bool { return m_properties.flags & AudioSourceFlags::Loop; }
+        auto GetClips()       const noexcept -> const std::vector<asset::AudioClipView>& { return m_clips; }
+        auto GetProperties()  const noexcept -> const AudioSourceProperties&             { return m_properties; }
+        auto GetGain()        const noexcept -> float                                    { return m_properties.gain; }
+        auto GetInnerRadius() const noexcept -> float                                    { return m_properties.innerRadius; }
+        auto GetOuterRadius() const noexcept -> float                                    { return m_properties.outerRadius; }
+        auto IsSpatial()      const noexcept -> bool                                     { return m_properties.flags & AudioSourceFlags::Spatial; }
+        auto IsLooping()      const noexcept -> bool                                     { return m_properties.flags & AudioSourceFlags::Loop; }
 
         void SetProperties(const AudioSourceProperties& properties) noexcept { m_properties = properties; }
-        void SetGain(float gain) noexcept { m_properties.gain = gain; }
-        void SetInnerRadius(float radius) noexcept { m_properties.innerRadius = radius; }
-        void SetOuterRadius(float radius) noexcept { m_properties.outerRadius = radius; }
+        void SetGain(float gain)                                    noexcept { m_properties.gain = gain; }
+        void SetInnerRadius(float radius)                           noexcept { m_properties.innerRadius = radius; }
+        void SetOuterRadius(float radius)                           noexcept { m_properties.outerRadius = radius; }
 
         void SetSpatial(bool spatialize) noexcept
         {
@@ -112,16 +116,10 @@ class AudioSource : public ComponentBase
         }
 
     private:
-        struct AudioSourceColdData
-        {
-            std::vector<std::string> assetPaths;
-        };
-
         std::vector<asset::AudioClipView> m_clips;
         uint32_t m_currentClipIndex = NullClipIndex;
         uint32_t m_currentSampleIndex = 0u;
         AudioSourceProperties m_properties;
-        std::unique_ptr<AudioSourceColdData> m_coldData;
 
         void SetPlaying() noexcept { m_properties.flags |= AudioSourceFlags::Play; }
         void SetStopped() noexcept { m_properties.flags &= ~AudioSourceFlags::Play; }

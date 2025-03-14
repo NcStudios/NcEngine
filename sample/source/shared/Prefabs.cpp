@@ -47,6 +47,10 @@ MaterialDesc Teal{"TealMaterial"};
 MaterialDesc Yellow{"YellowMaterial"};
 } // namespace material
 
+namespace audio_clip
+{
+asset::AudioClipView Default{};
+} // namespace audio_clip
 
 namespace animation
 {
@@ -155,6 +159,8 @@ void InitializeResources()
 
 void ReloadPrefabs()
 {
+    audio_clip::Default = asset::AcquireAudioClipAsset(asset::DefaultAudioClip);
+
     mesh::Cave = asset::AcquireMeshAsset(mesh::CavePath);
     mesh::Capsule = asset::AcquireMeshAsset(asset::CapsuleMesh);
     mesh::Cube = asset::AcquireMeshAsset(asset::CubeMesh);

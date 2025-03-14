@@ -11,9 +11,9 @@ auto AcquireAudioClipAsset(const std::string&) -> AudioClipView
 } // namespace nc::asset
 
 constexpr auto g_entity = nc::Entity{0, 0, 0};
-const auto g_clip1 = std::string{"clip1.nca"};
-const auto g_clip2 = std::string{"clip2.nca"};
-const auto g_clip3 = std::string{"clip3.nca"};
+const auto g_clip1 = nc::asset::AudioClipView{.id = 1};
+const auto g_clip2 = nc::asset::AudioClipView{.id = 2};
+const auto g_clip3 = nc::asset::AudioClipView{.id = 3};
 
 TEST(AudioSourceTests, Constructor_playFlag_handlesInitialClipSelection)
 {
@@ -96,25 +96,40 @@ TEST(AudioSourceTests, Stop_notPlaying_preservesPlayState)
     EXPECT_EQ(nc::NullClipIndex, uut.GetRecentClipIndex());
 }
 
-TEST(AudioSourceTests, AddClip_updatesClipsAndPaths)
+TEST(AudioSourceTests, Resume_previouslyPlaying_continues)
+{
+    auto uut = nc::AudioSource{g_entity, {g_clip1}};
+    uut.Play(0);
+    uut.Stop();
+    uut.Resume();
+    EXPECT_TRUE(uut.IsPlaying());
+    EXPECT_EQ(0, uut.GetRecentClipIndex());
+}
+
+TEST(AudioSourceTests, Resume_invalidClip_throws)
+{
+    auto uut = nc::AudioSource{g_entity, {g_clip1}};
+    EXPECT_THROW(uut.Resume(), nc::NcError);
+}
+
+TEST(AudioSourceTests, AddClip_updatesClips)
 {
     auto uut = nc::AudioSource{g_entity, {g_clip1}};
     const auto actualIndex = uut.AddClip(g_clip2);
     ASSERT_EQ(1, actualIndex);
-    EXPECT_EQ(2, uut.GetClips().size());
-    const auto paths = uut.GetAssetPaths();
-    ASSERT_EQ(2, paths.size());
-    EXPECT_EQ(g_clip2, paths[actualIndex]);
+    const auto& clips = uut.GetClips();
+    ASSERT_EQ(2, clips.size());
+    EXPECT_EQ(g_clip1.id, clips[0].id);
+    EXPECT_EQ(g_clip2.id, clips[1].id);
 }
 
 TEST(AudioSourceTests, SetClip_validClipIndex_replacesClip)
 {
     auto uut = nc::AudioSource{g_entity, {g_clip1, g_clip2}};
     uut.SetClip(0, g_clip3);
-    EXPECT_EQ(2, uut.GetClips().size());
-    const auto paths = uut.GetAssetPaths();
-    ASSERT_EQ(2, paths.size());
-    EXPECT_EQ(g_clip3, paths[0]);
+    const auto& clips = uut.GetClips();
+    ASSERT_EQ(2, clips.size());
+    EXPECT_EQ(g_clip3.id, clips[0].id);
 }
 
 TEST(AudioSourceTests, SetClip_invalidClipIndex_throws)
@@ -136,17 +151,15 @@ TEST(AudioSourceTests, RemoveClip_validClipIndex_removesClip)
 {
     auto uut = nc::AudioSource{g_entity, {g_clip1, g_clip2, g_clip3}};
     uut.RemoveClip(0);
-    ASSERT_EQ(2, uut.GetClips().size());
-    ASSERT_EQ(2, uut.GetAssetPaths().size());
-    EXPECT_EQ(g_clip2, uut.GetAssetPaths()[0]);
-    EXPECT_EQ(g_clip3, uut.GetAssetPaths()[1]);
+    const auto& clips = uut.GetClips();
+    ASSERT_EQ(2, clips.size());
+    EXPECT_EQ(g_clip2.id, clips[0].id);
+    EXPECT_EQ(g_clip3.id, clips[1].id);
     uut.RemoveClip(1);
-    ASSERT_EQ(1, uut.GetClips().size());
-    ASSERT_EQ(1, uut.GetAssetPaths().size());
-    EXPECT_EQ(g_clip2, uut.GetAssetPaths()[0]);
+    ASSERT_EQ(1, clips.size());
+    EXPECT_EQ(g_clip2.id, clips[0].id);
     uut.RemoveClip(0);
-    ASSERT_EQ(0, uut.GetClips().size());
-    ASSERT_EQ(0, uut.GetAssetPaths().size());
+    ASSERT_EQ(0, clips.size());
 }
 
 TEST(AudioSourceTests, RemoveClip_invalidClipIndex_throws)
