@@ -59,6 +59,8 @@ auto LogTriggerEvents = true;
 auto SelectedCastMode = CastMode::RayCast;
 auto SelectedCastModeName = std::string{CastModeNames[0]};
 
+constexpr auto g_compoundShapeId = asset::AssetId{42};
+
 void Widget()
 {
     ImGui::Text("Physics Test");
@@ -604,9 +606,9 @@ void BuildBridge(ecs::Ecs world, NcPhysics& ncPhysics)
         SubShapeInfo{Shape::MakeConvexHull(convex_hull::Ramp, ramp2Info.scale), ramp2Info.position, ramp2Info.rotation}
     };
 
-    const auto compoundShapeId = asset::AssetId{42}; // this is the only one in the sample, so we'll just make it up
     auto cookedShape = CreateStaticCompoundShape(subShapes);
-    ncPhysics.AddRuntimeCompoundShape(std::move(cookedShape), compoundShapeId);
+    ncPhysics.RemoveRuntimeCompoundShape(g_compoundShapeId);
+    ncPhysics.AddRuntimeCompoundShape(std::move(cookedShape), g_compoundShapeId);
 
     const auto container = world.Emplace<Entity>({
         .tag = "PlatformBody",
@@ -615,7 +617,7 @@ void BuildBridge(ecs::Ecs world, NcPhysics& ncPhysics)
 
     world.Emplace<RigidBody>(
         container,
-        nc::Shape::MakeCompound(compoundShapeId),
+        nc::Shape::MakeCompound(g_compoundShapeId),
         nc::RigidBodyInfo{
             .type = BodyType::Static
         }

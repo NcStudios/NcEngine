@@ -333,6 +333,23 @@ TEST_F(ShapeFactoryTest, AddRuntimeAsset_compoundShape_addsAsset)
     EXPECT_EQ(JPH::EShapeSubType::StaticCompound, actual->GetSubType());
 }
 
+TEST_F(ShapeFactoryTest, AddRuntimeAsset_afterRemove_addsAsset)
+{
+    const auto id = nc::asset::AssetId{42};
+    const auto shapes = std::array{
+        nc::SubShapeInfo{ nc::Shape::MakeBox()    },
+        nc::SubShapeInfo{ nc::Shape::MakeSphere() }
+    };
+
+    auto cooked = nc::CreateStaticCompoundShape(shapes);
+    auto& shape = nc::ShapeStorageRTTI::ToShape(cooked.GetShapeData());
+    uut.AddRuntimeAsset(shape, id);
+    uut.RemoveRuntimeAsset(id);
+    uut.AddRuntimeAsset(shape, id);
+    const auto actual = uut.GetRuntimeAsset(id, nc::ShapeType::Compound);
+    EXPECT_EQ(JPH::EShapeSubType::StaticCompound, actual->GetSubType());
+}
+
 TEST_F(ShapeFactoryTest, GetRuntimeAsset_badInputs_throws)
 {
     const auto id = nc::asset::AssetId{42};

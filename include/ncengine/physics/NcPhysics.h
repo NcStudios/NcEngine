@@ -81,12 +81,15 @@ struct NcPhysics : public Module
     virtual void EndRigidBodyBatch() = 0;
 
     /**
-     * @brief Register a cooked CompoundShape as an asset.
+     * @name Runtime Asset Operations
      * 
      * In order to reference a dynamically constructed CompoundShape in a Shape, RigidBody, or CollisionQuery, it must
-     * be made known to internal asset storage. Once cooked, call this with a unique AssetId to make it available.
+     * be made known to internal asset storage. Once cooked, call AddRuntimeCompoundShape() with a unique AssetId to
+     * make it available.
      */
     virtual void AddRuntimeCompoundShape(const CookedShape& cookedShape, asset::AssetId id) = 0;
+    virtual void RemoveRuntimeCompoundShape(asset::AssetId id) = 0;
+    virtual void RemoveAllRuntimeCompoundShapes() = 0;
 };
 
 /** @brief Build an NcPhysics module instance. */

@@ -145,6 +145,16 @@ void ShapeFactory::AddRuntimeAsset(JPH::Ref<JPH::Shape> shape, asset::AssetId id
     m_runtimeAssets.emplace(id, std::move(shape));
 }
 
+void ShapeFactory::RemoveRuntimeAsset(asset::AssetId id)
+{
+    m_runtimeAssets.erase(id);
+}
+
+void ShapeFactory::RemoveAllRuntimeAssets()
+{
+    m_runtimeAssets.clear();
+}
+
 void ShapeFactory::OnConvexHullUpdate(const asset::ConvexHullUpdateEventData& event)
 {
     switch (event.updateAction)

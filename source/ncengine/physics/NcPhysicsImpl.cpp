@@ -42,6 +42,8 @@ class NcPhysicsStub : public nc::NcPhysics
         void BeginRigidBodyBatch(size_t) override {}
         void EndRigidBodyBatch() override {}
         void AddRuntimeCompoundShape(const nc::CookedShape&, nc::asset::AssetId) override {}
+        void RemoveRuntimeCompoundShape(nc::asset::AssetId) override {}
+        void RemoveAllRuntimeCompoundShapes() override {}
         void OnBuildTaskGraph(nc::task::UpdateTasks& update, nc::task::RenderTasks&)
         {
             update.Add(
@@ -355,6 +357,16 @@ void NcPhysicsImpl::EndRigidBodyBatch()
 void NcPhysicsImpl::AddRuntimeCompoundShape(const CookedShape& cookedShape, asset::AssetId id)
 {
     m_shapeFactory.AddRuntimeAsset(ShapeStorageRTTI::ToShape(cookedShape.GetShapeData()), id);
+}
+
+void NcPhysicsImpl::RemoveRuntimeCompoundShape(asset::AssetId id)
+{
+    m_shapeFactory.RemoveRuntimeAsset(id);
+}
+
+void NcPhysicsImpl::RemoveAllRuntimeCompoundShapes()
+{
+    m_shapeFactory.RemoveAllRuntimeAssets();
 }
 } // namespace physics
 } // namespace nc
