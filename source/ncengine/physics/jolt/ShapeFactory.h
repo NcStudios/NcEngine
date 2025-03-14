@@ -15,6 +15,7 @@ class Vec3;
 
 namespace nc
 {
+enum class ShapeType : uint8_t;
 struct Shape;
 
 namespace asset
@@ -28,6 +29,7 @@ namespace physics
 class ShapeFactory
 {
     static constexpr auto boxConvexRadius = 0.025f;
+    static constexpr auto capsuleMinHalfHeight = 0.001f;
 
     public:
         explicit ShapeFactory(Signal<const asset::ConvexHullUpdateEventData&>& onConvexHullUpdate,
@@ -56,14 +58,20 @@ class ShapeFactory
         auto MakeConvexHull(asset::AssetId id, const JPH::Vec3& scale) -> JPH::Ref<JPH::Shape>;
         auto MakeMesh(asset::AssetId id, const JPH::Vec3& scale)       -> JPH::Ref<JPH::Shape>;
         auto MakeCompound(asset::AssetId id, const JPH::Vec3& scale)   -> JPH::Ref<JPH::Shape>;
-        auto GetConvexHull(asset::AssetId id)                          -> JPH::Shape*           { return m_convexHulls.at(id).GetPtr(); }
-        auto GetMeshCollider(asset::AssetId id)                        -> JPH::Shape*           { return m_meshColliders.at(id).GetPtr(); }
+        auto GetConvexHull(asset::AssetId id)                          -> JPH::Shape*;
+        auto GetMeshCollider(asset::AssetId id)                        -> JPH::Shape*;
+        auto GetRuntimeAsset(asset::AssetId id, ShapeType type)        -> JPH::Shape*;
+
+        void AddRuntimeAsset(JPH::Ref<JPH::Shape> shape, asset::AssetId id);
+        void RemoveRuntimeAsset(asset::AssetId id);
+        void RemoveAllRuntimeAssets();
 
     private:
         inline static ShapeFactory* s_instance = nullptr;
 
         std::unordered_map<asset::AssetId, JPH::Ref<JPH::Shape>> m_convexHulls;
         std::unordered_map<asset::AssetId, JPH::Ref<JPH::Shape>> m_meshColliders;
+        std::unordered_map<asset::AssetId, JPH::Ref<JPH::Shape>> m_runtimeAssets;
         Connection m_convexHullUpdateConnection;
         Connection m_meshColliderUpdateConnection;
 
