@@ -75,6 +75,7 @@ void ReloadPrefabs()
     mesh::sphere = asset::AcquireMeshAsset(asset::SphereMesh);
     mesh::wheel = asset::AcquireMeshAsset(asset::WheelMesh);
 
+    audio_clip::Acquire();
     mesh::Acquire();
     texture::Acquire();
 

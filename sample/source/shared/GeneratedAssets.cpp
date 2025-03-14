@@ -17,9 +17,18 @@ const auto g_paths = std::array{
     std::string{path::hit},
 };
 
+nc::asset::AudioClipView drums{};
+nc::asset::AudioClipView hit{};
+
 void Load()
 {
     nc::asset::LoadAudioClipAssets(g_paths);
+}
+
+void Acquire()
+{
+    drums = nc::asset::AcquireAudioClipAsset(path::drums);
+    hit = nc::asset::AcquireAudioClipAsset(path::hit);
 }
 
 } // namespace audio_clip

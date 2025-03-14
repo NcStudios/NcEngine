@@ -114,7 +114,7 @@ void WriteAssetIds(std::ostream& source,
 
 void WriteLoadFunctionDeclaration(std::ostream& header)
 {
-    header << "void Load();\n\n";
+    header << "void Load();\n";
 }
 
 void WriteLoadFunction(std::ostream& source,
@@ -165,14 +165,19 @@ void WriteAudioClips(std::ostream& header,
                      const std::vector<nc::convert::ReflectedTarget>& assets)
 {
     constexpr auto ns = std::string_view{"audio_clip"};
+    constexpr auto varType = std::string_view{"nc::asset::AudioClipView"};
     BeginNamespace(header, ns);
     WritePaths(header, assets);
+    WriteVariableDeclarations(header, assets, varType);
     WriteLoadFunctionDeclaration(header);
+    WriteAcquireFunctionDeclaration(header);
     EndNamespace(header, ns);
 
     BeginNamespace(source, ns);
     WritePathsArray(source, assets);
+    WriteVariableDefinitions(source, assets, varType);
     WriteLoadFunction(source, "nc::asset::LoadAudioClipAssets");
+    WriteAcquireFunction(source, assets, "nc::asset::AcquireAudioClipAsset");
     EndNamespace(source, ns);
 }
 

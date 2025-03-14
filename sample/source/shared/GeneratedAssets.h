@@ -14,8 +14,11 @@ constexpr auto drums = "drums.nca";
 constexpr auto hit = "hit.nca";
 } // namespace path
 
-void Load();
+extern nc::asset::AudioClipView drums;
+extern nc::asset::AudioClipView hit;
 
+void Load();
+void Acquire();
 } // namespace audio_clip
 
 namespace convex_hull
@@ -28,7 +31,6 @@ constexpr auto ramp = "ramp.nca";
 extern nc::asset::AssetId ramp;
 
 void Load();
-
 } // namespace convex_hull
 
 namespace cube_map
@@ -39,7 +41,6 @@ constexpr auto night_sky = "night_sky.nca";
 } // namespace path
 
 void Load();
-
 } // namespace cube_map
 
 namespace mesh
@@ -62,7 +63,6 @@ extern nc::asset::MeshView ramp;
 extern nc::asset::MeshView skeleton;
 
 void Load();
-
 void Acquire();
 } // namespace mesh
 
@@ -76,7 +76,6 @@ constexpr auto halfpipe = "halfpipe.nca";
 extern nc::asset::AssetId halfpipe;
 
 void Load();
-
 } // namespace mesh_collider
 
 namespace animation
@@ -103,7 +102,6 @@ extern nc::asset::AssetId skeleton_walk_left;
 extern nc::asset::AssetId skeleton_walk_right;
 
 void Load();
-
 } // namespace animation
 
 namespace texture
@@ -148,7 +146,6 @@ extern nc::asset::TextureView normal_ogre;
 extern nc::asset::TextureView normal_skeleton;
 
 void Load();
-
 void Acquire();
 } // namespace texture
 
