@@ -60,6 +60,11 @@ Source files enumerating assets in a manifest can be automatically generated wit
 > nc-convert -g manifest.json -o out/dir -r out::namespace
 ```
 
+For example, source for the sample assets is generated with:
+```
+nc-convert -g sample/assets/manifest.json -o sample/source/shared -r nc::sample
+```
+
 For more information, see the help text for `nc-convert`.
 
 # Input File Requirements
