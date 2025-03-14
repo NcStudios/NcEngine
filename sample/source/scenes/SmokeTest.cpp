@@ -16,6 +16,7 @@
 #include "ncengine/physics/CollisionListener.h"
 #include "ncengine/physics/Constraints.h"
 #include "ncengine/physics/NcPhysics.h"
+#include "ncengine/physics/CompoundShape.h"
 #include "ncengine/physics/RigidBody.h"
 #include "ncengine/scene/NcScene.h"
 #include "ncengine/serialize/SceneSerialization.h"
@@ -27,6 +28,7 @@
 namespace
 {
 constexpr auto g_sceneFragment = "smokeTestScene";
+constexpr auto g_compoundShapeId = nc::asset::AssetId{100};
 
 void SaveScene(nc::ecs::Ecs world, const nc::asset::AssetMap& assets)
 {
@@ -91,6 +93,8 @@ void SmokeTest::Load(ecs::Ecs world, ModuleProvider modules)
         }
     );
 
+    auto& ncPhysics = *modules.Get<NcPhysics>();
+
     if (isSecondPass)
     {
         asset::UnloadAllAudioClipAssets();
@@ -100,6 +104,7 @@ void SmokeTest::Load(ecs::Ecs world, ModuleProvider modules)
         asset::UnloadAllMeshColliderAssets();
         asset::UnloadAllSkeletalAnimationAssets();
         asset::UnloadAllTextureAssets();
+        // ncPhysics.RemoveRuntimeCompoundShape(g_compoundShapeId);
         ::LoadScene(world, modules);
     }
     else
@@ -153,6 +158,15 @@ void SmokeTest::Load(ecs::Ecs world, ModuleProvider modules)
             },
             groundBody
         );
+
+        const auto subShapes = std::array{
+            SubShapeInfo{Shape::MakeBox(),                         Vector3{-2.0f, -2.0f, 0.0f}},
+            SubShapeInfo{Shape::MakeBox(),                         Vector3{ 2.0f, -2.0f, 0.0f}},
+            SubShapeInfo{Shape::MakeConvexHull(convex_hull::ramp), Vector3{ 0.0f, -2.0f, 0.0f}}
+        };
+
+        auto cookedShape = CreateStaticCompoundShape(subShapes);
+        ncPhysics.AddRuntimeCompoundShape(std::move(cookedShape), g_compoundShapeId);
     }
 
     const auto cameraHandle = world.Emplace<Entity>({.position = Vector3{0.0f, 0.0f, -15.0f}});
@@ -277,5 +291,25 @@ void SmokeTest::Load(ecs::Ecs world, ModuleProvider modules)
     );
 
     world.Emplace<Entity>({.parent = box1});
+
+    const auto compoundShape = world.Emplace<Entity>({
+        .flags = Entity::Flags::Static
+    });
+
+    world.Emplace<RigidBody>(
+        compoundShape,
+        nc::Shape::MakeCompound(g_compoundShapeId),
+        nc::RigidBodyInfo{
+            .type = BodyType::Static
+        }
+    );
+
+    const auto boxSubShape1 = world.Emplace<Entity>({.position = Vector3{-2.0f, -2.0f, 0.0f}, .parent = compoundShape});
+    const auto boxSubShape2 = world.Emplace<Entity>({.position = Vector3{ 2.0f, -2.0f, 0.0f}, .parent = compoundShape});
+    const auto rampSubShape = world.Emplace<Entity>({.position = Vector3{ 0.0f, -2.0f, 0.0f}, .parent = compoundShape});
+
+    world.Emplace<StaticMesh>(boxSubShape1, mesh::cube, material::teal);
+    world.Emplace<StaticMesh>(boxSubShape2, mesh::cube, material::teal);
+    world.Emplace<StaticMesh>(rampSubShape, mesh::ramp, material::yellow);
 }
 } // namespace nc::sample
