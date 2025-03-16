@@ -1,6 +1,6 @@
 /**
  * @file AudioSource.h
- * @copyright Jaremie Romer and McCallister Romer 2024
+ * @copyright Jaremie Romer and McCallister Romer 2025
  */
 #pragma once
 
@@ -9,8 +9,13 @@
 
 #include <span>
 
-namespace nc::audio
+namespace nc
 {
+namespace audio
+{
+class NcAudioImpl;
+} // namespace audio
+
 /** @brief Flags applying to all clips in an AudioSource. */
 struct AudioSourceFlags
 {
@@ -42,7 +47,7 @@ class AudioSource : public ComponentBase
 {
     public:
         AudioSource(Entity entity,
-                    std::vector<std::string> clips,
+                    std::vector<asset::AudioClipView> clips = {},
                     AudioSourceProperties properties = AudioSourceProperties{});
 
         /** @brief Play the audio clip at a given index. */
@@ -55,22 +60,37 @@ class AudioSource : public ComponentBase
         auto IsPlaying() const noexcept -> bool { return m_properties.flags & AudioSourceFlags::Play; }
 
         /**
-         * @brief Get the index of the most recently played clip.
+         * @brief Preemptively set the next clip to be played. This can be started with Resume() instead of Play().
+         * @note Stops any playing clips and resets the play position.
+         */
+        void Queue(uint32_t clipIndex);
+
+        /**
+         * @brief Get the index of the most recently queued or played clip.
          * @note Returns NullClipIndex if no clip has been played or the most recent clip was removed.
          */
-        auto GetRecentClipIndex() const noexcept -> uint32_t { return m_currentClipIndex; }
+        auto GetQueuedClipIndex() const noexcept -> uint32_t { return m_currentClipIndex; }
 
-        /** @brief Stop the currently playing audio clip. */
+        /** @brief Stop the currently playing audio clip, preserving the current position in the clip. */
         void Stop() noexcept { m_properties.flags &= ~AudioSourceFlags::Play; }
+
+        /**
+         * @brief Continue playing from the last position.
+         * @note Requires a valid clip to be queued.
+         */
+        void Resume();
+
+        /** @brief Go back the beginning of the current playing or queued clip. */
+        void ResetPlayPosition() { m_currentSampleIndex = 0; }
 
         /**
          * @brief Add an audio clip.
          * @return The index where the clip was added.
          */
-        auto AddClip(std::string clip) -> uint32_t;
+        auto AddClip(const asset::AudioClipView& clip) -> uint32_t;
 
         /** @brief Replace the audio clip at a given index. */
-        void SetClip(uint32_t clipIndex, std::string clip);
+        void SetClip(uint32_t clipIndex, const asset::AudioClipView& clip);
 
         /**
          * @brief Remove the audio clip at a given index.
@@ -78,19 +98,18 @@ class AudioSource : public ComponentBase
          */
         void RemoveClip(uint32_t clipIndex);
 
-        auto GetClips() const noexcept -> const std::vector<asset::AudioClipView>& { return m_clips; }
-        auto GetAssetPaths() const noexcept -> const std::vector<std::string>& { return m_coldData->assetPaths; }
-        auto GetProperties() const noexcept -> const AudioSourceProperties& { return m_properties; }
-        auto GetGain() const noexcept -> float { return m_properties.gain; }
-        auto GetInnerRadius() const noexcept -> float { return m_properties.innerRadius; }
-        auto GetOuterRadius() const noexcept -> float { return m_properties.outerRadius; }
-        auto IsSpatial() const noexcept -> bool { return m_properties.flags & AudioSourceFlags::Spatial; }
-        auto IsLooping() const noexcept -> bool { return m_properties.flags & AudioSourceFlags::Loop; }
+        auto GetClips()       const noexcept -> const std::vector<asset::AudioClipView>& { return m_clips; }
+        auto GetProperties()  const noexcept -> const AudioSourceProperties&             { return m_properties; }
+        auto GetGain()        const noexcept -> float                                    { return m_properties.gain; }
+        auto GetInnerRadius() const noexcept -> float                                    { return m_properties.innerRadius; }
+        auto GetOuterRadius() const noexcept -> float                                    { return m_properties.outerRadius; }
+        auto IsSpatial()      const noexcept -> bool                                     { return m_properties.flags & AudioSourceFlags::Spatial; }
+        auto IsLooping()      const noexcept -> bool                                     { return m_properties.flags & AudioSourceFlags::Loop; }
 
         void SetProperties(const AudioSourceProperties& properties) noexcept { m_properties = properties; }
-        void SetGain(float gain) noexcept { m_properties.gain = gain; }
-        void SetInnerRadius(float radius) noexcept { m_properties.innerRadius = radius; }
-        void SetOuterRadius(float radius) noexcept { m_properties.outerRadius = radius; }
+        void SetGain(float gain)                                    noexcept { m_properties.gain = gain; }
+        void SetInnerRadius(float radius)                           noexcept { m_properties.innerRadius = radius; }
+        void SetOuterRadius(float radius)                           noexcept { m_properties.outerRadius = radius; }
 
         void SetSpatial(bool spatialize) noexcept
         {
@@ -107,22 +126,16 @@ class AudioSource : public ComponentBase
         }
 
     private:
-        struct AudioSourceColdData
-        {
-            std::vector<std::string> assetPaths;
-        };
-
         std::vector<asset::AudioClipView> m_clips;
         uint32_t m_currentClipIndex = NullClipIndex;
         uint32_t m_currentSampleIndex = 0u;
         AudioSourceProperties m_properties;
-        std::unique_ptr<AudioSourceColdData> m_coldData;
 
         void SetPlaying() noexcept { m_properties.flags |= AudioSourceFlags::Play; }
         void SetStopped() noexcept { m_properties.flags &= ~AudioSourceFlags::Play; }
         void WriteSpatialSamples(double* buffer, size_t frames, const Vector3& sourcePosition, const Vector3& listenerPosition, const Vector3& rightEar);
         void WriteNonSpatialSamples(double* buffer, size_t frames);
 
-        friend class NcAudioImpl;
+        friend class audio::NcAudioImpl;
 };
-} // namespace nc::audio
+} // namespace nc

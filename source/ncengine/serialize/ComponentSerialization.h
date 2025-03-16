@@ -10,8 +10,8 @@ namespace nc
 struct SerializationContext;
 struct DeserializationContext;
 
-void SerializeAudioSource(std::ostream& stream, const audio::AudioSource& out, const SerializationContext& ctx, const std::any&);
-auto DeserializeAudioSource(std::istream& stream, const DeserializationContext& ctx, const std::any&) -> audio::AudioSource;
+void SerializeAudioSource(std::ostream& stream, const AudioSource& out, const SerializationContext& ctx, const std::any&);
+auto DeserializeAudioSource(std::istream& stream, const DeserializationContext& ctx, const std::any&) -> AudioSource;
 void SerializeDirectionalLight(std::ostream& stream, const DirectionalLight& out, const SerializationContext& ctx, const std::any&);
 auto DeserializeDirectionalLight(std::istream& stream, const DeserializationContext& ctx, const std::any&) -> DirectionalLight;
 void SerializeParticleEmitter(std::ostream& stream, const ParticleEmitter& out, const SerializationContext& ctx, const std::any&);

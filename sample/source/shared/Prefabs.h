@@ -20,6 +20,12 @@ void InitializeResources();
 // Reload cached global asset views
 void ReloadPrefabs();
 
+// Audio Clips
+namespace audio_clip
+{
+extern asset::AudioClipView silence;
+} // namespace audio_clip
+
 namespace font
 {
 extern asset::FontInfo ui;

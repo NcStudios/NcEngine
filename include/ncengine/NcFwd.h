@@ -22,6 +22,10 @@ struct Vector2;
 struct Vector3;
 struct Vector4;
 
+// Audio Types
+struct NcAudio;
+class AudioSource;
+
 // Physics Types
 struct NcPhysics;
 struct CollisionListener;
@@ -29,11 +33,17 @@ class Constraint;
 class RigidBody;
 struct Shape;
 
-namespace audio
-{
-struct NcAudio;
-class AudioSource;
-} // namespace audio
+// Graphics Types
+struct NcGraphics;
+class Camera;
+struct DirectionalLight;
+struct PointLight;
+class SceneNavigationCamera;
+struct SpotLight;
+class ParticleEmitter;
+class SkinnedMesh;
+struct SpotLight;
+class StaticMesh;
 
 namespace config
 {
@@ -45,15 +55,4 @@ struct GraphicsSettings;
 struct PhysicsSettings;
 struct ProjectSettings;
 } // namespace config
-
-struct NcGraphics;
-class Camera;
-struct DirectionalLight;
-struct PointLight;
-class SceneNavigationCamera;
-struct SpotLight;
-class ParticleEmitter;
-class SkinnedMesh;
-struct SpotLight;
-class StaticMesh;
 } // namespac nc

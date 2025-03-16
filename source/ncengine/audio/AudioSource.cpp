@@ -2,18 +2,6 @@
 
 namespace
 {
-auto GetClips(const std::vector<std::string>& paths) -> std::vector<nc::asset::AudioClipView>
-{
-    auto out = std::vector<nc::asset::AudioClipView>{};
-    out.reserve(paths.size());
-    std::ranges::transform(paths, std::back_inserter(out), [](const auto& path)
-    {
-        return nc::asset::AcquireAudioClipAsset(path);
-    });
-
-    return out;
-}
-
 auto CalculateAttenuation(double innerRadius, double outerRadius, double squareDistance) -> double
 {
     if(innerRadius * innerRadius > squareDistance)
@@ -25,15 +13,14 @@ auto CalculateAttenuation(double innerRadius, double outerRadius, double squareD
 }
 } // anonymous namespace
 
-namespace nc::audio
+namespace nc
 {
 AudioSource::AudioSource(Entity entity,
-                         std::vector<std::string> clips,
+                         std::vector<asset::AudioClipView> clips,
                          AudioSourceProperties properties)
     : ComponentBase{entity},
-      m_clips{::GetClips(clips)},
-      m_properties{properties},
-      m_coldData{std::make_unique<AudioSourceColdData>(std::move(clips))}
+      m_clips{std::move(clips)},
+      m_properties{properties}
 {
     if (IsPlaying())
     {
@@ -62,18 +49,30 @@ void AudioSource::PlayNext()
     SetPlaying();
 }
 
-auto AudioSource::AddClip(std::string clip) -> uint32_t
+void AudioSource::Queue(uint32_t clipIndex)
 {
-    m_clips.push_back(asset::AcquireAudioClipAsset(clip));
-    m_coldData->assetPaths.push_back(std::move(clip));
+    NC_ASSERT(clipIndex < m_clips.size(), "AudioSource has an invalid clip queued");
+    SetStopped();
+    m_currentClipIndex = clipIndex;
+    m_currentSampleIndex = 0u;
+}
+
+void AudioSource::Resume()
+{
+    NC_ASSERT(m_currentClipIndex < m_clips.size(), "AudioSource has an invalid clip queued");
+    SetPlaying();
+}
+
+auto AudioSource::AddClip(const asset::AudioClipView& clip) -> uint32_t
+{
+    m_clips.push_back(clip);
     return static_cast<uint32_t>(m_clips.size() - 1);
 }
 
-void AudioSource::SetClip(uint32_t clipIndex, std::string path)
+void AudioSource::SetClip(uint32_t clipIndex, const asset::AudioClipView& clip)
 {
     NC_ASSERT(clipIndex < m_clips.size(), "Audio clip index out of bounds");
-    m_clips[clipIndex] = asset::AcquireAudioClipAsset(path);
-    m_coldData->assetPaths.at(clipIndex) = std::move(path);
+    m_clips[clipIndex] = clip;
     if (m_currentClipIndex == clipIndex && IsPlaying())
     {
         m_currentClipIndex = NullClipIndex;
@@ -85,7 +84,6 @@ void AudioSource::RemoveClip(uint32_t clipIndex)
 {
     NC_ASSERT(clipIndex < m_clips.size(), "Audio clip index out of bounds");
     m_clips.erase(m_clips.begin() + clipIndex);
-    m_coldData->assetPaths.erase(m_coldData->assetPaths.begin() + clipIndex);
     if (m_currentClipIndex == clipIndex)
     {
         m_currentClipIndex = NullClipIndex;
@@ -150,4 +148,4 @@ void AudioSource::WriteNonSpatialSamples(double* buffer, size_t frames)
         }
     }
 }
-} // namespace nc::audio
+} // namespace nc

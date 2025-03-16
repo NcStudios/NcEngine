@@ -67,7 +67,7 @@ auto BuildModuleRegistry(ecs::ComponentRegistry& registry,
                                                     dispatcher,
                                                     events));
 
-    moduleRegistry->Register(nc::audio::BuildAudioModule(config.audioSettings, world));
+    moduleRegistry->Register(nc::BuildAudioModule(config.audioSettings, world));
     moduleRegistry->Register(nc::ecs::BuildEcsModule(registry, events));
     moduleRegistry->Register(std::make_unique<nc::Random>());
     return moduleRegistry;

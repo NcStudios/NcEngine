@@ -23,9 +23,21 @@ void Serialize(std::ostream& stream, const TextureView& in)
 
 void Deserialize(std::istream& stream, TextureView& out)
 {
-    auto textureId = uint64_t{};
+    auto textureId = AssetId{};
     serialize::Deserialize(stream, textureId);
     out = asset::AcquireTextureAsset(textureId);
+}
+
+void Serialize(std::ostream& stream, const AudioClipView& in)
+{
+    serialize::Serialize(stream, in.id);
+}
+
+void Deserialize(std::istream& stream, AudioClipView& out)
+{
+    auto clipId = AssetId{};
+    serialize::Deserialize(stream, clipId);
+    out = asset::AcquireAudioClipAsset(clipId);
 }
 } // namespace asset
 
@@ -66,22 +78,22 @@ auto DeserializeMaterialDesc(std::istream& stream) -> MaterialDesc
     return out;
 }
 
-void SerializeAudioSource(std::ostream& stream, const audio::AudioSource& out, const SerializationContext& ctx, const std::any&)
+void SerializeAudioSource(std::ostream& stream, const AudioSource& out, const SerializationContext& ctx, const std::any&)
 {
     serialize::Serialize(stream, ctx.entityMap.at(out.ParentEntity()));
-    serialize::Serialize(stream, out.GetAssetPaths());
+    serialize::Serialize(stream, out.GetClips());
     serialize::Serialize(stream, out.GetProperties());
 }
 
-auto DeserializeAudioSource(std::istream& stream, const DeserializationContext& ctx, const std::any&) -> audio::AudioSource
+auto DeserializeAudioSource(std::istream& stream, const DeserializationContext& ctx, const std::any&) -> AudioSource
 {
     auto id = uint32_t{};
-    auto paths = std::vector<std::string>{};
-    auto properties = audio::AudioSourceProperties{};
+    auto clips = std::vector<asset::AudioClipView>{};
+    auto properties = AudioSourceProperties{};
     serialize::Deserialize(stream, id);
-    serialize::Deserialize(stream, paths);
+    serialize::Deserialize(stream, clips);
     serialize::Deserialize(stream, properties);
-    return audio::AudioSource{ctx.entityMap.at(id), std::move(paths), properties};
+    return AudioSource{ctx.entityMap.at(id), std::move(clips), properties};
 }
 
 void SerializeDirectionalLight(std::ostream& stream, const DirectionalLight& out, const SerializationContext&, const std::any&)

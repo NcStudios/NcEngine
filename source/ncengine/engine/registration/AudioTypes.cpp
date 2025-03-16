@@ -5,7 +5,7 @@ namespace nc
 {
 void RegisterAudioTypes(ecs::ComponentRegistry& registry, size_t maxEntities)
 {
-    Register<audio::AudioSource>(
+    Register<AudioSource>(
         registry,
         maxEntities,
         AudioSourceId,
