@@ -1,6 +1,7 @@
 #include "PostProcessDialog.h"
 #include "ui/editor/impl/assets/AssetWrapper.h"
 #include "ncengine/asset/NcAsset.h"
+#include "ncengine/asset/DefaultAssets.h"
 #include "ncengine/graphics/GraphicsUtility.h"
 #include "ncengine/graphics/NcGraphics.h"
 
@@ -46,9 +47,19 @@ void DrawPostProcessPassInfo(nc::PostProcessEffectId effectId,
                     modified = nc::ui::DragFloat(copy.maskGradientAmount, "noiseMaskGradientAmount", 0.001f, 0.0f, 1.0f) || modified;
                     modified = nc::ui::InputColor3(copy.maskGradientEnd, "noiseMaskGradientEnd") || modified;
 
-                    constexpr auto assetType = nc::asset::AssetType::Texture;
+                    static constexpr auto assetType = nc::asset::AssetType::Texture;
                     const auto textureAssets = nc::ui::editor::GetLoadedAssets(assetType);
-                    auto noiseTexPath = std::string{ncAsset->GetAssetPath(assetType, copy.noiseTex.id)};
+
+                    auto noiseTexPath = [&copy, &ncAsset, &modified](){
+                        if (copy.noiseTex.id != nc::asset::NullAssetId)
+                        {
+                            return std::string{ncAsset->GetAssetPath(assetType, copy.noiseTex.id)};
+                        }
+
+                        // if no texture is set, just force something
+                        modified = true;
+                        return std::string{nc::asset::DefaultBaseColor};
+                    }();
 
                     if (nc::ui::Combobox(noiseTexPath, "noise", textureAssets))
                     {

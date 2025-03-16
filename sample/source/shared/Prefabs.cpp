@@ -32,6 +32,11 @@ MaterialDesc white{"WhileMaterial"};
 MaterialDesc yellow{"YellowMaterial"};
 } // namespace material
 
+namespace audio_clip
+{
+asset::AudioClipView silence{};
+} // namespace audio_clip
+
 namespace mesh
 {
 asset::MeshView cube{};
@@ -69,6 +74,8 @@ void InitializeResources()
 
 void ReloadPrefabs()
 {
+    audio_clip::silence = asset::AcquireAudioClipAsset(asset::DefaultAudioClip);
+
     mesh::capsule = asset::AcquireMeshAsset(asset::CapsuleMesh);
     mesh::cube = asset::AcquireMeshAsset(asset::CubeMesh);
     mesh::plane = asset::AcquireMeshAsset(asset::PlaneMesh);
