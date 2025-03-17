@@ -163,7 +163,7 @@ PassBackend::PassBackend(IRenderDevice& device,
 
     // Make all the shadow map render targets that will be used by the passes
     uniShadowMapSinks.Add(device, context, memorySettings.maxSpotLights + memorySettings.maxDirectionalLights, graphicsSettings.shadowMapResolution, graphicsSettings.shadowMapResolution);
-    pointShadowMapSinks.Add(device, context, memorySettings.maxPointLights, graphicsSettings.screenWidth, graphicsSettings.screenHeight);
+    pointShadowMapSinks.Add(device, context, 1, graphicsSettings.shadowMapResolution, graphicsSettings.shadowMapResolution);
 
     // Make the pass and pipeline objects
     MakePassesAndPipelines(device, swapChain, shaderFactory, shaderBindings, passManifest);
@@ -192,7 +192,6 @@ void PassBackend::Update(const PostProcessState& postProcessState)
 }
 
 void PassBackend::RenderShadowPass(IDeviceContext& context,
-                                   ISwapChain& swapChain,
                                    PerPassResourceSignature& perPassResourceSignature,
                                    const MaterialPass& staticPass,
                                    const MaterialPass& skinnedPass,
@@ -210,6 +209,8 @@ void PassBackend::RenderShadowPass(IDeviceContext& context,
     // RenderTargetIndex corresponds to the index of the shadow map in the SinkBuffer.
     for (const auto& [lightDataIndex, light] : std::views::enumerate(lights))
     {
+        auto lightIndex = static_cast<uint32_t>(lightDataIndex);
+
         if (!light.castsShadows)
         {
             continue;
@@ -217,9 +218,9 @@ void PassBackend::RenderShadowPass(IDeviceContext& context,
 
         hasSomeShadowCaster = true;
 
-        if (light.type != LightType::Point)
+        if (staticPass.flag & MaterialPassFlag::UniShadow && light.type != LightType::Point)
         {
-            sinkIndexBuffer.Update(context, std::vector<uint32_t>{}, std::vector<uint32_t>{}, false, static_cast<uint32_t>(lightDataIndex));
+            sinkIndexBuffer.Update(context, std::vector<uint32_t>{}, std::vector<uint32_t>{}, false, lightIndex);
             perPassResourceSignature.Commit(context);
 
             BindUniShadowMapRenderTarget(context, uniShadowMapsBuffer, renderTargetIndex);
@@ -231,22 +232,21 @@ void PassBackend::RenderShadowPass(IDeviceContext& context,
             DrawIndexed(context, skinnedBatches);
             renderTargetIndex++;
         }
-        else // Point lights have six faces to render, not one
+        else if (staticPass.flag & MaterialPassFlag::PointShadow && light.type == LightType::Point) // Point lights have six faces to render, not one
         {
             // Iterate through face indices for the point light
             for (auto faceIndex = 0u; faceIndex < 6u; faceIndex++)
             {
-                sinkIndexBuffer.Update(context, std::vector<uint32_t>{}, std::vector<uint32_t>{}, false, static_cast<uint32_t>(lightDataIndex), faceIndex);
+                sinkIndexBuffer.Update(context, std::vector<uint32_t>{}, std::vector<uint32_t>{}, false, lightIndex, faceIndex);
                 perPassResourceSignature.Commit(context);
 
-                BindPointShadowMapRenderTarget(context,swapChain, pointShadowMapsBuffer, renderTargetIndex);
-                ClearPointShadowMapRenderTarget(context,swapChain, pointShadowMapsBuffer, renderTargetIndex);
+                BindPointShadowMapRenderTarget(context, pointShadowMapsBuffer, lightIndex, faceIndex);
+                ClearPointShadowMapRenderTarget(context, pointShadowMapsBuffer, lightIndex, faceIndex);
         
                 context.SetPipelineState(staticPass.pso);
                 DrawIndexed(context, staticBatches);
                 context.SetPipelineState(skinnedPass.pso);
                 DrawIndexed(context, skinnedBatches);
-                renderTargetIndex++;
             }
         }
     }
@@ -286,9 +286,9 @@ void PassBackend::RenderMaterial(IDeviceContext& context,
     {
         m_finalColorTarget = m_finalColorTarget.has_value() ? std::min(staticPass.sinks.color, m_finalColorTarget.value()) : staticPass.sinks.color;
 
-        if (staticPass.flag & MaterialPassFlag::Shadow)
+        if (staticPass.flag & MaterialPassFlag::UniShadow || staticPass.flag & MaterialPassFlag::PointShadow)
         {
-            RenderShadowPass(context, swapChain, perPassResourceSignature, staticPass, skinnedPass, staticBatches, skinnedBatches, lights);
+            RenderShadowPass(context, perPassResourceSignature, staticPass, skinnedPass, staticBatches, skinnedBatches, lights);
             continue;
         }
 

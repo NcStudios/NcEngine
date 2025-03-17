@@ -44,7 +44,6 @@ class PassBackend
         void Update(const PostProcessState& postProcessState);
 
         void RenderShadowPass(Diligent::IDeviceContext& context,
-                              Diligent::ISwapChain& swapChain,
                               PerPassResourceSignature& perPassResourceSignature,
                               const MaterialPass& staticPass,
                               const MaterialPass& skinnedPass,

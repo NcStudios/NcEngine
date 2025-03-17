@@ -33,28 +33,23 @@ auto CreatePipeline(Diligent::IRenderDevice& device,
     auto colorFormat = TEX_FORMAT_UNKNOWN;
     if (passDesc.colorSink != ColorTarget::None)
     {
-      colorFormat = OffScreenColorRTFormat;
+        colorFormat = OffScreenColorRTFormat;
     }
     else if (passDesc.shadowMapSink == ShadowMapTarget::Point)
     {
-      colorFormat = OffScreenShadowMapRTFormat;
+        colorFormat = OffScreenShadowMapRTFormat;
     }
-    
 
     auto numColorTargets = 0u;
-    if (passDesc.colorSink != ColorTarget::None)
+    if (passDesc.colorSink != ColorTarget::None || passDesc.shadowMapSink == ShadowMapTarget::Point)
     {
         numColorTargets = 1;
-    }
-    else if (passDesc.shadowMapSink == ShadowMapTarget::Point)
-    {
-        numColorTargets = 6;
     }
 
     auto depthFormat = TEX_FORMAT_UNKNOWN;
     if (passDesc.depthSink != DepthTarget::None || passDesc.shadowMapSink != ShadowMapTarget::None)
     {
-      depthFormat = OffScreenDepthRTFormat;
+        depthFormat = OffScreenDepthRTFormat;
     }
 
     ci.GraphicsPipeline.NumRenderTargets                  = static_cast<uint8_t>(numColorTargets);

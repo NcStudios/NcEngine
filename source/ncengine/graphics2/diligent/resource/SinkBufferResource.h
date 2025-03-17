@@ -20,19 +20,16 @@ struct SinkBufferResourceDesc
 
 auto MakeColorSinkBufferDesc(uint32_t maxTextures) -> SinkBufferResourceDesc;
 auto MakeDepthSinkBufferDesc(uint32_t maxTextures) -> SinkBufferResourceDesc;
-auto MakePointShadowSinkBufferDesc(uint32_t maxTextures) -> SinkBufferResourceDesc;
 auto MakeUniShadowSinkBufferDesc(uint32_t maxTextures) -> SinkBufferResourceDesc;
 
 class SinkBufferResource
 {
     public:
         explicit SinkBufferResource(Diligent::IShaderResourceVariable& variable,
-                                    SinkBufferResourceDesc desc,
-                                    bool isCubeMap = false)
+                                    SinkBufferResourceDesc desc)
             : m_variable{&variable},
               m_desc{std::move(desc)},
-              m_initialLoadComplete{false},
-              m_isCubeMap{isCubeMap}
+              m_initialLoadComplete{false}
         {
         }
 
@@ -58,10 +55,8 @@ class SinkBufferResource
 
         auto GetMsaaRenderTargetView(uint32_t index) -> Diligent::ITextureView* { return static_cast<Diligent::ITextureView*>(m_renderTargetViewsMsaa.at(index)); }
         auto GetRenderTargetView(uint32_t index)     -> Diligent::ITextureView* { return static_cast<Diligent::ITextureView*>(m_renderTargetViews.at(index)); }
-
         auto GetMsaaTexture(uint32_t index)          -> Diligent::ITexture*     { return m_texturesMsaa.at(index); }
         auto GetTexture(uint32_t index)              -> Diligent::ITexture*     { return m_textures.at(index); }
-
         auto GetSinkCount() const                    -> uint32_t                { return static_cast<uint32_t>(m_textures.size()); }
         auto GetMsaaSinkCount() const                -> uint32_t                { return static_cast<uint32_t>(m_texturesMsaa.size()); }
 
@@ -74,6 +69,5 @@ class SinkBufferResource
         Diligent::IShaderResourceVariable* m_variable;
         SinkBufferResourceDesc m_desc;
         bool m_initialLoadComplete;
-        bool m_isCubeMap;
 };
 } // namespace nc::graphics

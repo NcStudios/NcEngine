@@ -162,7 +162,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
             std::vector<PassDesc>
             {
                 PassDesc{
-                    .flag = MaterialPassFlag::Shadow,
+                    .flag = MaterialPassFlag::UniShadow,
                     .name = "UniShadow",
                     .type = PassType::Material,
                     .shaderPaths = ShaderPaths{.vertexShaderPath = "UniShadowMap.vsh"},
@@ -171,7 +171,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .useDepthTest = true
                 },
                 PassDesc{
-                    .flag = MaterialPassFlag::Shadow,
+                    .flag = MaterialPassFlag::UniShadow,
                     .name = "UniShadow",
                     .type = PassType::SkinnedMaterial,
                     .shaderPaths = ShaderPaths{.vertexShaderPath =  "UniShadowMapSkinned.vsh"},
@@ -180,7 +180,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .useDepthTest = true
                 },
                 PassDesc{
-                    .flag = MaterialPassFlag::Shadow,
+                    .flag = MaterialPassFlag::PointShadow,
                     .name = "PointShadow",
                     .type = PassType::Material,
                     .shaderPaths = ShaderPaths{"PointShadowMap.psh", "PointShadowMap.vsh"},
@@ -189,7 +189,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .useDepthTest = true
                 },
                 PassDesc{
-                    .flag = MaterialPassFlag::Shadow,
+                    .flag = MaterialPassFlag::PointShadow,
                     .name = "PointShadow",
                     .type = PassType::SkinnedMaterial,
                     .shaderPaths = ShaderPaths{"PointShadowMap.psh", "PointShadowMapSkinned.vsh"},

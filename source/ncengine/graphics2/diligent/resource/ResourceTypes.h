@@ -36,7 +36,14 @@ struct SinkBufferDesc
     Diligent::SHADER_TYPE shaderType = Diligent::SHADER_TYPE_UNKNOWN;
     uint32_t maxElementCount = 1u;
     bool dynamic = false;
-    bool isCubeMap = false;
+};
+
+struct CubeSinkBufferDesc
+{
+    std::string resourceKey = "UninitializedCubeSinkBufferDesc";
+    Diligent::SHADER_TYPE shaderType = Diligent::SHADER_TYPE_UNKNOWN;
+    uint32_t maxElementCount = 1u;
+    bool dynamic = false;
 };
 
 struct UniformBufferDesc
@@ -48,6 +55,7 @@ struct UniformBufferDesc
 
 auto ToPipelineResourceDesc(const UniformBufferDesc& resourceDesc)    -> Diligent::PipelineResourceDesc;
 auto ToPipelineResourceDesc(const TextureBufferDesc& resourceDesc)    -> Diligent::PipelineResourceDesc;
+auto ToPipelineResourceDesc(const CubeSinkBufferDesc& resourceDesc)   -> Diligent::PipelineResourceDesc;
 auto ToPipelineResourceDesc(const SinkBufferDesc& resourceDesc)       -> Diligent::PipelineResourceDesc;
 auto ToPipelineResourceDesc(const StructuredBufferDesc& resourceDesc) -> Diligent::PipelineResourceDesc;
 

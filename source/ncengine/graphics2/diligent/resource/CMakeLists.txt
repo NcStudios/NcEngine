@@ -1,5 +1,6 @@
 target_sources(${NC_ENGINE_LIB}
     PRIVATE
+        CubeSinkBufferResource.cpp
         EnvironmentBufferResource.cpp
         MeshBuffer.cpp
         PerFrameResourceSignature.cpp

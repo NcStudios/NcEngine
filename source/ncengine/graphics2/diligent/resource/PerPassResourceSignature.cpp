@@ -16,7 +16,7 @@ PerPassResourceSignature::PerPassResourceSignature(Diligent::IRenderDevice& devi
                                                    const SinkBufferDesc& depthSinksDesc,
                                                    const SinkBufferDesc& postProcessSinksDesc,
                                                    const SinkBufferDesc& uniShadowMapSinksDesc,
-                                                   const SinkBufferDesc& pointShadowMapSinksDesc,
+                                                   const CubeSinkBufferDesc& pointShadowMapSinksDesc,
                                                    const UniformBufferDesc& postProcessPassPropertiesDesc,
                                                    const UniformBufferDesc& sinkIndexDesc)
     : m_postProcessSinkCount{postProcessSinksDesc.maxElementCount},
@@ -97,10 +97,11 @@ PerPassResourceSignature::PerPassResourceSignature(Diligent::IRenderDevice& devi
     );
     m_uniShadowMapSinksResource->Update();
 
-    m_pointShadowMapSinksResource = std::make_unique<SinkBufferResource>(
+    m_pointShadowMapSinksResource = std::make_unique<CubeSinkBufferResource>(
         GetVariable(pointShadowMapSinksDesc.shaderType, pointShadowMapSinksDesc.resourceKey.data(), m_srb),
-        MakePointShadowSinkBufferDesc(pointShadowMapSinksDesc.maxElementCount)
+        MakeCubeShadowSinkBufferDesc(pointShadowMapSinksDesc.maxElementCount)
     );
+
     m_pointShadowMapSinksResource->Update();
 }
 

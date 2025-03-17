@@ -38,9 +38,9 @@ void ClearPostProcessRenderTarget(Diligent::IDeviceContext& context,
                                   uint32_t postProcessIndex);
 
 void ClearPointShadowMapRenderTarget(Diligent::IDeviceContext& context,
-                                     Diligent::ISwapChain& swapChain,
-                                     SinkBufferResource& shadowMapSinkBufferResource,
-                                     uint32_t shadowMapIndex);
+                                     CubeSinkBufferResource& shadowMapSinkBufferResource,
+                                     uint32_t lightIndex,
+                                     uint32_t faceIndex);
 
 void ClearUniShadowMapRenderTarget(Diligent::IDeviceContext& context,
                                    SinkBufferResource& shadowMapSinkBufferResource,
@@ -59,9 +59,9 @@ void BindPostProcessRenderTarget(Diligent::IDeviceContext& context,
                                  uint32_t postProcessIndex);
 
 void BindPointShadowMapRenderTarget(Diligent::IDeviceContext& context,
-                                    Diligent::ISwapChain& swapChain,
-                                    SinkBufferResource& shadowMapSinkBufferResource,
-                                    uint32_t shadowMapIndex);
+                                    CubeSinkBufferResource& shadowMapSinkBufferResource,
+                                    uint32_t lightIndex,
+                                    uint32_t faceIndex);
 
 void BindUniShadowMapRenderTarget(Diligent::IDeviceContext& context,
                                   SinkBufferResource& shadowMapSinkBufferResource,
@@ -75,6 +75,10 @@ auto ToDepthRenderTargetView(Diligent::ISwapChain& swapChain,
 auto ToPostProcessRenderTargetView(Diligent::ISwapChain& swapChain,
                                    SinkBufferResource& postProcessSinkBufferResource,
                                    uint32_t index) -> Diligent::ITextureView*;
+
+auto ToPostProcessCubeRenderTargetView(Diligent::ISwapChain& swapChain,
+                                       CubeSinkBufferResource& postProcessSinkBufferResource,
+                                       uint32_t index) -> Diligent::ITextureView*;
 
 auto ToColorRenderTargetView(Diligent::ISwapChain& swapChain,
                              SinkBufferResource& colorSinkBufferResource,
