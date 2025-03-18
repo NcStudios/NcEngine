@@ -65,6 +65,16 @@ void ShaderBindings::Update(Diligent::IDeviceContext& context,
         m_perFrameSignature.GetLightBuffer().Update(context, device, lightBufferUpdateInfo);
     }
 
+    const auto& lightMatrixData = renderState.lightRenderState.lightMatrices;
+    if (!lightMatrixData.empty())
+    {
+        auto lightBufferUpdateInfo = BufferUpdateInfo<LightMatrixData>{
+            .instances = lightMatrixData,
+            .dirtyRanges = {{0, lightMatrixData.size()}}
+        };
+        m_perFrameSignature.GetLightMatrixDataBuffer().Update(context, device, lightBufferUpdateInfo);
+    }
+
     const auto& materialData = renderState.materialRenderState;
     if (!materialData.instances.empty())
     {

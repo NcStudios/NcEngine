@@ -122,14 +122,14 @@ struct LightData
               const float intensity_,
               const Vector3& dir,
               int32_t enableShadows,
-              DirectX::FXMMATRIX viewProj)
+              uint32_t viewProjIndex_)
         : diffuseColor{diffuseCol},
           type{LightType::Directional},
           specularColor{specularCol},
           direction{dir},
           intensity{intensity_},
           castsShadows{enableShadows},
-          viewProjection{viewProj}
+          viewProjIndex{viewProjIndex_}
     {
     }
 
@@ -140,7 +140,7 @@ struct LightData
               const Vector3& pos,
               int32_t enableShadows,
               float rad,
-              DirectX::FXMMATRIX viewProj)
+              uint32_t viewProjIndex_)
         : diffuseColor{diffuseCol},
           type{LightType::Point},
           specularColor{specularCol},
@@ -148,7 +148,7 @@ struct LightData
           position{pos},
           intensity{intensity_},
           castsShadows{enableShadows},
-          viewProjection{viewProj}
+          viewProjIndex{viewProjIndex_}
     {
     }
 
@@ -162,7 +162,7 @@ struct LightData
               float outAngle,
               float rad,
               int32_t enableShadows,
-              DirectX::FXMMATRIX viewProj)
+              uint32_t viewProjIndex_)
         : diffuseColor{diffuseCol},
           type{LightType::Spot},
           specularColor{specularCol},
@@ -173,7 +173,7 @@ struct LightData
           outerAngle{outAngle},
           intensity{intensity_},
           castsShadows{enableShadows},
-          viewProjection{viewProj}
+          viewProjIndex{viewProjIndex_}
     {
     }
 
@@ -187,6 +187,12 @@ struct LightData
     float outerAngle = 1.0f;
     float intensity = 1.0f;
     int castsShadows = 0;
+    uint32_t viewProjIndex = 0;
+};
+
+// Object model for light projection matrix for shadow mapping (type: StructuredBuffer element type)
+struct LightMatrixData
+{
     DirectX::XMMATRIX viewProjection = DirectX::XMMATRIX{};
 };
 

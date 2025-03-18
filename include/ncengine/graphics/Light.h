@@ -25,6 +25,7 @@ struct PointLight
     Vector3 specularColor = Vector3{0.25f, 0.25f, 0.25f};
     float intensity = 1.0f;
     float radius = 25.0f;
+    bool castsShadows = true;
 };
 
 /** @brief Component representing a light pointing in a single direction with a radius for attenuation, and an inner and outer angle to specify both cone size and falloff. */

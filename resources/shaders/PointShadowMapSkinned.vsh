@@ -14,11 +14,8 @@ struct VSInput
 struct PSInput
 {
     float4 Pos           : SV_POSITION;
-    float3 Normal        : NORMAL;
-    float2 UV            : TEX_COORD;
-    uint   MaterialIndex;
     float3 WorldPos;
-    float3 LocalPos;
+    float ZDepth;
 };
 
 struct TransformData
@@ -40,8 +37,14 @@ cbuffer SinkIndices
     uint lightFaceIndex;
 };
 
+struct LightMatrix
+{
+    float4x4 viewProjection;
+};
+
 StructuredBuffer<TransformData> Transforms;
 StructuredBuffer<LightData> Lights;
+StructuredBuffer<LightMatrix> LightMatrices;
 
 // todo: #802 Define this at compile time
 #define ENABLE_SKINNING 1
@@ -142,12 +145,7 @@ void main(in VSInput VSIn, uint InstanceID : SV_InstanceID, out PSInput PSIn)
     float4 worldPos = mul(pos, Transforms[transformIndex].modelMatrix);
 
     LightData light = Lights[lightIndex];
-    if (light.type == 1) // Point Light
-    {
-        PSIn.Pos = mul(mul(worldPos, light.viewProj), DirectionalMatrices[lightFaceIndex]);
-    }
-    else
-    {
-        PSIn.Pos = mul(worldPos, light.viewProj);
-    }
+    PSIn.Pos = mul(worldPos, LightMatrices[light.lightMatrixIndex + lightFaceIndex].viewProjection);
+    PSIn.WorldPos = worldPos;
+    PSIn.ZDepth = PSIn.Pos.z;
 }

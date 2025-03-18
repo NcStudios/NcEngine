@@ -20,8 +20,14 @@ struct TransformData
     float4x4 model;
 };
 
+struct LightMatrix
+{
+    float4x4 viewProjection;
+};
+
 StructuredBuffer<TransformData> Transforms;
 StructuredBuffer<LightData> Lights;
+StructuredBuffer<LightMatrix> LightMatrices;
 
 struct StaticMeshInstanceData
 {
@@ -62,14 +68,6 @@ void main(in  VSInput VSIn, uint InstanceID : SV_InstanceID,  out PSInput PSIn)
     PSIn.WorldPos = TransformedPos;
 
     LightData light = Lights[lightIndex];
-    if (light.type == 1) // Point Light
-    {
-        PSIn.Pos = mul(mul(TransformedPos, light.viewProj), DirectionalMatrices[lightFaceIndex]);
-    }
-    else
-    {
-        PSIn.Pos = mul(TransformedPos, light.viewProj);
-    }
-
+    PSIn.Pos = mul(TransformedPos, LightMatrices[light.lightMatrixIndex + lightFaceIndex].viewProjection);
     PSIn.ZDepth = PSIn.Pos.z;
 }

@@ -48,11 +48,17 @@ struct LightData {
     float outerAngle;
     float intensity;
     int castsShadows;
-    float4x4 viewProj;
+    uint lightMatrixIndex;
+};
+
+struct LightMatrix
+{
+    float4x4 viewProjection;
 };
 
 StructuredBuffer<TransformData> Transforms;
 StructuredBuffer<LightData> Lights;
+StructuredBuffer<LightMatrix> LightMatrices;
 
 // todo: #802 Define this at compile time
 #define ENABLE_SKINNING 1
@@ -151,6 +157,7 @@ void main(in VSInput VSIn, uint InstanceID : SV_InstanceID, out PSInput PSIn)
 
     uint transformIndex = instance.transformIndex;
     float4 worldPos = mul(pos, Transforms[transformIndex].modelMatrix);
-    PSIn.Pos = mul(worldPos, Lights[lightIndex].viewProj);
 
+    LightData light = Lights[lightIndex];
+    PSIn.Pos = mul(worldPos, LightMatrices[light.lightMatrixIndex].viewProjection);
 }

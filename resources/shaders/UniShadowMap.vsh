@@ -27,11 +27,17 @@ struct LightData {
     float outerAngle;
     float intensity;
     int castsShadows;
-    float4x4 viewProj;
+    uint lightMatrixIndex;
+};
+
+struct LightMatrix
+{
+    float4x4 viewProjection;
 };
 
 StructuredBuffer<TransformData> Transforms;
 StructuredBuffer<LightData> Lights;
+StructuredBuffer<LightMatrix> LightMatrices;
 
 struct StaticMeshInstanceData
 {
@@ -68,5 +74,6 @@ void main(in  VSInput VSIn, uint InstanceID : SV_InstanceID,  out PSInput PSIn)
 {
     uint transformIndex = StaticInstances[InstanceID].transformIndex;
     float4 TransformedPos = mul(float4(VSIn.Pos, 1.0), Transforms[transformIndex].model);
-    PSIn.Pos = mul(TransformedPos, Lights[lightIndex].viewProj);
+    LightData light = Lights[lightIndex];
+    PSIn.Pos = mul(TransformedPos, LightMatrices[light.lightMatrixIndex].viewProjection);
 }

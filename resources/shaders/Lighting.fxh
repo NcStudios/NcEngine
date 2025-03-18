@@ -9,7 +9,7 @@ struct LightData {
     float outerAngle;
     float intensity;
     int castsShadows;
-    float4x4 viewProj;
+    uint lightMatrixIndex;
 };
 
 struct LightInfluence
@@ -111,56 +111,3 @@ LightInfluence LightRadiance(LightData light, float3 fragWorldPos, float3 camera
         return SpotLightRadiance(light, fragWorldPos, cameraPos, normal);
     }
 }
-
-// Define the static constant matrices with precomputed values
-static const float4x4 DIRECTION_POS_X = float4x4(
-     0.0f, 0.0f, -1.0f, 0.0f,
-     0.0f, 1.0f,  0.0f, 0.0f,
-     1.0f, 0.0f,  0.0f, 0.0f,
-     0.0f, 0.0f,  0.0f, 1.0f
-); // +X: RotationY(-PI/2)
-
-static const float4x4 DIRECTION_NEG_X = float4x4(
-     0.0f, 0.0f,  1.0f, 0.0f,
-     0.0f, 1.0f,  0.0f, 0.0f,
-    -1.0f, 0.0f,  0.0f, 0.0f,
-     0.0f, 0.0f,  0.0f, 1.0f
-); // -X: RotationY(PI/2)
-
-static const float4x4 DIRECTION_POS_Y = float4x4(
-    1.0f,  0.0f,  0.0f, 0.0f,
-    0.0f,  0.0f, -1.0f, 0.0f,
-    0.0f,  1.0f,  0.0f, 0.0f,
-    0.0f,  0.0f,  0.0f, 1.0f
-); // +Y: RotationX(PI/2)
-
-static const float4x4 DIRECTION_NEG_Y = float4x4(
-    1.0f,  0.0f,  0.0f, 0.0f,
-    0.0f,  0.0f,  1.0f, 0.0f,
-    0.0f, -1.0f,  0.0f, 0.0f,
-    0.0f,  0.0f,  0.0f, 1.0f
-); // -Y: RotationX(-PI/2)
-
-static const float4x4 DIRECTION_POS_Z = float4x4(
-    1.0f, 0.0f, 0.0f, 0.0f,
-    0.0f, 1.0f, 0.0f, 0.0f,
-    0.0f, 0.0f, 1.0f, 0.0f,
-    0.0f, 0.0f, 0.0f, 1.0f
-); // +Z: Identity
-
-static const float4x4 DIRECTION_NEG_Z = float4x4(
-    -1.0f, 0.0f,  0.0f, 0.0f,
-     0.0f, 1.0f,  0.0f, 0.0f,
-     0.0f, 0.0f, -1.0f, 0.0f,
-     0.0f, 0.0f,  0.0f, 1.0f
-); // -Z: RotationY(-PI)
-
-// Define the static array of matrices
-static float4x4 DirectionalMatrices[6] = {
-    DIRECTION_POS_X,  // Index 0: +X
-    DIRECTION_NEG_X,  // Index 1: -X
-    DIRECTION_POS_Y,  // Index 2: +Y
-    DIRECTION_NEG_Y,  // Index 3: -Y
-    DIRECTION_POS_Z,  // Index 4: +Z
-    DIRECTION_NEG_Z   // Index 5: -Z
-};
