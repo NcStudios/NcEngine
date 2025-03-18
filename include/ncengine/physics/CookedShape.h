@@ -66,6 +66,11 @@ class CookedShape
         /** @brief Partially recook the shape with a new position and rotation. */
         void SetPositionAndRotation(const Vector3& position, const Quaternion& rotation);
 
+        auto GetFurthestVertex(const Vector3& directionNormal) const -> Vector3;
+        auto GetDistanceFromOrigin(const Vector3& directionNormal) const -> float;
+        auto GetHalfExtent(const Vector3& directionNormal) const -> float;
+
+
         /** @cond internal */
         auto GetShapeData() const -> const ShapeStorage& { return m_storage; }
         /** @endcond */
