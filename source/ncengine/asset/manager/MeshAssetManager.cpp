@@ -19,9 +19,9 @@ MeshAssetManager::MeshAssetManager(const std::string& assetDirectory)
 {
 }
 
-auto MeshAssetManager::ImportMesh(const std::string& path, bool isExternal) -> asset::Mesh
+auto MeshAssetManager::ImportMesh(const std::string& path) -> asset::Mesh
 {
-    const auto fullPath = isExternal ? path : m_assetDirectory + path;
+    const auto fullPath = m_assetDirectory + path;
     const auto mesh = asset::ImportMesh(fullPath);
 
     auto meshView = MeshView{
@@ -39,14 +39,14 @@ auto MeshAssetManager::ImportMesh(const std::string& path, bool isExternal) -> a
     return mesh;
 }
 
-bool MeshAssetManager::Load(const std::string& path, bool isExternal, asset_flags_type)
+bool MeshAssetManager::Load(const std::string& path, asset_flags_type)
 {
     if (IsLoaded(path))
     {
         return false;
     }
 
-    auto mesh = ImportMesh(path, isExternal);
+    auto mesh = ImportMesh(path);
     if (mesh.bonesData.has_value() && mesh.bonesData.value().vertexSpaceToBoneSpace.size() > 0)
     {
         auto& bones = mesh.bonesData.value();
@@ -61,7 +61,7 @@ bool MeshAssetManager::Load(const std::string& path, bool isExternal, asset_flag
     return true;
 }
 
-bool MeshAssetManager::Load(std::span<const std::string> paths, bool isExternal, asset_flags_type)
+bool MeshAssetManager::Load(std::span<const std::string> paths, asset_flags_type)
 {
     auto idsToLoad = std::vector<std::string>{};
     auto bones = std::vector<BonesData>{};
@@ -76,7 +76,7 @@ bool MeshAssetManager::Load(std::span<const std::string> paths, bool isExternal,
             continue;
         }
 
-        auto mesh = ImportMesh(path, isExternal);
+        auto mesh = ImportMesh(path);
         if (mesh.bonesData.has_value() && mesh.bonesData.value().vertexSpaceToBoneSpace.size() > 0)
         {
             bones.push_back(std::move(mesh.bonesData.value()));
@@ -100,7 +100,7 @@ bool MeshAssetManager::Load(std::span<const std::string> paths, bool isExternal,
     return anyLoaded;
 }
 
-bool MeshAssetManager::Unload(const std::string& path, asset_flags_type)
+bool MeshAssetManager::Unload(const std::string& path)
 {
     const auto index = m_accessors.index(path);
     if (index == StringTable::NullIndex)
@@ -148,7 +148,7 @@ bool MeshAssetManager::Unload(const std::string& path, asset_flags_type)
     return true;
 }
 
-void MeshAssetManager::UnloadAll(asset_flags_type)
+void MeshAssetManager::UnloadAll()
 {
     /** We don't want to emit a signal for mesh data with empty data. **/
     m_accessors.clear();
@@ -161,20 +161,20 @@ void MeshAssetManager::UnloadAll(asset_flags_type)
     });
 }
 
-auto MeshAssetManager::Acquire(const std::string& path, asset_flags_type) const -> MeshView
+auto MeshAssetManager::Acquire(const std::string& path) const -> MeshView
 {
     NC_ASSERT(m_accessors.contains(path), fmt::format("Mesh is not loaded: '{}'", path));
     return m_accessors.at(path);
 }
 
-auto MeshAssetManager::Acquire(AssetId id, asset_flags_type) const -> MeshView
+auto MeshAssetManager::Acquire(AssetId id) const -> MeshView
 {
     const auto index = m_accessors.index(id);
     NC_ASSERT(index != m_accessors.NullIndex, fmt::format("Mesh is not loaded: '{}'", id));
     return m_accessors.at(index);
 }
 
-bool MeshAssetManager::IsLoaded(const std::string& path, asset_flags_type) const
+bool MeshAssetManager::IsLoaded(const std::string& path) const
 {
     return m_accessors.contains(path);
 }

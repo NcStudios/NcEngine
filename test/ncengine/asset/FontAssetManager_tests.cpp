@@ -39,32 +39,32 @@ class FontAssetManager_tests : public ::testing::Test
 
 TEST_F(FontAssetManager_tests, Load_NotLoaded_ReturnsTrue)
 {
-    auto actual = assetManager->Load(Font1, false);
+    auto actual = assetManager->Load(Font1);
     EXPECT_TRUE(actual);
 }
 
 TEST_F(FontAssetManager_tests, Load_Loaded_ReturnsFalse)
 {
-    assetManager->Load(Font1, false);
-    auto actual = assetManager->Load(Font1, false);
+    assetManager->Load(Font1);
+    auto actual = assetManager->Load(Font1);
     EXPECT_FALSE(actual);
 }
 
 TEST_F(FontAssetManager_tests, Load_BadPath_Throws)
 {
-    EXPECT_THROW(assetManager->Load(FontInfo{"bad/path", 12.0f}, false), std::runtime_error);
+    EXPECT_THROW(assetManager->Load(FontInfo{"bad/path", 12.0f}), std::runtime_error);
 }
 
 TEST_F(FontAssetManager_tests, Load_Collection_ReturnsTrue)
 {
     std::array<FontInfo, 2u> paths{Font1, Font2};
-    auto actual = assetManager->Load(paths, false);
+    auto actual = assetManager->Load(paths);
     EXPECT_TRUE(actual);
 }
 
 TEST_F(FontAssetManager_tests, Unload_Loaded_ReturnsTrue)
 {
-    assetManager->Load(Font1, false);
+    assetManager->Load(Font1);
     auto actual = assetManager->Unload(Font1);
     EXPECT_TRUE(actual);
 }
@@ -83,7 +83,7 @@ TEST_F(FontAssetManager_tests, Unload_BadPath_ReturnsFalse)
 
 TEST_F(FontAssetManager_tests, IsLoaded_Loaded_ReturnsTrue)
 {
-    assetManager->Load(Font1, false);
+    assetManager->Load(Font1);
     auto actual = assetManager->IsLoaded(Font1);
     EXPECT_TRUE(actual);
 }
@@ -96,7 +96,7 @@ TEST_F(FontAssetManager_tests, IsLoaded_NotLoaded_ReturnsFalse)
 
 TEST_F(FontAssetManager_tests, IsLoaded_AfterUnload_ReturnsFalse)
 {
-    assetManager->Load(Font1, false);
+    assetManager->Load(Font1);
     assetManager->Unload(Font1);
     auto actual = assetManager->IsLoaded(Font1);
     EXPECT_FALSE(actual);
@@ -105,13 +105,13 @@ TEST_F(FontAssetManager_tests, IsLoaded_AfterUnload_ReturnsFalse)
 TEST_F(FontAssetManager_tests, UnloadAll_HasAssets_RemovesAssets)
 {
     std::array<FontInfo, 2u> paths{Font1, Font2};
-    assetManager->Load(paths, false);
-    assetManager->UnloadAll(AssetFlags::None);
+    assetManager->Load(paths);
+    assetManager->UnloadAll();
     EXPECT_FALSE(assetManager->Unload(Font1));
     EXPECT_FALSE(assetManager->Unload(Font2));
 }
 
 TEST_F(FontAssetManager_tests, UnloadAll_Empty_Completes)
 {
-    assetManager->UnloadAll(AssetFlags::None);
+    assetManager->UnloadAll();
 }

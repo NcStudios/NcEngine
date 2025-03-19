@@ -139,9 +139,9 @@ ShaderAssetManager::ShaderAssetManager(const std::string& assetDirectory)
 {
 }
 
-bool ShaderAssetManager::Load(const std::string& path, bool isExternal, asset_flags_type)
+bool ShaderAssetManager::Load(const std::string& path, asset_flags_type)
 {
-    const auto fullPath = isExternal ? path : m_assetDirectory + path;
+    const auto fullPath = m_assetDirectory + path;
 
     if (IsLoaded(path))
     {
@@ -160,12 +160,12 @@ bool ShaderAssetManager::Load(const std::string& path, bool isExternal, asset_fl
     return true;
 }
 
-bool ShaderAssetManager::Load(std::span<const std::string> paths, bool isExternal, asset_flags_type)
+bool ShaderAssetManager::Load(std::span<const std::string> paths, asset_flags_type)
 {
     auto atLeastOneFailure = false;
     for (const auto& path : paths)
     {
-        if (!Load(path, isExternal))
+        if (!Load(path))
         {
             atLeastOneFailure = true;
         }
@@ -174,7 +174,7 @@ bool ShaderAssetManager::Load(std::span<const std::string> paths, bool isExterna
     return !atLeastOneFailure;
 }
 
-bool ShaderAssetManager::Unload(const std::string& path, asset_flags_type)
+bool ShaderAssetManager::Unload(const std::string& path)
 {
     if (!IsLoaded(path))
     {
@@ -196,12 +196,12 @@ bool ShaderAssetManager::Unload(const std::string& path, asset_flags_type)
     return true;
 }
 
-void ShaderAssetManager::UnloadAll(asset_flags_type)
+void ShaderAssetManager::UnloadAll()
 {
     m_shaderFlyweights.clear();
 }
 
-auto ShaderAssetManager::Acquire(const std::string& path, asset_flags_type) const -> ShaderView
+auto ShaderAssetManager::Acquire(const std::string& path) const -> ShaderView
 {
     auto pos = std::ranges::find_if(m_shaderFlyweights, [&path](const auto& asset)
     {
@@ -224,7 +224,7 @@ auto ShaderAssetManager::Acquire(const std::string& path, asset_flags_type) cons
     };
 }
 
-bool ShaderAssetManager::IsLoaded(const std::string& path, asset_flags_type) const
+bool ShaderAssetManager::IsLoaded(const std::string& path) const
 {
     return std::ranges::any_of(m_shaderFlyweights.begin(), m_shaderFlyweights.end(), [path](const auto& view) { return view.uid == path; });
 }

@@ -35,13 +35,13 @@ class FontAssetManager : public IAssetService<FontView, FontInfo>
     public:
         explicit FontAssetManager(const std::string& assetDirectory);
 
-        bool Load(const FontInfo& font, bool isExternal, asset_flags_type flags = AssetFlags::None) override;
-        bool Load(std::span<const FontInfo> fonts, bool isExternal, asset_flags_type flags = AssetFlags::None) override;
-        bool Unload(const FontInfo& font, asset_flags_type flags = AssetFlags::None) override;
-        void UnloadAll(asset_flags_type flags = AssetFlags::None) override;
-        auto Acquire(const FontInfo& font, asset_flags_type flags = AssetFlags::None) const -> FontView override;
-        auto Acquire(AssetId, asset_flags_type = AssetFlags::None) const -> FontView override { throw NcError{"Not Implemented"};}
-        bool IsLoaded(const FontInfo& font, asset_flags_type flags = AssetFlags::None) const override;
+        bool Load(const FontInfo& font, asset_flags_type flags = AssetFlags::None) override;
+        bool Load(std::span<const FontInfo> fonts, asset_flags_type flags = AssetFlags::None) override;
+        bool Unload(const FontInfo& font) override;
+        void UnloadAll() override;
+        auto Acquire(const FontInfo& font) const -> FontView override;
+        auto Acquire(AssetId) const -> FontView override { throw NcError{"Not Implemented"};}
+        bool IsLoaded(const FontInfo& font) const override;
         auto GetPath(AssetId) const -> std::string_view override { throw NcError{"Not Implemented"}; }
         auto GetAllLoaded() const -> std::vector<std::string_view> override;
         auto OnUpdate() -> Signal<>&;

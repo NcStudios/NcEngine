@@ -44,12 +44,12 @@ FontAssetManager::FontAssetManager(const std::string& assetDirectory)
 {
 }
 
-bool FontAssetManager::Load(const FontInfo& font, bool isExternal, asset_flags_type)
+bool FontAssetManager::Load(const FontInfo& font, asset_flags_type)
 {
     if (IsLoaded(font))
         return false;
 
-    const auto fullPath = isExternal ? font.path : m_assetDirectory + font.path;
+    const auto fullPath = m_assetDirectory + font.path;
     if (!std::filesystem::exists(fullPath))
         throw NcError{fmt::format("Font file does not exist '{}'", fullPath)};
 
@@ -59,7 +59,7 @@ bool FontAssetManager::Load(const FontInfo& font, bool isExternal, asset_flags_t
     return true;
 }
 
-bool FontAssetManager::Load(std::span<const FontInfo> fonts, bool isExternal, asset_flags_type)
+bool FontAssetManager::Load(std::span<const FontInfo> fonts, asset_flags_type)
 {
     const auto scale = ::GetFontScaling();
     auto anyLoaded = false;
@@ -68,7 +68,7 @@ bool FontAssetManager::Load(std::span<const FontInfo> fonts, bool isExternal, as
         if (IsLoaded(font))
             continue;
 
-        const auto fullPath = isExternal ? font.path : m_assetDirectory + font.path;
+        const auto fullPath = m_assetDirectory + font.path;
         if (!std::filesystem::exists(fullPath))
             throw NcError{fmt::format("Font file does not exist '{}'", fullPath)};
 
@@ -83,7 +83,7 @@ bool FontAssetManager::Load(std::span<const FontInfo> fonts, bool isExternal, as
     return anyLoaded;
 }
 
-bool FontAssetManager::Unload(const FontInfo& font, asset_flags_type)
+bool FontAssetManager::Unload(const FontInfo& font)
 {
     if (m_fonts.erase(font) == 0)
         return false;
@@ -93,14 +93,14 @@ bool FontAssetManager::Unload(const FontInfo& font, asset_flags_type)
     return true;
 }
 
-void FontAssetManager::UnloadAll(asset_flags_type)
+void FontAssetManager::UnloadAll()
 {
     ::ClearFontAtlas();
     m_fonts.clear();
     m_onUpdate.Emit();
 }
 
-auto FontAssetManager::Acquire(const FontInfo& font, asset_flags_type) const -> FontView
+auto FontAssetManager::Acquire(const FontInfo& font) const -> FontView
 {
     const auto it = m_fonts.find(font);
     if (it == m_fonts.end())
@@ -111,7 +111,7 @@ auto FontAssetManager::Acquire(const FontInfo& font, asset_flags_type) const -> 
     return it->second;
 }
 
-bool FontAssetManager::IsLoaded(const FontInfo& font, asset_flags_type) const
+bool FontAssetManager::IsLoaded(const FontInfo& font) const
 {
     return m_fonts.contains(font);
 }

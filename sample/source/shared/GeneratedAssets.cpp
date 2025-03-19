@@ -12,13 +12,13 @@ namespace nc::sample
 {
 namespace audio_clip
 {
+nc::asset::AudioClipView drums{};
+nc::asset::AudioClipView hit{};
+
 const auto g_paths = std::array{
     std::string{path::drums},
     std::string{path::hit},
 };
-
-nc::asset::AudioClipView drums{};
-nc::asset::AudioClipView hit{};
 
 void Load()
 {
@@ -35,11 +35,11 @@ void Acquire()
 
 namespace convex_hull
 {
+nc::asset::AssetId ramp{nc::utility::Fnv1a(path::ramp)};
+
 const auto g_paths = std::array{
     std::string{path::ramp},
 };
-
-nc::asset::AssetId ramp{nc::utility::Fnv1a(path::ramp)};
 
 void Load()
 {
@@ -63,6 +63,13 @@ void Load()
 
 namespace mesh
 {
+nc::asset::MeshView cave{};
+nc::asset::MeshView guy2{};
+nc::asset::MeshView halfpipe{};
+nc::asset::MeshView ogre{};
+nc::asset::MeshView ramp{};
+nc::asset::MeshView skeleton{};
+
 const auto g_paths = std::array{
     std::string{path::cave},
     std::string{path::guy2},
@@ -71,13 +78,6 @@ const auto g_paths = std::array{
     std::string{path::ramp},
     std::string{path::skeleton},
 };
-
-nc::asset::MeshView cave{};
-nc::asset::MeshView guy2{};
-nc::asset::MeshView halfpipe{};
-nc::asset::MeshView ogre{};
-nc::asset::MeshView ramp{};
-nc::asset::MeshView skeleton{};
 
 void Load()
 {
@@ -98,11 +98,11 @@ void Acquire()
 
 namespace mesh_collider
 {
+nc::asset::AssetId halfpipe{nc::utility::Fnv1a(path::halfpipe)};
+
 const auto g_paths = std::array{
     std::string{path::halfpipe},
 };
-
-nc::asset::AssetId halfpipe{nc::utility::Fnv1a(path::halfpipe)};
 
 void Load()
 {
@@ -113,6 +113,15 @@ void Load()
 
 namespace animation
 {
+nc::asset::AssetId ogre_attack{nc::utility::Fnv1a(path::ogre_attack)};
+nc::asset::AssetId ogre_idle{nc::utility::Fnv1a(path::ogre_idle)};
+nc::asset::AssetId skeleton_idle{nc::utility::Fnv1a(path::skeleton_idle)};
+nc::asset::AssetId skeleton_jump{nc::utility::Fnv1a(path::skeleton_jump)};
+nc::asset::AssetId skeleton_walk_back{nc::utility::Fnv1a(path::skeleton_walk_back)};
+nc::asset::AssetId skeleton_walk_forward{nc::utility::Fnv1a(path::skeleton_walk_forward)};
+nc::asset::AssetId skeleton_walk_left{nc::utility::Fnv1a(path::skeleton_walk_left)};
+nc::asset::AssetId skeleton_walk_right{nc::utility::Fnv1a(path::skeleton_walk_right)};
+
 const auto g_paths = std::array{
     std::string{path::ogre_attack},
     std::string{path::ogre_idle},
@@ -123,15 +132,6 @@ const auto g_paths = std::array{
     std::string{path::skeleton_walk_left},
     std::string{path::skeleton_walk_right},
 };
-
-nc::asset::AssetId ogre_attack{nc::utility::Fnv1a(path::ogre_attack)};
-nc::asset::AssetId ogre_idle{nc::utility::Fnv1a(path::ogre_idle)};
-nc::asset::AssetId skeleton_idle{nc::utility::Fnv1a(path::skeleton_idle)};
-nc::asset::AssetId skeleton_jump{nc::utility::Fnv1a(path::skeleton_jump)};
-nc::asset::AssetId skeleton_walk_back{nc::utility::Fnv1a(path::skeleton_walk_back)};
-nc::asset::AssetId skeleton_walk_forward{nc::utility::Fnv1a(path::skeleton_walk_forward)};
-nc::asset::AssetId skeleton_walk_left{nc::utility::Fnv1a(path::skeleton_walk_left)};
-nc::asset::AssetId skeleton_walk_right{nc::utility::Fnv1a(path::skeleton_walk_right)};
 
 void Load()
 {
@@ -185,8 +185,8 @@ nc::asset::TextureView normal_skeleton{};
 
 void Load()
 {
-    nc::asset::LoadTextureAssets(g_diffusePaths, false, nc::asset::AssetFlags::TextureTypeImage);
-    nc::asset::LoadTextureAssets(g_normalPaths, false, nc::asset::AssetFlags::TextureTypeNormalMap);
+    nc::asset::LoadTextureAssets(g_diffusePaths, nc::asset::AssetFlags::TextureTypeImage);
+    nc::asset::LoadTextureAssets(g_normalPaths, nc::asset::AssetFlags::TextureTypeNormalMap);
 }
 void Acquire()
 {
