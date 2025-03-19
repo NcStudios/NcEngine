@@ -56,8 +56,9 @@ bool TextureAssetManager::Load(std::span<const std::string> paths, std::span<con
             continue;
         }
 
+        const auto fullPath = m_assetDirectory + path;
         m_table.emplace(path);
-        textures.emplace_back(ImportTexture(path), m_table.hash(path), flag);
+        textures.emplace_back(ImportTexture(fullPath), m_table.hash(path), flag);
     }
 
     if (!textures.empty())

@@ -67,10 +67,9 @@ auto AcquireMeshAsset(AssetId id) -> MeshView;
  *  @note Unloading textures invalidates all TextureViews. It is intended
  *  to be done on scene change. */
 
-auto LoadTextureAssets(std::span<const std::string> paths, std::span<asset_flags_type> flags) -> bool;
-
 bool LoadTextureAsset(const std::string& path, asset_flags_type flags = AssetFlags::None);
 bool LoadTextureAssets(std::span<const std::string> paths, asset_flags_type flags = AssetFlags::None);
+bool LoadTextureAssets(std::span<const std::string> paths, std::span<const asset_flags_type> flags);
 bool UnloadTextureAsset(const std::string& path);
 void UnloadAllTextureAssets();
 auto AcquireTextureAsset(const std::string& path) -> TextureView;

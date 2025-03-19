@@ -92,7 +92,6 @@ void WritePathsArray(std::ostream& source,
                      const std::vector<nc::convert::ReflectedTarget>& assets,
                      std::string_view variableName = "g_paths")
 {
-
     source << "const auto " << variableName << " = std::array{\n";
     for (const auto& asset : assets)
     {
@@ -277,47 +276,24 @@ void WriteTextures(std::ostream& header,
     EndNamespace(header, ns);
 
     BeginNamespace(source, ns);
+    WriteVariableDefinitions(source, assets, "nc::asset::TextureView");
+    WritePathsArray(source, assets);
 
-    auto diffuse = std::vector<nc::convert::ReflectedTarget>{};
-    auto normal = std::vector<nc::convert::ReflectedTarget>{};
+    source << "const auto g_flags = std::array{\n";
     for (const auto& asset : assets)
     {
         if (asset.subtype == nc::convert::AssetSubtype::NormalTexture)
         {
-            normal.push_back(asset);
+            source << "    nc::asset::AssetFlags::TextureTypeNormalMap,\n";
         }
         else
         {
-            diffuse.push_back(asset);
+            source << "    nc::asset::AssetFlags::TextureTypeImage,\n";
         }
     }
 
-    if (!diffuse.empty())
-    {
-        WritePathsArray(source, diffuse, "g_diffusePaths");
-    }
-
-    if (!normal.empty())
-    {
-        WritePathsArray(source, normal, "g_normalPaths");
-    }
-
-    WriteVariableDefinitions(source, assets, "nc::asset::TextureView");
-
-    source << "void Load()\n"
-            << "{\n";
-
-    if (!diffuse.empty())
-    {
-        source << "    nc::asset::LoadTextureAssets(g_diffusePaths, nc::asset::AssetFlags::TextureTypeImage);\n";
-    }
-
-    if (!normal.empty())
-    {
-        source << "    nc::asset::LoadTextureAssets(g_normalPaths, nc::asset::AssetFlags::TextureTypeNormalMap);\n";
-    }
-    
-    source << "}\n";
+    source << "};\n\n";
+    source << "void Load()\n{\n    nc::asset::LoadTextureAssets(g_paths, g_flags);\n}\n\n";
 
     WriteAcquireFunction(source, assets, "nc::asset::AcquireTextureAsset");
     EndNamespace(source, ns);

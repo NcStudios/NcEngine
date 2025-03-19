@@ -193,7 +193,7 @@ bool LoadTextureAssets(std::span<const std::string> paths, asset_flags_type flag
     return AssetService<TextureView>::Get()->Load(paths, flags);
 }
 
-auto LoadTextureAssets(std::span<const std::string> paths, std::span<asset_flags_type> flags) -> bool
+bool LoadTextureAssets(std::span<const std::string> paths, std::span<const asset_flags_type> flags)
 {
     return AssetService<TextureView>::Get()->Load(paths, flags);
 }

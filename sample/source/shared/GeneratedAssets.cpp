@@ -142,29 +142,6 @@ void Load()
 
 namespace texture
 {
-const auto g_diffusePaths = std::array{
-    std::string{path::diffuse_cave},
-    std::string{path::diffuse_guy},
-    std::string{path::diffuse_ogre},
-    std::string{path::diffuse_skeleton},
-    std::string{path::diffuse_blue},
-    std::string{path::diffuse_green},
-    std::string{path::diffuse_orange},
-    std::string{path::diffuse_purple},
-    std::string{path::diffuse_red},
-    std::string{path::diffuse_teal},
-    std::string{path::diffuse_yellow},
-    std::string{path::effect_linear_hatch},
-    std::string{path::effect_noise},
-};
-
-const auto g_normalPaths = std::array{
-    std::string{path::normal_cave},
-    std::string{path::normal_guy},
-    std::string{path::normal_ogre},
-    std::string{path::normal_skeleton},
-};
-
 nc::asset::TextureView diffuse_cave{};
 nc::asset::TextureView diffuse_guy{};
 nc::asset::TextureView diffuse_ogre{};
@@ -183,11 +160,51 @@ nc::asset::TextureView normal_guy{};
 nc::asset::TextureView normal_ogre{};
 nc::asset::TextureView normal_skeleton{};
 
+const auto g_paths = std::array{
+    std::string{path::diffuse_cave},
+    std::string{path::diffuse_guy},
+    std::string{path::diffuse_ogre},
+    std::string{path::diffuse_skeleton},
+    std::string{path::diffuse_blue},
+    std::string{path::diffuse_green},
+    std::string{path::diffuse_orange},
+    std::string{path::diffuse_purple},
+    std::string{path::diffuse_red},
+    std::string{path::diffuse_teal},
+    std::string{path::diffuse_yellow},
+    std::string{path::effect_linear_hatch},
+    std::string{path::effect_noise},
+    std::string{path::normal_cave},
+    std::string{path::normal_guy},
+    std::string{path::normal_ogre},
+    std::string{path::normal_skeleton},
+};
+
+const auto g_flags = std::array{
+    nc::asset::AssetFlags::TextureTypeImage,
+    nc::asset::AssetFlags::TextureTypeImage,
+    nc::asset::AssetFlags::TextureTypeImage,
+    nc::asset::AssetFlags::TextureTypeImage,
+    nc::asset::AssetFlags::TextureTypeImage,
+    nc::asset::AssetFlags::TextureTypeImage,
+    nc::asset::AssetFlags::TextureTypeImage,
+    nc::asset::AssetFlags::TextureTypeImage,
+    nc::asset::AssetFlags::TextureTypeImage,
+    nc::asset::AssetFlags::TextureTypeImage,
+    nc::asset::AssetFlags::TextureTypeImage,
+    nc::asset::AssetFlags::TextureTypeImage,
+    nc::asset::AssetFlags::TextureTypeImage,
+    nc::asset::AssetFlags::TextureTypeNormalMap,
+    nc::asset::AssetFlags::TextureTypeNormalMap,
+    nc::asset::AssetFlags::TextureTypeNormalMap,
+    nc::asset::AssetFlags::TextureTypeNormalMap,
+};
+
 void Load()
 {
-    nc::asset::LoadTextureAssets(g_diffusePaths, nc::asset::AssetFlags::TextureTypeImage);
-    nc::asset::LoadTextureAssets(g_normalPaths, nc::asset::AssetFlags::TextureTypeNormalMap);
+    nc::asset::LoadTextureAssets(g_paths, g_flags);
 }
+
 void Acquire()
 {
     diffuse_cave = nc::asset::AcquireTextureAsset(path::diffuse_cave);
