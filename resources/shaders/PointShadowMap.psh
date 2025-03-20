@@ -53,5 +53,5 @@ cbuffer SinkIndices
 void main(in PSInput PSIn, out PSOutput PSOut)
 {
     float3 lightVec = PSIn.WorldPos.xyz - Lights[lightIndex].position;
-    PSOut.Color = PSIn.ZDepth;
+    PSOut.Color = length(lightVec);
 }

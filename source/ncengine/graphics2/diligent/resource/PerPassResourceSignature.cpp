@@ -37,6 +37,7 @@ PerPassResourceSignature::PerPassResourceSignature(Diligent::IRenderDevice& devi
     const auto samplers = std::array{
         SinkBufferResource::MakeSamplerDesc(colorSinksDesc.resourceKey),
         SinkBufferResource::MakeShadowSamplerDesc(uniShadowMapSinksDesc.resourceKey),
+        CubeSinkBufferResource::MakeShadowSamplerDesc(pointShadowMapSinksDesc.resourceKey),
     };
 
     auto desc = Diligent::PipelineResourceSignatureDesc{};

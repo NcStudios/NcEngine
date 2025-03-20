@@ -10,6 +10,7 @@ TextureCube   PointShadowMapSinks[];
 Texture2D     Textures[];
 SamplerState  Textures_sampler; // By convention, texture samplers must use the '_sampler' suffix
 SamplerState  UniShadowMapSinks_sampler; // By convention, texture samplers must use the '_sampler' suffix
+SamplerState  PointShadowMapSinks_sampler; // By convention, texture samplers must use the '_sampler' suffix
 
 cbuffer EnvironmentProperties
 {
@@ -153,18 +154,23 @@ float UniShadowCalculation(float4 fragPosLightSpace, Texture2D depthTex)
     return shadow;
 }
 
+//     float distance = length(lightToFrag);
+//     float3 sampleDir = -normalize(lightToFrag); // Direction to sample cube map
+//     sampleDir.y *= -1;
+
 float PointShadowCalculation(float4 fragPosWorldSpace, float3 lightPosWorldSpace, TextureCube depthTex)
 {
     // Vector from light to fragment
-    float3 lightToFrag = fragPosWorldSpace.xyz - lightPosWorldSpace;
+    float3 lightToFrag = lightPosWorldSpace - fragPosWorldSpace.xyz;
     float distance = length(lightToFrag);
-    float3 sampleDir = normalize(lightToFrag); // Direction to sample cube map
+    float3 sampleDir = -normalize(lightToFrag); // Direction to sample cube map
+    sampleDir.y *= -1;
 
     // Current depth is the distance from the light to the fragment
     float currentDepth = distance;
 
     // Bias to reduce shadow acne
-    float bias = 0.05; // Adjust as needed
+    float bias = 0.01f; // Adjust as needed
 
     // Simple PCF: Sample a few directions around the main direction
     float shadow = 0.0;
@@ -183,10 +189,10 @@ float PointShadowCalculation(float4 fragPosWorldSpace, float3 lightPosWorldSpace
     for (int i = 0; i < sampleCount; i++) 
     {
         float3 perturbedDir = normalize(sampleDir + offsets[i]);
-        float closestDepth = depthTex.Sample(UniShadowMapSinks_sampler, perturbedDir).r;
+        float closestDepth = depthTex.Sample(PointShadowMapSinks_sampler, perturbedDir).r;
 
         // Depth in cube map is typically stored as raw distance (not normalized)
-        shadow += (currentDepth - bias > closestDepth) ? 1.0 : 0.0;
+        shadow += (currentDepth + bias > closestDepth) ? 1.0 : 0.0;
     }
 
     shadow /= float(sampleCount);
@@ -302,6 +308,25 @@ void main(in  PSInput  PSIn, out PSOutput PSOut)
 
 
     // TextureCube depthTex = PointShadowMapSinks[0];
-    // float rawShadow = PointShadowCalculation(mul(PSIn.WorldPos, Lights[0].viewProj), PSIn.WorldPos, Lights[0].position, depthTex);
-    // PSOut.Color = float4((1.0f - rawShadow), 0.0f, 0.0f, 1.0f); 
+
+    // // Vector from light to fragment
+    // float3 lightToFrag = Lights[0].position - PSIn.WorldPos.xyz;
+    // float distance = length(lightToFrag);
+    // float3 sampleDir = -normalize(lightToFrag); // Direction to sample cube map
+    // sampleDir.y *= -1;
+
+
+
+
+
+
+
+    // // Current depth is the distance from the light to the fragment
+    // // float closestDepth = depthTex.Sample(UniShadowMapSinks_sampler, sampleDir).r;
+
+    // float zNear = 0.01f;
+    // float zFar = 150.0f;
+    // float linearDepth = closestDepth / zFar;
+
+    // PSOut.Color = float4(closestDepth, 0.0f, 0.0f, 1.0f); 
 }
