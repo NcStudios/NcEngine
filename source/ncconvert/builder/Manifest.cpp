@@ -59,13 +59,13 @@ auto IsUpToDate(const nc::convert::Target& target) -> bool
     return std::filesystem::last_write_time(target.destinationPath) > std::filesystem::last_write_time(target.sourcePath);
 }
 
-auto ToAssetSubtype(std::string_view str) -> nc::convert::AssetSubtype
+auto ToAssetSubtype(std::string_view str) -> nc::asset::AssetSubtype
 {
-    using enum nc::convert::AssetSubtype;
-    if (str == "diffuse")  return DiffuseTexture;
+    using enum nc::asset::AssetSubtype;
     if (str == "normal")   return NormalTexture;
-    if (str == "particle") return ParticleTexture;
-    if (str == "effect")   return EffectTexture;
+    if (str == "diffuse")  return DiffuseTexture;
+    if (str == "particle") return DiffuseTexture;
+    if (str == "effect")   return DiffuseTexture;
     return None;
 }
 

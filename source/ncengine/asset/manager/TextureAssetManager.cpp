@@ -16,7 +16,7 @@ TextureAssetManager::TextureAssetManager(const std::string& texturesAssetDirecto
 {
 }
 
-bool TextureAssetManager::Load(const std::string& path, asset_flags_type flags)
+bool TextureAssetManager::Load(const std::string& path, AssetSubtype subtype)
 {
     if (m_table.size() + 1 >= m_maxTextureCount)
     {
@@ -29,7 +29,7 @@ bool TextureAssetManager::Load(const std::string& path, asset_flags_type flags)
     }
 
     const auto fullPath = m_assetDirectory + path;
-    auto texture = asset::TextureWithId{asset::ImportTexture(fullPath), m_table.hash(path), flags};
+    auto texture = asset::TextureWithId{asset::ImportTexture(fullPath), m_table.hash(path), subtype};
     m_table.emplace(path);
     m_onUpdate.Emit(asset::TextureUpdateEventData{
         asset::UpdateAction::Load,
@@ -39,8 +39,9 @@ bool TextureAssetManager::Load(const std::string& path, asset_flags_type flags)
     return true;
 }
 
-bool TextureAssetManager::Load(std::span<const std::string> paths, std::span<const asset_flags_type> flags)
+bool TextureAssetManager::Load(std::span<const std::string> paths, std::span<const AssetSubtype> subtypes)
 {
+    NC_ASSERT(paths.size() == subtypes.size(), "Number of subtypes does not match number of asset paths");
     if (m_table.size() + paths.size() >= m_maxTextureCount)
     {
         throw NcError("Cannot exceed max texture count.");
@@ -49,7 +50,7 @@ bool TextureAssetManager::Load(std::span<const std::string> paths, std::span<con
     auto textures = std::vector<TextureWithId>{};
     textures.reserve(paths.size());
 
-    for (const auto [path, flag] : std::views::zip(paths, flags))
+    for (const auto [path, subtype] : std::views::zip(paths, subtypes))
     {
         if (IsLoaded(path))
         {
@@ -58,7 +59,7 @@ bool TextureAssetManager::Load(std::span<const std::string> paths, std::span<con
 
         const auto fullPath = m_assetDirectory + path;
         m_table.emplace(path);
-        textures.emplace_back(ImportTexture(fullPath), m_table.hash(path), flag);
+        textures.emplace_back(ImportTexture(fullPath), m_table.hash(path), subtype);
     }
 
     if (!textures.empty())
@@ -72,7 +73,7 @@ bool TextureAssetManager::Load(std::span<const std::string> paths, std::span<con
     return true;
 }
 
-bool TextureAssetManager::Load(std::span<const std::string> paths, asset_flags_type flags)
+bool TextureAssetManager::Load(std::span<const std::string> paths, AssetSubtype subtype)
 {
     if (m_table.size() + paths.size() >= m_maxTextureCount)
     {
@@ -91,7 +92,7 @@ bool TextureAssetManager::Load(std::span<const std::string> paths, asset_flags_t
 
         m_table.emplace(path);
         const auto fullPath = m_assetDirectory + path;
-        textures.emplace_back(ImportTexture(fullPath), m_table.hash(path), flags);
+        textures.emplace_back(ImportTexture(fullPath), m_table.hash(path), subtype);
     }
 
     if (!textures.empty())

@@ -15,8 +15,8 @@ class CubeMapAssetManager : public IAssetService<CubeMapView, std::string>
     public:
         explicit CubeMapAssetManager(const std::string& cubeMapAssetDirectory, uint32_t maxCubeMapsCount);
 
-        bool Load(const std::string& path, asset_flags_type flags = AssetFlags::None) override;
-        bool Load(std::span<const std::string> paths, asset_flags_type flags = AssetFlags::None) override;
+        bool Load(const std::string& path, AssetSubtype = AssetSubtype::None) override;
+        bool Load(std::span<const std::string> paths, AssetSubtype = AssetSubtype::None) override;
         bool Unload(const std::string& path) override;
         void UnloadAll() override;
         auto Acquire(const std::string& path) const -> CubeMapView override;

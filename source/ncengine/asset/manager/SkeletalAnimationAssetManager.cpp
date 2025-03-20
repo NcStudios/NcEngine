@@ -15,7 +15,7 @@ SkeletalAnimationAssetManager::SkeletalAnimationAssetManager(const std::string& 
 {
 }
 
-bool SkeletalAnimationAssetManager::Load(const std::string& path, asset_flags_type)
+bool SkeletalAnimationAssetManager::Load(const std::string& path, AssetSubtype)
 {
     auto previousTableSize = m_table.size();
     if (m_table.size() + 1 >= m_maxSkeletalAnimationCount)
@@ -39,7 +39,7 @@ bool SkeletalAnimationAssetManager::Load(const std::string& path, asset_flags_ty
     return true;
 }
 
-bool SkeletalAnimationAssetManager::Load(std::span<const std::string> paths, asset_flags_type)
+bool SkeletalAnimationAssetManager::Load(std::span<const std::string> paths, AssetSubtype)
 {
     auto previousTableSize = m_table.size();
     if (m_table.size() + paths.size() >= m_maxSkeletalAnimationCount)

@@ -18,8 +18,8 @@ struct className : public nc::asset::IAssetService<viewType, inputType>         
     viewType view;                                                                                                                                                         \
     const char* path = "test_path";                                                                                                                                        \
                                                                                                                                                                            \
-    bool Load(const inputType&, nc::asset::asset_flags_type = nc::asset::AssetFlags::None)                                                  override { return true; }      \
-    bool Load(std::span<const inputType>, nc::asset::asset_flags_type = nc::asset::AssetFlags::None)                                        override { return true; }      \
+    bool Load(const inputType&, nc::asset::AssetSubtype = nc::asset::AssetSubtype::None)                                                    override { return true; }      \
+    bool Load(std::span<const inputType>, nc::asset::AssetSubtype = nc::asset::AssetSubtype::None)                                          override { return true; }      \
     bool Unload(const inputType&)                                                                                                           override { return true; }      \
     void UnloadAll()                                                                                                                        override {}                    \
     bool IsLoaded(const inputType&)                                                                  const                                  override { return true; }      \

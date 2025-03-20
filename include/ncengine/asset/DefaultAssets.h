@@ -7,8 +7,23 @@
  */
 #pragma once
 
+// TODO just need flags...
+#include "ncasset/AssetType.h"
+
+#include <span>
+#include <string_view>
+
 namespace nc::asset
 {
+auto GetDefaultAudioClipPaths() -> std::span<const std::string_view>;
+auto GetDefaultConvexHullPaths() -> std::span<const std::string_view>;
+auto GetDefaultCubeMapPaths() -> std::span<const std::string_view>;
+auto GetDefaultMeshPaths() -> std::span<const std::string_view>;
+auto GetDefaultMeshColliderPaths() -> std::span<const std::string_view>;
+auto GetDefaultSkeletalAnimationPaths() -> std::span<const std::string_view>;
+auto GetDefaultTexturePaths() -> std::span<const std::string_view>;
+auto GetDefaultTextureSubtypes() -> std::span<const AssetSubtype>;
+
 /** @brief Name of the default plane mesh asset. */
 constexpr auto PlaneMesh = "DefaultPlane.nca";
 

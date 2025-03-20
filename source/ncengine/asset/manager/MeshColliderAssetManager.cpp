@@ -11,7 +11,7 @@ MeshColliderAssetManager::MeshColliderAssetManager(const std::string& meshCollid
 {
 }
 
-bool MeshColliderAssetManager::Load(const std::string& path, asset_flags_type)
+bool MeshColliderAssetManager::Load(const std::string& path, AssetSubtype)
 {
     if (IsLoaded(path))
     {
@@ -31,7 +31,7 @@ bool MeshColliderAssetManager::Load(const std::string& path, asset_flags_type)
     return true;
 }
 
-bool MeshColliderAssetManager::Load(std::span<const std::string> paths, asset_flags_type)
+bool MeshColliderAssetManager::Load(std::span<const std::string> paths, AssetSubtype)
 {
     auto anyLoaded = false;
     auto assets = std::vector<MeshCollider>{};

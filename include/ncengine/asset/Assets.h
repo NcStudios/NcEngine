@@ -1,18 +1,10 @@
 #pragma once
 
+#include "ncasset/AssetType.h"
 #include "ncengine/asset/AssetViews.h"
 
 namespace nc::asset
 {
-/** Asset flags are used to pass parameters to the asset loading/unloading functions. */
-using asset_flags_type = uint64_t;
-struct AssetFlags
-{
-    static constexpr asset_flags_type None                 = 0b00000000;
-    static constexpr asset_flags_type TextureTypeImage     = 0b00000001;
-    static constexpr asset_flags_type TextureTypeNormalMap = 0b00000010;
-};
-
 /** Assets must be loaded before dependent objects are created and should be unloaded only
  *  when they are no longer in use.
  * 
@@ -67,9 +59,9 @@ auto AcquireMeshAsset(AssetId id) -> MeshView;
  *  @note Unloading textures invalidates all TextureViews. It is intended
  *  to be done on scene change. */
 
-bool LoadTextureAsset(const std::string& path, asset_flags_type flags = AssetFlags::None);
-bool LoadTextureAssets(std::span<const std::string> paths, asset_flags_type flags = AssetFlags::None);
-bool LoadTextureAssets(std::span<const std::string> paths, std::span<const asset_flags_type> flags);
+bool LoadTextureAsset(const std::string& path, AssetSubtype subtype = AssetSubtype::DiffuseTexture);
+bool LoadTextureAssets(std::span<const std::string> paths, AssetSubtype subtype = AssetSubtype::DiffuseTexture);
+bool LoadTextureAssets(std::span<const std::string> paths, std::span<const AssetSubtype> subtypes);
 bool UnloadTextureAsset(const std::string& path);
 void UnloadAllTextureAssets();
 auto AcquireTextureAsset(const std::string& path) -> TextureView;

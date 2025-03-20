@@ -19,7 +19,7 @@ CubeMapAssetManager::CubeMapAssetManager(const std::string& cubeMapAssetDirector
 {
 }
 
-bool CubeMapAssetManager::Load(const std::string& path, asset_flags_type)
+bool CubeMapAssetManager::Load(const std::string& path, AssetSubtype)
 {
     if (IsLoaded(path))
     {
@@ -42,7 +42,7 @@ bool CubeMapAssetManager::Load(const std::string& path, asset_flags_type)
     return true;
 }
 
-bool CubeMapAssetManager::Load(std::span<const std::string> paths, asset_flags_type)
+bool CubeMapAssetManager::Load(std::span<const std::string> paths, AssetSubtype)
 {
     if (paths.size() + m_cubeMapIds.size() >= m_maxCubeMapsCount)
     {

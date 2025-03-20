@@ -30,15 +30,14 @@ class IAssetService : public IAssetServiceBase
         IAssetService();
 
         virtual bool Load(const InputType& input,
-                          asset_flags_type flags = 0) = 0;
+                          AssetSubtype subtype = AssetSubtype::None) = 0;
         virtual bool Load(std::span<const InputType> inputs,
-                          asset_flags_type flags = 0) = 0;
-
+                          AssetSubtype subtype = AssetSubtype::None) = 0;
         virtual bool Load(std::span<const InputType> inputs,
-                          std::span<const asset_flags_type> flags)
+                          std::span<const AssetSubtype> subtypes)
         {
-            (void)flags;
-            return Load(inputs, false);
+            (void)subtypes;
+            return Load(inputs);
         }
 
         virtual bool Unload(const InputType& input) = 0;

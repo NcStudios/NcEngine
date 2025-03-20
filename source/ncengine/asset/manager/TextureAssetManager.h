@@ -17,11 +17,11 @@ class TextureAssetManager : public IAssetService<TextureView, std::string>
         explicit TextureAssetManager(const std::string& texturesAssetDirectory, uint32_t maxTextures);
 
         bool Load(const std::string& path,
-                  asset_flags_type flags = AssetFlags::None) override;
+                  AssetSubtype = AssetSubtype::None) override;
         bool Load(std::span<const std::string> paths,
-                  asset_flags_type flags = AssetFlags::None) override;
+                  AssetSubtype = AssetSubtype::None) override;
         bool Load(std::span<const std::string> paths,
-                  std::span<const asset_flags_type> flags) override;
+                  std::span<const AssetSubtype> subtypes) override;
 
 
         bool Unload(const std::string& path)                                 override;

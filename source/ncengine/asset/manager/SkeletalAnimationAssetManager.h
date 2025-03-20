@@ -15,8 +15,8 @@ class SkeletalAnimationAssetManager : public IAssetService<SkeletalAnimationView
     public:
         explicit SkeletalAnimationAssetManager(const std::string& skeletalAnimationAssetDirectory, uint32_t maxSkeletalAnimations);
 
-        bool Load(const std::string& path, asset_flags_type flags = AssetFlags::None) override;
-        bool Load(std::span<const std::string> paths, asset_flags_type flags = AssetFlags::None) override;
+        bool Load(const std::string& path, AssetSubtype = AssetSubtype::None) override;
+        bool Load(std::span<const std::string> paths, AssetSubtype = AssetSubtype::None) override;
         bool Unload(const std::string& path) override;
         void UnloadAll() override;
         auto Acquire(const std::string& path) const -> SkeletalAnimationView override;

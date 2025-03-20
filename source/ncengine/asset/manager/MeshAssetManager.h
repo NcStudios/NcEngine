@@ -16,8 +16,8 @@ class MeshAssetManager : public IAssetService<MeshView, std::string>
     public:
         explicit MeshAssetManager(const std::string& assetDirectory);
 
-        bool Load(const std::string& path, asset_flags_type flags = AssetFlags::None) override;
-        bool Load(std::span<const std::string> paths, asset_flags_type flags = AssetFlags::None) override;
+        bool Load(const std::string& path, AssetSubtype = AssetSubtype::None) override;
+        bool Load(std::span<const std::string> paths, AssetSubtype = AssetSubtype::None) override;
         bool Unload(const std::string& path) override;
         void UnloadAll() override;
         auto Acquire(const std::string& path) const -> MeshView override;
