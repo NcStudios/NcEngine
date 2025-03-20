@@ -195,7 +195,7 @@ const auto g_paths = std::array{
     std::string{path::normal_skeleton},
 };
 
-const auto g_flags = std::array{
+const auto g_subtypes = std::array{
     nc::asset::AssetSubtype::DiffuseTexture,
     nc::asset::AssetSubtype::DiffuseTexture,
     nc::asset::AssetSubtype::NormalTexture,
@@ -221,7 +221,7 @@ const auto g_flags = std::array{
 
 void Load()
 {
-    nc::asset::LoadTextureAssets(g_paths, g_flags);
+    nc::asset::LoadTextureAssets(g_paths, g_subtypes);
 }
 
 void Acquire()

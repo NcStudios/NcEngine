@@ -113,6 +113,41 @@ void WritePathsArray(std::ostream& source,
     source << "};\n\n";
 }
 
+void WriteSubtypesArray(std::ostream& source,
+                        const std::vector<nc::convert::ReflectedTarget>& assets,
+                        std::span<const nc::asset::AssetSubtype> defaults,
+                        std::string_view variableName = "g_subtypes")
+{
+    constexpr auto diffuseString = std::string_view{"    nc::asset::AssetSubtype::DiffuseTexture,\n"};
+    constexpr auto normalString  = std::string_view{"    nc::asset::AssetSubtype::NormalTexture,\n"};
+    constexpr auto noneString    = std::string_view{"    nc::asset::AssetSubtype::None,\n"};
+    using enum nc::asset::AssetSubtype;
+
+    source << "const auto " << variableName << " = std::array{\n";
+
+    for (const auto& subtype : defaults)
+    {
+        switch (subtype)
+        {
+            case DiffuseTexture: source << diffuseString; break;
+            case NormalTexture:  source << normalString;  break;
+            case None:           source << noneString;    break;
+        }
+    }
+
+    for (const auto& asset : assets)
+    {
+        switch (asset.subtype)
+        {
+            case DiffuseTexture: source << diffuseString; break;
+            case NormalTexture:  source << normalString;  break;
+            case None:           source << noneString;    break;
+        }
+    }
+
+    source << "};\n\n";
+}
+
 void WriteAssetIds(std::ostream& source,
                    const std::vector<nc::convert::ReflectedTarget>& assets)
 {
@@ -130,9 +165,10 @@ void WriteLoadFunctionDeclaration(std::ostream& header)
 }
 
 void WriteLoadFunction(std::ostream& source,
-                       std::string_view functionName)
+                       std::string_view functionName,
+                       std::string_view arguments = "g_paths")
 {
-    source << "void Load()\n{\n    " << functionName << "(g_paths);\n}\n\n";
+    source << "void Load()\n{\n    " << functionName << "(" << arguments << ");\n}\n\n";
 }
 
 void WriteAcquireFunctionDeclaration(std::ostream& header)
@@ -280,37 +316,9 @@ void WriteTextures(std::ostream& header,
 
     BeginNamespace(source, ns);
     WriteVariableDefinitions(source, assets, "nc::asset::TextureView");
-    WritePathsArray(source, assets, nc::asset::GetDefaultTexturePaths());
-
-    source << "const auto g_subtypes = std::array{\n";
-
-    for (const auto& subtype : nc::asset::GetDefaultTextureSubtypes())
-    {
-        if (subtype == nc::asset::AssetSubtype::NormalTexture)
-        {
-            source << "    nc::asset::AssetSubtype::NormalTexture,\n";
-        }
-        else
-        {
-            source << "    nc::asset::AssetFlags::DiffuseTexture,\n";
-        }
-    }
-
-    for (const auto& asset : assets)
-    {
-        if (asset.subtype == nc::asset::AssetSubtype::NormalTexture)
-        {
-            source << "    nc::asset::AssetFlags::NormalTexture,\n";
-        }
-        else
-        {
-            source << "    nc::asset::AssetFlags::DiffuseTexture,\n";
-        }
-    }
-
-    source << "};\n\n";
-    source << "void Load()\n{\n    nc::asset::LoadTextureAssets(g_paths, g_subtypes);\n}\n\n";
-
+    WritePathsArray(source, assets, nc::asset::GetDefaultTexturePaths(), "g_paths");
+    WriteSubtypesArray(source, assets, nc::asset::GetDefaultTextureSubtypes(), "g_subtypes");
+    WriteLoadFunction(source, "nc::asset::LoadTextureAssets", "g_paths, g_subtypes");
     WriteAcquireFunction(source, assets, "nc::asset::AcquireTextureAsset");
     EndNamespace(source, ns);
 }
