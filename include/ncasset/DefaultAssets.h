@@ -1,5 +1,5 @@
 /**
- * @file NcAsset.h
+ * @file DefaultAssets.h
  * @copyright Jaremie Romer and McCallister Romer 2025
  * 
  * @note Assets in this file are guaranteed to be loaded before each call to
@@ -7,7 +7,6 @@
  */
 #pragma once
 
-// TODO just need flags...
 #include "ncasset/AssetType.h"
 
 #include <span>

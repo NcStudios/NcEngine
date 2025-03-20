@@ -7,6 +7,7 @@
  */
 #include "GeneratedAssets.h"
 
+#include "ncasset/DefaultAssets.h"
 #include "ncengine/asset/AssetViews.h"
 #include "ncengine/asset/NcAsset.h"
 #include "ncengine/graphics/Material.h"

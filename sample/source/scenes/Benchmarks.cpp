@@ -3,7 +3,6 @@
 #include "shared/spawner/Spawner.h"
 
 #include "ncengine/NcEngine.h"
-#include "ncengine/asset/DefaultAssets.h"
 #include "ncengine/config/Config.h"
 #include "ncengine/ecs/InvokeFreeComponent.h"
 #include "ncengine/graphics/ParticleEmitter.h"

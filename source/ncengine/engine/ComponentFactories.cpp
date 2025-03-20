@@ -1,5 +1,5 @@
 #include "ComponentFactories.h"
-#include "ncengine/asset/DefaultAssets.h"
+#include "ncasset/DefaultAssets.h"
 #include "ncengine/audio/AudioSource.h"
 #include "ncengine/ecs/FrameLogic.h"
 #include "ncengine/ecs/ComponentRegistry.h"

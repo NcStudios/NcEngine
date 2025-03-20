@@ -5,14 +5,11 @@
 #include "../builder/Target.h"
 #include "builder/Manifest.h"
 
+#include "ncasset/DefaultAssets.h"
+
 #include <array>
 #include <fstream>
 #include <ranges>
-
-
-
-#include "../include/ncengine/asset/DefaultAssets.h"
-
 
 namespace
 {

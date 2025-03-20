@@ -1,7 +1,7 @@
 #include "ModuleFactory.h"
 
+#include "ncasset/DefaultAssets.h"
 #include "ncengine/Events.h"
-#include "ncengine/asset/DefaultAssets.h"
 #include "ncengine/asset/NcAsset.h"
 #include "ncengine/audio/NcAudio.h"
 #include "ncengine/config/Config.h"

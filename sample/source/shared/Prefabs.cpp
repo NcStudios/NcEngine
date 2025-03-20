@@ -1,7 +1,6 @@
 #include "Prefabs.h"
 
 #include "ncengine/asset/Assets.h"
-#include "ncengine/asset/DefaultAssets.h"
 #include "ncengine/config/Config.h"
 #include "ncutility/Hash.h"
 

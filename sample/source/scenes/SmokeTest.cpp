@@ -2,7 +2,6 @@
 #include "shared/Prefabs.h"
 
 #include "ncengine/asset/Assets.h"
-#include "ncengine/asset/DefaultAssets.h"
 #include "ncengine/audio/AudioSource.h"
 #include "ncengine/audio/NcAudio.h"
 #include "ncengine/ecs/FrameLogic.h"
