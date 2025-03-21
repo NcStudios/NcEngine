@@ -104,9 +104,8 @@ auto ReflectDefaults(std::span<const std::string_view> defaultPaths) -> std::vec
     targets.reserve(defaultPaths.size());
     for (const auto& path : defaultPaths)
     {
-        const auto extensionPos = path.find('.');
         targets.emplace_back(
-            std::string{path.substr(0, extensionPos)},
+            RelativePathToIdentifier(path),
             std::string{path},
             nc::asset::AssetSubtype::None
         );
@@ -122,9 +121,8 @@ auto ReflectDefaults(std::span<const std::string_view> defaultPaths,
     targets.reserve(defaultPaths.size());
     for (const auto [path, subtype] : std::views::zip(defaultPaths, subtypes))
     {
-        const auto extensionPos = path.find('.');
         targets.emplace_back(
-            std::string{path.substr(0, extensionPos)},
+            RelativePathToIdentifier(path),
             std::string{path},
             subtype
         );

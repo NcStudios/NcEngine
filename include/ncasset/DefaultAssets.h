@@ -24,50 +24,50 @@ auto GetDefaultTexturePaths() -> std::span<const std::string_view>;
 auto GetDefaultTextureSubtypes() -> std::span<const AssetSubtype>;
 
 /** @brief Name of the default plane mesh asset. */
-constexpr auto PlaneMesh = "DefaultPlane.nca";
+constexpr auto PlaneMesh = "default/plane.nca";
 
 /** @brief Name of the default cube mesh asset. */
-constexpr auto CubeMesh = "DefaultCube.nca";
+constexpr auto CubeMesh = "default/cube.nca";
 
 /** @brief Name of the default sphere mesh asset. */
-constexpr auto SphereMesh = "DefaultSphere.nca";
+constexpr auto SphereMesh = "default/sphere.nca";
 
 /** @brief Name of the default capsule mesh asset. */
-constexpr auto CapsuleMesh = "DefaultCapsule.nca";
+constexpr auto CapsuleMesh = "default/capsule.nca";
 
 /** @brief Name of the default skybox mesh asset. */
-constexpr auto SkyboxMesh = "DefaultSkyboxMesh.nca";
+constexpr auto SkyboxMesh = "default/skybox.nca";
 
 /** @brief Name of the default wheel mesh asset. */
-constexpr auto WheelMesh = "DefaultWheel.nca";
+constexpr auto WheelMesh = "default/wheel.nca";
 
 /** @brief Name of the default base color texture asset. */
-constexpr auto DefaultBaseColor = "DefaultBaseColor.nca";
+constexpr auto DefaultBaseColor = "default/color.nca";
 
 /** @brief Name of the default normal texture asset. */
-constexpr auto DefaultNormal = "DefaultNormal.nca";
+constexpr auto DefaultNormal = "default/normal.nca";
 
 /** @brief Name of the default roughness texture asset. */
-constexpr auto DefaultRoughness = "DefaultMetallic.nca";
+constexpr auto DefaultRoughness = "default/metallic.nca";
 
 /** @brief Name of the default metallic texture asset. */
 constexpr auto DefaultMetallic = DefaultRoughness;
 
 /** @brief Name of the default particle texture asset. */
-constexpr auto DefaultParticle = "DefaultParticle.nca";
+constexpr auto DefaultParticle = "default/particle.nca";
 
 /** @brief Name of the default skeletal animation asset; a spinning cube. */
-constexpr auto DefaultSkeletalAnimation = "DefaultCubeAnimation.nca";
+constexpr auto DefaultSkeletalAnimation = "default/cube.nca";
 
 /** @brief Name of the default skybox cubemap asset. */
-constexpr auto DefaultSkyboxCubeMap = "DefaultSkyboxCubeMap.nca";
+constexpr auto DefaultSkyboxCubeMap = "default/skybox.nca";
 
 /** @brief Name of the default empty audio clip asset. */
-constexpr auto DefaultAudioClip = "DefaultAudioClip.nca";
+constexpr auto DefaultAudioClip = "default/silence.nca";
 
 /** @brief Name of the default plane-shaped mesh collider asset. */
-constexpr auto DefaultMeshCollider = "DefaultMeshCollider.nca";
+constexpr auto DefaultMeshCollider = "default/plane.nca";
 
 /** @brief Name of the default cube-shaped convex hull asset. */
-constexpr auto DefaultConvexHull = "DefaultConvexHull.nca";
+constexpr auto DefaultConvexHull = "default/cube.nca";
 } // namespace nc::asset

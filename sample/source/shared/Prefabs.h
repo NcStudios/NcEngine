@@ -21,25 +21,10 @@ void InitializeResources();
 // Reload cached global asset views
 void ReloadPrefabs();
 
-// Audio Clips
-namespace audio_clip
-{
-extern asset::AudioClipView silence;
-} // namespace audio_clip
-
 namespace font
 {
 extern asset::FontInfo ui;
 } // namespace font
-
-namespace mesh
-{
-extern asset::MeshView cube;
-extern asset::MeshView sphere;
-extern asset::MeshView capsule;
-extern asset::MeshView plane;
-extern asset::MeshView wheel;
-} // namespace mesh
 
 namespace material
 {
