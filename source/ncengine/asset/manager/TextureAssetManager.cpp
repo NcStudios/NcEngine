@@ -16,7 +16,7 @@ TextureAssetManager::TextureAssetManager(const std::string& texturesAssetDirecto
 {
 }
 
-bool TextureAssetManager::Load(const std::string& path, AssetSubtype subtype)
+auto TextureAssetManager::Load(const std::string& path, AssetSubtype subtype) -> bool
 {
     if (m_table.size() + 1 >= m_maxTextureCount)
     {
@@ -39,7 +39,7 @@ bool TextureAssetManager::Load(const std::string& path, AssetSubtype subtype)
     return true;
 }
 
-bool TextureAssetManager::Load(std::span<const std::string> paths, std::span<const AssetSubtype> subtypes)
+auto TextureAssetManager::Load(std::span<const std::string> paths, std::span<const AssetSubtype> subtypes) -> bool
 {
     NC_ASSERT(paths.size() == subtypes.size(), "Number of subtypes does not match number of asset paths");
     if (m_table.size() + paths.size() >= m_maxTextureCount)
@@ -73,7 +73,7 @@ bool TextureAssetManager::Load(std::span<const std::string> paths, std::span<con
     return true;
 }
 
-bool TextureAssetManager::Load(std::span<const std::string> paths, AssetSubtype subtype)
+auto TextureAssetManager::Load(std::span<const std::string> paths, AssetSubtype subtype) -> bool
 {
     if (m_table.size() + paths.size() >= m_maxTextureCount)
     {
@@ -106,7 +106,7 @@ bool TextureAssetManager::Load(std::span<const std::string> paths, AssetSubtype 
     return true;
 }
 
-bool TextureAssetManager::Unload(const std::string& path)
+auto TextureAssetManager::Unload(const std::string& path) -> bool
 {
     if (!m_table.erase(path))
         return false;
@@ -142,16 +142,6 @@ auto TextureAssetManager::Acquire(AssetId id) const -> TextureView
         .id = id,
         .index = static_cast<uint32_t>(index)
     };
-}
-
-bool TextureAssetManager::IsLoaded(const std::string& path) const
-{
-    return m_table.contains(path);
-}
-
-auto TextureAssetManager::OnUpdate() -> Signal<const TextureUpdateEventData&>&
-{
-    return m_onUpdate;
 }
 
 auto TextureAssetManager::GetAllLoaded() const -> std::vector<std::string_view>

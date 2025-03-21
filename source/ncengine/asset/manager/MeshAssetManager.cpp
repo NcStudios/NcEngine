@@ -39,7 +39,7 @@ auto MeshAssetManager::ImportMesh(const std::string& path) -> asset::Mesh
     return mesh;
 }
 
-bool MeshAssetManager::Load(const std::string& path, AssetSubtype)
+auto MeshAssetManager::Load(const std::string& path, AssetSubtype) -> bool
 {
     if (IsLoaded(path))
     {
@@ -61,7 +61,7 @@ bool MeshAssetManager::Load(const std::string& path, AssetSubtype)
     return true;
 }
 
-bool MeshAssetManager::Load(std::span<const std::string> paths, AssetSubtype)
+auto MeshAssetManager::Load(std::span<const std::string> paths, AssetSubtype) -> bool
 {
     auto idsToLoad = std::vector<std::string>{};
     auto bones = std::vector<BonesData>{};
@@ -100,7 +100,7 @@ bool MeshAssetManager::Load(std::span<const std::string> paths, AssetSubtype)
     return anyLoaded;
 }
 
-bool MeshAssetManager::Unload(const std::string& path)
+auto MeshAssetManager::Unload(const std::string& path) -> bool
 {
     const auto index = m_accessors.index(path);
     if (index == StringTable::NullIndex)
@@ -174,23 +174,8 @@ auto MeshAssetManager::Acquire(AssetId id) const -> MeshView
     return m_accessors.at(index);
 }
 
-bool MeshAssetManager::IsLoaded(const std::string& path) const
-{
-    return m_accessors.contains(path);
-}
-
 auto MeshAssetManager::GetAllLoaded() const -> std::vector<std::string_view>
 {
     return GetPaths(m_accessors.keys());
-}
-
-auto MeshAssetManager::OnMeshUpdate() -> Signal<const asset::MeshUpdateEventData&>&
-{
-    return m_onMeshUpdate;
-}
-
-auto MeshAssetManager::OnBoneUpdate() -> Signal<const asset::BoneUpdateEventData&>&
-{
-    return m_onBoneUpdate;
 }
 } // namespace nc::asset

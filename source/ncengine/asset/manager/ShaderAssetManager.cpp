@@ -139,7 +139,7 @@ ShaderAssetManager::ShaderAssetManager(const std::string& assetDirectory)
 {
 }
 
-bool ShaderAssetManager::Load(const std::string& path, AssetSubtype)
+auto ShaderAssetManager::Load(const std::string& path, AssetSubtype) -> bool
 {
     const auto fullPath = m_assetDirectory + path;
 
@@ -160,7 +160,7 @@ bool ShaderAssetManager::Load(const std::string& path, AssetSubtype)
     return true;
 }
 
-bool ShaderAssetManager::Load(std::span<const std::string> paths, AssetSubtype)
+auto ShaderAssetManager::Load(std::span<const std::string> paths, AssetSubtype) -> bool
 {
     auto atLeastOneFailure = false;
     for (const auto& path : paths)
@@ -174,7 +174,7 @@ bool ShaderAssetManager::Load(std::span<const std::string> paths, AssetSubtype)
     return !atLeastOneFailure;
 }
 
-bool ShaderAssetManager::Unload(const std::string& path)
+auto ShaderAssetManager::Unload(const std::string& path) -> bool
 {
     if (!IsLoaded(path))
     {
@@ -224,7 +224,7 @@ auto ShaderAssetManager::Acquire(const std::string& path) const -> ShaderView
     };
 }
 
-bool ShaderAssetManager::IsLoaded(const std::string& path) const
+auto ShaderAssetManager::IsLoaded(const std::string& path) const -> bool
 {
     return std::ranges::any_of(m_shaderFlyweights.begin(), m_shaderFlyweights.end(), [path](const auto& view) { return view.uid == path; });
 }

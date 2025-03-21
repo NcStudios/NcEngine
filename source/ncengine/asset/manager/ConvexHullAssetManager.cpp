@@ -11,7 +11,7 @@ ConvexHullAssetManager::ConvexHullAssetManager(const std::string& assetDirectory
 {
 }
 
-bool ConvexHullAssetManager::Load(const std::string& path, AssetSubtype)
+auto ConvexHullAssetManager::Load(const std::string& path, AssetSubtype) -> bool
 {
     if (IsLoaded(path))
     {
@@ -31,7 +31,7 @@ bool ConvexHullAssetManager::Load(const std::string& path, AssetSubtype)
     return true;
 }
 
-bool ConvexHullAssetManager::Load(std::span<const std::string> paths, AssetSubtype)
+auto ConvexHullAssetManager::Load(std::span<const std::string> paths, AssetSubtype) -> bool
 {
     auto anyLoaded = false;
     auto assets = std::vector<ConvexHull>{};
@@ -65,7 +65,7 @@ bool ConvexHullAssetManager::Load(std::span<const std::string> paths, AssetSubty
     return anyLoaded;
 }
 
-bool ConvexHullAssetManager::Unload(const std::string& path)
+auto ConvexHullAssetManager::Unload(const std::string& path) -> bool
 {
     if (m_map.erase(path))
     {
@@ -102,11 +102,6 @@ auto ConvexHullAssetManager::Acquire(AssetId id) const -> ConvexHullView
 {
     NC_ASSERT(m_map.index(id) != m_map.NullIndex, fmt::format("ConvexHull is not loaded: '{}'", id));
     return ConvexHullView{id};
-}
-
-bool ConvexHullAssetManager::IsLoaded(const std::string& path) const
-{
-    return m_map.contains(path);
 }
 
 auto ConvexHullAssetManager::GetAllLoaded() const -> std::vector<std::string_view>

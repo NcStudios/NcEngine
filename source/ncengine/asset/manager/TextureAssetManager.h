@@ -14,25 +14,24 @@ struct TextureUpdateEventData;
 class TextureAssetManager : public IAssetService<TextureView, std::string>
 {
     public:
-        explicit TextureAssetManager(const std::string& texturesAssetDirectory, uint32_t maxTextures);
+        explicit TextureAssetManager(const std::string& texturesAssetDirectory,
+                                     uint32_t maxTextures);
 
-        bool Load(const std::string& path,
-                  AssetSubtype = AssetSubtype::None) override;
-        bool Load(std::span<const std::string> paths,
-                  AssetSubtype = AssetSubtype::None) override;
-        bool Load(std::span<const std::string> paths,
-                  std::span<const AssetSubtype> subtypes) override;
-
-
-        bool Unload(const std::string& path)                                 override;
-        void UnloadAll()                                                     override;
-        auto Acquire(const std::string& path)  const          -> TextureView override;
-        auto Acquire(AssetId id)               const          -> TextureView override;
-        bool IsLoaded(const std::string& path) const                             override;
-        auto GetPath(AssetId id)               const          -> std::string_view override { return m_table.at(m_table.index(id)); }
-        auto GetAllLoaded()                    const          -> std::vector<std::string_view> override;
-        auto GetAssetType()                    const noexcept -> AssetType                     override { return AssetType::Texture; }
-        auto OnUpdate()                                       -> Signal<const TextureUpdateEventData&>&;
+        auto Load(const std::string& path,
+                  AssetSubtype = AssetSubtype::None)      -> bool                          override;
+        auto Load(std::span<const std::string> paths,
+                  AssetSubtype = AssetSubtype::None)      -> bool                          override;
+        auto Load(std::span<const std::string> paths,
+                  std::span<const AssetSubtype> subtypes) -> bool                          override;
+        auto Unload(const std::string& path)              -> bool                          override;
+        void UnloadAll()                                                                   override;
+        auto Acquire(const std::string& path)       const -> TextureView                   override;
+        auto Acquire(AssetId id)                    const -> TextureView                   override;
+        auto GetAllLoaded()                         const -> std::vector<std::string_view> override;
+        auto IsLoaded(const std::string& path)      const -> bool                          override { return m_table.contains(path); }
+        auto GetPath(AssetId id)                    const -> std::string_view              override { return m_table.at(m_table.index(id)); }
+        auto GetAssetType()                         const -> AssetType                     override { return AssetType::Texture; }
+        auto OnUpdate()                                   -> decltype(auto)                         { return (m_onUpdate); }
 
     private:
         StringTable m_table;

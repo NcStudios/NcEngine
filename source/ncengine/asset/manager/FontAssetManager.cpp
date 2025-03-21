@@ -44,7 +44,7 @@ FontAssetManager::FontAssetManager(const std::string& assetDirectory)
 {
 }
 
-bool FontAssetManager::Load(const FontInfo& font, AssetSubtype)
+auto FontAssetManager::Load(const FontInfo& font, AssetSubtype) -> bool
 {
     if (IsLoaded(font))
         return false;
@@ -59,7 +59,7 @@ bool FontAssetManager::Load(const FontInfo& font, AssetSubtype)
     return true;
 }
 
-bool FontAssetManager::Load(std::span<const FontInfo> fonts, AssetSubtype)
+auto FontAssetManager::Load(std::span<const FontInfo> fonts, AssetSubtype) -> bool
 {
     const auto scale = ::GetFontScaling();
     auto anyLoaded = false;
@@ -83,7 +83,7 @@ bool FontAssetManager::Load(std::span<const FontInfo> fonts, AssetSubtype)
     return anyLoaded;
 }
 
-bool FontAssetManager::Unload(const FontInfo& font)
+auto FontAssetManager::Unload(const FontInfo& font) -> bool
 {
     if (m_fonts.erase(font) == 0)
         return false;
@@ -111,7 +111,7 @@ auto FontAssetManager::Acquire(const FontInfo& font) const -> FontView
     return it->second;
 }
 
-bool FontAssetManager::IsLoaded(const FontInfo& font) const
+auto FontAssetManager::IsLoaded(const FontInfo& font) const -> bool
 {
     return m_fonts.contains(font);
 }
@@ -126,10 +126,5 @@ auto FontAssetManager::GetAllLoaded() const -> std::vector<std::string_view>
     });
 
     return out;
-}
-
-auto FontAssetManager::OnUpdate() -> Signal<>&
-{
-    return m_onUpdate;
 }
 } // namespace nc::asset

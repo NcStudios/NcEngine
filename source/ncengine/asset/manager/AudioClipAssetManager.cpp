@@ -11,7 +11,7 @@ AudioClipAssetManager::AudioClipAssetManager(const std::string& assetDirectory)
 {
 }
 
-bool AudioClipAssetManager::Load(const std::string& path, AssetSubtype)
+auto AudioClipAssetManager::Load(const std::string& path, AssetSubtype) -> bool
 {
     if (IsLoaded(path))
     {
@@ -23,7 +23,7 @@ bool AudioClipAssetManager::Load(const std::string& path, AssetSubtype)
     return true;
 }
 
-bool AudioClipAssetManager::Load(std::span<const std::string> paths, AssetSubtype)
+auto AudioClipAssetManager::Load(std::span<const std::string> paths, AssetSubtype) -> bool
 {
     bool anyLoaded = false;
 
@@ -43,7 +43,7 @@ bool AudioClipAssetManager::Load(std::span<const std::string> paths, AssetSubtyp
     return anyLoaded;
 }
 
-bool AudioClipAssetManager::Unload(const std::string& path)
+auto AudioClipAssetManager::Unload(const std::string& path) -> bool
 {
     return m_audioClips.erase(path);
 }
@@ -70,11 +70,6 @@ auto AudioClipAssetManager::Acquire(AssetId id) const -> AudioClipView
         .rightChannel = std::span<const double>{clip.rightChannel},
         .samplesPerChannel = clip.samplesPerChannel
     };
-}
-
-bool AudioClipAssetManager::IsLoaded(const std::string& path) const
-{
-    return m_audioClips.contains(path);
 }
 
 auto AudioClipAssetManager::GetAllLoaded() const -> std::vector<std::string_view>

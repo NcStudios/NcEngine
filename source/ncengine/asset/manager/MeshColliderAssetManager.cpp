@@ -11,7 +11,7 @@ MeshColliderAssetManager::MeshColliderAssetManager(const std::string& meshCollid
 {
 }
 
-bool MeshColliderAssetManager::Load(const std::string& path, AssetSubtype)
+auto MeshColliderAssetManager::Load(const std::string& path, AssetSubtype) -> bool
 {
     if (IsLoaded(path))
     {
@@ -31,7 +31,7 @@ bool MeshColliderAssetManager::Load(const std::string& path, AssetSubtype)
     return true;
 }
 
-bool MeshColliderAssetManager::Load(std::span<const std::string> paths, AssetSubtype)
+auto MeshColliderAssetManager::Load(std::span<const std::string> paths, AssetSubtype) -> bool
 {
     auto anyLoaded = false;
     auto assets = std::vector<MeshCollider>{};
@@ -65,7 +65,7 @@ bool MeshColliderAssetManager::Load(std::span<const std::string> paths, AssetSub
     return anyLoaded;
 }
 
-bool MeshColliderAssetManager::Unload(const std::string& path)
+auto MeshColliderAssetManager::Unload(const std::string& path) -> bool
 {
     if (m_map.erase(path))
     {
@@ -102,11 +102,6 @@ auto MeshColliderAssetManager::Acquire(AssetId id) const -> MeshColliderView
 {
     NC_ASSERT(m_map.index(id) != m_map.NullIndex, fmt::format("MeshCollider is not loaded: '{}'", id));
     return MeshColliderView{id};
-}
-
-bool MeshColliderAssetManager::IsLoaded(const std::string& path) const
-{
-    return m_map.contains(path);
 }
 
 auto MeshColliderAssetManager::GetAllLoaded() const -> std::vector<std::string_view>

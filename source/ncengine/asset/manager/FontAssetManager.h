@@ -35,17 +35,19 @@ class FontAssetManager : public IAssetService<FontView, FontInfo>
     public:
         explicit FontAssetManager(const std::string& assetDirectory);
 
-        bool Load(const FontInfo& font, AssetSubtype = AssetSubtype::None) override;
-        bool Load(std::span<const FontInfo> fonts, AssetSubtype = AssetSubtype::None) override;
-        bool Unload(const FontInfo& font) override;
-        void UnloadAll() override;
-        auto Acquire(const FontInfo& font) const -> FontView override;
-        auto Acquire(AssetId) const -> FontView override { throw NcError{"Not Implemented"};}
-        bool IsLoaded(const FontInfo& font) const override;
-        auto GetPath(AssetId) const -> std::string_view override { throw NcError{"Not Implemented"}; }
-        auto GetAllLoaded() const -> std::vector<std::string_view> override;
-        auto OnUpdate() -> Signal<>&;
-        auto GetAssetType() const noexcept -> asset::AssetType override { return asset::AssetType::Font; }
+        auto Load(const FontInfo& font,
+                  AssetSubtype = AssetSubtype::None) -> bool                          override;
+        auto Load(std::span<const FontInfo> fonts,
+                  AssetSubtype = AssetSubtype::None) -> bool                          override;
+        auto Unload(const FontInfo& font)            -> bool                          override;
+        void UnloadAll()                                                              override;
+        auto Acquire(const FontInfo& font)     const -> FontView                      override;
+        auto Acquire(AssetId)                  const -> FontView                      override { throw NcError{"Not Implemented"};}
+        auto GetAllLoaded()                    const -> std::vector<std::string_view> override;
+        auto IsLoaded(const FontInfo& font)    const -> bool                          override;
+        auto GetPath(AssetId)                  const -> std::string_view              override { throw NcError{"Not Implemented"}; }
+        auto GetAssetType()                    const -> asset::AssetType              override { return asset::AssetType::Font; }
+        auto OnUpdate()                              -> decltype(auto)                         { return (m_onUpdate); }
 
     private:
         std::unordered_map<FontInfo, FontView, FontHash, FontEqual> m_fonts;

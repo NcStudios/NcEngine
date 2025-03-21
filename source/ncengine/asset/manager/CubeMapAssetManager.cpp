@@ -19,7 +19,7 @@ CubeMapAssetManager::CubeMapAssetManager(const std::string& cubeMapAssetDirector
 {
 }
 
-bool CubeMapAssetManager::Load(const std::string& path, AssetSubtype)
+auto CubeMapAssetManager::Load(const std::string& path, AssetSubtype) -> bool
 {
     if (IsLoaded(path))
     {
@@ -42,7 +42,7 @@ bool CubeMapAssetManager::Load(const std::string& path, AssetSubtype)
     return true;
 }
 
-bool CubeMapAssetManager::Load(std::span<const std::string> paths, AssetSubtype)
+auto CubeMapAssetManager::Load(std::span<const std::string> paths, AssetSubtype) -> bool
 {
     if (paths.size() + m_cubeMapIds.size() >= m_maxCubeMapsCount)
     {
@@ -82,7 +82,7 @@ bool CubeMapAssetManager::Load(std::span<const std::string> paths, AssetSubtype)
     return true;
 }
 
-bool CubeMapAssetManager::Unload(const std::string& path)
+auto CubeMapAssetManager::Unload(const std::string& path) -> bool
 {
     if (!m_cubeMapIds.erase(path))
         return false;
@@ -117,18 +117,8 @@ auto CubeMapAssetManager::Acquire(AssetId id) const -> CubeMapView
     };
 }
 
-bool CubeMapAssetManager::IsLoaded(const std::string& path) const
-{
-    return m_cubeMapIds.contains(path);
-}
-
 auto CubeMapAssetManager::GetAllLoaded() const -> std::vector<std::string_view>
 {
     return GetPaths(m_cubeMapIds.keys());
-}
-
-auto CubeMapAssetManager::OnUpdate() -> Signal<const asset::CubeMapUpdateEventData&>&
-{
-    return m_onUpdate;
 }
 } // namespace nc::asset

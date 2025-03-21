@@ -14,15 +14,6 @@
 
 namespace nc::asset
 {
-auto GetDefaultAudioClipPaths() -> std::span<const std::string_view>;
-auto GetDefaultConvexHullPaths() -> std::span<const std::string_view>;
-auto GetDefaultCubeMapPaths() -> std::span<const std::string_view>;
-auto GetDefaultMeshPaths() -> std::span<const std::string_view>;
-auto GetDefaultMeshColliderPaths() -> std::span<const std::string_view>;
-auto GetDefaultSkeletalAnimationPaths() -> std::span<const std::string_view>;
-auto GetDefaultTexturePaths() -> std::span<const std::string_view>;
-auto GetDefaultTextureSubtypes() -> std::span<const AssetSubtype>;
-
 /** @brief Name of the default plane mesh asset. */
 constexpr auto PlaneMesh = "default/plane.nca";
 
@@ -70,4 +61,14 @@ constexpr auto DefaultMeshCollider = "default/plane.nca";
 
 /** @brief Name of the default cube-shaped convex hull asset. */
 constexpr auto DefaultConvexHull = "default/cube.nca";
+
+/** @name Get names of all default assets of a particular type */
+auto GetDefaultAudioClipPaths() -> std::span<const std::string_view>;
+auto GetDefaultConvexHullPaths() -> std::span<const std::string_view>;
+auto GetDefaultCubeMapPaths() -> std::span<const std::string_view>;
+auto GetDefaultMeshPaths() -> std::span<const std::string_view>;
+auto GetDefaultMeshColliderPaths() -> std::span<const std::string_view>;
+auto GetDefaultSkeletalAnimationPaths() -> std::span<const std::string_view>;
+auto GetDefaultTexturePaths() -> std::span<const std::string_view>;
+auto GetDefaultTextureSubtypes() -> std::span<const AssetSubtype>;
 } // namespace nc::asset

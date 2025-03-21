@@ -15,7 +15,7 @@ SkeletalAnimationAssetManager::SkeletalAnimationAssetManager(const std::string& 
 {
 }
 
-bool SkeletalAnimationAssetManager::Load(const std::string& path, AssetSubtype)
+auto SkeletalAnimationAssetManager::Load(const std::string& path, AssetSubtype) -> bool
 {
     auto previousTableSize = m_table.size();
     if (m_table.size() + 1 >= m_maxSkeletalAnimationCount)
@@ -39,7 +39,7 @@ bool SkeletalAnimationAssetManager::Load(const std::string& path, AssetSubtype)
     return true;
 }
 
-bool SkeletalAnimationAssetManager::Load(std::span<const std::string> paths, AssetSubtype)
+auto SkeletalAnimationAssetManager::Load(std::span<const std::string> paths, AssetSubtype) -> bool
 {
     auto previousTableSize = m_table.size();
     if (m_table.size() + paths.size() >= m_maxSkeletalAnimationCount)
@@ -74,7 +74,7 @@ bool SkeletalAnimationAssetManager::Load(std::span<const std::string> paths, Ass
     return false;
 }
 
-bool SkeletalAnimationAssetManager::Unload(const std::string& path)
+auto SkeletalAnimationAssetManager::Unload(const std::string& path) -> bool
 {
     if (!m_table.erase(path))
         return false;
@@ -113,18 +113,8 @@ auto SkeletalAnimationAssetManager::Acquire(AssetId id) const -> SkeletalAnimati
     };
 }
 
-bool SkeletalAnimationAssetManager::IsLoaded(const std::string& path) const
-{
-    return m_table.contains(path);
-}
-
 auto SkeletalAnimationAssetManager::GetAllLoaded() const -> std::vector<std::string_view>
 {
     return GetPaths(m_table.keys());
-}
-
-auto SkeletalAnimationAssetManager::OnUpdate() -> Signal<const SkeletalAnimationUpdateEventData&>&
-{
-    return m_onUpdate;
 }
 } // namespace nc::asset

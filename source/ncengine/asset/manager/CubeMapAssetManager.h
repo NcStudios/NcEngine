@@ -13,19 +13,22 @@ struct CubeMapUpdateEventData;
 class CubeMapAssetManager : public IAssetService<CubeMapView, std::string>
 {
     public:
-        explicit CubeMapAssetManager(const std::string& cubeMapAssetDirectory, uint32_t maxCubeMapsCount);
+        explicit CubeMapAssetManager(const std::string& cubeMapAssetDirectory,
+                                     uint32_t maxCubeMapsCount);
 
-        bool Load(const std::string& path, AssetSubtype = AssetSubtype::None) override;
-        bool Load(std::span<const std::string> paths, AssetSubtype = AssetSubtype::None) override;
-        bool Unload(const std::string& path) override;
+        auto Load(const std::string& path,
+                  AssetSubtype = AssetSubtype::None) -> bool                          override;
+        auto Load(std::span<const std::string> paths,
+                  AssetSubtype = AssetSubtype::None) -> bool                          override;
+        auto Unload(const std::string& path)         -> bool                          override;
         void UnloadAll() override;
-        auto Acquire(const std::string& path) const -> CubeMapView override;
-        auto Acquire(AssetId id) const -> CubeMapView override;
-        bool IsLoaded(const std::string& path) const override;
-        auto GetPath(AssetId id) const -> std::string_view override { return m_cubeMapIds.at(m_cubeMapIds.index(id)); }
-        auto GetAllLoaded() const -> std::vector<std::string_view> override;
-        auto GetAssetType() const noexcept -> asset::AssetType override { return asset::AssetType::CubeMap; }
-        auto OnUpdate() -> Signal<const asset::CubeMapUpdateEventData&>&;
+        auto Acquire(const std::string& path)  const -> CubeMapView                   override;
+        auto Acquire(AssetId id)               const -> CubeMapView                   override;
+        auto GetAllLoaded()                    const -> std::vector<std::string_view> override;
+        auto IsLoaded(const std::string& path) const -> bool                          override { return m_cubeMapIds.contains(path); }
+        auto GetPath(AssetId id)               const -> std::string_view              override { return m_cubeMapIds.at(m_cubeMapIds.index(id)); }
+        auto GetAssetType()                    const -> asset::AssetType              override { return asset::AssetType::CubeMap; }
+        auto OnUpdate()                              -> decltype(auto)                         { return (m_onUpdate); }
 
     private:
         StringTable m_cubeMapIds;
