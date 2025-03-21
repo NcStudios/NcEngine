@@ -30,7 +30,7 @@ class Manifest
         /** @brief Perform build-specific target transformations/filtering and extract targets that required building. */
         auto ExtractTargetsForBuild() -> TargetMap;
 
-        /** @brief Perform generation-specific transformations and get a map describing all targets. */
+        /** @brief Perform generation-specific transformations and get a map describing all targets, including engine defaults. */
         auto GetTargetsForSourceGeneration() -> ReflectedTargetMap;
 
     private:

@@ -10,10 +10,12 @@ namespace audio_clip
 {
 namespace path
 {
+constexpr auto DefaultAudioClip = "DefaultAudioClip.nca";
 constexpr auto drums = "drums.nca";
 constexpr auto hit = "hit.nca";
 } // namespace path
 
+extern nc::asset::AudioClipView DefaultAudioClip;
 extern nc::asset::AudioClipView drums;
 extern nc::asset::AudioClipView hit;
 
@@ -25,9 +27,11 @@ namespace convex_hull
 {
 namespace path
 {
+constexpr auto DefaultConvexHull = "DefaultConvexHull.nca";
 constexpr auto ramp = "ramp.nca";
 } // namespace path
 
+extern nc::asset::AssetId DefaultConvexHull;
 extern nc::asset::AssetId ramp;
 
 void Load();
@@ -37,6 +41,7 @@ namespace cube_map
 {
 namespace path
 {
+constexpr auto DefaultSkyboxCubeMap = "DefaultSkyboxCubeMap.nca";
 constexpr auto night_sky = "night_sky.nca";
 } // namespace path
 
@@ -47,6 +52,12 @@ namespace mesh
 {
 namespace path
 {
+constexpr auto DefaultPlane = "DefaultPlane.nca";
+constexpr auto DefaultCube = "DefaultCube.nca";
+constexpr auto DefaultSphere = "DefaultSphere.nca";
+constexpr auto DefaultCapsule = "DefaultCapsule.nca";
+constexpr auto DefaultWheel = "DefaultWheel.nca";
+constexpr auto DefaultSkyboxMesh = "DefaultSkyboxMesh.nca";
 constexpr auto cave = "cave.nca";
 constexpr auto guy2 = "guy2.nca";
 constexpr auto halfpipe = "halfpipe.nca";
@@ -55,6 +66,12 @@ constexpr auto ramp = "ramp.nca";
 constexpr auto skeleton = "skeleton.nca";
 } // namespace path
 
+extern nc::asset::MeshView DefaultPlane;
+extern nc::asset::MeshView DefaultCube;
+extern nc::asset::MeshView DefaultSphere;
+extern nc::asset::MeshView DefaultCapsule;
+extern nc::asset::MeshView DefaultWheel;
+extern nc::asset::MeshView DefaultSkyboxMesh;
 extern nc::asset::MeshView cave;
 extern nc::asset::MeshView guy2;
 extern nc::asset::MeshView halfpipe;
@@ -70,9 +87,11 @@ namespace mesh_collider
 {
 namespace path
 {
+constexpr auto DefaultMeshCollider = "DefaultMeshCollider.nca";
 constexpr auto halfpipe = "halfpipe.nca";
 } // namespace path
 
+extern nc::asset::AssetId DefaultMeshCollider;
 extern nc::asset::AssetId halfpipe;
 
 void Load();
@@ -82,6 +101,7 @@ namespace animation
 {
 namespace path
 {
+constexpr auto DefaultCubeAnimation = "DefaultCubeAnimation.nca";
 constexpr auto ogre_attack = "ogre/attack.nca";
 constexpr auto ogre_idle = "ogre/idle.nca";
 constexpr auto skeleton_idle = "skeleton/idle.nca";
@@ -92,6 +112,7 @@ constexpr auto skeleton_walk_left = "skeleton/walk_left.nca";
 constexpr auto skeleton_walk_right = "skeleton/walk_right.nca";
 } // namespace path
 
+extern nc::asset::AssetId DefaultCubeAnimation;
 extern nc::asset::AssetId ogre_attack;
 extern nc::asset::AssetId ogre_idle;
 extern nc::asset::AssetId skeleton_idle;
@@ -108,6 +129,10 @@ namespace texture
 {
 namespace path
 {
+constexpr auto DefaultBaseColor = "DefaultBaseColor.nca";
+constexpr auto DefaultMetallic = "DefaultMetallic.nca";
+constexpr auto DefaultNormal = "DefaultNormal.nca";
+constexpr auto DefaultParticle = "DefaultParticle.nca";
 constexpr auto diffuse_cave = "diffuse/cave.nca";
 constexpr auto diffuse_guy = "diffuse/guy.nca";
 constexpr auto diffuse_ogre = "diffuse/ogre.nca";
@@ -127,6 +152,10 @@ constexpr auto normal_ogre = "normal/ogre.nca";
 constexpr auto normal_skeleton = "normal/skeleton.nca";
 } // namespace path
 
+extern nc::asset::TextureView DefaultBaseColor;
+extern nc::asset::TextureView DefaultMetallic;
+extern nc::asset::TextureView DefaultNormal;
+extern nc::asset::TextureView DefaultParticle;
 extern nc::asset::TextureView diffuse_cave;
 extern nc::asset::TextureView diffuse_guy;
 extern nc::asset::TextureView diffuse_ogre;

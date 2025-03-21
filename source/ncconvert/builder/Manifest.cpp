@@ -4,6 +4,7 @@
 #include "utility/Log.h"
 #include "utility/Path.h"
 
+#include "ncasset/DefaultAssets.h"
 #include "ncutility/NcError.h"
 #include "nlohmann/json.hpp"
 
@@ -96,6 +97,57 @@ auto RelativePathToIdentifier(std::filesystem::path path) -> std::string
 
     return string;
 }
+
+auto ReflectDefaults(std::span<const std::string_view> defaultPaths) -> std::vector<nc::convert::ReflectedTarget>
+{
+    auto targets = std::vector<nc::convert::ReflectedTarget>{};
+    targets.reserve(defaultPaths.size());
+    for (const auto& path : defaultPaths)
+    {
+        const auto extensionPos = path.find('.');
+        targets.emplace_back(
+            std::string{path.substr(0, extensionPos)},
+            std::string{path},
+            nc::asset::AssetSubtype::None
+        );
+    }
+
+    return targets;
+}
+
+auto ReflectDefaults(std::span<const std::string_view> defaultPaths,
+                     std::span<const nc::asset::AssetSubtype> subtypes) -> std::vector<nc::convert::ReflectedTarget>
+{
+    auto targets = std::vector<nc::convert::ReflectedTarget>{};
+    targets.reserve(defaultPaths.size());
+    for (const auto [path, subtype] : std::views::zip(defaultPaths, subtypes))
+    {
+        const auto extensionPos = path.find('.');
+        targets.emplace_back(
+            std::string{path.substr(0, extensionPos)},
+            std::string{path},
+            subtype
+        );
+    }
+
+    return targets;
+}
+
+auto ReflectDefaults(nc::asset::AssetType type) -> std::vector<nc::convert::ReflectedTarget>
+{
+    using namespace nc::asset;
+    switch (type)
+    {
+        case AssetType::AudioClip:         return ReflectDefaults(GetDefaultAudioClipPaths());
+        case AssetType::ConvexHull:        return ReflectDefaults(GetDefaultConvexHullPaths());
+        case AssetType::CubeMap:           return ReflectDefaults(GetDefaultCubeMapPaths());
+        case AssetType::Mesh:              return ReflectDefaults(GetDefaultMeshPaths());
+        case AssetType::MeshCollider:      return ReflectDefaults(GetDefaultMeshColliderPaths());
+        case AssetType::SkeletalAnimation: return ReflectDefaults(GetDefaultSkeletalAnimationPaths());
+        case AssetType::Texture:           return ReflectDefaults(GetDefaultTexturePaths(), GetDefaultTextureSubtypes());
+        default:                           return {};
+    }
+}
 } // anonymous namespace
 
 namespace nc::convert
@@ -165,8 +217,8 @@ auto Manifest::GetTargetsForSourceGeneration() -> ReflectedTargetMap
     auto out = ReflectedTargetMap{};
     for (const auto& [type, targetList] : m_targets)
     {
-        auto reflectedTargets = std::vector<ReflectedTarget>{};
-        reflectedTargets.reserve(targetList.size());
+        auto reflectedTargets = ReflectDefaults(type);
+        reflectedTargets.reserve(reflectedTargets.size() + targetList.size());
         for (const auto& target : targetList)
         {
             auto path = AssetNameToRelativePath(target.destinationPath);

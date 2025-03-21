@@ -5,8 +5,6 @@
 #include "../builder/Target.h"
 #include "builder/Manifest.h"
 
-#include "ncasset/DefaultAssets.h"
-
 #include <array>
 #include <fstream>
 #include <ranges>
@@ -92,16 +90,9 @@ void WriteVariableDefinitions(std::ostream& source,
 
 void WritePathsArray(std::ostream& source,
                      const std::vector<nc::convert::ReflectedTarget>& assets,
-                     std::span<const std::string_view> defaults,
                      std::string_view variableName = "g_paths")
 {
     source << "const auto " << variableName << " = std::array{\n";
-
-    for (const auto& asset : defaults)
-    {
-        source << "    std::string{\"" << asset << "\"},\n";
-    }
-
     for (const auto& asset : assets)
     {
         source << "    std::string{path::" << asset.name << "},\n";
@@ -112,7 +103,6 @@ void WritePathsArray(std::ostream& source,
 
 void WriteSubtypesArray(std::ostream& source,
                         const std::vector<nc::convert::ReflectedTarget>& assets,
-                        std::span<const nc::asset::AssetSubtype> defaults,
                         std::string_view variableName = "g_subtypes")
 {
     constexpr auto diffuseString = std::string_view{"    nc::asset::AssetSubtype::DiffuseTexture,\n"};
@@ -121,17 +111,6 @@ void WriteSubtypesArray(std::ostream& source,
     using enum nc::asset::AssetSubtype;
 
     source << "const auto " << variableName << " = std::array{\n";
-
-    for (const auto& subtype : defaults)
-    {
-        switch (subtype)
-        {
-            case DiffuseTexture: source << diffuseString; break;
-            case NormalTexture:  source << normalString;  break;
-            case None:           source << noneString;    break;
-        }
-    }
-
     for (const auto& asset : assets)
     {
         switch (asset.subtype)
@@ -199,7 +178,7 @@ void WriteAnimations(std::ostream& header,
     EndNamespace(header, ns);
 
     BeginNamespace(source, ns);
-    WritePathsArray(source, assets, nc::asset::GetDefaultSkeletalAnimationPaths());
+    WritePathsArray(source, assets);
     WriteAssetIds(source, assets);
     WriteLoadFunction(source, "nc::asset::LoadSkeletalAnimationAssets");
     EndNamespace(source, ns);
@@ -219,7 +198,7 @@ void WriteAudioClips(std::ostream& header,
     EndNamespace(header, ns);
 
     BeginNamespace(source, ns);
-    WritePathsArray(source, assets, nc::asset::GetDefaultAudioClipPaths());
+    WritePathsArray(source, assets);
     WriteVariableDefinitions(source, assets, varType);
     WriteLoadFunction(source, "nc::asset::LoadAudioClipAssets");
     WriteAcquireFunction(source, assets, "nc::asset::AcquireAudioClipAsset");
@@ -238,7 +217,7 @@ void WriteConvexHulls(std::ostream& header,
     EndNamespace(header, ns);
 
     BeginNamespace(source, ns);
-    WritePathsArray(source, assets, nc::asset::GetDefaultConvexHullPaths());
+    WritePathsArray(source, assets);
     WriteAssetIds(source, assets);
     WriteLoadFunction(source, "nc::asset::LoadConvexHullAssets");
     EndNamespace(source, ns);
@@ -255,7 +234,7 @@ void WriteCubeMaps(std::ostream& header,
     EndNamespace(header, ns);
 
     BeginNamespace(source, ns);
-    WritePathsArray(source, assets, nc::asset::GetDefaultCubeMapPaths());
+    WritePathsArray(source, assets);
     WriteLoadFunction(source, "nc::asset::LoadCubeMapAssets");
     EndNamespace(source, ns);
 }
@@ -274,7 +253,7 @@ void WriteMeshes(std::ostream& header,
     EndNamespace(header, ns);
 
     BeginNamespace(source, ns);
-    WritePathsArray(source, assets, nc::asset::GetDefaultMeshPaths());
+    WritePathsArray(source, assets);
     WriteVariableDefinitions(source, assets, varType);
     WriteLoadFunction(source, "nc::asset::LoadMeshAssets");
     WriteAcquireFunction(source, assets, "nc::asset::AcquireMeshAsset");
@@ -293,7 +272,7 @@ void WriteMeshColliders(std::ostream& header,
     EndNamespace(header, ns);
 
     BeginNamespace(source, ns);
-    WritePathsArray(source, assets, nc::asset::GetDefaultMeshColliderPaths());
+    WritePathsArray(source, assets);
     WriteAssetIds(source, assets);
     WriteLoadFunction(source, "nc::asset::LoadMeshColliderAssets");
     EndNamespace(source, ns);
@@ -313,8 +292,8 @@ void WriteTextures(std::ostream& header,
 
     BeginNamespace(source, ns);
     WriteVariableDefinitions(source, assets, "nc::asset::TextureView");
-    WritePathsArray(source, assets, nc::asset::GetDefaultTexturePaths(), "g_paths");
-    WriteSubtypesArray(source, assets, nc::asset::GetDefaultTextureSubtypes(), "g_subtypes");
+    WritePathsArray(source, assets, "g_paths");
+    WriteSubtypesArray(source, assets, "g_subtypes");
     WriteLoadFunction(source, "nc::asset::LoadTextureAssets", "g_paths, g_subtypes");
     WriteAcquireFunction(source, assets, "nc::asset::AcquireTextureAsset");
     EndNamespace(source, ns);

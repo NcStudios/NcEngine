@@ -13,11 +13,12 @@ namespace nc::sample
 namespace audio_clip
 {
 const auto g_paths = std::array{
-    std::string{"DefaultAudioClip.nca"},
+    std::string{path::DefaultAudioClip},
     std::string{path::drums},
     std::string{path::hit},
 };
 
+nc::asset::AudioClipView DefaultAudioClip{};
 nc::asset::AudioClipView drums{};
 nc::asset::AudioClipView hit{};
 
@@ -28,6 +29,7 @@ void Load()
 
 void Acquire()
 {
+    DefaultAudioClip = nc::asset::AcquireAudioClipAsset(path::DefaultAudioClip);
     drums = nc::asset::AcquireAudioClipAsset(path::drums);
     hit = nc::asset::AcquireAudioClipAsset(path::hit);
 }
@@ -37,10 +39,11 @@ void Acquire()
 namespace convex_hull
 {
 const auto g_paths = std::array{
-    std::string{"DefaultConvexHull.nca"},
+    std::string{path::DefaultConvexHull},
     std::string{path::ramp},
 };
 
+nc::asset::AssetId DefaultConvexHull{nc::utility::Fnv1a(path::DefaultConvexHull)};
 nc::asset::AssetId ramp{nc::utility::Fnv1a(path::ramp)};
 
 void Load()
@@ -53,7 +56,7 @@ void Load()
 namespace cube_map
 {
 const auto g_paths = std::array{
-    std::string{"DefaultSkyboxCubeMap.nca"},
+    std::string{path::DefaultSkyboxCubeMap},
     std::string{path::night_sky},
 };
 
@@ -67,12 +70,12 @@ void Load()
 namespace mesh
 {
 const auto g_paths = std::array{
-    std::string{"DefaultPlane.nca"},
-    std::string{"DefaultCube.nca"},
-    std::string{"DefaultSphere.nca"},
-    std::string{"DefaultCapsule.nca"},
-    std::string{"DefaultWheel.nca"},
-    std::string{"DefaultSkyboxMesh.nca"},
+    std::string{path::DefaultPlane},
+    std::string{path::DefaultCube},
+    std::string{path::DefaultSphere},
+    std::string{path::DefaultCapsule},
+    std::string{path::DefaultWheel},
+    std::string{path::DefaultSkyboxMesh},
     std::string{path::cave},
     std::string{path::guy2},
     std::string{path::halfpipe},
@@ -81,6 +84,12 @@ const auto g_paths = std::array{
     std::string{path::skeleton},
 };
 
+nc::asset::MeshView DefaultPlane{};
+nc::asset::MeshView DefaultCube{};
+nc::asset::MeshView DefaultSphere{};
+nc::asset::MeshView DefaultCapsule{};
+nc::asset::MeshView DefaultWheel{};
+nc::asset::MeshView DefaultSkyboxMesh{};
 nc::asset::MeshView cave{};
 nc::asset::MeshView guy2{};
 nc::asset::MeshView halfpipe{};
@@ -95,6 +104,12 @@ void Load()
 
 void Acquire()
 {
+    DefaultPlane = nc::asset::AcquireMeshAsset(path::DefaultPlane);
+    DefaultCube = nc::asset::AcquireMeshAsset(path::DefaultCube);
+    DefaultSphere = nc::asset::AcquireMeshAsset(path::DefaultSphere);
+    DefaultCapsule = nc::asset::AcquireMeshAsset(path::DefaultCapsule);
+    DefaultWheel = nc::asset::AcquireMeshAsset(path::DefaultWheel);
+    DefaultSkyboxMesh = nc::asset::AcquireMeshAsset(path::DefaultSkyboxMesh);
     cave = nc::asset::AcquireMeshAsset(path::cave);
     guy2 = nc::asset::AcquireMeshAsset(path::guy2);
     halfpipe = nc::asset::AcquireMeshAsset(path::halfpipe);
@@ -108,10 +123,11 @@ void Acquire()
 namespace mesh_collider
 {
 const auto g_paths = std::array{
-    std::string{"DefaultMeshCollider.nca"},
+    std::string{path::DefaultMeshCollider},
     std::string{path::halfpipe},
 };
 
+nc::asset::AssetId DefaultMeshCollider{nc::utility::Fnv1a(path::DefaultMeshCollider)};
 nc::asset::AssetId halfpipe{nc::utility::Fnv1a(path::halfpipe)};
 
 void Load()
@@ -124,7 +140,7 @@ void Load()
 namespace animation
 {
 const auto g_paths = std::array{
-    std::string{"DefaultCubeAnimation.nca"},
+    std::string{path::DefaultCubeAnimation},
     std::string{path::ogre_attack},
     std::string{path::ogre_idle},
     std::string{path::skeleton_idle},
@@ -135,6 +151,7 @@ const auto g_paths = std::array{
     std::string{path::skeleton_walk_right},
 };
 
+nc::asset::AssetId DefaultCubeAnimation{nc::utility::Fnv1a(path::DefaultCubeAnimation)};
 nc::asset::AssetId ogre_attack{nc::utility::Fnv1a(path::ogre_attack)};
 nc::asset::AssetId ogre_idle{nc::utility::Fnv1a(path::ogre_idle)};
 nc::asset::AssetId skeleton_idle{nc::utility::Fnv1a(path::skeleton_idle)};
@@ -153,6 +170,10 @@ void Load()
 
 namespace texture
 {
+nc::asset::TextureView DefaultBaseColor{};
+nc::asset::TextureView DefaultMetallic{};
+nc::asset::TextureView DefaultNormal{};
+nc::asset::TextureView DefaultParticle{};
 nc::asset::TextureView diffuse_cave{};
 nc::asset::TextureView diffuse_guy{};
 nc::asset::TextureView diffuse_ogre{};
@@ -172,10 +193,10 @@ nc::asset::TextureView normal_ogre{};
 nc::asset::TextureView normal_skeleton{};
 
 const auto g_paths = std::array{
-    std::string{"DefaultBaseColor.nca"},
-    std::string{"DefaultMetallic.nca"},
-    std::string{"DefaultNormal.nca"},
-    std::string{"DefaultParticle.nca"},
+    std::string{path::DefaultBaseColor},
+    std::string{path::DefaultMetallic},
+    std::string{path::DefaultNormal},
+    std::string{path::DefaultParticle},
     std::string{path::diffuse_cave},
     std::string{path::diffuse_guy},
     std::string{path::diffuse_ogre},
@@ -226,6 +247,10 @@ void Load()
 
 void Acquire()
 {
+    DefaultBaseColor = nc::asset::AcquireTextureAsset(path::DefaultBaseColor);
+    DefaultMetallic = nc::asset::AcquireTextureAsset(path::DefaultMetallic);
+    DefaultNormal = nc::asset::AcquireTextureAsset(path::DefaultNormal);
+    DefaultParticle = nc::asset::AcquireTextureAsset(path::DefaultParticle);
     diffuse_cave = nc::asset::AcquireTextureAsset(path::diffuse_cave);
     diffuse_guy = nc::asset::AcquireTextureAsset(path::diffuse_guy);
     diffuse_ogre = nc::asset::AcquireTextureAsset(path::diffuse_ogre);
