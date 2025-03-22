@@ -1,7 +1,7 @@
 #include "ModuleFactory.h"
 
+#include "ncasset/DefaultAssets.h"
 #include "ncengine/Events.h"
-#include "ncengine/asset/DefaultAssets.h"
 #include "ncengine/asset/NcAsset.h"
 #include "ncengine/audio/NcAudio.h"
 #include "ncengine/config/Config.h"
@@ -25,10 +25,10 @@ auto BuildDefaultAssetMap() -> nc::asset::AssetMap
         { AssetType::AudioClip,         { DefaultAudioClip } },
         { AssetType::ConvexHull,        { DefaultConvexHull } },
         { AssetType::CubeMap,           { DefaultSkyboxCubeMap } },
-        { AssetType::Mesh,              { PlaneMesh, CubeMesh, SphereMesh, CapsuleMesh, WheelMesh } },
+        { AssetType::Mesh,              { PlaneMesh, CubeMesh, SphereMesh, CapsuleMesh, WheelMesh, SkyboxMesh } },
         { AssetType::MeshCollider,      { DefaultMeshCollider } },
         { AssetType::SkeletalAnimation, { DefaultSkeletalAnimation } },
-        { AssetType::Texture,           { DefaultBaseColor, DefaultNormal, DefaultRoughness, DefaultParticle } }
+        { AssetType::Texture,           { DefaultBaseColor, DefaultNormal, DefaultParticle } }
     };
 }
 } // anonymous namespace

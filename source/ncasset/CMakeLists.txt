@@ -21,6 +21,7 @@ target_include_directories(NcAsset
 
 target_sources(NcAsset
     PRIVATE
+        ${PROJECT_SOURCE_DIR}/source/ncasset/DefaultAssets.cpp
         ${PROJECT_SOURCE_DIR}/source/ncasset/Deserialize.cpp
         ${PROJECT_SOURCE_DIR}/source/ncasset/Import.cpp
         ${PROJECT_SOURCE_DIR}/source/ncasset/NcaHeader.cpp

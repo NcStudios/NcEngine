@@ -1,8 +1,9 @@
 #include "ui/editor/ComponentWidgets.h"
 #include "assets/AssetWrapper.h"
+
+#include "ncasset/DefaultAssets.h"
 #include "ncengine/Events.h"
 #include "ncengine/asset/NcAsset.h"
-#include "ncengine/asset/DefaultAssets.h"
 #include "ncengine/audio/AudioSource.h"
 #include "ncengine/ecs/Tag.h"
 #include "ncengine/ecs/Transform.h"

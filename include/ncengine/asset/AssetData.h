@@ -24,7 +24,7 @@ enum class UpdateAction : uint8_t
 /** @brief Event data for mesh bones/rig load and unload operations. */
 struct BoneUpdateEventData
 {
-    std::span<const asset::BonesData> data;
+    std::span<const BonesData> data;
     std::vector<std::string> ids;
     UpdateAction updateAction;
 };
@@ -32,7 +32,7 @@ struct BoneUpdateEventData
 /** @brief A data/id pair for a loaded CubeMap. */
 struct CubeMapWithId
 {
-    asset::CubeMap cubeMap;
+    CubeMap cubeMap;
     size_t id;
 };
 
@@ -49,7 +49,7 @@ struct CubeMapUpdateEventData
 /** @brief Event data for mesh load and unload operations. */
 struct MeshUpdateEventData
 {
-    std::span<const asset::MeshVertex> vertices;
+    std::span<const MeshVertex> vertices;
     std::span<const uint32_t> indices;
 };
 
@@ -64,9 +64,9 @@ struct SkeletalAnimationUpdateEventData
 /** @brief A data/id pair for a loaded texture. */
 struct TextureWithId
 {
-    asset::Texture texture;
+    Texture texture;
     size_t id;
-    asset_flags_type flags;
+    AssetSubtype subtype = AssetSubtype::None;
 };
 
 /** @brief Event data for texture load and unload operations. */

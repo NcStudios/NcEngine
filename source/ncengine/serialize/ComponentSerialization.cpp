@@ -81,18 +81,31 @@ auto DeserializeMaterialDesc(std::istream& stream) -> MaterialDesc
 void SerializeAudioSource(std::ostream& stream, const AudioSource& out, const SerializationContext& ctx, const std::any&)
 {
     serialize::Serialize(stream, ctx.entityMap.at(out.ParentEntity()));
-    serialize::Serialize(stream, out.GetClips());
     serialize::Serialize(stream, out.GetProperties());
+    const auto& clips = out.GetClips();
+    const auto clipCount = clips.size();
+    serialize::Serialize(stream, clipCount);
+    for (const auto& clip : clips) // serialize individual to hit special handling for views
+    {
+        serialize::Serialize(stream, clip);
+    }
 }
 
 auto DeserializeAudioSource(std::istream& stream, const DeserializationContext& ctx, const std::any&) -> AudioSource
 {
     auto id = uint32_t{};
-    auto clips = std::vector<asset::AudioClipView>{};
     auto properties = AudioSourceProperties{};
+    auto clipCount = size_t{};
+    auto clips = std::vector<asset::AudioClipView>{};
     serialize::Deserialize(stream, id);
-    serialize::Deserialize(stream, clips);
     serialize::Deserialize(stream, properties);
+    serialize::Deserialize(stream, clipCount);
+    clips.resize(clipCount);
+    for (auto i = 0ull; i < clipCount; ++i)
+    {
+        serialize::Deserialize(stream, clips[i]);
+    }
+
     return AudioSource{ctx.entityMap.at(id), std::move(clips), properties};
 }
 

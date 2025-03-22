@@ -3,7 +3,6 @@
 #include "shared/spawner/Spawner.h"
 
 #include "ncengine/NcEngine.h"
-#include "ncengine/asset/DefaultAssets.h"
 #include "ncengine/config/Config.h"
 #include "ncengine/ecs/InvokeFreeComponent.h"
 #include "ncengine/graphics/ParticleEmitter.h"
@@ -47,9 +46,9 @@ constexpr auto g_assets = std::array{
 };
 
 const auto g_meshViews = std::array{
-    &nc::sample::mesh::cube,
-    &nc::sample::mesh::sphere,
-    &nc::sample::mesh::capsule,
+    &nc::sample::mesh::default_cube,
+    &nc::sample::mesh::default_sphere,
+    &nc::sample::mesh::default_capsule,
     &nc::sample::mesh::ramp,
     &nc::sample::mesh::halfpipe
 };
@@ -456,7 +455,7 @@ void Benchmarks::Load(ecs::Ecs world, ModuleProvider modules)
         .flags = Entity::Flags::Static
     });
 
-    world.Emplace<StaticMesh>(ground, mesh::cube, material::blue);
+    world.Emplace<StaticMesh>(ground, mesh::default_cube, material::blue);
     world.Emplace<RigidBody>(ground, Shape::MakeBox());
 
     const auto spawnBehavior = SpawnBehavior{

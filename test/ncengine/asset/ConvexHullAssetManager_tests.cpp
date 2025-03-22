@@ -30,32 +30,32 @@ class ConvexHullAssetManager_tests : public ::testing::Test
 
 TEST_F(ConvexHullAssetManager_tests, Load_NotLoaded_ReturnsTrue)
 {
-    auto actual = assetManager->Load(HullPath1, false);
+    auto actual = assetManager->Load(HullPath1);
     EXPECT_TRUE(actual);
 }
 
 TEST_F(ConvexHullAssetManager_tests, Load_Loaded_ReturnsFalse)
 {
-    assetManager->Load(HullPath1, false);
-    auto actual = assetManager->Load(HullPath1, false);
+    assetManager->Load(HullPath1);
+    auto actual = assetManager->Load(HullPath1);
     EXPECT_FALSE(actual);
 }
 
 TEST_F(ConvexHullAssetManager_tests, Load_BadPath_Throws)
 {
-    EXPECT_THROW(assetManager->Load("bad/path", false), std::runtime_error);
+    EXPECT_THROW(assetManager->Load("bad/path"), std::runtime_error);
 }
 
 TEST_F(ConvexHullAssetManager_tests, Load_Collection_ReturnsTrue)
 {
     std::array<std::string, 2u> paths{HullPath1, HullPath2};
-    auto actual = assetManager->Load(paths, false);
+    auto actual = assetManager->Load(paths);
     EXPECT_TRUE(actual);
 }
 
 TEST_F(ConvexHullAssetManager_tests, Unload_Loaded_ReturnsTrue)
 {
-    assetManager->Load(HullPath1, false);
+    assetManager->Load(HullPath1);
     auto actual = assetManager->Unload(HullPath1);
     EXPECT_TRUE(actual);
 }
@@ -74,7 +74,7 @@ TEST_F(ConvexHullAssetManager_tests, Unload_BadPath_ReturnsFalse)
 
 TEST_F(ConvexHullAssetManager_tests, IsLoaded_Loaded_ReturnsTrue)
 {
-    assetManager->Load(HullPath1, false);
+    assetManager->Load(HullPath1);
     auto actual = assetManager->IsLoaded(HullPath1);
     EXPECT_TRUE(actual);
 }
@@ -87,7 +87,7 @@ TEST_F(ConvexHullAssetManager_tests, IsLoaded_NotLoaded_ReturnsFalse)
 
 TEST_F(ConvexHullAssetManager_tests, IsLoaded_AfterUnload_ReturnsFalse)
 {
-    assetManager->Load(HullPath1, false);
+    assetManager->Load(HullPath1);
     assetManager->Unload(HullPath1);
     auto actual = assetManager->IsLoaded(HullPath1);
     EXPECT_FALSE(actual);
@@ -96,21 +96,21 @@ TEST_F(ConvexHullAssetManager_tests, IsLoaded_AfterUnload_ReturnsFalse)
 TEST_F(ConvexHullAssetManager_tests, UnloadAll_HasAssets_RemovesAssets)
 {
     std::array<std::string, 2u> paths{HullPath1, HullPath2};
-    assetManager->Load(paths, false);
-    assetManager->UnloadAll(AssetFlags::None);
+    assetManager->Load(paths);
+    assetManager->UnloadAll();
     EXPECT_FALSE(assetManager->Unload(HullPath1));
     EXPECT_FALSE(assetManager->Unload(HullPath2));
 }
 
 TEST_F(ConvexHullAssetManager_tests, UnloadAll_Empty_Completes)
 {
-    assetManager->UnloadAll(AssetFlags::None);
+    assetManager->UnloadAll();
 }
 
 TEST_F(ConvexHullAssetManager_tests, GetPath_Loaded_ReturnsPath)
 {
     std::array<std::string, 2u> paths{HullPath1, HullPath2};
-    assetManager->Load(paths, false);
+    assetManager->Load(paths);
     const auto& expected = paths.at(1);
     const auto view = assetManager->Acquire(expected);
     const auto actual = assetManager->GetPath(view.id);
@@ -120,7 +120,7 @@ TEST_F(ConvexHullAssetManager_tests, GetPath_Loaded_ReturnsPath)
 TEST_F(ConvexHullAssetManager_tests, GetPath_NotLoaded_Throws)
 {
     std::array<std::string, 2u> paths{HullPath1, HullPath2};
-    assetManager->Load(paths, false);
+    assetManager->Load(paths);
     const auto& expected = paths.at(1);
     const auto view = assetManager->Acquire(expected);
     assetManager->UnloadAll();

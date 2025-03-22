@@ -15,9 +15,9 @@ class IAssetServiceBase
     public:
         virtual ~IAssetServiceBase() = default;
 
-        virtual auto GetAllLoaded() const -> std::vector<std::string_view> = 0;
-        virtual auto GetPath(AssetId hash) const -> std::string_view = 0;
-        virtual auto GetAssetType() const noexcept -> asset::AssetType = 0;
+        virtual auto GetAllLoaded()        const -> std::vector<std::string_view> = 0;
+        virtual auto GetPath(AssetId hash) const -> std::string_view              = 0;
+        virtual auto GetAssetType()        const -> asset::AssetType              = 0;
 };
 
 /** Interface for services that manage assets. */
@@ -29,13 +29,22 @@ class IAssetService : public IAssetServiceBase
 
         IAssetService();
 
-        virtual bool Load(const InputType& input, bool isExternal, asset_flags_type flags = AssetFlags::None) = 0;
-        virtual bool Load(std::span<const InputType> inputs, bool isExternal, asset_flags_type flags = AssetFlags::None) = 0;
-        virtual bool Unload(const InputType& input, asset_flags_type flags = AssetFlags::None) = 0;
-        virtual void UnloadAll(asset_flags_type flags = AssetFlags::None) = 0;
-        virtual auto Acquire(const InputType& input, asset_flags_type flags = AssetFlags::None) const -> data_type = 0;
-        virtual auto Acquire(AssetId, asset_flags_type = AssetFlags::None) const -> data_type = 0;
-        virtual bool IsLoaded(const InputType& input, asset_flags_type flags = AssetFlags::None) const = 0;
+        virtual bool Load(const InputType& input,
+                          AssetSubtype subtype = AssetSubtype::None) = 0;
+        virtual bool Load(std::span<const InputType> inputs,
+                          AssetSubtype subtype = AssetSubtype::None) = 0;
+        virtual bool Load(std::span<const InputType> inputs,
+                          std::span<const AssetSubtype> subtypes)
+        {
+            (void)subtypes;
+            return Load(inputs);
+        }
+
+        virtual bool Unload(const InputType& input)                      = 0;
+        virtual void UnloadAll()                                         = 0;
+        virtual auto Acquire(const InputType& input)  const -> data_type = 0;
+        virtual auto Acquire(AssetId)                 const -> data_type = 0;
+        virtual bool IsLoaded(const InputType& input) const              = 0;
 };
 
 /** Helper alias for locating asset services. */

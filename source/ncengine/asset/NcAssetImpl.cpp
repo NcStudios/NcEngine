@@ -87,19 +87,19 @@ auto NcAssetImpl::OnFontUpdate() noexcept -> Signal<>&
 void NcAssetImpl::LoadAssets(const AssetMap& assets)
 {
     if (assets.contains(asset::AssetType::AudioClip))
-        m_audioClipManager->Load(assets.at(asset::AssetType::AudioClip), false);
+        m_audioClipManager->Load(assets.at(asset::AssetType::AudioClip));
     if (assets.contains(asset::AssetType::ConvexHull))
-        m_convexHullManager->Load(assets.at(asset::AssetType::ConvexHull), false);
+        m_convexHullManager->Load(assets.at(asset::AssetType::ConvexHull));
     if (assets.contains(asset::AssetType::CubeMap))
-        m_cubeMapManager->Load(assets.at(asset::AssetType::CubeMap), false);
+        m_cubeMapManager->Load(assets.at(asset::AssetType::CubeMap));
     if (assets.contains(asset::AssetType::Mesh))
-        m_meshManager->Load(assets.at(asset::AssetType::Mesh), false);
+        m_meshManager->Load(assets.at(asset::AssetType::Mesh));
     if (assets.contains(asset::AssetType::MeshCollider))
-        m_meshColliderManager->Load(assets.at(asset::AssetType::MeshCollider), false);
+        m_meshColliderManager->Load(assets.at(asset::AssetType::MeshCollider));
     if (assets.contains(asset::AssetType::SkeletalAnimation))
-        m_skeletalAnimationManager->Load(assets.at(asset::AssetType::SkeletalAnimation), false);
+        m_skeletalAnimationManager->Load(assets.at(asset::AssetType::SkeletalAnimation));
     if (assets.contains(asset::AssetType::Texture))
-        m_textureManager->Load(assets.at(asset::AssetType::Texture), false);
+        m_textureManager->Load(assets.at(asset::AssetType::Texture));
 }
 
 auto NcAssetImpl::GetLoadedAssets() const noexcept -> AssetMap

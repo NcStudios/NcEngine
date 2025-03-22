@@ -1,5 +1,5 @@
 #include "WidgetSystem.h"
-#include "ncengine/asset/DefaultAssets.h"
+#include "ncasset/DefaultAssets.h"
 #include "ncengine/ecs/Ecs.h"
 #include "ncengine/ecs/Transform.h"
 #include "ncengine/graphics/MeshRenderer.h"

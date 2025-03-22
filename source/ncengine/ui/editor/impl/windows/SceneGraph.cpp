@@ -1,5 +1,7 @@
 #include "SceneGraph.h"
 #include "EntityContextMenu.h"
+
+#include "ncasset/DefaultAssets.h"
 #include "ncengine/ecs/Tag.h"
 #include "ncengine/ecs/Transform.h"
 #include "ncengine/graphics/WireframeRenderer.h"
