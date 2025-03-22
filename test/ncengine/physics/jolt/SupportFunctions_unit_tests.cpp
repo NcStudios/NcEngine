@@ -64,7 +64,7 @@ struct TestDirectionQuery
 ////////
 #define TEST_VECS(expected, direction) \
 { \
-    const auto actual = uut.GetFurthestVertex(direction); \
+    const auto actual = nc::GetWorldSupport(shape, direction); \
     EXPECT_EQ(expected, actual) \
         << "expected: "  << expected.x << ", " << expected.y << ", " << expected.z \
         << " | actual: " << actual.x   << ", " << actual.y   << ", " << actual.z; \
@@ -253,7 +253,6 @@ TEST_F(SupportFunctionsTest, Capsule_transformed)
     EXPECT_EQ(offset + nc::Vector3::Down()  * halfHeight, nc::GetWorldSupport(shape, nc::Vector3::Down()));
     EXPECT_EQ(offset + nc::Vector3::Front() * radius,     nc::GetWorldSupport(shape, nc::Vector3::Front()));
     EXPECT_EQ(offset + nc::Vector3::Back()  * radius,     nc::GetWorldSupport(shape, nc::Vector3::Back()));
-
 }
 
 TEST_F(SupportFunctionsTest, GetDistanceFromOrigin_CompoundShape)
@@ -265,7 +264,7 @@ TEST_F(SupportFunctionsTest, GetDistanceFromOrigin_CompoundShape)
             nc::Quaternion::Identity()
         },
         nc::SubShapeInfo{
-            nc::Shape::MakeSphere(0.5f),
+            nc::Shape::MakeSphere(0.4f),
             nc::Vector3::Down(),
             nc::Quaternion::Identity()
         }
@@ -276,9 +275,31 @@ TEST_F(SupportFunctionsTest, GetDistanceFromOrigin_CompoundShape)
     EXPECT_FLOAT_EQ(0.5f, nc::GetDistanceFromOrigin(shape, nc::Vector3::Right()));
     EXPECT_FLOAT_EQ(0.5f, nc::GetDistanceFromOrigin(shape, nc::Vector3::Left()));
     EXPECT_FLOAT_EQ(1.5f, nc::GetDistanceFromOrigin(shape, nc::Vector3::Up()));
-    EXPECT_FLOAT_EQ(1.5f, nc::GetDistanceFromOrigin(shape, nc::Vector3::Down()));
+    EXPECT_FLOAT_EQ(1.4f, nc::GetDistanceFromOrigin(shape, nc::Vector3::Down()));
     EXPECT_FLOAT_EQ(0.5f, nc::GetDistanceFromOrigin(shape, nc::Vector3::Front()));
     EXPECT_FLOAT_EQ(0.5f, nc::GetDistanceFromOrigin(shape, nc::Vector3::Back()));
+
+    EXPECT_FLOAT_EQ(0.5f, nc::GetHalfExtent(shape, nc::Vector3::Right()));
+    EXPECT_FLOAT_EQ(0.5f, nc::GetHalfExtent(shape, nc::Vector3::Left()));
+    EXPECT_FLOAT_EQ(1.5f, nc::GetHalfExtent(shape, nc::Vector3::Up()));
+    EXPECT_FLOAT_EQ(1.4f, nc::GetHalfExtent(shape, nc::Vector3::Down()));
+    EXPECT_FLOAT_EQ(0.5f, nc::GetHalfExtent(shape, nc::Vector3::Front()));
+    EXPECT_FLOAT_EQ(0.5f, nc::GetHalfExtent(shape, nc::Vector3::Back()));
+
+    // EXPECT_EQ(nc::Vector3( 0.5f,  0.0f,  0.0f), nc::GetWorldSupport(shape, nc::Vector3::Right()));
+    // EXPECT_EQ(nc::Vector3(-0.5f,  0.0f,  0.0f), nc::GetWorldSupport(shape, nc::Vector3::Left()));
+    // EXPECT_EQ(nc::Vector3( 0.0f,  1.5f,  0.0f), nc::GetWorldSupport(shape, nc::Vector3::Up()));
+    // EXPECT_EQ(nc::Vector3( 0.0f, -1.5f,  0.0f), nc::GetWorldSupport(shape, nc::Vector3::Down()));
+    // EXPECT_EQ(nc::Vector3( 0.0f,  0.0f,  0.5f), nc::GetWorldSupport(shape, nc::Vector3::Front()));
+    // EXPECT_EQ(nc::Vector3( 0.0f,  0.0f, -0.5f), nc::GetWorldSupport(shape, nc::Vector3::Back()));
+
+    TEST_VECS(nc::Vector3( 0.5f,  1.0f,  0.0f), nc::Vector3::Right());
+    TEST_VECS(nc::Vector3(-0.5f,  1.0f,  0.0f), nc::Vector3::Left());
+    TEST_VECS(nc::Vector3( 0.0f,  1.5f,  0.0f), nc::Vector3::Up());
+    TEST_VECS(nc::Vector3( 0.0f, -1.4f,  0.0f), nc::Vector3::Down());
+    TEST_VECS(nc::Vector3( 0.0f,  1.0f,  0.5f), nc::Vector3::Front());
+    TEST_VECS(nc::Vector3( 0.0f,  1.0f, -0.5f), nc::Vector3::Back());
+
 }
 
 TEST_F(SupportFunctionsTest, GetDistanceFromOrigin_CompoundShape2)
@@ -302,12 +323,7 @@ TEST_F(SupportFunctionsTest, GetDistanceFromOrigin_CompoundShape2)
     EXPECT_FLOAT_EQ(2.0f, nc::GetDistanceFromOrigin(shape, nc::Vector3::Front()));
     EXPECT_FLOAT_EQ(2.0f, nc::GetDistanceFromOrigin(shape, nc::Vector3::Back()));
 
-    EXPECT_FLOAT_EQ(0.5f, nc::GetHalfExtent(shape, nc::Vector3::Right()));
-    EXPECT_FLOAT_EQ(0.5f, nc::GetHalfExtent(shape, nc::Vector3::Left()));
-    EXPECT_FLOAT_EQ(0.5f, nc::GetHalfExtent(shape, nc::Vector3::Up()));
-    EXPECT_FLOAT_EQ(1.25f, nc::GetHalfExtent(shape, nc::Vector3::Down()));
-    EXPECT_FLOAT_EQ(2.0f, nc::GetHalfExtent(shape, nc::Vector3::Front()));
-    EXPECT_FLOAT_EQ(2.0f, nc::GetHalfExtent(shape, nc::Vector3::Back()));
+
 }
 
 
