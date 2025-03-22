@@ -1,6 +1,7 @@
 #ifdef NC_DEBUG_RENDERING_ENABLED
 #include "ncengine/debug/DebugRendering.h"
 
+#include "ncasset/DefaultAssets.h"
 #include "ncutility/NcError.h"
 
 #include <optional>

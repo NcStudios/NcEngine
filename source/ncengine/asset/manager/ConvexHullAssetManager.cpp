@@ -11,14 +11,14 @@ ConvexHullAssetManager::ConvexHullAssetManager(const std::string& assetDirectory
 {
 }
 
-bool ConvexHullAssetManager::Load(const std::string& path, bool isExternal, asset_flags_type)
+auto ConvexHullAssetManager::Load(const std::string& path, AssetSubtype) -> bool
 {
     if (IsLoaded(path))
     {
         return false;
     }
 
-    const auto fullPath = isExternal ? path : m_assetDirectory + path;
+    const auto fullPath = m_assetDirectory + path;
     m_map.emplace(path);
     const auto id = m_map.hash(path);
     auto asset = ImportConvexHull(fullPath);
@@ -31,7 +31,7 @@ bool ConvexHullAssetManager::Load(const std::string& path, bool isExternal, asse
     return true;
 }
 
-bool ConvexHullAssetManager::Load(std::span<const std::string> paths, bool isExternal, asset_flags_type)
+auto ConvexHullAssetManager::Load(std::span<const std::string> paths, AssetSubtype) -> bool
 {
     auto anyLoaded = false;
     auto assets = std::vector<ConvexHull>{};
@@ -47,7 +47,7 @@ bool ConvexHullAssetManager::Load(std::span<const std::string> paths, bool isExt
         }
 
         anyLoaded = true;
-        const auto fullPath = isExternal ? path : m_assetDirectory + path;
+        const auto fullPath = m_assetDirectory + path;
         assets.push_back(ImportConvexHull(fullPath));
         ids.push_back(m_map.hash(path));
         m_map.emplace(path);
@@ -65,7 +65,7 @@ bool ConvexHullAssetManager::Load(std::span<const std::string> paths, bool isExt
     return anyLoaded;
 }
 
-bool ConvexHullAssetManager::Unload(const std::string& path, asset_flags_type)
+auto ConvexHullAssetManager::Unload(const std::string& path) -> bool
 {
     if (m_map.erase(path))
     {
@@ -82,7 +82,7 @@ bool ConvexHullAssetManager::Unload(const std::string& path, asset_flags_type)
     return false;
 }
 
-void ConvexHullAssetManager::UnloadAll(asset_flags_type)
+void ConvexHullAssetManager::UnloadAll()
 {
     m_map.clear();
     m_onUpdate.Emit(ConvexHullUpdateEventData{
@@ -92,21 +92,16 @@ void ConvexHullAssetManager::UnloadAll(asset_flags_type)
     });
 }
 
-auto ConvexHullAssetManager::Acquire(const std::string& path, asset_flags_type) const -> ConvexHullView
+auto ConvexHullAssetManager::Acquire(const std::string& path) const -> ConvexHullView
 {
     NC_ASSERT(m_map.contains(path), fmt::format("ConvexHull is not loaded: '{}'", path));
     return Acquire(m_map.hash(path));
 }
 
-auto ConvexHullAssetManager::Acquire(AssetId id, asset_flags_type) const -> ConvexHullView
+auto ConvexHullAssetManager::Acquire(AssetId id) const -> ConvexHullView
 {
     NC_ASSERT(m_map.index(id) != m_map.NullIndex, fmt::format("ConvexHull is not loaded: '{}'", id));
     return ConvexHullView{id};
-}
-
-bool ConvexHullAssetManager::IsLoaded(const std::string& path, asset_flags_type) const
-{
-    return m_map.contains(path);
 }
 
 auto ConvexHullAssetManager::GetAllLoaded() const -> std::vector<std::string_view>

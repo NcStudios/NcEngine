@@ -11,19 +11,19 @@ AudioClipAssetManager::AudioClipAssetManager(const std::string& assetDirectory)
 {
 }
 
-bool AudioClipAssetManager::Load(const std::string& path, bool isExternal, asset_flags_type)
+auto AudioClipAssetManager::Load(const std::string& path, AssetSubtype) -> bool
 {
     if (IsLoaded(path))
     {
         return false;
     }
 
-    const auto fullPath = isExternal ? path : m_assetDirectory + path;
+    const auto fullPath = m_assetDirectory + path;
     m_audioClips.emplace(path, asset::ImportAudioClip(fullPath));
     return true;
 }
 
-bool AudioClipAssetManager::Load(std::span<const std::string> paths, bool isExternal, asset_flags_type)
+auto AudioClipAssetManager::Load(std::span<const std::string> paths, AssetSubtype) -> bool
 {
     bool anyLoaded = false;
 
@@ -34,7 +34,7 @@ bool AudioClipAssetManager::Load(std::span<const std::string> paths, bool isExte
             continue;
         }
 
-        if (Load(path, isExternal))
+        if (Load(path))
         {
             anyLoaded = true;
         }
@@ -43,23 +43,23 @@ bool AudioClipAssetManager::Load(std::span<const std::string> paths, bool isExte
     return anyLoaded;
 }
 
-bool AudioClipAssetManager::Unload(const std::string& path, asset_flags_type)
+auto AudioClipAssetManager::Unload(const std::string& path) -> bool
 {
     return m_audioClips.erase(path);
 }
 
-void AudioClipAssetManager::UnloadAll(asset_flags_type)
+void AudioClipAssetManager::UnloadAll()
 {
     m_audioClips.clear();
 }
 
-auto AudioClipAssetManager::Acquire(const std::string& path, asset_flags_type) const -> AudioClipView
+auto AudioClipAssetManager::Acquire(const std::string& path) const -> AudioClipView
 {
     NC_ASSERT(m_audioClips.contains(path), fmt::format("AudioClip is not loaded: '{}'", path));
     return Acquire(m_audioClips.hash(path));
 }
 
-auto AudioClipAssetManager::Acquire(AssetId id, asset_flags_type) const -> AudioClipView
+auto AudioClipAssetManager::Acquire(AssetId id) const -> AudioClipView
 {
     const auto index = m_audioClips.index(id);
     NC_ASSERT(index != m_audioClips.NullIndex, fmt::format("AudioClip is not loaded: '{}'", id));
@@ -70,11 +70,6 @@ auto AudioClipAssetManager::Acquire(AssetId id, asset_flags_type) const -> Audio
         .rightChannel = std::span<const double>{clip.rightChannel},
         .samplesPerChannel = clip.samplesPerChannel
     };
-}
-
-bool AudioClipAssetManager::IsLoaded(const std::string& path, asset_flags_type) const
-{
-    return m_audioClips.contains(path);
 }
 
 auto AudioClipAssetManager::GetAllLoaded() const -> std::vector<std::string_view>

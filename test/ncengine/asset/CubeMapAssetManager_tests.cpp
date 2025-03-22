@@ -30,37 +30,37 @@ class CubeMapAssetManager_tests : public ::testing::Test
 
 TEST_F(CubeMapAssetManager_tests, Load_NotLoaded_ReturnsTrue)
 {
-    auto actual = assetManager->Load(skybox1, false);
+    auto actual = assetManager->Load(skybox1);
     EXPECT_TRUE(actual);
 }
 
 TEST_F(CubeMapAssetManager_tests, Load_IsLoaded_ReturnsFalse)
 {
-    assetManager->Load(skybox1, false);
-    auto actual = assetManager->Load(skybox1, false);
+    assetManager->Load(skybox1);
+    auto actual = assetManager->Load(skybox1);
     EXPECT_FALSE(actual);
 }
 
 TEST_F(CubeMapAssetManager_tests, Load_BadPath_Throws)
 {
-    EXPECT_THROW(assetManager->Load("bad/path", false), std::runtime_error);
+    EXPECT_THROW(assetManager->Load("bad/path"), std::runtime_error);
 }
 
 TEST_F(CubeMapAssetManager_tests, Load_Collection_ReturnsTrue)
 {
     std::array<std::string, 3u> paths {skybox1, skybox2, skybox3};
-    auto actual = assetManager->Load(paths, false);
+    auto actual = assetManager->Load(paths);
     EXPECT_TRUE(actual);
 }
 
 TEST_F(CubeMapAssetManager_tests, Load_Collection_OneAlreadyLoaded_IndexRemainsTheSame)
 {
     std::array<std::string, 3u> paths {skybox1, skybox2, skybox3};
-    assetManager->Load(paths, false);
+    assetManager->Load(paths);
     auto viewFirstLoad = assetManager->Acquire(skybox1);
 
     std::array<std::string, 1u> paths2 {skybox1};
-    assetManager->Load(paths2, false);
+    assetManager->Load(paths2);
 
     auto viewSecondLoad = assetManager->Acquire(skybox1);
     EXPECT_EQ(viewFirstLoad.index, 0u);
@@ -69,7 +69,7 @@ TEST_F(CubeMapAssetManager_tests, Load_Collection_OneAlreadyLoaded_IndexRemainsT
 
 TEST_F(CubeMapAssetManager_tests, Unload_Loaded_ReturnsTrue)
 {
-    assetManager->Load(skybox1, false);
+    assetManager->Load(skybox1);
     auto actual = assetManager->Unload(skybox1);
     EXPECT_TRUE(actual);
 }
@@ -82,7 +82,7 @@ TEST_F(CubeMapAssetManager_tests, Unload_NotLoaded_ReturnsFalse)
 
 TEST_F(CubeMapAssetManager_tests, IsLoaded_Loaded_ReturnsTrue)
 {
-    assetManager->Load(skybox1, false);
+    assetManager->Load(skybox1);
     auto actual = assetManager->IsLoaded(skybox1);
     EXPECT_TRUE(actual);
 }
@@ -96,8 +96,8 @@ TEST_F(CubeMapAssetManager_tests, IsLoaded_NotLoaded_ReturnsFalse)
 TEST_F(CubeMapAssetManager_tests, UnloadAll_HasAssets_RemovesAssets)
 {
     std::array<std::string, 3u> paths {skybox1, skybox2, skybox3};
-    assetManager->Load(paths, false);
-    assetManager->UnloadAll(AssetFlags::None);
+    assetManager->Load(paths);
+    assetManager->UnloadAll();
     EXPECT_FALSE(assetManager->IsLoaded(skybox1));
     EXPECT_FALSE(assetManager->IsLoaded(skybox2));
     EXPECT_FALSE(assetManager->IsLoaded(skybox3));
@@ -105,13 +105,13 @@ TEST_F(CubeMapAssetManager_tests, UnloadAll_HasAssets_RemovesAssets)
 
 TEST_F(CubeMapAssetManager_tests, UnloadAll_Empty_Completes)
 {
-    assetManager->UnloadAll(AssetFlags::None);
+    assetManager->UnloadAll();
 }
 
 TEST_F(CubeMapAssetManager_tests, Unload_FromBeginning_UpdatesAccesors)
 {
     std::array<std::string, 3u> paths {skybox1, skybox2, skybox3};
-    assetManager->Load(paths, false);
+    assetManager->Load(paths);
     assetManager->Unload(skybox1);
     auto view1 = assetManager->Acquire(skybox2);
     auto view2 = assetManager->Acquire(skybox3);
@@ -122,7 +122,7 @@ TEST_F(CubeMapAssetManager_tests, Unload_FromBeginning_UpdatesAccesors)
 TEST_F(CubeMapAssetManager_tests, Unload_FromMiddle_UpdatesAccesors)
 {
     std::array<std::string, 3u> paths {skybox1, skybox2, skybox3};
-    assetManager->Load(paths, false);
+    assetManager->Load(paths);
     assetManager->Unload(skybox2);
     auto view1 = assetManager->Acquire(skybox1);
     auto view2 = assetManager->Acquire(skybox3);
@@ -133,7 +133,7 @@ TEST_F(CubeMapAssetManager_tests, Unload_FromMiddle_UpdatesAccesors)
 TEST_F(CubeMapAssetManager_tests, Unload_FromEnd_AccessorsNotUpdated)
 {
     std::array<std::string, 3u> paths {skybox1, skybox2, skybox3};
-    assetManager->Load(paths, false);
+    assetManager->Load(paths);
     assetManager->Unload(skybox3);
     auto view1 = assetManager->Acquire(skybox1);
     auto view2 = assetManager->Acquire(skybox2);
@@ -144,7 +144,7 @@ TEST_F(CubeMapAssetManager_tests, Unload_FromEnd_AccessorsNotUpdated)
 TEST_F(CubeMapAssetManager_tests, GetPath_Loaded_ReturnsPath)
 {
     std::array<std::string, 2u> paths{skybox1, skybox2};
-    assetManager->Load(paths, false);
+    assetManager->Load(paths);
     const auto& expected = paths.at(1);
     const auto view = assetManager->Acquire(expected);
     const auto actual = assetManager->GetPath(view.id);
@@ -154,7 +154,7 @@ TEST_F(CubeMapAssetManager_tests, GetPath_Loaded_ReturnsPath)
 TEST_F(CubeMapAssetManager_tests, GetPath_NotLoaded_Throws)
 {
     std::array<std::string, 2u> paths{skybox1, skybox2};
-    assetManager->Load(paths, false);
+    assetManager->Load(paths);
     const auto& expected = paths.at(1);
     const auto view = assetManager->Acquire(expected);
     assetManager->UnloadAll();

@@ -1,25 +1,17 @@
 #pragma once
 
+#include "ncasset/AssetType.h"
+
 #include <filesystem>
 #include <optional>
 
 namespace nc::convert
 {
-/** @brief Indicates special properties of asset. */
-enum class AssetSubtype : uint8_t
-{
-    None,
-    DiffuseTexture,
-    NormalTexture,
-    ParticleTexture,
-    EffectTexture
-};
-
 /** @brief Target-specific options */
 struct TargetOptions
 {
     bool optimizeMesh = false;
-    AssetSubtype subtype = AssetSubtype::None;
+    asset::AssetSubtype subtype = asset::AssetSubtype::None;
 };
 
 /** @brief Data describing a required asset conversion. */
@@ -47,6 +39,6 @@ struct ReflectedTarget
 {
     std::string name;
     std::string path;
-    AssetSubtype subtype = AssetSubtype::None;
+    asset::AssetSubtype subtype = asset::AssetSubtype::None;
 };
 }

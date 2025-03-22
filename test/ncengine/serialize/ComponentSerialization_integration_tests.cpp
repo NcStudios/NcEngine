@@ -34,7 +34,7 @@ auto g_systemEvents = std::make_unique<SystemEvents>();
 
 namespace asset
 {
-auto g_mockAudioClipView = AudioClipView{};
+auto g_mockAudioClipView = AudioClipView{.id = 1};
 auto g_mockMeshView = MeshView{.id = 1};
 auto g_mockTextureView = TextureView{.id = 1, .index = 1};
 
@@ -127,8 +127,7 @@ TEST(ComponentSerializationTests, RoundTrip_audioSource_preservesValues)
 {
     auto stream = std::stringstream{};
     const auto expectedClips = std::vector<nc::asset::AudioClipView>{
-        nc::asset::AudioClipView{.id = 1},
-        nc::asset::AudioClipView{.id = 2}
+        nc::asset::g_mockAudioClipView
     };
     const auto expectedFlags = nc::AudioSourceFlags::Spatial;
     const auto expectedProperties = nc::AudioSourceProperties{.flags = expectedFlags};

@@ -19,7 +19,7 @@ CubeMapAssetManager::CubeMapAssetManager(const std::string& cubeMapAssetDirector
 {
 }
 
-bool CubeMapAssetManager::Load(const std::string& path, bool isExternal, asset_flags_type)
+auto CubeMapAssetManager::Load(const std::string& path, AssetSubtype) -> bool
 {
     if (IsLoaded(path))
     {
@@ -31,7 +31,7 @@ bool CubeMapAssetManager::Load(const std::string& path, bool isExternal, asset_f
         throw nc::NcError("Invalid extension: " + path);
     }
 
-    const auto fullPath = isExternal ? path : m_assetDirectory + path;
+    const auto fullPath = m_assetDirectory + path;
     const auto data = CubeMapWithId{ImportCubeMap(fullPath), m_cubeMapIds.hash(path)};
     m_cubeMapIds.emplace(path);
     m_onUpdate.Emit(CubeMapUpdateEventData{
@@ -42,7 +42,7 @@ bool CubeMapAssetManager::Load(const std::string& path, bool isExternal, asset_f
     return true;
 }
 
-bool CubeMapAssetManager::Load(std::span<const std::string> paths, bool isExternal, asset_flags_type)
+auto CubeMapAssetManager::Load(std::span<const std::string> paths, AssetSubtype) -> bool
 {
     if (paths.size() + m_cubeMapIds.size() >= m_maxCubeMapsCount)
     {
@@ -64,7 +64,7 @@ bool CubeMapAssetManager::Load(std::span<const std::string> paths, bool isExtern
             throw nc::NcError("Invalid extension: " + path);
         }
 
-        const auto fullPath = isExternal ? path : m_assetDirectory + path;
+        const auto fullPath = m_assetDirectory + path;
         loadedCubeMaps.push_back(asset::CubeMapWithId{asset::ImportCubeMap(fullPath), m_cubeMapIds.hash(path)});
         m_cubeMapIds.emplace(path);
     }
@@ -82,7 +82,7 @@ bool CubeMapAssetManager::Load(std::span<const std::string> paths, bool isExtern
     return true;
 }
 
-bool CubeMapAssetManager::Unload(const std::string& path, asset_flags_type)
+auto CubeMapAssetManager::Unload(const std::string& path) -> bool
 {
     if (!m_cubeMapIds.erase(path))
         return false;
@@ -95,18 +95,18 @@ bool CubeMapAssetManager::Unload(const std::string& path, asset_flags_type)
     return true;
 }
 
-void CubeMapAssetManager::UnloadAll(asset_flags_type)
+void CubeMapAssetManager::UnloadAll()
 {
     m_cubeMapIds.clear();
 }
 
-auto CubeMapAssetManager::Acquire(const std::string& path, asset_flags_type) const -> CubeMapView
+auto CubeMapAssetManager::Acquire(const std::string& path) const -> CubeMapView
 {
     NC_ASSERT(m_cubeMapIds.contains(path), fmt::format("CubeMap is not loaded: '{}'", path));
     return Acquire(m_cubeMapIds.hash(path));
 }
 
-auto CubeMapAssetManager::Acquire(AssetId id, asset_flags_type) const -> CubeMapView
+auto CubeMapAssetManager::Acquire(AssetId id) const -> CubeMapView
 {
     const auto index = m_cubeMapIds.index(id);
     NC_ASSERT(index != m_cubeMapIds.NullIndex, fmt::format("CubeMap is not loaded: '{}'", id));
@@ -117,18 +117,8 @@ auto CubeMapAssetManager::Acquire(AssetId id, asset_flags_type) const -> CubeMap
     };
 }
 
-bool CubeMapAssetManager::IsLoaded(const std::string& path, asset_flags_type) const
-{
-    return m_cubeMapIds.contains(path);
-}
-
 auto CubeMapAssetManager::GetAllLoaded() const -> std::vector<std::string_view>
 {
     return GetPaths(m_cubeMapIds.keys());
-}
-
-auto CubeMapAssetManager::OnUpdate() -> Signal<const asset::CubeMapUpdateEventData&>&
-{
-    return m_onUpdate;
 }
 } // namespace nc::asset
