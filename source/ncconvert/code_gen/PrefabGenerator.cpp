@@ -105,7 +105,7 @@ void WriteSubtypesArray(std::ostream& source,
                         const std::vector<nc::convert::ReflectedTarget>& assets,
                         std::string_view variableName = "g_subtypes")
 {
-    constexpr auto diffuseString = std::string_view{"    nc::asset::AssetSubtype::DiffuseTexture,\n"};
+    constexpr auto diffuseString = std::string_view{"    nc::asset::AssetSubtype::ColorTexture,\n"};
     constexpr auto normalString  = std::string_view{"    nc::asset::AssetSubtype::NormalTexture,\n"};
     constexpr auto noneString    = std::string_view{"    nc::asset::AssetSubtype::None,\n"};
     using enum nc::asset::AssetSubtype;
@@ -115,9 +115,9 @@ void WriteSubtypesArray(std::ostream& source,
     {
         switch (asset.subtype)
         {
-            case DiffuseTexture: source << diffuseString; break;
-            case NormalTexture:  source << normalString;  break;
-            case None:           source << noneString;    break;
+            case ColorTexture:  source << diffuseString; break;
+            case NormalTexture: source << normalString;  break;
+            case None:          source << noneString;    break;
         }
     }
 

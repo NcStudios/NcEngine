@@ -64,9 +64,9 @@ auto ToAssetSubtype(std::string_view str) -> nc::asset::AssetSubtype
 {
     using enum nc::asset::AssetSubtype;
     if (str == "normal")   return NormalTexture;
-    if (str == "diffuse")  return DiffuseTexture;
-    if (str == "particle") return DiffuseTexture;
-    if (str == "effect")   return DiffuseTexture;
+    if (str == "diffuse")  return ColorTexture;
+    if (str == "particle") return ColorTexture;
+    if (str == "effect")   return ColorTexture;
     return None;
 }
 

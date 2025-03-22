@@ -67,7 +67,6 @@ auto GetDefaultTexturePaths() -> std::span<const std::string_view>
 {
     static constexpr auto paths = std::array{
         std::string_view{DefaultBaseColor},
-        std::string_view{DefaultRoughness},
         std::string_view{DefaultNormal},
         std::string_view{DefaultParticle}
     };
@@ -78,10 +77,10 @@ auto GetDefaultTexturePaths() -> std::span<const std::string_view>
 auto GetDefaultTextureSubtypes() -> std::span<const AssetSubtype>
 {
     static constexpr auto subtypes = std::array{
-        AssetSubtype::DiffuseTexture,
-        AssetSubtype::DiffuseTexture,
+        AssetSubtype::ColorTexture,
+        AssetSubtype::ColorTexture,
         AssetSubtype::NormalTexture,
-        AssetSubtype::DiffuseTexture
+        AssetSubtype::ColorTexture
     };
 
     return subtypes;

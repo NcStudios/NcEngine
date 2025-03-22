@@ -171,7 +171,6 @@ void Load()
 namespace texture
 {
 nc::asset::TextureView default_color{};
-nc::asset::TextureView default_metallic{};
 nc::asset::TextureView default_normal{};
 nc::asset::TextureView default_particle{};
 nc::asset::TextureView diffuse_cave{};
@@ -194,7 +193,6 @@ nc::asset::TextureView normal_skeleton{};
 
 const auto g_paths = std::array{
     std::string{path::default_color},
-    std::string{path::default_metallic},
     std::string{path::default_normal},
     std::string{path::default_particle},
     std::string{path::diffuse_cave},
@@ -217,23 +215,22 @@ const auto g_paths = std::array{
 };
 
 const auto g_subtypes = std::array{
-    nc::asset::AssetSubtype::DiffuseTexture,
-    nc::asset::AssetSubtype::DiffuseTexture,
+    nc::asset::AssetSubtype::ColorTexture,
+    nc::asset::AssetSubtype::ColorTexture,
     nc::asset::AssetSubtype::NormalTexture,
-    nc::asset::AssetSubtype::DiffuseTexture,
-    nc::asset::AssetSubtype::DiffuseTexture,
-    nc::asset::AssetSubtype::DiffuseTexture,
-    nc::asset::AssetSubtype::DiffuseTexture,
-    nc::asset::AssetSubtype::DiffuseTexture,
-    nc::asset::AssetSubtype::DiffuseTexture,
-    nc::asset::AssetSubtype::DiffuseTexture,
-    nc::asset::AssetSubtype::DiffuseTexture,
-    nc::asset::AssetSubtype::DiffuseTexture,
-    nc::asset::AssetSubtype::DiffuseTexture,
-    nc::asset::AssetSubtype::DiffuseTexture,
-    nc::asset::AssetSubtype::DiffuseTexture,
-    nc::asset::AssetSubtype::DiffuseTexture,
-    nc::asset::AssetSubtype::DiffuseTexture,
+    nc::asset::AssetSubtype::ColorTexture,
+    nc::asset::AssetSubtype::ColorTexture,
+    nc::asset::AssetSubtype::ColorTexture,
+    nc::asset::AssetSubtype::ColorTexture,
+    nc::asset::AssetSubtype::ColorTexture,
+    nc::asset::AssetSubtype::ColorTexture,
+    nc::asset::AssetSubtype::ColorTexture,
+    nc::asset::AssetSubtype::ColorTexture,
+    nc::asset::AssetSubtype::ColorTexture,
+    nc::asset::AssetSubtype::ColorTexture,
+    nc::asset::AssetSubtype::ColorTexture,
+    nc::asset::AssetSubtype::ColorTexture,
+    nc::asset::AssetSubtype::ColorTexture,
     nc::asset::AssetSubtype::NormalTexture,
     nc::asset::AssetSubtype::NormalTexture,
     nc::asset::AssetSubtype::NormalTexture,
@@ -248,7 +245,6 @@ void Load()
 void Acquire()
 {
     default_color = nc::asset::AcquireTextureAsset(path::default_color);
-    default_metallic = nc::asset::AcquireTextureAsset(path::default_metallic);
     default_normal = nc::asset::AcquireTextureAsset(path::default_normal);
     default_particle = nc::asset::AcquireTextureAsset(path::default_particle);
     diffuse_cave = nc::asset::AcquireTextureAsset(path::diffuse_cave);

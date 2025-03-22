@@ -63,7 +63,7 @@ const auto imageTexture1 = nc::asset::TextureWithId{
         .pixelData = {0, 1, 2, 3}
     },
     .id = 0,
-    .subtype = nc::asset::AssetSubtype::DiffuseTexture
+    .subtype = nc::asset::AssetSubtype::ColorTexture
 };
 
 const auto imageTexture2 = nc::asset::TextureWithId{
@@ -76,7 +76,7 @@ const auto imageTexture2 = nc::asset::TextureWithId{
         }
     },
     .id = 1,
-    .subtype = nc::asset::AssetSubtype::DiffuseTexture
+    .subtype = nc::asset::AssetSubtype::ColorTexture
 };
 
 const auto normalTexture = nc::asset::TextureWithId{

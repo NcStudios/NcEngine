@@ -75,10 +75,6 @@
             {
                 "sourcePath": "raw/image/DefaultBaseColor.png",
                 "assetName": "texture/default/color"
-            },
-            {
-                "sourcePath": "raw/image/DefaultMetallic.png",
-                "assetName": "texture/default/metallic"
             }
         ],
         "normal" : [

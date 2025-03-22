@@ -130,7 +130,6 @@ namespace texture
 namespace path
 {
 constexpr auto default_color = "default/color.nca";
-constexpr auto default_metallic = "default/metallic.nca";
 constexpr auto default_normal = "default/normal.nca";
 constexpr auto default_particle = "default/particle.nca";
 constexpr auto diffuse_cave = "diffuse/cave.nca";
@@ -153,7 +152,6 @@ constexpr auto normal_skeleton = "normal/skeleton.nca";
 } // namespace path
 
 extern nc::asset::TextureView default_color;
-extern nc::asset::TextureView default_metallic;
 extern nc::asset::TextureView default_normal;
 extern nc::asset::TextureView default_particle;
 extern nc::asset::TextureView diffuse_cave;

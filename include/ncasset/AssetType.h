@@ -26,7 +26,7 @@ enum class AssetType
 enum class AssetSubtype : uint8_t
 {
     None,
-    DiffuseTexture,
+    ColorTexture,
     NormalTexture
 };
 } // namespace nc::asset

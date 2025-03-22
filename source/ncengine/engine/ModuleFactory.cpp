@@ -25,10 +25,10 @@ auto BuildDefaultAssetMap() -> nc::asset::AssetMap
         { AssetType::AudioClip,         { DefaultAudioClip } },
         { AssetType::ConvexHull,        { DefaultConvexHull } },
         { AssetType::CubeMap,           { DefaultSkyboxCubeMap } },
-        { AssetType::Mesh,              { PlaneMesh, CubeMesh, SphereMesh, CapsuleMesh, WheelMesh } },
+        { AssetType::Mesh,              { PlaneMesh, CubeMesh, SphereMesh, CapsuleMesh, WheelMesh, SkyboxMesh } },
         { AssetType::MeshCollider,      { DefaultMeshCollider } },
         { AssetType::SkeletalAnimation, { DefaultSkeletalAnimation } },
-        { AssetType::Texture,           { DefaultBaseColor, DefaultNormal, DefaultRoughness, DefaultParticle } }
+        { AssetType::Texture,           { DefaultBaseColor, DefaultNormal, DefaultParticle } }
     };
 }
 } // anonymous namespace
