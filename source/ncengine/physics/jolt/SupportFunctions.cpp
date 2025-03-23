@@ -94,7 +94,7 @@ auto GetSupport(const JPH::ScaledShape* shape,
                 const JPH::Vec3& direction,
                 nc::SupportBuffer& buffer) -> JPH::Vec3
 {
-    const auto localVertex = GetFurthestVertex(shape, direction, buffer);
+    const auto localVertex = GetFurthestVertex(shape->GetInnerShape(), direction, buffer);
     return localVertex * shape->GetScale();
 }
 
