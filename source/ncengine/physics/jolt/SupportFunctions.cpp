@@ -158,10 +158,12 @@ auto GetHalfExtent(const CookedShape& shape,
     const auto direction = physics::ToJoltVec3(directionNormal);
     const auto vertex = ::GetFurthestVertex(apiShape.GetPtr(), direction);
 
-    if (shape.GetProperties().decorations & ShapeDecorationFlags::HasIsometricTransformation)
+    if (HasIsometricTransformation(apiShape))
     {
-        return direction.Dot(vertex - apiShape->GetCenterOfMass());
-
+        // note: For compound shapes, Shape::GetCenterOfMass() doesn't map to what the engine considers the origin.
+        //       Instead, we can just shift back to origin IFF a translation is applied, ignoring COM offsets.
+        const auto* decoratedShape = static_cast<const JPH::RotatedTranslatedShape*>(apiShape.GetPtr());
+        return direction.Dot(vertex - decoratedShape->GetPosition());
     }
 
     return vertex.Dot(direction);
