@@ -12,6 +12,28 @@
 #include "Jolt/Physics/Collision/Shape/Shape.h"
 #include "Jolt/Physics/Collision/Shape/SphereShape.h"
 
+namespace nc
+{
+struct SupportBuffer::Impl : public JPH::ConvexShape::SupportBuffer
+{
+};
+
+SupportBuffer::SupportBuffer()
+    : m_impl{std::make_unique<Impl>()}
+{
+}
+
+SupportBuffer::SupportBuffer(SupportBuffer&&) noexcept = default;
+SupportBuffer& SupportBuffer::operator=(SupportBuffer&&) noexcept = default;
+SupportBuffer::~SupportBuffer() noexcept = default;
+
+auto SupportBuffer::GetDefault() -> SupportBuffer&
+{
+    static auto instance = SupportBuffer{};
+    return instance;
+}
+} // namespace nc
+
 namespace
 {
 auto GetSupport(const JPH::SphereShape* sphere,
@@ -32,13 +54,12 @@ auto GetSupport(const JPH::CapsuleShape* capsule,
 }
 
 auto GetSupport(const JPH::ConvexShape* shape,
-                const JPH::Vec3& direction) -> JPH::Vec3
+                const JPH::Vec3& direction,
+                nc::SupportBuffer& buffer) -> JPH::Vec3
 {
-    // todo: not thread safe
-    static auto buffer = JPH::ConvexShape::SupportBuffer{};
-    auto supportFunc = shape->GetSupportFunction(
+    const auto* supportFunc = shape->GetSupportFunction(
         JPH::ConvexShape::ESupportMode::Default,
-        buffer,
+        buffer.GetImpl(),
         JPH::Vec3::sOne()
     );
 
@@ -46,20 +67,23 @@ auto GetSupport(const JPH::ConvexShape* shape,
 }
 
 auto GetFurthestVertex(const JPH::Shape* shape,
-                       const JPH::Vec3& direction) -> JPH::Vec3;
+                       const JPH::Vec3& direction,
+                       nc::SupportBuffer& buffer) -> JPH::Vec3;
 
 auto GetFurthestVertexLocal(const JPH::Shape* shape,
                             const JPH::Vec3& direction,
                             const JPH::Vec3& translation,
-                            const JPH::Quat& rotation) -> JPH::Vec3
+                            const JPH::Quat& rotation,
+                            nc::SupportBuffer& buffer) -> JPH::Vec3
 {
     const auto localDirection = rotation.Conjugated() * direction;
-    const auto localVertex = GetFurthestVertex(shape, localDirection);
+    const auto localVertex = GetFurthestVertex(shape, localDirection, buffer);
     return rotation * localVertex + translation;
 }
 
 auto GetFurthestVertex(const JPH::Shape* shape,
-                       const JPH::Vec3& direction) -> JPH::Vec3
+                       const JPH::Vec3& direction,
+                       nc::SupportBuffer& buffer) -> JPH::Vec3
 {
     switch (shape->GetSubType())
     {
@@ -80,7 +104,7 @@ auto GetFurthestVertex(const JPH::Shape* shape,
         case JPH::EShapeType::Convex:
         {
             const auto* convexShape = static_cast<const JPH::ConvexShape*>(shape);
-            return GetSupport(convexShape, direction);
+            return GetSupport(convexShape, direction, buffer);
         }
         case JPH::EShapeType::Decorated:
         {
@@ -89,7 +113,7 @@ auto GetFurthestVertex(const JPH::Shape* shape,
                 case JPH::EShapeSubType::Scaled:
                 {
                     const auto* decoratedShape = static_cast<const JPH::ScaledShape*>(shape);
-                    const auto localVertex = GetFurthestVertex(decoratedShape->GetInnerShape(), direction);
+                    const auto localVertex = GetFurthestVertex(decoratedShape->GetInnerShape(), direction, buffer);
                     return localVertex * decoratedShape->GetScale();
                 }
                 case JPH::EShapeSubType::RotatedTranslated:
@@ -97,7 +121,7 @@ auto GetFurthestVertex(const JPH::Shape* shape,
                     const auto* decoratedShape = static_cast<const JPH::RotatedTranslatedShape*>(shape);
                     const auto& translation = decoratedShape->GetPosition();
                     const auto& rotation = decoratedShape->GetRotation();
-                    return GetFurthestVertexLocal(decoratedShape->GetInnerShape(), direction, translation, rotation);
+                    return GetFurthestVertexLocal(decoratedShape->GetInnerShape(), direction, translation, rotation, buffer);
                 }
                 default:
                     throw nc::NcError{fmt::format("Unhandled SubShapeType '{}'", (int)shape->GetSubType())};
@@ -113,7 +137,7 @@ auto GetFurthestVertex(const JPH::Shape* shape,
             {
                 const auto translation = subShape.GetPositionCOM() + totalCenterOfMass;
                 const auto rotation = subShape.GetRotation();
-                const auto vertex = GetFurthestVertexLocal(subShape.mShape, direction, translation, rotation);
+                const auto vertex = GetFurthestVertexLocal(subShape.mShape, direction, translation, rotation, buffer);
                 const auto distance = vertex.Dot(direction);
                 if (distance > maxExtent)
                 {
@@ -134,29 +158,22 @@ auto GetFurthestVertex(const JPH::Shape* shape,
 namespace nc
 {
 auto GetWorldSupport(const CookedShape& shape,
-                     const Vector3& directionNormal) -> Vector3
+                     const Vector3& directionNormal,
+                     SupportBuffer& buffer) -> Vector3
 {
     const auto& apiShape = ShapeStorageRTTI::ToShape(shape.GetShapeData());
     const auto direction = physics::ToJoltVec3(directionNormal);
-    const auto point = ::GetFurthestVertex(apiShape.GetPtr(), direction);
-    return physics::ToVector3(point);
-}
-
-auto GetDistanceFromOrigin(const CookedShape& shape,
-                           const Vector3& directionNormal) -> float
-{
-    const auto& apiShape = ShapeStorageRTTI::ToShape(shape.GetShapeData());
-    const auto direction = physics::ToJoltVec3(directionNormal);
-    const auto vertex = ::GetFurthestVertex(apiShape.GetPtr(), direction);
-    return vertex.Dot(direction);
+    const auto vertex = ::GetFurthestVertex(apiShape.GetPtr(), direction, buffer);
+    return physics::ToVector3(vertex);
 }
 
 auto GetHalfExtent(const CookedShape& shape,
-                   const Vector3& directionNormal) -> float
+                   const Vector3& directionNormal,
+                   SupportBuffer& buffer) -> float
 {
     const auto& apiShape = ShapeStorageRTTI::ToShape(shape.GetShapeData());
     const auto direction = physics::ToJoltVec3(directionNormal);
-    const auto vertex = ::GetFurthestVertex(apiShape.GetPtr(), direction);
+    const auto vertex = ::GetFurthestVertex(apiShape.GetPtr(), direction, buffer);
 
     if (HasIsometricTransformation(apiShape))
     {
