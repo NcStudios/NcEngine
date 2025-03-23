@@ -155,9 +155,9 @@ auto GetFurthestVertex(const JPH::Shape* shape,
             {
                 case JPH::EShapeSubType::Sphere:     return GetSupport(static_cast<const JPH::SphereShape*>(shape), direction);
                 case JPH::EShapeSubType::Capsule:    return GetSupport(static_cast<const JPH::CapsuleShape*>(shape), direction);
-                case JPH::EShapeSubType::Box:
+                case JPH::EShapeSubType::Box:        [[fallthrough]];
                 case JPH::EShapeSubType::ConvexHull: return GetSupport(static_cast<const JPH::ConvexShape*>(shape), direction, buffer);
-                default:                             break;
+                default:                             UnhandledShapeType(type, subtype);
             }
         }
         case JPH::EShapeType::Decorated:
@@ -166,7 +166,7 @@ auto GetFurthestVertex(const JPH::Shape* shape,
             {
                 case JPH::EShapeSubType::Scaled:            return GetSupport(static_cast<const JPH::ScaledShape*>(shape), direction, buffer);
                 case JPH::EShapeSubType::RotatedTranslated: return GetSupport(static_cast<const JPH::RotatedTranslatedShape*>(shape), direction, buffer);
-                default:                                    break;
+                default:                                    UnhandledShapeType(type, subtype);
             }
         }
         case JPH::EShapeType::Compound:
@@ -174,10 +174,8 @@ auto GetFurthestVertex(const JPH::Shape* shape,
             return GetSupport(static_cast<const JPH::CompoundShape*>(shape), direction, buffer);
         }
         default:
-            break;
+            UnhandledShapeType(type, subtype);
     }
-
-    UnhandledShapeType(type, subtype);
 }
 } // anonymous namespace
 
