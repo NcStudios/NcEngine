@@ -79,7 +79,7 @@ TEST_F(SupportFunctionsTest, Box_nonTransformed)
     constexpr auto extents = nc::Vector3{1.0f, 2.0f, 3.0f};
     const auto shape = nc::CookedShape{nc::Shape::MakeBox(extents)};
 
-    // for box, multiple vertices are valid here; just testting component of query direction
+    // for box, multiple vertices are valid here; just testing component of query direction
     EXPECT_FLOAT_EQ( 0.5f, nc::GetWorldSupport(shape, nc::Vector3::Right()).x);
     EXPECT_FLOAT_EQ(-0.5f, nc::GetWorldSupport(shape, nc::Vector3::Left()).x);
     EXPECT_FLOAT_EQ( 1.0f, nc::GetWorldSupport(shape, nc::Vector3::Up()).y);
@@ -105,7 +105,7 @@ TEST_F(SupportFunctionsTest, Box_transformed)
         nc::Quaternion::Identity()
     };
 
-    // for box, multiple vertices are valid here; just testting component of query direction
+    // for box, multiple vertices are valid here; just testing component of query direction
     EXPECT_FLOAT_EQ( 0.5f + offset.x, nc::GetWorldSupport(shape, nc::Vector3::Right()).x);
     EXPECT_FLOAT_EQ(-0.5f + offset.x, nc::GetWorldSupport(shape, nc::Vector3::Left()).x);
     EXPECT_FLOAT_EQ( 1.0f + offset.y, nc::GetWorldSupport(shape, nc::Vector3::Up()).y);
@@ -268,7 +268,6 @@ TEST_F(SupportFunctionsTest, GetDistanceFromOrigin_CompoundShape_translatedRotat
     constexpr auto extents = nc::Vector3{1.0f, 2.0f, 3.0f};
     constexpr auto offset = nc::Vector3{1.0f, 2.0f, 3.0f};
 
-    // dx/jolt quats out of sync
     // There are slight differences in quaternion calculations between DX/Jolt. They diverge enough
     // in this test to exceed gtest's epsilon (error roughly 0.00000005). Forcing initialization from
     // Jolt's values to keep the comparison happy.

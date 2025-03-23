@@ -3,6 +3,7 @@
 #include "CookedShapeUtility.h"
 
 #include "ncmath/Vector.h"
+#include "ncutility/platform/Platform.h"
 
 #include "Jolt/Physics/Collision/Shape/CapsuleShape.h"
 #include "Jolt/Physics/Collision/Shape/CompoundShape.h"
@@ -36,10 +37,33 @@ auto SupportBuffer::GetDefault() -> SupportBuffer&
 
 namespace
 {
+/** @note Support functions for non-compound shapes can ignore position/center of mass as its always zero. */
+
+auto GetFurthestVertex(const JPH::Shape* shape,
+                       const JPH::Vec3& direction,
+                       nc::SupportBuffer& buffer) -> JPH::Vec3;
+
+auto GetFurthestVertexLocal(const JPH::Shape* shape,
+                            const JPH::Vec3& direction,
+                            const JPH::Vec3& translation,
+                            const JPH::Quat& rotation,
+                            nc::SupportBuffer& buffer) -> JPH::Vec3;
+
+[[noreturn]] NC_NO_INLINE
+void UnhandledShapeType(JPH::EShapeType type,
+                        JPH::EShapeSubType subtype)
+{
+    throw nc::NcError{fmt::format(
+        "Unhandled shape type/subtype '{}', '{}'",
+        std::to_underlying(type),
+        std::to_underlying(subtype)
+    )};
+}
+
 auto GetSupport(const JPH::SphereShape* sphere,
                 const JPH::Vec3& direction) -> JPH::Vec3
 {
-    return sphere->GetCenterOfMass() + direction * sphere->GetRadius();
+    return direction * sphere->GetRadius();
 }
 
 auto GetSupport(const JPH::CapsuleShape* capsule,
@@ -66,9 +90,45 @@ auto GetSupport(const JPH::ConvexShape* shape,
     return supportFunc->GetSupport(direction);
 }
 
-auto GetFurthestVertex(const JPH::Shape* shape,
-                       const JPH::Vec3& direction,
-                       nc::SupportBuffer& buffer) -> JPH::Vec3;
+auto GetSupport(const JPH::ScaledShape* shape,
+                const JPH::Vec3& direction,
+                nc::SupportBuffer& buffer) -> JPH::Vec3
+{
+    const auto localVertex = GetFurthestVertex(shape, direction, buffer);
+    return localVertex * shape->GetScale();
+}
+
+auto GetSupport(const JPH::RotatedTranslatedShape* shape,
+                const JPH::Vec3& direction,
+                nc::SupportBuffer& buffer) -> JPH::Vec3
+{
+    const auto& translation = shape->GetPosition();
+    const auto& rotation = shape->GetRotation();
+    return GetFurthestVertexLocal(shape->GetInnerShape(), direction, translation, rotation, buffer);
+}
+
+auto GetSupport(const JPH::CompoundShape* shape,
+                const JPH::Vec3& direction,
+                nc::SupportBuffer& buffer)
+{
+    const auto totalCenterOfMass = shape->GetCenterOfMass();
+    auto furthestVertex = JPH::Vec3{};
+    auto maxExtent = -1.0f;
+    for (const auto& subShape : shape->GetSubShapes())
+    {
+        const auto translation = subShape.GetPositionCOM() + totalCenterOfMass;
+        const auto rotation = subShape.GetRotation();
+        const auto vertex = GetFurthestVertexLocal(subShape.mShape, direction, translation, rotation, buffer);
+        const auto distance = vertex.Dot(direction);
+        if (distance > maxExtent)
+        {
+            furthestVertex = vertex;
+            maxExtent = distance;
+        }
+    }
+
+    return furthestVertex;
+}
 
 auto GetFurthestVertexLocal(const JPH::Shape* shape,
                             const JPH::Vec3& direction,
@@ -85,73 +145,35 @@ auto GetFurthestVertex(const JPH::Shape* shape,
                        const JPH::Vec3& direction,
                        nc::SupportBuffer& buffer) -> JPH::Vec3
 {
-    switch (shape->GetSubType())
-    {
-        case JPH::EShapeSubType::Sphere:
-        {
-            const auto* sphereShape = static_cast<const JPH::SphereShape*>(shape);
-            return GetSupport(sphereShape, direction);
-        }
-        case JPH::EShapeSubType::Capsule:
-        {
-            const auto* capsuleShape = static_cast<const JPH::CapsuleShape*>(shape);
-            return GetSupport(capsuleShape, direction);
-        }
-    }
-
-    switch (shape->GetType())
+    const auto type = shape->GetType();
+    const auto subtype = shape->GetSubType();
+    switch (type)
     {
         case JPH::EShapeType::Convex:
         {
-            const auto* convexShape = static_cast<const JPH::ConvexShape*>(shape);
-            return GetSupport(convexShape, direction, buffer);
+            switch (subtype)
+            {
+                case JPH::EShapeSubType::Sphere:     return GetSupport(static_cast<const JPH::SphereShape*>(shape), direction);
+                case JPH::EShapeSubType::Capsule:    return GetSupport(static_cast<const JPH::CapsuleShape*>(shape), direction);
+                case JPH::EShapeSubType::Box:
+                case JPH::EShapeSubType::ConvexHull: return GetSupport(static_cast<const JPH::ConvexShape*>(shape), direction, buffer);
+            }
         }
         case JPH::EShapeType::Decorated:
         {
-            switch (shape->GetSubType())
+            switch (subtype)
             {
-                case JPH::EShapeSubType::Scaled:
-                {
-                    const auto* decoratedShape = static_cast<const JPH::ScaledShape*>(shape);
-                    const auto localVertex = GetFurthestVertex(decoratedShape->GetInnerShape(), direction, buffer);
-                    return localVertex * decoratedShape->GetScale();
-                }
-                case JPH::EShapeSubType::RotatedTranslated:
-                {
-                    const auto* decoratedShape = static_cast<const JPH::RotatedTranslatedShape*>(shape);
-                    const auto& translation = decoratedShape->GetPosition();
-                    const auto& rotation = decoratedShape->GetRotation();
-                    return GetFurthestVertexLocal(decoratedShape->GetInnerShape(), direction, translation, rotation, buffer);
-                }
-                default:
-                    throw nc::NcError{fmt::format("Unhandled SubShapeType '{}'", (int)shape->GetSubType())};
+                case JPH::EShapeSubType::Scaled:            return GetSupport(static_cast<const JPH::ScaledShape*>(shape), direction, buffer);
+                case JPH::EShapeSubType::RotatedTranslated: return GetSupport(static_cast<const JPH::RotatedTranslatedShape*>(shape), direction, buffer);
             }
         }
         case JPH::EShapeType::Compound:
         {
-            const auto* compoundShape = static_cast<const JPH::CompoundShape*>(shape);
-            const auto totalCenterOfMass = compoundShape->GetCenterOfMass();
-            auto furthestVertex = JPH::Vec3{};
-            auto maxExtent = -FLT_MAX;
-            for (const auto& subShape : compoundShape->GetSubShapes())
-            {
-                const auto translation = subShape.GetPositionCOM() + totalCenterOfMass;
-                const auto rotation = subShape.GetRotation();
-                const auto vertex = GetFurthestVertexLocal(subShape.mShape, direction, translation, rotation, buffer);
-                const auto distance = vertex.Dot(direction);
-                if (distance > maxExtent)
-                {
-                    furthestVertex = vertex;
-                    maxExtent = distance;
-                }
-            }
-
-            return furthestVertex;
+            return GetSupport(static_cast<const JPH::CompoundShape*>(shape), direction, buffer);
         }
-
-        default:
-            throw nc::NcError{fmt::format("Unhandled ShapeType '{}'", (int)shape->GetType())};
     }
+
+    UnhandledShapeType(type, subtype);
 }
 } // anonymous namespace
 

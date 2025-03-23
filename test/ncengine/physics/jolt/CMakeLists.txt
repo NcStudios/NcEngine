@@ -209,7 +209,6 @@ add_test(ConstraintManager_unit_tests ConstraintManager_unit_tests)
 ### CookedShape Tests ###
 add_executable(CookedShape_unit_tests
     CookedShape_unit_tests.cpp
-    ${NC_SOURCE_DIR}/physics/jolt/CompoundShape.cpp
     ${NC_SOURCE_DIR}/physics/jolt/CookedShape.cpp
     ${NC_SOURCE_DIR}/physics/jolt/JoltPhysics.cpp
     ${NC_SOURCE_DIR}/physics/jolt/ShapeFactory.cpp
