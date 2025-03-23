@@ -157,6 +157,13 @@ auto GetHalfExtent(const CookedShape& shape,
     const auto& apiShape = ShapeStorageRTTI::ToShape(shape.GetShapeData());
     const auto direction = physics::ToJoltVec3(directionNormal);
     const auto vertex = ::GetFurthestVertex(apiShape.GetPtr(), direction);
-    return direction.Dot(vertex - apiShape->GetCenterOfMass());
+
+    if (shape.GetProperties().decorations & ShapeDecorationFlags::HasIsometricTransformation)
+    {
+        return direction.Dot(vertex - apiShape->GetCenterOfMass());
+
+    }
+
+    return vertex.Dot(direction);
 }
 } // namespace nc

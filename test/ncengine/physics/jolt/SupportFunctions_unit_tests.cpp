@@ -255,7 +255,7 @@ TEST_F(SupportFunctionsTest, Capsule_transformed)
     EXPECT_EQ(offset + nc::Vector3::Back()  * radius,     nc::GetWorldSupport(shape, nc::Vector3::Back()));
 }
 
-TEST_F(SupportFunctionsTest, GetDistanceFromOrigin_CompoundShape)
+TEST_F(SupportFunctionsTest, CompoundShape_nonTransformed)
 {
     const auto subShapes = std::array{
         nc::SubShapeInfo{
@@ -272,6 +272,7 @@ TEST_F(SupportFunctionsTest, GetDistanceFromOrigin_CompoundShape)
 
     const auto shape = nc::CreateStaticCompoundShape(subShapes);
 
+    // can we get this to be half extent relative to local origin
     EXPECT_FLOAT_EQ(0.5f, nc::GetDistanceFromOrigin(shape, nc::Vector3::Right()));
     EXPECT_FLOAT_EQ(0.5f, nc::GetDistanceFromOrigin(shape, nc::Vector3::Left()));
     EXPECT_FLOAT_EQ(1.5f, nc::GetDistanceFromOrigin(shape, nc::Vector3::Up()));
@@ -279,6 +280,7 @@ TEST_F(SupportFunctionsTest, GetDistanceFromOrigin_CompoundShape)
     EXPECT_FLOAT_EQ(0.5f, nc::GetDistanceFromOrigin(shape, nc::Vector3::Front()));
     EXPECT_FLOAT_EQ(0.5f, nc::GetDistanceFromOrigin(shape, nc::Vector3::Back()));
 
+    // this is half extent relative to COM
     EXPECT_FLOAT_EQ(0.5f, nc::GetHalfExtent(shape, nc::Vector3::Right()));
     EXPECT_FLOAT_EQ(0.5f, nc::GetHalfExtent(shape, nc::Vector3::Left()));
     EXPECT_FLOAT_EQ(1.5f, nc::GetHalfExtent(shape, nc::Vector3::Up()));
@@ -286,23 +288,15 @@ TEST_F(SupportFunctionsTest, GetDistanceFromOrigin_CompoundShape)
     EXPECT_FLOAT_EQ(0.5f, nc::GetHalfExtent(shape, nc::Vector3::Front()));
     EXPECT_FLOAT_EQ(0.5f, nc::GetHalfExtent(shape, nc::Vector3::Back()));
 
-    // EXPECT_EQ(nc::Vector3( 0.5f,  0.0f,  0.0f), nc::GetWorldSupport(shape, nc::Vector3::Right()));
-    // EXPECT_EQ(nc::Vector3(-0.5f,  0.0f,  0.0f), nc::GetWorldSupport(shape, nc::Vector3::Left()));
-    // EXPECT_EQ(nc::Vector3( 0.0f,  1.5f,  0.0f), nc::GetWorldSupport(shape, nc::Vector3::Up()));
-    // EXPECT_EQ(nc::Vector3( 0.0f, -1.5f,  0.0f), nc::GetWorldSupport(shape, nc::Vector3::Down()));
-    // EXPECT_EQ(nc::Vector3( 0.0f,  0.0f,  0.5f), nc::GetWorldSupport(shape, nc::Vector3::Front()));
-    // EXPECT_EQ(nc::Vector3( 0.0f,  0.0f, -0.5f), nc::GetWorldSupport(shape, nc::Vector3::Back()));
-
-    TEST_VECS(nc::Vector3( 0.5f,  1.0f,  0.0f), nc::Vector3::Right());
-    TEST_VECS(nc::Vector3(-0.5f,  1.0f,  0.0f), nc::Vector3::Left());
-    TEST_VECS(nc::Vector3( 0.0f,  1.5f,  0.0f), nc::Vector3::Up());
-    TEST_VECS(nc::Vector3( 0.0f, -1.4f,  0.0f), nc::Vector3::Down());
-    TEST_VECS(nc::Vector3( 0.0f,  1.0f,  0.5f), nc::Vector3::Front());
-    TEST_VECS(nc::Vector3( 0.0f,  1.0f, -0.5f), nc::Vector3::Back());
-
+    EXPECT_EQ(nc::Vector3( 0.5f,  1.0f,  0.0f), nc::GetWorldSupport(shape, nc::Vector3::Right()));
+    EXPECT_EQ(nc::Vector3(-0.5f,  1.0f,  0.0f), nc::GetWorldSupport(shape, nc::Vector3::Left()));
+    EXPECT_EQ(nc::Vector3( 0.0f,  1.5f,  0.0f), nc::GetWorldSupport(shape, nc::Vector3::Up()));
+    EXPECT_EQ(nc::Vector3( 0.0f, -1.4f,  0.0f), nc::GetWorldSupport(shape, nc::Vector3::Down()));
+    EXPECT_EQ(nc::Vector3( 0.0f,  1.0f,  0.5f), nc::GetWorldSupport(shape, nc::Vector3::Front()));
+    EXPECT_EQ(nc::Vector3( 0.0f,  1.0f, -0.5f), nc::GetWorldSupport(shape, nc::Vector3::Back()));
 }
 
-TEST_F(SupportFunctionsTest, GetDistanceFromOrigin_CompoundShape2)
+TEST_F(SupportFunctionsTest, CompoundShape_nonTransformed_offsetCenterOfMass)
 {
     const auto subShapes = std::array{
         nc::SubShapeInfo{
@@ -314,7 +308,7 @@ TEST_F(SupportFunctionsTest, GetDistanceFromOrigin_CompoundShape2)
         }
     };
 
-    const auto shape = nc::CreateStaticCompoundShape(subShapes);
+    auto shape = nc::CreateStaticCompoundShape(subShapes);
 
     EXPECT_FLOAT_EQ(0.5f, nc::GetDistanceFromOrigin(shape, nc::Vector3::Right()));
     EXPECT_FLOAT_EQ(0.5f, nc::GetDistanceFromOrigin(shape, nc::Vector3::Left()));
@@ -324,15 +318,23 @@ TEST_F(SupportFunctionsTest, GetDistanceFromOrigin_CompoundShape2)
     EXPECT_FLOAT_EQ(2.0f, nc::GetDistanceFromOrigin(shape, nc::Vector3::Back()));
 
 
+    EXPECT_EQ(nc::Vector3( 0.5f, -1.0f,  0.0f), nc::GetWorldSupport(shape, nc::Vector3::Right()));
+    EXPECT_EQ(nc::Vector3(-0.5f, -1.0f,  0.0f), nc::GetWorldSupport(shape, nc::Vector3::Left()));
+    EXPECT_EQ(nc::Vector3( 0.0f, -1.5f,  0.0f), nc::GetWorldSupport(shape, nc::Vector3::Down()));
+    // vertices selected from box could be any on reference face
+    EXPECT_FLOAT_EQ(0.5f,  nc::GetWorldSupport(shape, nc::Vector3::Up()).y);
+    EXPECT_FLOAT_EQ(2.0f,  nc::GetWorldSupport(shape, nc::Vector3::Front()).z);
+    EXPECT_FLOAT_EQ(-2.0f, nc::GetWorldSupport(shape, nc::Vector3::Back()).z);
 }
 
 
-TEST_F(SupportFunctionsTest, GetDistanceFromOrigin_CompoundShape_rotatedInnerShape)
+TEST_F(SupportFunctionsTest, CompoundShape_transformedSubShapes)
 {
     const auto r = nc::Quaternion::FromEulerAngles(0.0f, 0.0f, nc::DegreesToRadians(90.0f));
 
     // THINK THIS IS THE SAME AS TEST BELOW
-    
+    // - this isn't using compound, we can redo test using compound but need 1 more shape
+
     const auto uut = nc::CookedShape{
         nc::Shape::MakeBox(nc::Vector3{0.5f, 1.0f, 4.0f}),
         nc::Vector3::Zero(),
@@ -347,52 +349,70 @@ TEST_F(SupportFunctionsTest, GetDistanceFromOrigin_CompoundShape_rotatedInnerSha
     EXPECT_FLOAT_EQ(2.0f, nc::GetDistanceFromOrigin(uut, nc::Vector3::Back()));
 }
 
-TEST_F(SupportFunctionsTest, GetDistanceFromOrigin_CompoundShape_rotatedCompoundShape)
+TEST_F(SupportFunctionsTest, CompoundShape_transformed)
 {
-    const auto rotation = nc::Quaternion::FromEulerAngles(0.0f, 0.0f, nc::DegreesToRadians(90.0f));
-
-    const auto shape = nc::CookedShape{
-        nc::Shape::MakeBox(nc::Vector3{0.5f, 1.0f, 4.0f}),
-        nc::Vector3::Zero(),
-        rotation
+    constexpr auto subshapes = std::array{
+        nc::SubShapeInfo{
+            nc::Shape::MakeBox(nc::Vector3{0.5f, 1.0f, 4.0f})
+        },
+        nc::SubShapeInfo{
+            nc::Shape::MakeBox(nc::Vector3{0.5f, 0.5f, 0.5f}),
+            nc::Vector3::Down()
+        }
     };
 
-    EXPECT_FLOAT_EQ(0.5f,  nc::GetDistanceFromOrigin(shape, nc::Vector3::Right()));
-    EXPECT_FLOAT_EQ(0.5f,  nc::GetDistanceFromOrigin(shape, nc::Vector3::Left()));
-    EXPECT_FLOAT_EQ(0.25f, nc::GetDistanceFromOrigin(shape, nc::Vector3::Up()));
-    EXPECT_FLOAT_EQ(0.25f, nc::GetDistanceFromOrigin(shape, nc::Vector3::Down()));
-    EXPECT_FLOAT_EQ(2.0f,  nc::GetDistanceFromOrigin(shape, nc::Vector3::Front()));
-    EXPECT_FLOAT_EQ(2.0f,  nc::GetDistanceFromOrigin(shape, nc::Vector3::Back()));
+    const auto rotation = nc::Quaternion::FromEulerAngles(0.0f, 0.0f, nc::DegreesToRadians(90.0f));
+
+    auto shape = nc::CreateMutableCompoundShape(subshapes);
+    shape.SetPositionAndRotation(nc::Vector3::Zero(), rotation);
+
+    // EXPECT_FLOAT_EQ(0.5f,  nc::GetDistanceFromOrigin(shape, nc::Vector3::Right()));
+    // EXPECT_FLOAT_EQ(0.5f,  nc::GetDistanceFromOrigin(shape, nc::Vector3::Left()));
+    // EXPECT_FLOAT_EQ(0.25f, nc::GetDistanceFromOrigin(shape, nc::Vector3::Up()));
+    // EXPECT_FLOAT_EQ(0.25f, nc::GetDistanceFromOrigin(shape, nc::Vector3::Down()));
+    // EXPECT_FLOAT_EQ(2.0f,  nc::GetDistanceFromOrigin(shape, nc::Vector3::Front()));
+    // EXPECT_FLOAT_EQ(2.0f,  nc::GetDistanceFromOrigin(shape, nc::Vector3::Back()));
+
+    EXPECT_FLOAT_EQ( 1.25f, nc::GetWorldSupport(shape, nc::Vector3::Right()).x);
+    EXPECT_FLOAT_EQ(-0.5f,  nc::GetWorldSupport(shape, nc::Vector3::Left()).x);
+    EXPECT_FLOAT_EQ( 0.25f, nc::GetWorldSupport(shape, nc::Vector3::Up()).y);
+    EXPECT_FLOAT_EQ(-0.25f, nc::GetWorldSupport(shape, nc::Vector3::Down()).y);
+    EXPECT_FLOAT_EQ( 2.0f,  nc::GetWorldSupport(shape, nc::Vector3::Front()).z);
+    EXPECT_FLOAT_EQ(-2.0f,  nc::GetWorldSupport(shape, nc::Vector3::Back()).z);
 }
 
 TEST_F(SupportFunctionsTest, GetDistanceFromOrigin_CompoundShape_translatedRotatedCompoundShape)
 {
+    constexpr auto extents = nc::Vector3{1.0f, 2.0f, 3.0f};
+    constexpr auto offset = nc::Vector3{1.0f, 2.0f, 3.0f};
+
+    // dx/jolt quats out of sync
     const auto r2 = JPH::Quat::sEulerAngles(JPH::Vec3{0.0f, 0.0f, nc::DegreesToRadians(90.0f)});
 
-    const auto r = nc::Quaternion{r2.GetX(), r2.GetY(), r2.GetZ(), r2.GetW()};
+    const auto rotation = nc::Quaternion{r2.GetX(), r2.GetY(), r2.GetZ(), r2.GetW()};
 
-    const auto uut = nc::CookedShape{
-        nc::Shape::MakeBox(nc::Vector3{1.0f, 2.0f, 3.0f}),
-        nc::Vector3{1.0f, 2.0f, 3.0f},
-        r
+    const auto shape = nc::CookedShape{
+        nc::Shape::MakeBox(extents),
+        offset,
+        rotation
     };
 
     // after rotation:
     // 2.0, 1.0, 3.0
 
-    const auto actualRight = nc::GetDistanceFromOrigin(uut, nc::Vector3::Right());
-    const auto actualLeft = nc::GetDistanceFromOrigin(uut, nc::Vector3::Left());
-    const auto actualUp = nc::GetDistanceFromOrigin(uut, nc::Vector3::Up());
-    const auto actualDown = nc::GetDistanceFromOrigin(uut, nc::Vector3::Down());
-    const auto actualFront = nc::GetDistanceFromOrigin(uut, nc::Vector3::Front());
-    const auto actualBack = nc::GetDistanceFromOrigin(uut, nc::Vector3::Back());
+    EXPECT_FLOAT_EQ( 2.0f, nc::GetDistanceFromOrigin(shape, nc::Vector3::Right()));
+    EXPECT_FLOAT_EQ( 0.0f, nc::GetDistanceFromOrigin(shape, nc::Vector3::Left()));
+    EXPECT_FLOAT_EQ( 2.5f, nc::GetDistanceFromOrigin(shape, nc::Vector3::Up()));
+    EXPECT_FLOAT_EQ(-1.5f, nc::GetDistanceFromOrigin(shape, nc::Vector3::Down())); // these are busted, kind of...
+    EXPECT_FLOAT_EQ( 4.5f, nc::GetDistanceFromOrigin(shape, nc::Vector3::Front()));
+    EXPECT_FLOAT_EQ(-1.5f, nc::GetDistanceFromOrigin(shape, nc::Vector3::Back()));
 
-    EXPECT_FLOAT_EQ(2.0f, actualRight);
-    EXPECT_FLOAT_EQ(0.0f, actualLeft);
-    EXPECT_FLOAT_EQ(2.5f, actualUp);
-    EXPECT_FLOAT_EQ(-1.5f, actualDown); // these are busted, kind of...
-    EXPECT_FLOAT_EQ(4.5f, actualFront);
-    EXPECT_FLOAT_EQ(-1.5f, actualBack);
+    EXPECT_FLOAT_EQ(2.0f, nc::GetWorldSupport(shape, nc::Vector3::Right()).x);
+    EXPECT_FLOAT_EQ(0.0f, nc::GetWorldSupport(shape, nc::Vector3::Left()).x);
+    EXPECT_FLOAT_EQ(2.5f, nc::GetWorldSupport(shape, nc::Vector3::Up()).y);
+    EXPECT_FLOAT_EQ(1.5f, nc::GetWorldSupport(shape, nc::Vector3::Down()).y);
+    EXPECT_FLOAT_EQ(4.5f, nc::GetWorldSupport(shape, nc::Vector3::Front()).z);
+    EXPECT_FLOAT_EQ(1.5f, nc::GetWorldSupport(shape, nc::Vector3::Back()).z);
 }
 
 TEST_F(SupportFunctionsTest, DebugSandbox)
@@ -426,13 +446,6 @@ TEST_F(SupportFunctionsTest, DebugSandbox)
 
     // after rotation:
     // 2.0, 1.0, 3.0
-
-    // const auto actualRight = uut.GetHalfExtent(nc::Vector3::Right());
-    // const auto actualLeft  = uut.GetHalfExtent(nc::Vector3::Left());
-    // const auto actualUp    = uut.GetHalfExtent(nc::Vector3::Up());
-    // const auto actualDown  = uut.GetHalfExtent(nc::Vector3::Down());
-    // const auto actualFront = uut.GetHalfExtent(nc::Vector3::Front());
-    // const auto actualBack  = uut.GetHalfExtent(nc::Vector3::Back());
 
     const auto actualRight = nc::GetDistanceFromOrigin(uut, nc::Vector3::Right());
     const auto actualLeft  = nc::GetDistanceFromOrigin(uut, nc::Vector3::Left());

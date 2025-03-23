@@ -115,6 +115,13 @@ auto CollisionQuery::TestShape(const Shape& shape,
     return m_impl->TestShape(shape, position, rotation);
 }
 
+auto CollisionQuery::TestShape(const CookedShape& shape,
+                               const Vector3& position,
+                               const Quaternion& rotation) const -> TestShapeResult
+{
+    return m_impl->TestShape(shape, position, rotation);
+}
+
 auto CollisionQuery::TestShape(const CookedShape& shape) const -> TestShapeResult
 {
     return m_impl->TestShape(shape);
