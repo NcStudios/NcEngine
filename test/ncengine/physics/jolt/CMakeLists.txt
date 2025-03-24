@@ -378,6 +378,37 @@ target_link_libraries(ShapeFactory_unit_tests
 
 add_test(ShapeFactory_unit_tests ShapeFactory_unit_tests)
 
+### SupportFunctions Tests ###
+add_executable(SupportFunctions_unit_tests
+    SupportFunctions_unit_tests.cpp
+    ${NC_SOURCE_DIR}/physics/jolt/CompoundShape.cpp
+    ${NC_SOURCE_DIR}/physics/jolt/CookedShape.cpp
+    ${NC_SOURCE_DIR}/physics/jolt/JoltPhysics.cpp
+    ${NC_SOURCE_DIR}/physics/jolt/ShapeFactory.cpp
+    ${NC_SOURCE_DIR}/physics/jolt/SupportFunctions.cpp
+)
+
+target_include_directories(SupportFunctions_unit_tests
+    PRIVATE
+        ${NC_INCLUDE_DIR}
+        ${NC_SOURCE_DIR}
+)
+
+target_compile_options(SupportFunctions_unit_tests
+    PUBLIC
+        ${NC_COMPILER_FLAGS}
+)
+
+target_link_libraries(SupportFunctions_unit_tests
+    PRIVATE
+        NcMath
+        NcUtility
+        NcJolt
+        gtest_main
+)
+
+add_test(SupportFunctions_unit_tests SupportFunctions_unit_tests)
+
 ### VehicleManager Tests ###
 add_executable(VehicleManager_unit_tests
     VehicleManager_unit_tests.cpp

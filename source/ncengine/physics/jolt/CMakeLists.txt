@@ -11,6 +11,7 @@ target_sources(${NC_ENGINE_LIB}
         JobSystem.cpp
         PhysicsSnapshot.cpp
         ShapeFactory.cpp
+        SupportFunctions.cpp
         VehicleAnimator.cpp
         VehicleManager.cpp
 )

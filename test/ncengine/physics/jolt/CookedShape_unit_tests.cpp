@@ -1,4 +1,5 @@
 #include "JoltApiFixture.inl"
+#include "ncengine/physics/CompoundShape.h"
 #include "ncengine/physics/CookedShape.h"
 #include "physics/jolt/Conversion.h"
 #include "physics/jolt/CookedShapeUtility.h"
