@@ -185,14 +185,28 @@ auto GetWorldSupport(const CookedShape& shape,
                      const Vector3& directionNormal,
                      SupportBuffer& buffer) -> Vector3
 {
+    return ToVector3(GetWorldSupport(shape, ToXMVector(directionNormal), buffer));
+}
+
+auto GetWorldSupport(const CookedShape& shape,
+                     DirectX::FXMVECTOR directionNormal,
+                     SupportBuffer& buffer) -> DirectX::XMVECTOR
+{
     const auto& apiShape = ShapeStorageRTTI::ToShape(shape.GetShapeData());
     const auto direction = physics::ToJoltVec3(directionNormal);
     const auto vertex = ::GetFurthestVertex(apiShape.GetPtr(), direction, buffer);
-    return physics::ToVector3(vertex);
+    return physics::ToXMVector(vertex);
 }
 
 auto GetHalfExtent(const CookedShape& shape,
                    const Vector3& directionNormal,
+                   SupportBuffer& buffer) -> float
+{
+    return GetHalfExtent(shape, ToXMVector(directionNormal), buffer);
+}
+
+auto GetHalfExtent(const CookedShape& shape,
+                   DirectX::FXMVECTOR directionNormal,
                    SupportBuffer& buffer) -> float
 {
     const auto& apiShape = ShapeStorageRTTI::ToShape(shape.GetShapeData());

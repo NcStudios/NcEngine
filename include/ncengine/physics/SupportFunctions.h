@@ -4,6 +4,8 @@
  */
 #pragma once
 
+#include "DirectXMath.h"
+
 #include <memory>
 
 namespace nc
@@ -38,18 +40,28 @@ class SupportBuffer
 };
 
 /**
+ * @name Shape Support Functions
  * @brief Get the furthest vertex in a direction in world space.
- * @note Concurrent calls to this function require unique SupportBuffers.
+ * @note Concurrent calls to these functions require unique SupportBuffers.
  */
 auto GetWorldSupport(const CookedShape& shape,
                      const Vector3& directionNormal,
                      SupportBuffer& buffer = SupportBuffer::GetDefault()) -> Vector3;
 
+auto GetWorldSupport(const CookedShape& shape,
+                     DirectX::FXMVECTOR directionNormal,
+                     SupportBuffer& buffer = SupportBuffer::GetDefault()) -> DirectX::XMVECTOR;
+
 /**
+ * @name Shape Extent Functions
  * @brief Get the shape's half extent in a direction.
- * @note Concurrent calls to this function require unique SupportBuffers.
+ * @note Concurrent calls to these functions require unique SupportBuffers.
  */
 auto GetHalfExtent(const CookedShape& shape,
                    const Vector3& directionNormal,
+                   SupportBuffer& buffer = SupportBuffer::GetDefault()) -> float;
+
+auto GetHalfExtent(const CookedShape& shape,
+                   DirectX::FXMVECTOR directionNormal,
                    SupportBuffer& buffer = SupportBuffer::GetDefault()) -> float;
 } // namespace nc
