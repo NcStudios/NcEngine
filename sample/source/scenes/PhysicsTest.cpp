@@ -1298,15 +1298,40 @@ void PhysicsTest::Load(ecs::Ecs world, ModuleProvider modules)
 
     world.Emplace<PointLight>(
         world.Emplace<Entity>({
-            .position = Vector3{0.0f, 10.0f, 0.0f},
+            .position = Vector3{-5.0f, 10.0f, 0.0f},
             .rotation = nc::Quaternion::FromEulerAngles(1.5f, 0.809f, 0.0f),
             .tag = "Point Light"
         }),
-        Vector3{1.0f, 1.0f, 1.0f},
-        Vector3{1.0f, 1.0f, 1.0f},
-        200.0f,
+        Vector3{1.0f, 0.0f, 0.0f},
+        Vector3{0.0f, 0.0f, 0.0f},
+        10.0f,
         75.0f
     );
+
+    world.Emplace<PointLight>(
+        world.Emplace<Entity>({
+            .position = Vector3{5.0f, 10.0f, 0.0f},
+            .rotation = nc::Quaternion::FromEulerAngles(1.5f, 0.809f, 0.0f),
+            .tag = "Point Light"
+        }),
+        Vector3{0.0f, 0.0f, 1.0f},
+        Vector3{0.0f, 0.0f, 0.0f},
+        10.0f,
+        75.0f
+    );
+
+    world.Emplace<PointLight>(
+        world.Emplace<Entity>({
+            .position = Vector3{10.0f, 10.0f, 0.0f},
+            .rotation = nc::Quaternion::FromEulerAngles(1.5f, 0.809f, 0.0f),
+            .tag = "Point Light"
+        }),
+        Vector3{0.0f, 1.0f, 0.0f},
+        Vector3{0.0f, 1.0f, 0.0f},
+        10.0f,
+        75.0f
+    );
+
 
     // auto lvHandle = world.Emplace<Entity>({.position = Vector3{0.0f, 10.0f, 0.0f}, .tag = "Point Light 1"});
     // world.Emplace<PointLight>(lvHandle, Vector3(1.0f, 1.0f, 1.0f), Vector3(1.0f, 1.0f, 1.0f), 20.0f, 45.0f);

@@ -27,9 +27,9 @@ auto CalculateLightViewProjectionMatrix(DirectX::FXMMATRIX transformMatrix) -> D
 namespace pointlight2
 {
 constexpr float g_lightFieldOfView = DirectX::XM_PIDIV2; // 90 degrees
-constexpr float g_nearClip = 0.1f;
+constexpr float g_nearClip = 2.0;
 constexpr float g_farClip = 150.0f;
-const auto g_lightProjectionMatrix = DirectX::XMMatrixPerspectiveFovRH(g_lightFieldOfView, 1.f, g_nearClip, g_farClip);
+const auto g_lightProjectionMatrix = DirectX::XMMatrixPerspectiveFovLH(g_lightFieldOfView, 1.f, g_nearClip, g_farClip);
 } // namespace pointlight2
 
 namespace spotlight2
@@ -88,54 +88,56 @@ auto LightSubsystem::BuildState(ecs::ExplicitEcs<DirectionalLight, PointLight, S
                 light.specularColor,
                 light.intensity,
                 transform.Position(),
-                1, /** @todo, come up with shadow decisioning (which lights cast shadows) */
+                light.castsShadows,
                 light.radius,
                 lightMatrixIndex
             );
+
+            /*** DOESN"T WORK IF OFFSET IN X OR Z. Need to reflect before */
 
             if (light.castsShadows)
             {
                 // Positive X
                 {
                     const auto look = DirectX::XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f);
-                    auto viewMatrix = DirectX::XMMatrixLookAtRH(transform.PositionXM(), DirectX::XMVectorAdd(transform.PositionXM(),look), DirectX::XMVectorSet(0.0f, -1.0f, 0.0f, 0.0f));
-                    m_lightMatrixData.push_back(LightMatrixData{.viewProjection = viewMatrix * pointlight2::g_lightProjectionMatrix});
+                    auto viewMatrix = DirectX::XMMatrixLookAtLH(transform.PositionXM(), DirectX::XMVectorAdd(transform.PositionXM(),look), DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f));
+                    m_lightMatrixData.push_back(LightMatrixData{.viewProjection = DirectX::XMMatrixMultiply(viewMatrix, pointlight2::g_lightProjectionMatrix)});
                     lightMatrixIndex++;
                 }
                 // Negative X
                 {
                     const auto look = DirectX::XMVectorSet(-1.0f, 0.0f, 0.0f, 0.0f);
-                    auto viewMatrix = DirectX::XMMatrixLookAtRH(transform.PositionXM(), DirectX::XMVectorAdd(transform.PositionXM(),look), DirectX::XMVectorSet(0.0f, -1.0f, 0.0f, 0.0f));
-                    m_lightMatrixData.push_back(LightMatrixData{.viewProjection = viewMatrix * pointlight2::g_lightProjectionMatrix});
-                    lightMatrixIndex++;
-                }
-                // Negative Y
-                {
-                    const auto look = DirectX::XMVectorSet(0.0f, -1.0f, 0.0f, 0.0f);
-                    auto viewMatrix = DirectX::XMMatrixLookAtRH(transform.PositionXM(),  DirectX::XMVectorAdd(transform.PositionXM(),look), DirectX::XMVectorSet(0.0f, 0.0f, -1.0f, 0.0f));
-                    m_lightMatrixData.push_back(LightMatrixData{.viewProjection = viewMatrix * pointlight2::g_lightProjectionMatrix});
+                    auto viewMatrix = DirectX::XMMatrixLookAtLH(transform.PositionXM(), DirectX::XMVectorAdd(transform.PositionXM(),look), DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f));
+                    m_lightMatrixData.push_back(LightMatrixData{.viewProjection = DirectX::XMMatrixMultiply(viewMatrix, pointlight2::g_lightProjectionMatrix)});
                     lightMatrixIndex++;
                 }
                 // Positive Y
                 {
                     const auto look = DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
-                    auto viewMatrix = DirectX::XMMatrixLookAtRH(transform.PositionXM(),  DirectX::XMVectorAdd(transform.PositionXM(),look), DirectX::XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f));
-                    m_lightMatrixData.push_back(LightMatrixData{.viewProjection = viewMatrix * pointlight2::g_lightProjectionMatrix});
+                    auto viewMatrix = DirectX::XMMatrixLookAtLH(transform.PositionXM(),  DirectX::XMVectorAdd(transform.PositionXM(),look), DirectX::XMVectorSet(0.0f, 0.0f, -1.0f, 0.0f));
+                    m_lightMatrixData.push_back(LightMatrixData{.viewProjection = DirectX::XMMatrixMultiply(viewMatrix, pointlight2::g_lightProjectionMatrix)});
                     lightMatrixIndex++;
                 }
-
+                    // Negative Y
+                {
+                    const auto look = DirectX::XMVectorSet(0.0f, -1.0f, 0.0f, 0.0f);
+                    auto viewMatrix = DirectX::XMMatrixLookAtLH(transform.PositionXM(),  DirectX::XMVectorAdd(transform.PositionXM(),look), DirectX::XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f));
+                    m_lightMatrixData.push_back(LightMatrixData{.viewProjection = DirectX::XMMatrixMultiply(viewMatrix, pointlight2::g_lightProjectionMatrix)});
+                    lightMatrixIndex++;
+                }
+ 
                 // Positive Z
                 {
                     const auto look = DirectX::XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f);
-                    auto viewMatrix = DirectX::XMMatrixLookAtRH(transform.PositionXM(), DirectX::XMVectorAdd(transform.PositionXM(),look), DirectX::XMVectorSet(0.0f, -1.0f, 0.0f, 0.0f));
-                    m_lightMatrixData.push_back(LightMatrixData{.viewProjection = viewMatrix * pointlight2::g_lightProjectionMatrix});
+                    auto viewMatrix = DirectX::XMMatrixLookAtLH(transform.PositionXM(), DirectX::XMVectorAdd(transform.PositionXM(),look), DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f));
+                    m_lightMatrixData.push_back(LightMatrixData{.viewProjection = DirectX::XMMatrixMultiply(viewMatrix, pointlight2::g_lightProjectionMatrix)});
                     lightMatrixIndex++;
                 }
                 // Negative Z
                 {
                     const auto look = DirectX::XMVectorSet(0.0f, 0.0f, -1.0f, 0.0f);
-                    auto viewMatrix = DirectX::XMMatrixLookAtRH(transform.PositionXM(), DirectX::XMVectorAdd(transform.PositionXM(),look), DirectX::XMVectorSet(0.0f, -1.0f, 0.0f, 0.0f));
-                    m_lightMatrixData.push_back(LightMatrixData{.viewProjection = viewMatrix * pointlight2::g_lightProjectionMatrix});
+                    auto viewMatrix = DirectX::XMMatrixLookAtLH(transform.PositionXM(), DirectX::XMVectorAdd(transform.PositionXM(),look), DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f));
+                    m_lightMatrixData.push_back(LightMatrixData{.viewProjection = DirectX::XMMatrixMultiply(viewMatrix, pointlight2::g_lightProjectionMatrix)});
                     lightMatrixIndex++;
                 }
             }

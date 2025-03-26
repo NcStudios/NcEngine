@@ -98,9 +98,9 @@ auto MakeCubeShadowSinkBufferDesc(uint32_t maxTextures) -> CubeSinkBufferResourc
 auto CubeSinkBufferResource::MakeShadowSamplerDesc(std::string_view variableName) -> ImmutableSamplerDesc
 {
     auto samplerDesc = SamplerDesc{};
-    samplerDesc.AddressU = TEXTURE_ADDRESS_CLAMP;
-    samplerDesc.AddressV = TEXTURE_ADDRESS_CLAMP;
-    samplerDesc.AddressW = TEXTURE_ADDRESS_CLAMP;
+    samplerDesc.AddressU = TEXTURE_ADDRESS_BORDER;
+    samplerDesc.AddressV = TEXTURE_ADDRESS_BORDER;
+    samplerDesc.AddressW = TEXTURE_ADDRESS_BORDER;
     samplerDesc.BorderColor[0] = 1.0f;
     samplerDesc.BorderColor[1] = 1.0f;
     samplerDesc.BorderColor[2] = 1.0f;
@@ -108,6 +108,7 @@ auto CubeSinkBufferResource::MakeShadowSamplerDesc(std::string_view variableName
     samplerDesc.MagFilter = FILTER_TYPE::FILTER_TYPE_LINEAR;
     samplerDesc.MinFilter = FILTER_TYPE::FILTER_TYPE_LINEAR;
     samplerDesc.MipFilter = FILTER_TYPE::FILTER_TYPE_LINEAR;
+    samplerDesc.ComparisonFunc = COMPARISON_FUNC_LESS_EQUAL;
     
     return ImmutableSamplerDesc{
         SHADER_TYPE_VS_PS,

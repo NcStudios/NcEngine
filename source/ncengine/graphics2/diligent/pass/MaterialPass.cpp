@@ -52,6 +52,12 @@ auto CreatePipeline(Diligent::IRenderDevice& device,
         depthFormat = OffScreenDepthRTFormat;
     }
 
+    auto cullMode = CULL_MODE_BACK;
+    if (passDesc.shadowMapSink != ShadowMapTarget::None)
+    {
+        cullMode = CULL_MODE_FRONT;
+    }
+
     ci.GraphicsPipeline.NumRenderTargets                  = static_cast<uint8_t>(numColorTargets);
     ci.GraphicsPipeline.RTVFormats[0]                     = colorFormat;
     ci.GraphicsPipeline.DSVFormat                         = depthFormat;

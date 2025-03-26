@@ -10,6 +10,7 @@ struct LightData {
     float intensity;
     int castsShadows;
     uint lightMatrixIndex;
+    uint padding;
 };
 
 struct LightInfluence

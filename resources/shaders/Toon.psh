@@ -154,35 +154,24 @@ float UniShadowCalculation(float4 fragPosLightSpace, Texture2D depthTex)
     return shadow;
 }
 
-//     float distance = length(lightToFrag);
-//     float3 sampleDir = -normalize(lightToFrag); // Direction to sample cube map
-//     sampleDir.y *= -1;
-
 float PointShadowCalculation(float4 fragPosWorldSpace, float3 lightPosWorldSpace, TextureCube depthTex)
 {
-    // Vector from light to fragment
     float3 lightToFrag = lightPosWorldSpace - fragPosWorldSpace.xyz;
-    float distance = length(lightToFrag);
-    float3 sampleDir = -normalize(lightToFrag); // Direction to sample cube map
-    sampleDir.y *= -1;
+    float distance = length(lightToFrag) / 150.0f;
+    float3 sampleDir = -normalize(lightToFrag);
 
-    // Current depth is the distance from the light to the fragment
-    float currentDepth = distance;
-
-    // Bias to reduce shadow acne
-    float bias = 0.01f; // Adjust as needed
-
-    // Simple PCF: Sample a few directions around the main direction
+    // PCF: Sample a few directions around the main direction
     float shadow = 0.0;
-    float texelSize = 1.0 / 2048.0; // Replace 1024 with your cube map face resolution (e.g., renderTargetWidth)
-    const int sampleCount = 4; // Fewer samples for simplicity and performance
+    uint shadowMapWidth, shadowMapHeight;
+    depthTex.GetDimensions(shadowMapWidth, shadowMapHeight);
+    float texelSize = float2(1.0 / shadowMapWidth);
+    const int sampleCount = 4;
 
-    // Predefined offsets in 3D space (arbitrary small perturbations)
     float3 offsets[4] = {
-        float3(1.0, 0.0, 0.0) * texelSize,
-        float3(-1.0, 0.0, 0.0) * texelSize,
-        float3(0.0, 1.0, 0.0) * texelSize,
-        float3(0.0, -1.0, 0.0) * texelSize
+        float3(3.0, 0.0, 0.0) * texelSize,
+        float3(-3.0, 0.0, 0.0) * texelSize,
+        float3(0.0, 3.0, 0.0) * texelSize,
+        float3(0.0, -3.0, 0.0) * texelSize,
     };
 
     [unroll]
@@ -191,13 +180,13 @@ float PointShadowCalculation(float4 fragPosWorldSpace, float3 lightPosWorldSpace
         float3 perturbedDir = normalize(sampleDir + offsets[i]);
         float closestDepth = depthTex.Sample(PointShadowMapSinks_sampler, perturbedDir).r;
 
-        // Depth in cube map is typically stored as raw distance (not normalized)
-        shadow += (currentDepth + bias > closestDepth) ? 1.0 : 0.0;
+        float gradientAmt = 0.1f; // Adjust softness
+        shadow += smoothstep(closestDepth - gradientAmt, closestDepth + gradientAmt, distance);
     }
 
     shadow /= float(sampleCount);
 
-    return shadow;
+    return shadow * shadow;
 }
 
 
@@ -238,7 +227,7 @@ void main(in  PSInput  PSIn, out PSOutput PSOut)
             {
                 TextureCube depthTex = PointShadowMapSinks[shadowMapIndex];
                 float rawShadow = PointShadowCalculation(PSIn.WorldPos, Lights[i].position, depthTex);
-                shadowFactor = (1.0f - rawShadow); 
+                shadowFactor = (1.0f - rawShadow);
             }
             else
             {
@@ -291,42 +280,4 @@ void main(in  PSInput  PSIn, out PSOutput PSOut)
     float4 outputColor = float4(lerp(gradientApplied, gradientApplied * gradient, 0.5f), 1.0f);
 
     PSOut.Color = outputColor;
-
-
-    // Texture2D depthTex = UniShadowMapSinks[shadowMapIndex];
-    // float4 fragPosLightSPace = mul(mul(PSIn.WorldPos, Lights[0].viewProj), biasMat);
-    // float3 projCoords = fragPosLightSPace.xyz / fragPosLightSPace.w;
-    // projCoords.y = 1-projCoords.y;
-    // float currentDepth = projCoords.z;
-    // float sampledDepth = depthTex.Sample(UniShadowMapSinks_sampler, projCoords.xy) * 2;
-    // PSOut.Color = float4(sampledDepth, sampledDepth, sampledDepth, 1.0f);
-
-
-
-
-
-
-
-    // TextureCube depthTex = PointShadowMapSinks[0];
-
-    // // Vector from light to fragment
-    // float3 lightToFrag = Lights[0].position - PSIn.WorldPos.xyz;
-    // float distance = length(lightToFrag);
-    // float3 sampleDir = -normalize(lightToFrag); // Direction to sample cube map
-    // sampleDir.y *= -1;
-
-
-
-
-
-
-
-    // // Current depth is the distance from the light to the fragment
-    // // float closestDepth = depthTex.Sample(UniShadowMapSinks_sampler, sampleDir).r;
-
-    // float zNear = 0.01f;
-    // float zFar = 150.0f;
-    // float linearDepth = closestDepth / zFar;
-
-    // PSOut.Color = float4(closestDepth, 0.0f, 0.0f, 1.0f); 
 }

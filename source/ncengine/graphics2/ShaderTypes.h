@@ -188,6 +188,7 @@ struct LightData
     float intensity = 1.0f;
     int castsShadows = 0;
     uint32_t viewProjIndex = 0;
+    uint32_t padding = 0;
 };
 
 // Object model for light projection matrix for shadow mapping (type: StructuredBuffer element type)
