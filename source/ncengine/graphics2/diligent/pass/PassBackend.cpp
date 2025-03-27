@@ -207,7 +207,7 @@ void PassBackend::RenderShadowPass(IDeviceContext& context,
     auto uniRenderTargetIndex = 0u;
 
     // LightDataIndex corresponds to the index the shader will use to index the LightData buffer.
-    // RenderTargetIndex corresponds to the index of the shadow map in the SinkBuffer.
+    // PointRenderTargetIndex and uniRenderTargetIndex correspond to the index of the shadow map in the SinkBuffers.
     for (const auto& [lightDataIndex, light] : std::views::enumerate(lights))
     {
         auto lightIndex = static_cast<uint32_t>(lightDataIndex);

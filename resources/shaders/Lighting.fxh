@@ -22,6 +22,11 @@ struct LightInfluence
     float intensity;
 };
 
+struct LightMatrix
+{
+    float4x4 viewProjection;
+};
+
 float CalculateDiffuse(float3 L, float3 N)
 {
     return max(dot(N, L), 0.0f);

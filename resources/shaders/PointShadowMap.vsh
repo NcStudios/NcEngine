@@ -12,17 +12,11 @@ struct PSInput
 {
     float4 Pos : SV_POSITION;
     float4 WorldPos;
-    float ZDepth;
 };
 
 struct TransformData
 {
     float4x4 model;
-};
-
-struct LightMatrix
-{
-    float4x4 viewProjection;
 };
 
 StructuredBuffer<TransformData> Transforms;
@@ -68,6 +62,5 @@ void main(in  VSInput VSIn, uint InstanceID : SV_InstanceID,  out PSInput PSIn)
     PSIn.WorldPos = TransformedPos;
 
     LightData light = Lights[lightIndex];
-    PSIn.Pos = mul(TransformedPos, LightMatrices[light.lightMatrixIndex + lightFaceIndex].viewProjection);
-    PSIn.ZDepth = PSIn.Pos.z;
+    PSIn.Pos = mul(TransformedPos, LightMatrices[light.lightMatrixIndex  + lightFaceIndex].viewProjection);
 }

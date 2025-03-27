@@ -93,8 +93,6 @@ auto LightSubsystem::BuildState(ecs::ExplicitEcs<DirectionalLight, PointLight, S
                 lightMatrixIndex
             );
 
-            /*** DOESN"T WORK IF OFFSET IN X OR Z. Need to reflect before */
-
             if (light.castsShadows)
             {
                 // Positive X
