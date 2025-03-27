@@ -59,12 +59,11 @@ void ClearPointShadowMapRenderTarget(Diligent::IDeviceContext& context,
                                      uint32_t lightIndex,
                                      uint32_t faceIndex)
 {
-    Diligent::ITextureView* pRTV = shadowMapSinkBufferResource.GetRenderTargetView((lightIndex *6) + faceIndex);
+    Diligent::ITextureView* pRTV = shadowMapSinkBufferResource.GetRenderTargetView((lightIndex * 6) + faceIndex);
     if (pRTV)
     {
         context.ClearRenderTarget(pRTV, &ClearColor.x, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
     }
-
 
     Diligent::ITextureView* pDSV = shadowMapSinkBufferResource.GetDepthTargetView(0);
     context.ClearDepthStencil(pDSV, Diligent::CLEAR_DEPTH_FLAG, 1.f, 0, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);

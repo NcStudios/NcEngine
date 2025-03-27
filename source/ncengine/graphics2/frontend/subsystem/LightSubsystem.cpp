@@ -42,7 +42,7 @@ auto CalculateLightViewProjectionMatrix(const DirectX::XMMATRIX& transformMatrix
     float lightFieldOfView = 2 * outerAngle;
 
     // Create a perspective projection matrix that matches the cone
-    auto lightProjectionMatrix = DirectX::XMMatrixPerspectiveFovRH(lightFieldOfView, 1.778f, g_nearClip, farClip);
+    auto lightProjectionMatrix = DirectX::XMMatrixPerspectiveRH(lightFieldOfView, 2.0f, g_nearClip, farClip);
     const auto look = DirectX::XMVector3TransformNormal(DirectX::g_XMIdentityR2, transformMatrix);
     return DirectX::XMMatrixLookAtRH(transformMatrix.r[3], look, DirectX::g_XMNegIdentityR1) * lightProjectionMatrix;
 }

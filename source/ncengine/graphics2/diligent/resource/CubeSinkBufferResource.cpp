@@ -8,13 +8,6 @@ using namespace Diligent;
 
 namespace
 {
-struct SinkTargets
-{
-    std::vector<RefCntAutoPtr<ITexture>>& textures;
-    std::vector<IDeviceObject*>& renderTargetViews;
-    std::vector<IDeviceObject*>* shaderResourceViews = nullptr;
-};
-
 auto MakeTextureDesc(const nc::graphics::CubeSinkBufferResourceDesc& desc,
                      uint32_t width,
                      uint32_t height) -> TextureDesc
@@ -126,13 +119,6 @@ void CubeSinkBufferResource::Add(IRenderDevice& device,
     using namespace Diligent;
 
     auto maxTextures = m_desc.maxTextures;
-
-    // if (!m_initialLoadComplete)
-    // {
-    //     // @todo may need to do for all subresources for cube maps
-    //     InitializeArray(context, device, m_variable, maxTextures, false);
-    //     m_initialLoadComplete = true;
-    // }
 
     if (numCubeMaps == 0)
     {

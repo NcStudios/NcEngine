@@ -156,7 +156,7 @@ float PointShadowCalculation(float4 fragPosWorldSpace, float3 lightPosWorldSpace
         float3 perturbedDir = normalize(sampleDir + offsets[i]);
         float closestDepth = depthTex.Sample(PointShadowMapSinks_sampler, perturbedDir).r;
 
-        float gradientAmt = 0.05f; // Adjust softness
+        float gradientAmt = 0.0001f; // Adjust softness
         shadow += smoothstep(closestDepth - gradientAmt, closestDepth + gradientAmt, distance);
     }
 
