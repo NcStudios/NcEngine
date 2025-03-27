@@ -17,7 +17,7 @@ class WireframeBufferResource;
 struct WireframePass : public Pass
 {
     explicit WireframePass(Diligent::IRenderDevice& device,
-                           ShaderFactory& shaderFactory,
+                           const PipelineShaders& shaders,
                            ShaderBindings& shaderBindings,
                            const PassManifest& passManifest,
                            const PassDesc& passDesc,

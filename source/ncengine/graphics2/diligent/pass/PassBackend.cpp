@@ -426,39 +426,48 @@ void PassBackend::MakePassesAndPipelines(IRenderDevice& device,
                              ShaderBindings& shaderBindings,
                              const PassManifest& passManifest)
 {
+    const auto shaderMap = LoadShaders(shaderFactory);
+
     // Create the static material passes
     m_staticMaterialPasses.reserve(passManifest.StaticMaterialPassDescs().size());
     for (const auto& passDesc : passManifest.StaticMaterialPassDescs())
     {
-        m_staticMaterialPasses.emplace_back(device, shaderFactory, shaderBindings, passManifest, passDesc, m_numSamples);
+        m_staticMaterialPasses.emplace_back(device, GetShaders(passDesc.shaderPaths, shaderMap), shaderBindings, passManifest, passDesc, m_numSamples);
     }
 
     // Create the skinned material passes
     m_skinnedMaterialPasses.reserve(passManifest.SkinnedMaterialPassDescs().size());
-    for (auto& passDesc : passManifest.SkinnedMaterialPassDescs())
+    for (const auto& passDesc : passManifest.SkinnedMaterialPassDescs())
     {
-        m_skinnedMaterialPasses.emplace_back(device, shaderFactory, shaderBindings, passManifest, passDesc, m_numSamples);
+        m_skinnedMaterialPasses.emplace_back(device, GetShaders(passDesc.shaderPaths, shaderMap), shaderBindings, passManifest, passDesc, m_numSamples);
     }
 
     // Create the wireframe pass
-    m_wireframePass = std::make_unique<WireframePass>(device, shaderFactory, shaderBindings, passManifest, passManifest.WireframePassDesc(), m_numSamples);
+    {
+        const auto& passDesc = passManifest.WireframePassDesc();
+        m_wireframePass = std::make_unique<WireframePass>(device, GetShaders(passDesc.shaderPaths, shaderMap), shaderBindings, passManifest, passDesc, m_numSamples);
+    }
 
     // Create the particle pass
-    m_particlePass = std::make_unique<ParticlePass>(device, shaderFactory, shaderBindings, passManifest, passManifest.ParticlePassDesc(), m_numSamples);
-    m_finalColorTarget = m_particlePass->sinks.color;
+    {
+        const auto& passDesc = passManifest.ParticlePassDesc();
+        m_particlePass = std::make_unique<ParticlePass>(device, GetShaders(passDesc.shaderPaths, shaderMap), shaderBindings, passManifest, passDesc, m_numSamples);
+        m_finalColorTarget = m_particlePass->sinks.color;
+    }
+
 
     // Create the post process passes
     m_postProcessPasses.reserve(passManifest.PostProcessPassDescs().size());
     for (const auto& passDesc : passManifest.PostProcessPassDescs())
     {
-        m_postProcessPasses.emplace_back(device, swapChain, shaderFactory, shaderBindings, passManifest, passDesc);
+        m_postProcessPasses.emplace_back(device, swapChain, GetShaders(passDesc.shaderPaths, shaderMap), shaderBindings, passManifest, passDesc);
     }
     m_finalPostProcessTarget = m_postProcessPasses.back().sinks.postProcess;
 
     // Create a hardcoded dummy post process pass that always pipes the result of the last rendered render target to the swapchain
-    auto shaderPaths = ShaderPaths{"PPEnd.psh", "PostProcess.vsh"};
+    auto shaderPaths = ShaderPaths{shader::PPEndFragment, shader::PostProcessVertex};
     auto name = "Final Pass";
-    m_finalPass = std::make_unique<PostProcessPass>(device, swapChain, shaderFactory, shaderBindings, passManifest, PassDesc
+    m_finalPass = std::make_unique<PostProcessPass>(device, swapChain, GetShaders(shaderPaths, shaderMap), shaderBindings, passManifest, PassDesc
     {
         .flag = 0, // No flag used for this pass, it is not treated like the others (not in the collection)
         .name = name,

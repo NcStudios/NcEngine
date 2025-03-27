@@ -13,7 +13,7 @@ using namespace Diligent;
 using namespace nc::graphics;
 
 auto CreatePipeline(Diligent::IRenderDevice& device,
-                    ShaderFactory& shaderFactory,
+                    const PipelineShaders& shaders,
                     ShaderBindings& shaderBindings,
                     const PassDesc& passDesc,
                     uint32_t numSamples) -> Diligent::RefCntAutoPtr<Diligent::IPipelineState>
@@ -25,10 +25,8 @@ auto CreatePipeline(Diligent::IRenderDevice& device,
     ci.PSODesc.Name = passDesc.name.data();
     ci.PSODesc.ResourceLayout.DefaultVariableType = SHADER_RESOURCE_VARIABLE_TYPE_STATIC;
 
-    RefCntAutoPtr<IShader> pixelShader = CreateShaderFromSourceIfInitialized(shaderFactory, SHADER_TYPE_PIXEL, passDesc.shaderPaths);
-    RefCntAutoPtr<IShader> vertexShader = CreateShaderFromSourceIfInitialized(shaderFactory, SHADER_TYPE_VERTEX, passDesc.shaderPaths);
-    ci.pPS = pixelShader;
-    ci.pVS = vertexShader;
+    ci.pPS = shaders.pixelShader;
+    ci.pVS = shaders.vertexShader;
 
     auto depthFormat = TEX_FORMAT_UNKNOWN;
     if (passDesc.depthSink != DepthTarget::None || passDesc.shadowMapSink != ShadowMapTarget::None)
@@ -63,12 +61,16 @@ auto CreatePipeline(Diligent::IRenderDevice& device,
 namespace nc::graphics
 {
 MaterialPass::MaterialPass(Diligent::IRenderDevice& device,
-                           ShaderFactory& shaderFactory,
+                           const PipelineShaders& shaders,
                            ShaderBindings& shaderBindings,
                            const PassManifest& passManifest,
                            const PassDesc& passDesc,
                            uint32_t numSamples)
-    : Pass{CreatePipeline(device, shaderFactory, shaderBindings, passDesc, numSamples), GetSinks(passManifest, passDesc), GetSources(passManifest, passDesc)},
+    : Pass{
+        CreatePipeline(device, shaders, shaderBindings, passDesc, numSamples),
+        GetSinks(passManifest, passDesc),
+        GetSources(passManifest, passDesc)
+      },
       flag{passDesc.flag},
       isMsaa{passDesc.isMsaa}
 {

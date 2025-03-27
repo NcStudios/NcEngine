@@ -1,5 +1,7 @@
 #pragma once
 
+#include "ShaderTypes.h"
+
 #include "Graphics/GraphicsEngine/interface/GraphicsTypes.h"
 
 #include "ncengine/utility/EnumUtilities.h"
@@ -60,12 +62,6 @@ struct Sinks
     uint32_t color = NoTarget;
     uint32_t depth = NoTarget;
     uint32_t postProcess = NoTarget;
-};
-
-struct ShaderPaths
-{
-    std::string_view pixelShaderPath = "";
-    std::string_view vertexShaderPath = "";
 };
 
 enum class PassType : uint8_t

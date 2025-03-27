@@ -94,25 +94,38 @@ void BindShadowMapRenderTarget(Diligent::IDeviceContext& context,
     context.SetRenderTargets(0, nullptr, pDSV, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
 }
 
-auto CreateShaderFromSourceIfInitialized(ShaderFactory& shaderFactory, Diligent::SHADER_TYPE shaderType, const nc::graphics::ShaderPaths& shaderPaths) -> Diligent::RefCntAutoPtr<Diligent::IShader>
+auto LoadShaders(ShaderFactory& shaderFactory) -> ShaderMap
 {
-    Diligent::RefCntAutoPtr<Diligent::IShader> shader;
-    const auto& shaderPath = shaderType == Diligent::SHADER_TYPE_VERTEX ? shaderPaths.vertexShaderPath : shaderPaths.pixelShaderPath;
-
-    if (shaderPath == "")
+    auto map = ShaderMap{};
+    for (const auto& path : g_fragmentShaderPaths)
     {
-        return shader;
+        auto bytecode = shaderFactory.ReadShaderFile(path);
+        map.emplace(path, shaderFactory.MakeShaderFromByteCode(bytecode, path, Diligent::SHADER_TYPE_PIXEL));
     }
 
-    auto source = shaderFactory.ReadShaderFile(shaderPath);
-    shader = shaderFactory.MakeShaderFromSource(
-        source,
-        shaderPath.data(),
-        shaderType,
-        Diligent::SHADER_SOURCE_LANGUAGE_HLSL
-    );
+    for (const auto& path : g_vertexShaderPaths)
+    {
+        auto bytecode = shaderFactory.ReadShaderFile(path);
+        map.emplace(path, shaderFactory.MakeShaderFromByteCode(bytecode, path, Diligent::SHADER_TYPE_VERTEX));
+    }
 
-    return shader;
+    return map;
+}
+
+auto GetShaders(const ShaderPaths& paths, const ShaderMap& shaderMap) -> PipelineShaders
+{
+    auto shaders = PipelineShaders{};
+    if (!paths.pixelShaderPath.empty())
+    {
+        shaders.pixelShader = shaderMap.at(paths.pixelShaderPath).RawPtr();
+    }
+
+    if (!paths.vertexShaderPath.empty())
+    {
+        shaders.vertexShader = shaderMap.at(paths.vertexShaderPath).RawPtr();
+    }
+
+    return shaders;
 }
 
 auto GetSinks(const PassManifest& passManifest, const PassDesc& passDesc) -> Sinks
