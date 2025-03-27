@@ -1,8 +1,9 @@
 #include "ui/editor/ComponentWidgets.h"
 #include "assets/AssetWrapper.h"
+
+#include "ncasset/DefaultAssets.h"
 #include "ncengine/Events.h"
 #include "ncengine/asset/NcAsset.h"
-#include "ncengine/asset/DefaultAssets.h"
 #include "ncengine/audio/AudioSource.h"
 #include "ncengine/ecs/Tag.h"
 #include "ncengine/ecs/Transform.h"
@@ -31,7 +32,7 @@ namespace
 {
 namespace audio_source_ext
 {
-using T = nc::audio::AudioSource;
+using T = nc::AudioSource;
 
 constexpr auto gainProp        = nc::ui::Property{ &T::GetGain,        &T::SetGain,        "gain"       };
 constexpr auto innerRadiusProp = nc::ui::Property{ &T::GetInnerRadius, &T::SetInnerRadius, "innerRadius"};
@@ -297,6 +298,10 @@ void MeshColliderProperties(nc::RigidBody& body, const nc::Vector3& transformSca
         const auto selectedView = nc::asset::AssetService<nc::asset::MeshColliderView>::Get()->Acquire(assetPath);
         body.SetShape(nc::Shape::MakeMesh(selectedView.id, scale), transformScale);
     }
+}
+
+void CompoundShapeProperties(nc::RigidBody&, const nc::Vector3&)
+{
 }
 
 void DegreesOfFreedomWidget(nc::RigidBody& body)
@@ -1032,28 +1037,37 @@ void TransformUIWidget(Transform& transform, EditorContext& ctx, const std::any&
     }
 }
 
-void AudioSourceUIWidget(audio::AudioSource& audioSource, EditorContext&, const std::any&)
+void AudioSourceUIWidget(AudioSource& audioSource, EditorContext& ctx, const std::any&)
 {
     IMGUI_SCOPE(ui::ImGuiId, "AudioSource");
-    ui::PropertyWidget(audio_source_ext::gainProp, audioSource, &ui::DragFloat, 0.1f, 0.0f, 1.0f);
+    ui::PropertyWidget(audio_source_ext::gainProp,        audioSource, &ui::DragFloat, 0.1f, 0.0f, 1.0f);
     ui::PropertyWidget(audio_source_ext::innerRadiusProp, audioSource, &ui::DragFloat, 0.1f, 0.0f, 20.0f);
     ui::PropertyWidget(audio_source_ext::outerRadiusProp, audioSource, &ui::DragFloat, 0.1f, 0.0f, 200.0f);
-    ui::PropertyWidget(audio_source_ext::spatialProp, audioSource, &ui::Checkbox);
+    ui::PropertyWidget(audio_source_ext::spatialProp,     audioSource, &ui::Checkbox);
     ImGui::SameLine();
-    ui::PropertyWidget(audio_source_ext::loopProp, audioSource, &ui::Checkbox);
+    ui::PropertyWidget(audio_source_ext::loopProp,        audioSource, &ui::Checkbox);
 
+    auto& ncAsset = *ctx.modules.Get<asset::NcAsset>();
     auto clips = ui::editor::GetLoadedAssets(asset::AssetType::AudioClip);
-    auto curPath = std::string{};
-    for (auto [i, path] : std::views::enumerate(audioSource.GetAssetPaths()))
+    for (auto [i, view] : std::views::enumerate(audioSource.GetClips()))
     {
         IMGUI_SCOPE(ui::ImGuiId, (unsigned)i);
-        curPath = path;
+        auto curPath = std::string{ncAsset.GetAssetPath(asset::AssetType::AudioClip, view.id)};
+
         if (ui::Combobox(curPath, "", clips))
-            audioSource.SetClip(static_cast<uint32_t>(i), curPath);
+        {
+            const auto selectedClip = nc::asset::AcquireAudioClipAsset(curPath);
+            audioSource.SetClip(static_cast<uint32_t>(i), selectedClip);
+        }
 
         ImGui::SameLine();
         if (ImGui::Button("-"))
+        {
+            // NOTE: Removing invalidates our current place so we need to bail. Make sure future code added below
+            //       accounts for this..
             audioSource.RemoveClip(static_cast<uint32_t>(i));
+            return;
+        }
 
         ImGui::SameLine();
         if (ImGui::Button("Play"))
@@ -1061,7 +1075,10 @@ void AudioSourceUIWidget(audio::AudioSource& audioSource, EditorContext&, const 
     }
 
     if (ImGui::Button("Add Clip"))
-        audioSource.AddClip(asset::DefaultAudioClip);
+    {
+        const auto defaultClip = nc::asset::AcquireAudioClipAsset(asset::DefaultAudioClip);
+        audioSource.AddClip(defaultClip);
+    }
 }
 
 void StaticMeshUIWidget(StaticMesh& staticMesh, EditorContext& ctx, const std::any&)
@@ -1201,7 +1218,8 @@ void RigidBodyUIWidget(RigidBody& body, EditorContext& ctx, const std::any&)
         const auto transformScale = ctx.world.Get<Transform>(body.GetEntity()).Scale();
         auto selectedShapeName = std::string{ToString(body.GetShape().GetType())};
         auto excludeShapeIf = [type = body.GetBodyType()](const auto& text){
-            return type != BodyType::Static && text == "Mesh";
+            return (type != BodyType::Static && text == "Mesh") ||
+                    text == "Compound";
         };
 
         if (ui::FilteredCombobox(selectedShapeName, "shapeType", GetShapeTypeNames(), excludeShapeIf))
@@ -1224,14 +1242,19 @@ void RigidBodyUIWidget(RigidBody& body, EditorContext& ctx, const std::any&)
                     body.SetShape(Shape::MakeMesh(defaultMeshId), transformScale);
                     break;
                 }
+                case ShapeType::Compound:
+                {
+                    break;
+                }
             }
         }
 
         switch (body.GetShape().GetType())
         {
-            case ShapeType::Box:        { rigid_body_ext::BoxProperties(body,     transformScale); break; }
-            case ShapeType::Sphere:     { rigid_body_ext::SphereProperties(body,  transformScale); break; }
-            case ShapeType::Capsule:    { rigid_body_ext::CapsuleProperties(body, transformScale); break; }
+            case ShapeType::Box:        { rigid_body_ext::BoxProperties(body,           transformScale); break; }
+            case ShapeType::Sphere:     { rigid_body_ext::SphereProperties(body,        transformScale); break; }
+            case ShapeType::Capsule:    { rigid_body_ext::CapsuleProperties(body,       transformScale); break; }
+            case ShapeType::Compound:   { rigid_body_ext::CompoundShapeProperties(body, transformScale); break; }
             case ShapeType::ConvexHull:
             {
                 auto ncAsset = ctx.modules.Get<asset::NcAsset>();

@@ -24,8 +24,8 @@ constexpr auto NullAssetIndex = std::numeric_limits<uint32_t>::max();
 struct AudioClipView
 {
     AssetId id = NullAssetId;
-    std::span<const double> leftChannel;
-    std::span<const double> rightChannel;
+    std::span<const double> leftChannel = {};
+    std::span<const double> rightChannel = {};
     size_t samplesPerChannel = 0ull;
 };
 

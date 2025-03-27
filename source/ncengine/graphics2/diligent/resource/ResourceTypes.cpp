@@ -96,9 +96,9 @@ auto GetVariable(Diligent::SHADER_TYPE shaderType, const char* name, Diligent::I
     return *var;
 }
 
-auto ToTextureFormat(nc::asset::asset_flags_type flags) -> Diligent::TEXTURE_FORMAT
+auto ToTextureFormat(nc::asset::AssetSubtype subtype) -> Diligent::TEXTURE_FORMAT
 {
-    return flags & nc::asset::AssetFlags::TextureTypeNormalMap
+    return subtype == nc::asset::AssetSubtype::NormalTexture
         ? Diligent::TEX_FORMAT_RGBA8_UNORM
         : Diligent::TEX_FORMAT_RGBA8_UNORM_SRGB;
 }
@@ -150,7 +150,7 @@ void InitializeArray(Diligent::IDeviceContext& context, Diligent::IRenderDevice&
             .pixelData = std::vector<unsigned char> {0x1A, 0x2A, 0x3A, 0x4A}
         },
         1,
-        asset::AssetFlags::None
+        asset::AssetSubtype::None
     };
 
     auto barriers = std::vector<Diligent::StateTransitionDesc>();

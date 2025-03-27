@@ -23,9 +23,21 @@ void Serialize(std::ostream& stream, const TextureView& in)
 
 void Deserialize(std::istream& stream, TextureView& out)
 {
-    auto textureId = uint64_t{};
+    auto textureId = AssetId{};
     serialize::Deserialize(stream, textureId);
     out = asset::AcquireTextureAsset(textureId);
+}
+
+void Serialize(std::ostream& stream, const AudioClipView& in)
+{
+    serialize::Serialize(stream, in.id);
+}
+
+void Deserialize(std::istream& stream, AudioClipView& out)
+{
+    auto clipId = AssetId{};
+    serialize::Deserialize(stream, clipId);
+    out = asset::AcquireAudioClipAsset(clipId);
 }
 } // namespace asset
 
@@ -66,22 +78,35 @@ auto DeserializeMaterialDesc(std::istream& stream) -> MaterialDesc
     return out;
 }
 
-void SerializeAudioSource(std::ostream& stream, const audio::AudioSource& out, const SerializationContext& ctx, const std::any&)
+void SerializeAudioSource(std::ostream& stream, const AudioSource& out, const SerializationContext& ctx, const std::any&)
 {
     serialize::Serialize(stream, ctx.entityMap.at(out.ParentEntity()));
-    serialize::Serialize(stream, out.GetAssetPaths());
     serialize::Serialize(stream, out.GetProperties());
+    const auto& clips = out.GetClips();
+    const auto clipCount = clips.size();
+    serialize::Serialize(stream, clipCount);
+    for (const auto& clip : clips) // serialize individual to hit special handling for views
+    {
+        serialize::Serialize(stream, clip);
+    }
 }
 
-auto DeserializeAudioSource(std::istream& stream, const DeserializationContext& ctx, const std::any&) -> audio::AudioSource
+auto DeserializeAudioSource(std::istream& stream, const DeserializationContext& ctx, const std::any&) -> AudioSource
 {
     auto id = uint32_t{};
-    auto paths = std::vector<std::string>{};
-    auto properties = audio::AudioSourceProperties{};
+    auto properties = AudioSourceProperties{};
+    auto clipCount = size_t{};
+    auto clips = std::vector<asset::AudioClipView>{};
     serialize::Deserialize(stream, id);
-    serialize::Deserialize(stream, paths);
     serialize::Deserialize(stream, properties);
-    return audio::AudioSource{ctx.entityMap.at(id), std::move(paths), properties};
+    serialize::Deserialize(stream, clipCount);
+    clips.resize(clipCount);
+    for (auto i = 0ull; i < clipCount; ++i)
+    {
+        serialize::Deserialize(stream, clips[i]);
+    }
+
+    return AudioSource{ctx.entityMap.at(id), std::move(clips), properties};
 }
 
 void SerializeDirectionalLight(std::ostream& stream, const DirectionalLight& out, const SerializationContext&, const std::any&)
@@ -202,6 +227,7 @@ void SerializeRigidBody(std::ostream& stream, const RigidBody& out, const Serial
             break;
         case ShapeType::ConvexHull:
         case ShapeType::Mesh:
+        case ShapeType::Compound:
             serialize::Serialize(stream, shape.GetAssetId());
             serialize::Serialize(stream, shape.GetLocalScale());
             break;
@@ -297,6 +323,7 @@ auto DeserializeRigidBody(std::istream& stream, const DeserializationContext& ct
             break;
         case ShapeType::ConvexHull:
         case ShapeType::Mesh:
+        case ShapeType::Compound:
             serialize::Deserialize(stream, shapeAsset);
             serialize::Deserialize(stream, shapeScale);
             break;
@@ -330,6 +357,7 @@ auto DeserializeRigidBody(std::istream& stream, const DeserializationContext& ct
             case ShapeType::Capsule:    return Shape::MakeCapsule(shapeScale.y * 2.0f, shapeScale.x * 0.5f);
             case ShapeType::ConvexHull: return Shape::MakeConvexHull(shapeAsset, shapeScale);
             case ShapeType::Mesh:       return Shape::MakeMesh(shapeAsset, shapeScale);
+            case ShapeType::Compound:   return Shape::MakeCompound(shapeAsset, shapeScale.x);
             default:
                 throw NcError{fmt::format("Deserialized Unknown ShapeType: '{}'", std::to_underlying(shapeType))};
         }

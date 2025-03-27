@@ -2,7 +2,6 @@
 #include "shared/Prefabs.h"
 
 #include "ncengine/asset/Assets.h"
-#include "ncengine/asset/DefaultAssets.h"
 #include "ncengine/audio/AudioSource.h"
 #include "ncengine/audio/NcAudio.h"
 #include "ncengine/ecs/FrameLogic.h"
@@ -16,6 +15,7 @@
 #include "ncengine/physics/CollisionListener.h"
 #include "ncengine/physics/Constraints.h"
 #include "ncengine/physics/NcPhysics.h"
+#include "ncengine/physics/CompoundShape.h"
 #include "ncengine/physics/RigidBody.h"
 #include "ncengine/scene/NcScene.h"
 #include "ncengine/serialize/SceneSerialization.h"
@@ -27,6 +27,7 @@
 namespace
 {
 constexpr auto g_sceneFragment = "smokeTestScene";
+constexpr auto g_compoundShapeId = nc::asset::AssetId{100};
 
 void SaveScene(nc::ecs::Ecs world, const nc::asset::AssetMap& assets)
 {
@@ -91,6 +92,8 @@ void SmokeTest::Load(ecs::Ecs world, ModuleProvider modules)
         }
     );
 
+    auto& ncPhysics = *modules.Get<NcPhysics>();
+
     if (isSecondPass)
     {
         asset::UnloadAllAudioClipAssets();
@@ -101,6 +104,7 @@ void SmokeTest::Load(ecs::Ecs world, ModuleProvider modules)
         asset::UnloadAllSkeletalAnimationAssets();
         asset::UnloadAllTextureAssets();
         ::LoadScene(world, modules);
+        ReloadPrefabs();
     }
     else
     {
@@ -109,7 +113,7 @@ void SmokeTest::Load(ecs::Ecs world, ModuleProvider modules)
             .scale = Vector3{10.0f, 1.0f, 10.0f}
         });
 
-        world.Emplace<StaticMesh>(ground, mesh::Cube, material::Default);
+        world.Emplace<StaticMesh>(ground, mesh::default_cube, material::white);
         auto& groundBody = world.Emplace<RigidBody>(
             ground,
             Shape::MakeBox(),
@@ -153,6 +157,15 @@ void SmokeTest::Load(ecs::Ecs world, ModuleProvider modules)
             },
             groundBody
         );
+
+        const auto subShapes = std::array{
+            SubShapeInfo{Shape::MakeBox(),                         Vector3{-2.0f, -2.0f, 0.0f}},
+            SubShapeInfo{Shape::MakeBox(),                         Vector3{ 2.0f, -2.0f, 0.0f}},
+            SubShapeInfo{Shape::MakeConvexHull(convex_hull::ramp), Vector3{ 0.0f, -2.0f, 0.0f}}
+        };
+
+        auto cookedShape = CreateStaticCompoundShape(subShapes);
+        ncPhysics.AddRuntimeCompoundShape(std::move(cookedShape), g_compoundShapeId);
     }
 
     const auto cameraHandle = world.Emplace<Entity>({.position = Vector3{0.0f, 0.0f, -15.0f}});
@@ -160,7 +173,7 @@ void SmokeTest::Load(ecs::Ecs world, ModuleProvider modules)
     auto ncGraphics = modules.Get<NcGraphics>();
     ncGraphics->SetCamera(&camera);
     ncGraphics->SetSkybox(asset::DefaultSkyboxCubeMap);
-    modules.Get<audio::NcAudio>()->RegisterListener(cameraHandle);
+    modules.Get<NcAudio>()->RegisterListener(cameraHandle);
 
     const auto particles = world.Emplace<Entity>({});
     world.Emplace<ParticleEmitter>(
@@ -188,15 +201,15 @@ void SmokeTest::Load(ecs::Ecs world, ModuleProvider modules)
         .position = Vector3::Up() * 4.0f
     });
 
-    world.Emplace<SkinnedMesh>(animatedCube, mesh::Cube, material::Default, utility::Fnv1a("DefaultCubeAnimation.nca"));
-    world.Emplace<audio::AudioSource>(
+    world.Emplace<SkinnedMesh>(animatedCube, mesh::default_cube, material::white, animation::default_cube);
+    world.Emplace<AudioSource>(
         animatedCube,
-        std::vector<std::string>{
-            std::string{asset::DefaultAudioClip}
+        std::vector<asset::AudioClipView>{
+            audio_clip::default_silence
         },
-        audio::AudioSourceProperties{
-            .flags = audio::AudioSourceFlags::Play |
-                     audio::AudioSourceFlags::Loop
+        AudioSourceProperties{
+            .flags = AudioSourceFlags::Play |
+                     AudioSourceFlags::Loop
         }
     );
 
@@ -216,14 +229,14 @@ void SmokeTest::Load(ecs::Ecs world, ModuleProvider modules)
     const auto hull     = world.Emplace<Entity>({.position = Vector3{ 1.0f,  1.0f, 1.0f}});
     const auto halfpipe = world.Emplace<Entity>({.position = Vector3{ 0.0f, -7.0f, 0.0f}, .flags = Entity::Flags::Static});
 
-    world.Emplace<StaticMesh>(box1,     mesh::Cube,     material::Default);
-    world.Emplace<StaticMesh>(box2,     mesh::Cube,     material::Default);
-    world.Emplace<StaticMesh>(sphere1,  mesh::Sphere,   material::Default);
-    world.Emplace<StaticMesh>(sphere2,  mesh::Sphere,   material::Default);
-    world.Emplace<StaticMesh>(capsule1, mesh::Capsule,  material::Default);
-    world.Emplace<StaticMesh>(capsule2, mesh::Capsule,  material::Default);
-    world.Emplace<StaticMesh>(hull,     mesh::Ramp,     material::Default);
-    world.Emplace<StaticMesh>(halfpipe, mesh::HalfPipe, material::Default);
+    world.Emplace<StaticMesh>(box1,     mesh::default_cube,     material::white);
+    world.Emplace<StaticMesh>(box2,     mesh::default_cube,     material::white);
+    world.Emplace<StaticMesh>(sphere1,  mesh::default_sphere,   material::white);
+    world.Emplace<StaticMesh>(sphere2,  mesh::default_sphere,   material::white);
+    world.Emplace<StaticMesh>(capsule1, mesh::default_capsule,  material::white);
+    world.Emplace<StaticMesh>(capsule2, mesh::default_capsule,  material::white);
+    world.Emplace<StaticMesh>(hull,     mesh::ramp,             material::white);
+    world.Emplace<StaticMesh>(halfpipe, mesh::halfpipe,         material::white);
 
     auto& box1Body     = world.Emplace<RigidBody>(box1,     Shape::MakeBox());
     auto& box2Body     = world.Emplace<RigidBody>(box2,     Shape::MakeBox());
@@ -231,8 +244,8 @@ void SmokeTest::Load(ecs::Ecs world, ModuleProvider modules)
     auto& sphere2Body  = world.Emplace<RigidBody>(sphere2,  Shape::MakeSphere());
     auto& capsule1Body = world.Emplace<RigidBody>(capsule1, Shape::MakeCapsule());
     auto& capsule2Body = world.Emplace<RigidBody>(capsule2, Shape::MakeCapsule());
-    auto& hullBody     = world.Emplace<RigidBody>(hull,     Shape::MakeConvexHull(convex_hull::Ramp));
-    world.Emplace<RigidBody>(halfpipe, Shape::MakeMesh(mesh_collider::Halfpipe));
+    auto& hullBody     = world.Emplace<RigidBody>(hull,     Shape::MakeConvexHull(convex_hull::ramp));
+    world.Emplace<RigidBody>(halfpipe, Shape::MakeMesh(mesh_collider::halfpipe));
 
     world.Emplace<CollisionListener>(
         box1,
@@ -277,5 +290,25 @@ void SmokeTest::Load(ecs::Ecs world, ModuleProvider modules)
     );
 
     world.Emplace<Entity>({.parent = box1});
+
+    const auto compoundShape = world.Emplace<Entity>({
+        .flags = Entity::Flags::Static
+    });
+
+    world.Emplace<RigidBody>(
+        compoundShape,
+        nc::Shape::MakeCompound(g_compoundShapeId),
+        nc::RigidBodyInfo{
+            .type = BodyType::Static
+        }
+    );
+
+    const auto boxSubShape1 = world.Emplace<Entity>({.position = Vector3{-2.0f, -2.0f, 0.0f}, .parent = compoundShape});
+    const auto boxSubShape2 = world.Emplace<Entity>({.position = Vector3{ 2.0f, -2.0f, 0.0f}, .parent = compoundShape});
+    const auto rampSubShape = world.Emplace<Entity>({.position = Vector3{ 0.0f, -2.0f, 0.0f}, .parent = compoundShape});
+
+    world.Emplace<StaticMesh>(boxSubShape1, mesh::default_cube, material::teal);
+    world.Emplace<StaticMesh>(boxSubShape2, mesh::default_cube, material::teal);
+    world.Emplace<StaticMesh>(rampSubShape, mesh::ramp,         material::yellow);
 }
 } // namespace nc::sample

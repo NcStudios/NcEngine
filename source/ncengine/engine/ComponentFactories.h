@@ -6,7 +6,7 @@
 
 namespace nc
 {
-auto CreateAudioSource(Entity entity, const std::any&) -> audio::AudioSource;
+auto CreateAudioSource(Entity entity, const std::any&) -> AudioSource;
 auto CreateFrameLogic(Entity entity, const std::any&) -> FrameLogic;
 auto CreateParticleEmitter(Entity entity, const std::any&) -> ParticleEmitter;
 auto CreatePointLight(Entity entity, const std::any&) -> PointLight;

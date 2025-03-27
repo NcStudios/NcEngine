@@ -1,5 +1,7 @@
 #pragma once
 
+#include "ncasset/AssetType.h"
+
 #include <filesystem>
 #include <optional>
 
@@ -9,6 +11,7 @@ namespace nc::convert
 struct TargetOptions
 {
     bool optimizeMesh = false;
+    asset::AssetSubtype subtype = asset::AssetSubtype::None;
 };
 
 /** @brief Data describing a required asset conversion. */
@@ -29,5 +32,13 @@ struct Target
     std::filesystem::path destinationPath;
     std::optional<std::string> subResourceName;
     TargetOptions options;
+};
+
+/** @brief Data describing an asset for source code generation. */
+struct ReflectedTarget
+{
+    std::string name;
+    std::string path;
+    asset::AssetSubtype subtype = asset::AssetSubtype::None;
 };
 }

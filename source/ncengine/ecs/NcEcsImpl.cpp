@@ -38,11 +38,7 @@ void EcsModule::OnBuildTaskGraph(task::UpdateTasks& update, task::RenderTasks&)
     (
         update_task_id::CommitStagedChanges,
         "CommitStagedChanges",
-        [this]
-        {
-            m_registry->CommitPendingChanges();
-            UpdateWorldSpaceMatrices();
-        },
+        [this] { m_registry->CommitPendingChanges(); },
         {update_task_id::FrameLogicUpdate}
     );
 

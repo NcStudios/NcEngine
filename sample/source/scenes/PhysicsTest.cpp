@@ -13,6 +13,7 @@
 #include "ncengine/input/Input.h"
 #include "ncengine/physics/CollisionListener.h"
 #include "ncengine/physics/CollisionQuery.h"
+#include "ncengine/physics/CompoundShape.h"
 #include "ncengine/physics/Constraints.h"
 #include "ncengine/physics/NcPhysics.h"
 #include "ncengine/physics/RigidBody.h"
@@ -57,6 +58,8 @@ auto LogCollisionEvents = true;
 auto LogTriggerEvents = true;
 auto SelectedCastMode = CastMode::RayCast;
 auto SelectedCastModeName = std::string{CastModeNames[0]};
+
+constexpr auto g_compoundShapeId = asset::AssetId{42};
 
 void Widget()
 {
@@ -314,7 +317,7 @@ auto BuildWorm(ecs::Ecs world) -> Entity
             .layer = layer
         });
 
-        world.Emplace<StaticMesh>(entity, mesh::Cube, material::Green);
+        world.Emplace<StaticMesh>(entity, mesh::default_cube, material::green);
         return world.Emplace<RigidBody>(
             entity,
             Shape::MakeBox(),
@@ -426,11 +429,11 @@ auto BuildVehicle(ecs::Ecs world) -> Entity
     const auto wheelBR = world.Emplace<Entity>({.position = brPosition, .scale = wheelScale, .parent = car, .tag = "BR"});
     const auto carMesh = world.Emplace<Entity>({.scale = carScale, .parent = car, .tag = "CarMesh"});
 
-    world.Emplace<StaticMesh>(wheelFL, mesh::Wheel, material::Orange);
-    world.Emplace<StaticMesh>(wheelFR, mesh::Wheel, material::Orange);
-    world.Emplace<StaticMesh>(wheelBL, mesh::Wheel, material::Orange);
-    world.Emplace<StaticMesh>(wheelBR, mesh::Wheel, material::Orange);
-    world.Emplace<StaticMesh>(carMesh, mesh::Cube,  material::Green);
+    world.Emplace<StaticMesh>(wheelFL, mesh::default_wheel, material::orange);
+    world.Emplace<StaticMesh>(wheelFR, mesh::default_wheel, material::orange);
+    world.Emplace<StaticMesh>(wheelBL, mesh::default_wheel, material::orange);
+    world.Emplace<StaticMesh>(wheelBR, mesh::default_wheel, material::orange);
+    world.Emplace<StaticMesh>(carMesh, mesh::default_cube,  material::green);
 
     CharacterEntities.push_back(car);
     world.Emplace<VehicleController>(car);
@@ -552,11 +555,11 @@ void BuildGround(ecs::Ecs world)
 
 
 
-    world.Emplace<StaticMesh>(ground, mesh::Cube, material::Default);
-    world.Emplace<StaticMesh>(backWall, mesh::Cube, material::Default);
-    world.Emplace<StaticMesh>(frontWall, mesh::Cube, material::Default);
-    world.Emplace<StaticMesh>(leftWall, mesh::Cube, material::Default);
-    world.Emplace<StaticMesh>(rightWall, mesh::Cube, material::Default);
+    world.Emplace<StaticMesh>(ground,    mesh::default_cube, material::white);
+    world.Emplace<StaticMesh>(backWall,  mesh::default_cube, material::white);
+    world.Emplace<StaticMesh>(frontWall, mesh::default_cube, material::white);
+    world.Emplace<StaticMesh>(leftWall,  mesh::default_cube, material::white);
+    world.Emplace<StaticMesh>(rightWall, mesh::default_cube, material::white);
 
     world.Emplace<RigidBody>(ground, Shape::MakeBox());
     world.Emplace<RigidBody>(backWall, Shape::MakeBox());
@@ -565,75 +568,70 @@ void BuildGround(ecs::Ecs world)
     world.Emplace<RigidBody>(rightWall, Shape::MakeBox());
 }
 
-void BuildBridge(ecs::Ecs world)
+void BuildBridge(ecs::Ecs world, NcPhysics& ncPhysics)
 {
-    // Platforms
-    const auto platform1 = world.Emplace<Entity>({
+    const auto platform1Info = EntityInfo{
         .position = Vector3{0.0f, 5.0f, 40.0f},
         .scale = Vector3{10.0f, 1.0f, 10.0f},
         .tag = "Platform",
         .flags = Entity::Flags::Static
-    });
+    };
 
-    const auto platform2 = world.Emplace<Entity>({
+    const auto platform2Info = EntityInfo{
         .position = Vector3{0.0f, 5.0f, 60.0f},
         .scale = Vector3{10.0f, 1.0f, 10.0f},
         .tag = "Platform",
         .flags = Entity::Flags::Static
-    });
+    };
 
-    // Ramp
-    const auto ramp1 = world.Emplace<Entity>({
+    const auto ramp1Info = EntityInfo{
         .position = Vector3{0.0f, 1.15f, 25.99f},
         .rotation = Quaternion::FromEulerAngles(-0.4f, 0.0f, 0.0f),
         .scale = Vector3{8.0f, 1.0f, 20.0f},
         .tag = "Ramp",
         .flags = Entity::Flags::Static
-    });
+    };
 
-    const auto ramp2 = world.Emplace<Entity>({
+    const auto ramp2Info = EntityInfo{
         .position = Vector3{7.2f, 1.25f, 60.0f},
         .rotation = Quaternion::FromAxisAngle(Vector3::Up(), -1.571f),
         .scale = Vector3::Splat(3.2f),
         .tag = "Ramp"
+    };
+
+    const auto subShapes = std::array{
+        SubShapeInfo{Shape::MakeBox(platform1Info.scale), platform1Info.position},
+        SubShapeInfo{Shape::MakeBox(platform2Info.scale), platform2Info.position},
+        SubShapeInfo{Shape::MakeBox(ramp1Info.scale), ramp1Info.position, ramp1Info.rotation},
+        SubShapeInfo{Shape::MakeConvexHull(convex_hull::ramp, ramp2Info.scale), ramp2Info.position, ramp2Info.rotation}
+    };
+
+    auto cookedShape = CreateStaticCompoundShape(subShapes);
+    ncPhysics.RemoveRuntimeCompoundShape(g_compoundShapeId);
+    ncPhysics.AddRuntimeCompoundShape(std::move(cookedShape), g_compoundShapeId);
+
+    const auto container = world.Emplace<Entity>({
+        .tag = "PlatformBody",
+        .flags = Entity::Flags::Static
     });
 
-    world.Emplace<StaticMesh>(platform1, mesh::Cube, material::Default);
-    world.Emplace<StaticMesh>(platform2, mesh::Cube, material::Default);
-    world.Emplace<StaticMesh>(ramp1, mesh::Cube, material::Default);
-    world.Emplace<StaticMesh>(ramp2, mesh::Ramp, material::Default);
-
-    auto& platform1Body = world.Emplace<RigidBody>(
-        platform1,
-        nc::Shape::MakeBox(),
-        nc::RigidBodyInfo{
-            .type = BodyType::Static
-        }
-    );
-
-    auto& platform2Body = world.Emplace<RigidBody>(
-        platform2,
-        nc::Shape::MakeBox(),
-        nc::RigidBodyInfo{
-            .type = BodyType::Static
-        }
-    );
-
     world.Emplace<RigidBody>(
-        ramp1,
-        nc::Shape::MakeBox(),
+        container,
+        nc::Shape::MakeCompound(g_compoundShapeId),
         nc::RigidBodyInfo{
             .type = BodyType::Static
         }
     );
 
-    world.Emplace<RigidBody>(
-        ramp2,
-        nc::Shape::MakeConvexHull(convex_hull::Ramp),
-        nc::RigidBodyInfo{
-            .type = BodyType::Static
-        }
-    );
+    const auto platform1 = world.Emplace<Entity>(platform1Info);
+    const auto platform2 = world.Emplace<Entity>(platform2Info);
+    const auto ramp1 = world.Emplace<Entity>(ramp1Info);
+    const auto ramp2 = world.Emplace<Entity>(ramp2Info);
+
+    world.Emplace<StaticMesh>(platform1, mesh::default_cube, material::white);
+    world.Emplace<StaticMesh>(platform2, mesh::default_cube, material::white);
+    world.Emplace<StaticMesh>(ramp1,     mesh::default_cube, material::white);
+    world.Emplace<StaticMesh>(ramp2,     mesh::ramp,         material::white);
 
     // Bridge
     const auto bridgeParent = world.Emplace<Entity>({.tag = "Suspension Bridge"});
@@ -646,7 +644,7 @@ void BuildBridge(ecs::Ecs world)
             .tag = "Plank"}
         );
 
-        world.Emplace<StaticMesh>(plank, mesh::Cube, material::Orange);
+        world.Emplace<StaticMesh>(plank, mesh::default_cube, material::orange);
         return world.Emplace<RigidBody>(plank);
     };
 
@@ -663,20 +661,18 @@ void BuildBridge(ecs::Ecs world)
     nextPos += offset;
     auto& plank5 = makePlank(nextPos, scale);
 
-    platform1Body.AddConstraint(
+    plank1.AddConstraint(
         nc::HingeConstraintInfo{
-            .ownerPosition = Vector3{0.0f, 0.0f, 5.1f},
-            .targetPosition = Vector3{0.0f, 0.0f, -1.0f},
-        },
-        plank1
+            .ownerPosition = Vector3{0.0f, 0.0f, -1.0f},
+            .targetPosition = Vector3{0.0f, 5.0f, 45.1f},
+        }
     );
 
-    platform2Body.AddConstraint(
+    plank5.AddConstraint(
         nc::HingeConstraintInfo{
-            .ownerPosition = Vector3{0.0f, 0.0f, -5.1f},
-            .targetPosition = Vector3{0.0f, 0.0f, 1.0f}
-        },
-        plank5
+            .ownerPosition = Vector3{0.0f, 0.0f, 1.0f},
+            .targetPosition = Vector3{0.0f, 5.0f, 54.9f}
+        }
     );
 
     const auto plankToPlank = nc::HingeConstraintInfo{
@@ -702,7 +698,7 @@ void BuildSteps(ecs::Ecs world)
             .tag = "Step"
         });
 
-        world.Emplace<StaticMesh>(step, mesh::Cube, mat);
+        world.Emplace<StaticMesh>(step, mesh::default_cube, mat);
         world.Emplace<RigidBody>(step)
             .AddConstraint(PointConstraintInfo{
                 .ownerPosition = Vector3{},
@@ -710,7 +706,7 @@ void BuildSteps(ecs::Ecs world)
             });
     };
 
-    buildStep(Vector3{-29.1f, 2.0f, 40.0f}, Vector3{10.0f, 1.0f, 10.0f}, material::Purple);
+    buildStep(Vector3{-29.1f, 2.0f, 40.0f}, Vector3{10.0f, 1.0f, 10.0f}, material::purple);
 
     constexpr auto smallStepScale = Vector3{1.0f, 0.5f, 1.0f};
     constexpr auto smallStepBasePosition = Vector3{-5.5f, 5.0f, 36.0f};
@@ -721,7 +717,7 @@ void BuildSteps(ecs::Ecs world)
             const auto x = -1.01f * static_cast<float>(i);
             const auto y = -0.3f * static_cast<float>(i);
             const auto z = 1.01f* static_cast<float>(j);
-            buildStep(smallStepBasePosition + Vector3{x, y, z}, smallStepScale, material::Blue, 2);
+            buildStep(smallStepBasePosition + Vector3{x, y, z}, smallStepScale, material::blue, 2);
         }
     }
 
@@ -732,7 +728,7 @@ void BuildSteps(ecs::Ecs world)
         .tag = "Rotating Bridge"
     });
 
-    world.Emplace<StaticMesh>(rotatingBridge, mesh::Cube, material::Red);
+    world.Emplace<StaticMesh>(rotatingBridge, mesh::default_cube, material::red);
     world.Emplace<RigidBody>(rotatingBridge)
         .AddConstraint(
             HingeConstraintInfo{
@@ -758,7 +754,7 @@ void BuildRotatingSteps(ecs::Ecs world)
             .tag = "Step"
         });
 
-        world.Emplace<StaticMesh>(step, mesh::Cube, material::Purple);
+        world.Emplace<StaticMesh>(step, mesh::default_cube, material::purple);
         world.Emplace<RigidBody>(step)
             .AddConstraint(
                 SwingTwistConstraintInfo{
@@ -785,8 +781,8 @@ void BuildHalfPipes(ecs::Ecs world)
         .flags = Entity::Flags::Static
     });
 
-    world.Emplace<StaticMesh>(halfPipe, mesh::HalfPipe, material::Blue);
-    world.Emplace<RigidBody>(halfPipe, Shape::MakeMesh(mesh_collider::Halfpipe));
+    world.Emplace<StaticMesh>(halfPipe, mesh::halfpipe, material::blue);
+    world.Emplace<RigidBody>(halfPipe, Shape::MakeMesh(mesh_collider::halfpipe));
 }
 
 void BuildHinge(ecs::Ecs world)
@@ -812,8 +808,8 @@ void BuildHinge(ecs::Ecs world)
         .parent = root
     });
 
-    world.Emplace<StaticMesh>(anchor, mesh::Cube, material::Default);
-    world.Emplace<StaticMesh>(panel, mesh::Cube, material::Purple);
+    world.Emplace<StaticMesh>(anchor, mesh::default_cube, material::white);
+    world.Emplace<StaticMesh>(panel,  mesh::default_cube, material::purple);
 
     world.Emplace<RigidBody>(panel)
         .AddConstraint(
@@ -847,8 +843,8 @@ void BuildPunchingBag(ecs::Ecs world)
         .tag = "Bag"
     });
 
-    world.Emplace<StaticMesh>(top, mesh::Cube, material::Purple);
-    world.Emplace<StaticMesh>(bag, mesh::Capsule, material::Orange);
+    world.Emplace<StaticMesh>(top, mesh::default_cube,    material::purple);
+    world.Emplace<StaticMesh>(bag, mesh::default_capsule, material::orange);
 
     auto& topBody = world.Emplace<RigidBody>(top);
     auto& bagBody = world.Emplace<RigidBody>(bag, Shape::MakeCapsule());
@@ -887,10 +883,10 @@ void BuildChain(ecs::Ecs world)
     nodeInfo.position.x = 3.0f;
     const auto node4 = world.Emplace<Entity>(nodeInfo);
 
-    world.Emplace<StaticMesh>(node1, mesh::Capsule, material::Teal);
-    world.Emplace<StaticMesh>(node2, mesh::Capsule, material::Teal);
-    world.Emplace<StaticMesh>(node3, mesh::Capsule, material::Teal);
-    world.Emplace<StaticMesh>(node4, mesh::Capsule, material::Teal);
+    world.Emplace<StaticMesh>(node1, mesh::default_capsule, material::teal);
+    world.Emplace<StaticMesh>(node2, mesh::default_capsule, material::teal);
+    world.Emplace<StaticMesh>(node3, mesh::default_capsule, material::teal);
+    world.Emplace<StaticMesh>(node4, mesh::default_capsule, material::teal);
 
     const auto capsule = Shape::MakeCapsule();
     auto& node1Body = world.Emplace<RigidBody>(node1, capsule);
@@ -944,9 +940,9 @@ void BuildSliders(ecs::Ecs world)
         .tag = "Slider2"
     });
 
-    world.Emplace<StaticMesh>(base, mesh::Cube, material::Red);
-    world.Emplace<StaticMesh>(slider1, mesh::Capsule, material::Orange);
-    world.Emplace<StaticMesh>(slider2, mesh::Capsule, material::Orange);
+    world.Emplace<StaticMesh>(base,    mesh::default_cube,    material::red);
+    world.Emplace<StaticMesh>(slider1, mesh::default_capsule, material::orange);
+    world.Emplace<StaticMesh>(slider2, mesh::default_capsule, material::orange);
 
     auto& baseBody = world.Emplace<RigidBody>(base);
     auto& slider1Body = world.Emplace<RigidBody>(slider1, Shape::MakeCapsule());
@@ -993,9 +989,9 @@ void BuildSwingingBars(ecs::Ecs world)
         .parent = root
     });
 
-    world.Emplace<StaticMesh>(pole, mesh::Cube, material::Purple);
-    world.Emplace<StaticMesh>(bar1, mesh::Cube, material::Yellow);
-    world.Emplace<StaticMesh>(bar2, mesh::Cube, material::Yellow);
+    world.Emplace<StaticMesh>(pole, mesh::default_cube, material::purple);
+    world.Emplace<StaticMesh>(bar1, mesh::default_cube, material::yellow);
+    world.Emplace<StaticMesh>(bar2, mesh::default_cube, material::yellow);
 
     auto& poleBody = world.Emplace<RigidBody>(pole, Shape::MakeCapsule());
     auto& bar1Body = world.Emplace<RigidBody>(bar1);
@@ -1043,12 +1039,12 @@ void BuildTriggers(ecs::Ecs world)
         .tag = "Capsule"
     });
 
-    static constexpr auto white = Vector4::Splat(1.0f);
+    static constexpr auto teal = Vector4{0.2f, 0.4f, 1.0f, 1.0f};
     static constexpr auto pink = Vector4{0.8f, 0.2f, 0.6f, 1.0f};
     constexpr auto source = WireframeSource::Collider;
-    world.Emplace<WireframeRenderer>(box, source, box, white);
-    world.Emplace<WireframeRenderer>(sphere, source, sphere, white);
-    world.Emplace<WireframeRenderer>(capsule, source, capsule, white);
+    world.Emplace<WireframeRenderer>(box, source, box, teal);
+    world.Emplace<WireframeRenderer>(sphere, source, sphere, teal);
+    world.Emplace<WireframeRenderer>(capsule, source, capsule, teal);
 
     const auto info = RigidBodyInfo{
         .type = BodyType::Static,
@@ -1065,15 +1061,15 @@ void BuildTriggers(ecs::Ecs world)
             ecs.Get<WireframeRenderer>(self).color = pink;
     };
 
-    auto setWhite = [](Entity self, Entity other, ecs::Ecs ecs)
+    auto setTeal = [](Entity self, Entity other, ecs::Ecs ecs)
     {
         if (other.Layer() == PlayerLayer)
-            ecs.Get<WireframeRenderer>(self).color = white;
+            ecs.Get<WireframeRenderer>(self).color = teal;
     };
 
-    world.Emplace<CollisionListener>(box, nullptr, nullptr, setPink, setWhite);
-    world.Emplace<CollisionListener>(sphere, nullptr, nullptr, setPink, setWhite);
-    world.Emplace<CollisionListener>(capsule, nullptr, nullptr, setPink, setWhite);
+    world.Emplace<CollisionListener>(box, nullptr, nullptr, setPink, setTeal);
+    world.Emplace<CollisionListener>(sphere, nullptr, nullptr, setPink, setTeal);
+    world.Emplace<CollisionListener>(capsule, nullptr, nullptr, setPink, setTeal);
 }
 
 void BuildSpawner(ecs::Ecs world, Random* ncRandom, NcPhysics* ncPhysics)
@@ -1092,7 +1088,7 @@ void BuildSpawner(ecs::Ecs world, Random* ncRandom, NcPhysics* ncPhysics)
             .maxRotation = Vector3::Splat(std::numbers::pi_v<float> * 2.0f)
         },
         [world](Entity handle) mutable {
-            world.Emplace<StaticMesh>(handle, mesh::Cube, material::Default);
+            world.Emplace<StaticMesh>(handle, mesh::default_cube, material::white);
             world.Emplace<RigidBody>(handle, Shape::MakeBox());
         },
         [ncPhysics](bool isPreSpawn, unsigned count) {
@@ -1184,7 +1180,7 @@ class RayCaster : public FreeComponent
                 auto& renderer = world.Get<StaticMesh>(hit);
                 m_hits.push_back(hit);
                 m_restoreMaterials.push_back(renderer.GetMaterial().GetProperties());
-                renderer.GetMaterial().SetProperties(material::Yellow.properties);
+                renderer.GetMaterial().SetProperties(material::yellow.properties);
             }
         }
 
@@ -1244,7 +1240,7 @@ void PhysicsTest::Load(ecs::Ecs world, ModuleProvider modules)
     ncGraphics->SetCamera(&camera);
     ncGraphics->SetPostProcessEffectEnabled(nc::OutlinedToonEffectId, true);
     ncGraphics->SetPostProcessEffectProperties(nc::OutlinedToonEffectId, PostProcessPassFlag::Outline, PostProcessPassProperties{OutlinePassProperties{.width = 2.0f, .depthThreshold = 2.66f, .viewDirDepthThreshold = 0.93f, .normalThreshold = 0.180f}});
-    ncGraphics->SetPostProcessEffectProperties(nc::OutlinedToonEffectId, PostProcessPassFlag::Noise, post_process::Noise);
+    ncGraphics->SetPostProcessEffectProperties(nc::OutlinedToonEffectId, PostProcessPassFlag::Noise, post_process::noise);
 
     // Character
     SpawnCharacterFunc = [world, cameraHandle]() mutable
@@ -1273,7 +1269,7 @@ void PhysicsTest::Load(ecs::Ecs world, ModuleProvider modules)
 
     // Environment
     BuildGround(world);
-    BuildBridge(world);
+    BuildBridge(world, *ncPhysics);
     BuildSteps(world);
     BuildRotatingSteps(world);
     BuildHinge(world);

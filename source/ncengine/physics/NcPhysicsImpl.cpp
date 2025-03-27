@@ -1,6 +1,7 @@
 #include "NcPhysicsImpl.h"
 #include "EventDispatch.h"
 #include "jolt/Conversion.h"
+#include "jolt/CookedShapeUtility.h"
 #include "jolt/ShapeFactory.h"
 #include "jolt/VehicleAnimator.h"
 
@@ -40,6 +41,9 @@ class NcPhysicsStub : public nc::NcPhysics
         auto RestoreSnapshot(nc::PhysicsSnapshot&) -> bool { return false; }
         void BeginRigidBodyBatch(size_t) override {}
         void EndRigidBodyBatch() override {}
+        void AddRuntimeCompoundShape(const nc::CookedShape&, nc::asset::AssetId) override {}
+        void RemoveRuntimeCompoundShape(nc::asset::AssetId) override {}
+        void RemoveAllRuntimeCompoundShapes() override {}
         void OnBuildTaskGraph(nc::task::UpdateTasks& update, nc::task::RenderTasks&)
         {
             update.Add(
@@ -348,6 +352,21 @@ void NcPhysicsImpl::EndRigidBodyBatch()
 
     m_constraintManager.EndBatch(std::exchange(m_deferredState->constraintBatchIndex, DeferredPhysicsCreateState::NullBatch));
     m_vehicleManager.EndBatch(std::exchange(m_deferredState->vehicleBatchIndex, DeferredPhysicsCreateState::NullBatch));
+}
+
+void NcPhysicsImpl::AddRuntimeCompoundShape(const CookedShape& cookedShape, asset::AssetId id)
+{
+    m_shapeFactory.AddRuntimeAsset(ShapeStorageRTTI::ToShape(cookedShape.GetShapeData()), id);
+}
+
+void NcPhysicsImpl::RemoveRuntimeCompoundShape(asset::AssetId id)
+{
+    m_shapeFactory.RemoveRuntimeAsset(id);
+}
+
+void NcPhysicsImpl::RemoveAllRuntimeCompoundShapes()
+{
+    m_shapeFactory.RemoveAllRuntimeAssets();
 }
 } // namespace physics
 } // namespace nc

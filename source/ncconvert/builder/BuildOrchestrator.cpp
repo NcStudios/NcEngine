@@ -3,6 +3,7 @@
 #include "BuildInstructions.h"
 #include "Inspect.h"
 #include "Target.h"
+#include "code_gen/PrefabGenerator.h"
 #include "utility/EnumExtensions.h"
 #include "utility/Log.h"
 
@@ -62,6 +63,13 @@ void BuildOrchestrator::RunBuild()
         {
             throw NcError("Failed to create output directory: ", m_config.outputDirectory.string());
         }
+    }
+
+    if (m_config.mode == OperationMode::GenerateSource)
+    {
+        LOG("Generating source code at {}", m_config.outputDirectory.string());
+        GeneratePrefabFile(m_config.manifestPath.value(), m_config.outputDirectory, m_config.rootNamespace);
+        return;
     }
 
     const auto instructions = BuildInstructions{m_config};

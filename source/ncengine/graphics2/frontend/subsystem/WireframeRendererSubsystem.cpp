@@ -1,6 +1,6 @@
 #include "WireframeRendererSubsystem.h"
 
-#include "ncengine/asset/DefaultAssets.h"
+#include "ncasset/DefaultAssets.h"
 #include "ncengine/ecs/Ecs.h"
 #include "ncengine/ecs/Transform.h"
 #include "ncengine/graphics/Mesh.h"
@@ -52,6 +52,7 @@ auto GetMeshView(nc::ShapeType shape) -> nc::asset::MeshView
         }
         case nc::ShapeType::ConvexHull:
         case nc::ShapeType::Mesh:
+        case nc::ShapeType::Compound:
         {
             /** @todo 567 currently have no renderable geometry for these */
             static const auto view = AssetService<MeshView>::Get()->Acquire(CubeMesh);

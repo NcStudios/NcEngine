@@ -15,7 +15,7 @@ SkeletalAnimationAssetManager::SkeletalAnimationAssetManager(const std::string& 
 {
 }
 
-bool SkeletalAnimationAssetManager::Load(const std::string& path, bool isExternal, asset_flags_type)
+auto SkeletalAnimationAssetManager::Load(const std::string& path, AssetSubtype) -> bool
 {
     auto previousTableSize = m_table.size();
     if (m_table.size() + 1 >= m_maxSkeletalAnimationCount)
@@ -29,7 +29,7 @@ bool SkeletalAnimationAssetManager::Load(const std::string& path, bool isExterna
     }
 
     m_table.emplace(path);
-    const auto fullPath = isExternal ? path : m_assetDirectory + path;
+    const auto fullPath = m_assetDirectory + path;
     auto animation = ImportSkeletalAnimation(fullPath);
     m_onUpdate.Emit(SkeletalAnimationUpdateEventData{
         std::span<const std::string>{m_table.keys().begin() + previousTableSize, m_table.keys().end()},
@@ -39,7 +39,7 @@ bool SkeletalAnimationAssetManager::Load(const std::string& path, bool isExterna
     return true;
 }
 
-bool SkeletalAnimationAssetManager::Load(std::span<const std::string> paths, bool isExternal, asset_flags_type)
+auto SkeletalAnimationAssetManager::Load(std::span<const std::string> paths, AssetSubtype) -> bool
 {
     auto previousTableSize = m_table.size();
     if (m_table.size() + paths.size() >= m_maxSkeletalAnimationCount)
@@ -56,7 +56,7 @@ bool SkeletalAnimationAssetManager::Load(std::span<const std::string> paths, boo
         }
 
         m_table.emplace(path);
-        const auto fullPath = isExternal ? path : m_assetDirectory + path;
+        const auto fullPath = m_assetDirectory + path;
         animations.push_back(ImportSkeletalAnimation(fullPath));
     }
 
@@ -74,7 +74,7 @@ bool SkeletalAnimationAssetManager::Load(std::span<const std::string> paths, boo
     return false;
 }
 
-bool SkeletalAnimationAssetManager::Unload(const std::string& path, asset_flags_type)
+auto SkeletalAnimationAssetManager::Unload(const std::string& path) -> bool
 {
     if (!m_table.erase(path))
         return false;
@@ -87,7 +87,7 @@ bool SkeletalAnimationAssetManager::Unload(const std::string& path, asset_flags_
     return true;
 }
 
-void SkeletalAnimationAssetManager::UnloadAll(asset_flags_type)
+void SkeletalAnimationAssetManager::UnloadAll()
 {
     m_table.clear();
     m_onUpdate.Emit(SkeletalAnimationUpdateEventData{
@@ -97,13 +97,13 @@ void SkeletalAnimationAssetManager::UnloadAll(asset_flags_type)
     });
 }
 
-auto SkeletalAnimationAssetManager::Acquire(const std::string& path, asset_flags_type) const -> SkeletalAnimationView
+auto SkeletalAnimationAssetManager::Acquire(const std::string& path) const -> SkeletalAnimationView
 {
     NC_ASSERT(m_table.contains(path), fmt::format("SkeletalAnimation is not loaded: {}", path));
     return Acquire(m_table.hash(path));
 }
 
-auto SkeletalAnimationAssetManager::Acquire(AssetId id, asset_flags_type) const -> SkeletalAnimationView
+auto SkeletalAnimationAssetManager::Acquire(AssetId id) const -> SkeletalAnimationView
 {
     const auto index = m_table.index(id);
     NC_ASSERT(index != m_table.NullIndex, fmt::format("SkeletalAnimation is not loaded: {}", id));
@@ -113,18 +113,8 @@ auto SkeletalAnimationAssetManager::Acquire(AssetId id, asset_flags_type) const 
     };
 }
 
-bool SkeletalAnimationAssetManager::IsLoaded(const std::string& path, asset_flags_type) const
-{
-    return m_table.contains(path);
-}
-
 auto SkeletalAnimationAssetManager::GetAllLoaded() const -> std::vector<std::string_view>
 {
     return GetPaths(m_table.keys());
-}
-
-auto SkeletalAnimationAssetManager::OnUpdate() -> Signal<const SkeletalAnimationUpdateEventData&>&
-{
-    return m_onUpdate;
 }
 } // namespace nc::asset

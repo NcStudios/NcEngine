@@ -5,7 +5,6 @@
 #pragma once
 
 #include "ncengine/asset/Assets.h"
-#include "ncengine/asset/DefaultAssets.h"
 #include "ncengine/ecs/Entity.h"
 
 #include <vector>
