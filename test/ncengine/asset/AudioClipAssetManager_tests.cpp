@@ -30,32 +30,32 @@ class AudioClipAssetManager_tests : public ::testing::Test
 
 TEST_F(AudioClipAssetManager_tests, Load_NotLoaded_ReturnsTrue)
 {
-    auto actual = assetManager->Load(SoundPath1, false);
+    auto actual = assetManager->Load(SoundPath1);
     EXPECT_TRUE(actual);
 }
 
 TEST_F(AudioClipAssetManager_tests, Load_Loaded_ReturnsFalse)
 {
-    assetManager->Load(SoundPath1, false);
-    auto actual = assetManager->Load(SoundPath1, false);
+    assetManager->Load(SoundPath1);
+    auto actual = assetManager->Load(SoundPath1);
     EXPECT_FALSE(actual);
 }
 
 TEST_F(AudioClipAssetManager_tests, Load_BadPath_Throws)
 {
-    EXPECT_THROW(assetManager->Load("bad/path", false), std::runtime_error);
+    EXPECT_THROW(assetManager->Load("bad/path"), std::runtime_error);
 }
 
 TEST_F(AudioClipAssetManager_tests, Load_Collection_ReturnsTrue)
 {
     std::array<std::string, 2u> paths{SoundPath1, SoundPath2};
-    auto actual = assetManager->Load(paths, false);
+    auto actual = assetManager->Load(paths);
     EXPECT_TRUE(actual);
 }
 
 TEST_F(AudioClipAssetManager_tests, Unload_Loaded_ReturnsTrue)
 {
-    assetManager->Load(SoundPath1, false);
+    assetManager->Load(SoundPath1);
     auto actual = assetManager->Unload(SoundPath1);
     EXPECT_TRUE(actual);
 }
@@ -74,7 +74,7 @@ TEST_F(AudioClipAssetManager_tests, Unload_BadPath_ReturnsFalse)
 
 TEST_F(AudioClipAssetManager_tests, IsLoaded_Loaded_ReturnsTrue)
 {
-    assetManager->Load(SoundPath1, false);
+    assetManager->Load(SoundPath1);
     auto actual = assetManager->IsLoaded(SoundPath1);
     EXPECT_TRUE(actual);
 }
@@ -87,7 +87,7 @@ TEST_F(AudioClipAssetManager_tests, IsLoaded_NotLoaded_ReturnsFalse)
 
 TEST_F(AudioClipAssetManager_tests, IsLoaded_AfterUnload_ReturnsFalse)
 {
-    assetManager->Load(SoundPath1, false);
+    assetManager->Load(SoundPath1);
     assetManager->Unload(SoundPath1);
     auto actual = assetManager->IsLoaded(SoundPath1);
     EXPECT_FALSE(actual);
@@ -96,21 +96,21 @@ TEST_F(AudioClipAssetManager_tests, IsLoaded_AfterUnload_ReturnsFalse)
 TEST_F(AudioClipAssetManager_tests, UnloadAll_HasAssets_RemovesAssets)
 {
     std::array<std::string, 2u> paths{SoundPath1, SoundPath2};
-    assetManager->Load(paths, false);
-    assetManager->UnloadAll(AssetFlags::None);
+    assetManager->Load(paths);
+    assetManager->UnloadAll();
     EXPECT_FALSE(assetManager->Unload(SoundPath1));
     EXPECT_FALSE(assetManager->Unload(SoundPath2));
 }
 
 TEST_F(AudioClipAssetManager_tests, UnloadAll_Empty_Completes)
 {
-    assetManager->UnloadAll(AssetFlags::None);
+    assetManager->UnloadAll();
 }
 
 TEST_F(AudioClipAssetManager_tests, GetPath_Loaded_ReturnsPath)
 {
     std::array<std::string, 2u> paths{SoundPath1, SoundPath2};
-    assetManager->Load(paths, false);
+    assetManager->Load(paths);
     const auto& expected = paths.at(0);
     const auto view = assetManager->Acquire(expected);
     const auto actual = assetManager->GetPath(view.id);
@@ -120,7 +120,7 @@ TEST_F(AudioClipAssetManager_tests, GetPath_Loaded_ReturnsPath)
 TEST_F(AudioClipAssetManager_tests, GetPath_NotLoaded_Throws)
 {
     std::array<std::string, 2u> paths{SoundPath1, SoundPath2};
-    assetManager->Load(paths, false);
+    assetManager->Load(paths);
     const auto& expected = paths.at(0);
     const auto view = assetManager->Acquire(expected);
     assetManager->UnloadAll();

@@ -8,7 +8,7 @@
 namespace
 {
 constexpr auto g_format = RTAUDIO_FLOAT64;
-const auto g_nullDevice = nc::audio::AudioDevice{"NoDevice", nc::audio::InvalidDeviceId};
+const auto g_nullDevice = nc::AudioDevice{"NoDevice", nc::InvalidAudioDeviceId};
 
 auto ToString(RtAudioErrorType type) noexcept -> std::string_view
 {
@@ -86,7 +86,7 @@ auto DeviceStream::OpenStream(const StreamParameters& params) -> bool
 {
     CloseStream();
     m_activeDevice = FindSuitableDevice(params.deviceId);
-    if (m_activeDevice.id == InvalidDeviceId)
+    if (m_activeDevice.id == InvalidAudioDeviceId)
     {
         NC_LOG_ERROR("Failed to find a suitable audio output device");
         return false;
@@ -176,7 +176,7 @@ auto DeviceStream::EnumerateDevices() noexcept -> std::vector<AudioDevice>
 auto DeviceStream::FindSuitableDevice(uint32_t preferredDeviceId) noexcept -> AudioDevice
 {
     auto requestedDefault = false;
-    if (preferredDeviceId == DefaultDeviceId)
+    if (preferredDeviceId == DefaultAudioDeviceId)
     {
         // Our default id is static, while its actual id may change at any point
         preferredDeviceId = m_rtAudio->getDefaultOutputDevice();

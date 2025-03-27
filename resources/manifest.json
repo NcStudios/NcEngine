@@ -5,60 +5,60 @@
     "audio-clip": [
         {
             "sourcePath": "raw/sound/DefaultAudioClip.wav",
-            "assetName": "audio_clip/DefaultAudioClip"
+            "assetName": "audio_clip/default/silence"
         }
     ],
     "convex-hull": [
         {
             "sourcePath": "raw/model/DefaultCube.fbx",
-            "assetName": "convex_hull/DefaultConvexHull"
+            "assetName": "convex_hull/default/cube"
         }
     ],
     "cube-map": [
         {
             "sourcePath": "raw/image/DefaultSkybox.png",
-            "assetName": "cube_map/DefaultSkyboxCubeMap"
+            "assetName": "cube_map/default/skybox"
         }
     ],
     "mesh": [
         {
             "sourcePath": "raw/model/DefaultCapsule.fbx",
-            "assetName": "mesh/DefaultCapsule",
+            "assetName": "mesh/default/capsule",
             "options": {
                 "optimizeMesh": true
             }
         },
         {
             "sourcePath": "raw/model/DefaultCube.fbx",
-            "assetName": "mesh/DefaultCube",
+            "assetName": "mesh/default/cube",
             "options": {
                 "optimizeMesh": true
             }
         },
         {
             "sourcePath": "raw/model/DefaultPlane.fbx",
-            "assetName": "mesh/DefaultPlane",
+            "assetName": "mesh/default/plane",
             "options": {
                 "optimizeMesh": true
             }
         },
         {
             "sourcePath": "raw/model/DefaultSphere.fbx",
-            "assetName": "mesh/DefaultSphere",
+            "assetName": "mesh/default/sphere",
             "options": {
                 "optimizeMesh": true
             }
         },
         {
             "sourcePath": "raw/model/DefaultSkybox.fbx",
-            "assetName": "mesh/DefaultSkyboxMesh",
+            "assetName": "mesh/default/skybox",
             "options": {
                 "optimizeMesh": true
             }
         },
         {
             "sourcePath": "raw/model/DefaultWheel.fbx",
-            "assetName": "mesh/DefaultWheel",
+            "assetName": "mesh/default/wheel",
             "options": {
                 "optimizeMesh": true
             }
@@ -67,34 +67,36 @@
     "mesh-collider": [
         {
             "sourcePath": "raw/model/DefaultPlane.fbx",
-            "assetName": "mesh_collider/DefaultMeshCollider"
+            "assetName": "mesh_collider/default/plane"
         }
     ],
-    "texture": [
-        {
-            "sourcePath": "raw/image/DefaultBaseColor.png",
-            "assetName": "texture/DefaultBaseColor"
-        },
-        {
-            "sourcePath": "raw/image/DefaultMetallic.png",
-            "assetName": "texture/DefaultMetallic"
-        },
-        {
-            "sourcePath": "raw/image/DefaultNormal.png",
-            "assetName": "texture/DefaultNormal"
-        },
-        {
-            "sourcePath": "raw/image/DefaultParticle.png",
-            "assetName": "texture/DefaultParticle"
-        }
-    ],
+    "texture": {
+        "diffuse" : [
+            {
+                "sourcePath": "raw/image/DefaultBaseColor.png",
+                "assetName": "texture/default/color"
+            }
+        ],
+        "normal" : [
+            {
+                "sourcePath": "raw/image/DefaultNormal.png",
+                "assetName": "texture/default/normal"
+            }
+        ],
+        "particle" : [
+            {
+                "sourcePath": "raw/image/DefaultParticle.png",
+                "assetName": "texture/default/particle"
+            }
+        ]
+    },
     "skeletal-animation": [
         {
             "sourcePath": "raw/skeletal_animation/DefaultCube.fbx",
             "assetNames": [
                 {
                     "subResourceName" : "Armature|DefaultCubeAnimation",
-                    "assetName" : "skeletal_animation/DefaultCubeAnimation"
+                    "assetName" : "skeletal_animation/default/cube"
                 }
             ]
         }

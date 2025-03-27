@@ -1,4 +1,5 @@
 #include "JoltApiFixture.inl"
+#include "ncengine/physics/CompoundShape.h"
 #include "ncengine/physics/CookedShape.h"
 #include "physics/jolt/Conversion.h"
 #include "physics/jolt/CookedShapeUtility.h"
@@ -16,7 +17,6 @@ class CookedShapeTest : public JoltApiFixture
         nc::Signal<const nc::asset::ConvexHullUpdateEventData&> convexHullSignal;
         nc::Signal<const nc::asset::MeshColliderUpdateEventData&> meshColliderSignal;
         nc::physics::ShapeFactory shapeFactory{convexHullSignal, meshColliderSignal};
-
 };
 
 TEST_F(CookedShapeTest, CookedShapeRTTI)
@@ -123,6 +123,28 @@ TEST_F(CookedShapeTest, MoveOperations_transferState)
         movedTo = std::move(movedFrom);
         EXPECT_FALSE(movedFrom.HasShape());
         EXPECT_TRUE(movedTo.HasShape());
+    }
+}
+
+TEST_F(CookedShapeTest, GetProperties_findsInnerShapeAndDecorations)
+{
+    {
+        const auto sphere = nc::Shape::MakeSphere(0.5);
+        const auto uut = nc::CookedShape{sphere};
+        const auto properties = uut.GetProperties();
+        EXPECT_EQ(nc::ShapeType::Sphere, properties.type);
+        EXPECT_EQ(nc::ShapeDecorationFlags::None, properties.decorations);
+    }
+
+    {
+        const auto expectedExtents = nc::Vector3{1.0f, 2.0f, 3.0f};
+        const auto expectedPosition = nc::Vector3{5.0f, 6.0f, 7.0f};
+        const auto expectedRotation = nc::Quaternion::FromEulerAngles(1.0f, 2.0f, 3.0f);
+        const auto box = nc::Shape::MakeBox(expectedExtents);
+        const auto uut = nc::CookedShape{box, expectedPosition, expectedRotation};
+        const auto properties = uut.GetProperties();
+        EXPECT_EQ(nc::ShapeType::Box, properties.type);
+        EXPECT_EQ(nc::ShapeDecorationFlags::HasIsometricTransformation, properties.decorations);
     }
 }
 

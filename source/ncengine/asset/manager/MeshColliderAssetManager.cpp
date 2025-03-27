@@ -11,14 +11,14 @@ MeshColliderAssetManager::MeshColliderAssetManager(const std::string& meshCollid
 {
 }
 
-bool MeshColliderAssetManager::Load(const std::string& path, bool isExternal, asset_flags_type)
+auto MeshColliderAssetManager::Load(const std::string& path, AssetSubtype) -> bool
 {
     if (IsLoaded(path))
     {
         return false;
     }
 
-    const auto fullPath = isExternal ? path : m_assetDirectory + path;
+    const auto fullPath = m_assetDirectory + path;
     m_map.emplace(path);
     const auto id = m_map.hash(path);
     auto asset = ImportMeshCollider(fullPath);
@@ -31,7 +31,7 @@ bool MeshColliderAssetManager::Load(const std::string& path, bool isExternal, as
     return true;
 }
 
-bool MeshColliderAssetManager::Load(std::span<const std::string> paths, bool isExternal, asset_flags_type)
+auto MeshColliderAssetManager::Load(std::span<const std::string> paths, AssetSubtype) -> bool
 {
     auto anyLoaded = false;
     auto assets = std::vector<MeshCollider>{};
@@ -47,7 +47,7 @@ bool MeshColliderAssetManager::Load(std::span<const std::string> paths, bool isE
         }
 
         anyLoaded = true;
-        const auto fullPath = isExternal ? path : m_assetDirectory + path;
+        const auto fullPath = m_assetDirectory + path;
         assets.push_back(ImportMeshCollider(fullPath));
         ids.push_back(m_map.hash(path));
         m_map.emplace(path);
@@ -65,7 +65,7 @@ bool MeshColliderAssetManager::Load(std::span<const std::string> paths, bool isE
     return anyLoaded;
 }
 
-bool MeshColliderAssetManager::Unload(const std::string& path, asset_flags_type)
+auto MeshColliderAssetManager::Unload(const std::string& path) -> bool
 {
     if (m_map.erase(path))
     {
@@ -82,7 +82,7 @@ bool MeshColliderAssetManager::Unload(const std::string& path, asset_flags_type)
     return false;
 }
 
-void MeshColliderAssetManager::UnloadAll(asset_flags_type)
+void MeshColliderAssetManager::UnloadAll()
 {
     m_map.clear();
     m_onUpdate.Emit(MeshColliderUpdateEventData{
@@ -92,21 +92,16 @@ void MeshColliderAssetManager::UnloadAll(asset_flags_type)
     });
 }
 
-auto MeshColliderAssetManager::Acquire(const std::string& path, asset_flags_type) const -> MeshColliderView
+auto MeshColliderAssetManager::Acquire(const std::string& path) const -> MeshColliderView
 {
     NC_ASSERT(m_map.contains(path), fmt::format("MeshCollider is not loaded: '{}'", path));
     return Acquire(m_map.hash(path));
 }
 
-auto MeshColliderAssetManager::Acquire(AssetId id, asset_flags_type) const -> MeshColliderView
+auto MeshColliderAssetManager::Acquire(AssetId id) const -> MeshColliderView
 {
     NC_ASSERT(m_map.index(id) != m_map.NullIndex, fmt::format("MeshCollider is not loaded: '{}'", id));
     return MeshColliderView{id};
-}
-
-bool MeshColliderAssetManager::IsLoaded(const std::string& path, asset_flags_type) const
-{
-    return m_map.contains(path);
 }
 
 auto MeshColliderAssetManager::GetAllLoaded() const -> std::vector<std::string_view>

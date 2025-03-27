@@ -2,6 +2,7 @@ target_sources(${NC_ENGINE_LIB}
     PRIVATE
         BodyFactory.cpp
         BodyManager.cpp
+        CompoundShape.cpp
         ContactListener.cpp
         ConstraintFactory.cpp
         ConstraintManager.cpp
@@ -10,6 +11,7 @@ target_sources(${NC_ENGINE_LIB}
         JobSystem.cpp
         PhysicsSnapshot.cpp
         ShapeFactory.cpp
+        SupportFunctions.cpp
         VehicleAnimator.cpp
         VehicleManager.cpp
 )

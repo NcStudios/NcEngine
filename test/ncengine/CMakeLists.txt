@@ -1,4 +1,3 @@
-add_subdirectory(alloc)
 add_subdirectory(asset)
 add_subdirectory(audio)
 add_subdirectory(config)

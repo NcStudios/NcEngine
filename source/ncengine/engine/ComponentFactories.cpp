@@ -1,5 +1,5 @@
 #include "ComponentFactories.h"
-#include "ncengine/asset/DefaultAssets.h"
+#include "ncasset/DefaultAssets.h"
 #include "ncengine/audio/AudioSource.h"
 #include "ncengine/ecs/FrameLogic.h"
 #include "ncengine/ecs/ComponentRegistry.h"
@@ -14,9 +14,9 @@
 
 namespace nc
 {
-auto CreateAudioSource(Entity entity, const std::any&) -> audio::AudioSource
+auto CreateAudioSource(Entity entity, const std::any&) -> AudioSource
 {
-    return audio::AudioSource{entity, {asset::DefaultAudioClip}};
+    return AudioSource{entity};
 }
 
 auto CreateFrameLogic(Entity entity, const std::any&) -> FrameLogic
