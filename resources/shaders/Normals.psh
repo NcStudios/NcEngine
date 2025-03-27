@@ -37,7 +37,7 @@ struct PSInput
     float3 Normal        : NORMAL;
     float2 UV            : TEX_COORD; 
     uint   MaterialIndex;
-    float3 WorldPos;
+    float4 WorldPos;
 };
 
 struct PSOutput
