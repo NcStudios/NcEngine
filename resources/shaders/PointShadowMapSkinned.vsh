@@ -121,7 +121,7 @@ void main(in VSInput VSIn, uint InstanceID : SV_InstanceID, out PSInput PSIn)
 {
     INSTANCE_DATA instance = INSTANCE_BUFFER[InstanceID];
     float4 pos = float4(VSIn.Pos, 1.0);
-    float3 normal = VSIn.Normal;
+    float4 normal = float4(VSIn.Normal, 0.0f);
 
 #ifdef ENABLE_SKINNING
     if (IsValidBoneIndex(instance.boneIndex))

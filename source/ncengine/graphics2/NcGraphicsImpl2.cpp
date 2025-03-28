@@ -172,7 +172,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                 },
                 PassDesc{
                     .flag = MaterialPassFlag::UniShadow,
-                    .name = "UniShadow",
+                    .name = "UniShadowSkinned",
                     .type = PassType::SkinnedMaterial,
                     .shaderPaths = ShaderPaths{.vertexShaderPath =  "UniShadowMapSkinned.vsh"},
                     .shadowMapSink = ShadowMapTarget::Uni,
@@ -190,7 +190,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                 },
                 PassDesc{
                     .flag = MaterialPassFlag::PointShadow,
-                    .name = "PointShadow",
+                    .name = "PointShadowSkinned",
                     .type = PassType::SkinnedMaterial,
                     .shaderPaths = ShaderPaths{"PointShadowMap.psh", "PointShadowMapSkinned.vsh"},
                     .shadowMapSink = ShadowMapTarget::Point,
