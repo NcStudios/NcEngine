@@ -1,4 +1,5 @@
-#include "Lighting.fxh"
+#include "core/ShaderTypes.fxh"
+#include "core/Lighting.fxh"
 
 struct VSInput
 {
@@ -21,24 +22,6 @@ struct PSInput
     float3 LocalPos;
 };
 
-struct TransformData
-{
-    float4x4 modelMatrix;
-};
-
-cbuffer SinkIndices
-{
-    int colorRT1;
-    int colorRT2;
-    int colorRT3;
-    int colorRT4;
-    int depthRT1;
-    int depthRT2;
-    int depthRT3;
-    uint hasPostProcess;
-    uint lightIndex;
-};
-
 StructuredBuffer<TransformData> Transforms;
 StructuredBuffer<LightData> Lights;
 StructuredBuffer<LightMatrix> LightMatrices;
@@ -47,78 +30,19 @@ StructuredBuffer<LightMatrix> LightMatrices;
 #define ENABLE_SKINNING 1
 
 #ifdef ENABLE_SKINNING
-
-struct SkinnedMeshInstanceData
-{
-    uint transformIndex;
-    uint materialIndex;
-    uint boneIndex;
-};
-
 StructuredBuffer<SkinnedMeshInstanceData> SkinnedInstances;
+StructuredBuffer<BoneData> Bones;
 
 #define INSTANCE_DATA SkinnedMeshInstanceData
 #define INSTANCE_BUFFER SkinnedInstances
 
-struct BoneData
-{
-    float4x4 animatedBoneMatrix;
-};
-
-StructuredBuffer<BoneData> Bones;
-
-bool IsValidBoneIndex(uint boneIndex)
-{
-    return boneIndex != 4294967295;
-}
-
-bool IsValidAnimationTransform(float4x4 mat)
-{
-    // Check for zero matrix, ignoring homogenous coord
-    return all(mat[0] != 0.0) ||
-           all(mat[1] != 0.0) ||
-           all(mat[2] != 0.0) ||
-           mat[3].xyz != float3(0.0, 0.0, 0.0);
-}
-
-float4x4 CombineBoneMatrices(uint base, uint4 boneOffsets, float4 boneWeights)
-{
-    float4x4 boneTransform = float4x4(0.0);
-    for (int i = 0; i < 4; i++)
-    {
-        if (boneWeights[i] > 0.0f)
-        {
-            boneTransform += Bones[base + boneOffsets[i]].animatedBoneMatrix * boneWeights[i];
-        }
-    }
-
-    return boneTransform;
-}
-
+#include "core/Animation.fxh"
 #else
-
-struct StaticMeshInstanceData
-{
-    uint transformIndex;
-    uint materialIndex;
-};
-
 StructuredBuffer<StaticMeshInstanceData> StaticInstances;
 
 #define INSTANCE_DATA StaticMeshInstanceData
 #define INSTANCE_BUFFER StaticInstances
-
 #endif // ENABLE_SKINNING
-
-cbuffer EnvironmentProperties
-{
-    float4x4 cameraViewProjection;
-    float4x4 cameraInvProjection;
-    float3 cameraPosition;
-    uint lightCount;
-    float nearClip;
-    float farClip;
-};
 
 void main(in VSInput VSIn, uint InstanceID : SV_InstanceID, out PSInput PSIn)
 {
@@ -139,7 +63,7 @@ void main(in VSInput VSIn, uint InstanceID : SV_InstanceID, out PSInput PSIn)
 #endif // ENABLE_SKINNING
 
     uint transformIndex = instance.transformIndex;
-    float4 worldPos = mul(pos, Transforms[transformIndex].modelMatrix);
+    float4 worldPos = mul(pos, Transforms[transformIndex].model);
 
     LightData light = Lights[lightIndex];
     PSIn.Pos = mul(worldPos, LightMatrices[light.lightMatrixIndex].viewProjection);

@@ -1,8 +1,4 @@
-cbuffer WireframeProperties
-{
-    float4x4 wireframeModelMatrix;
-    float4 wireframeColor;
-};
+#include "core/ShaderTypes.fxh"
 
 struct PSInput
 {

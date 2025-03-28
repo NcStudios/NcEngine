@@ -1,24 +1,7 @@
-Texture2D     ColorSinks[];
-Texture2D     DepthSinks[];
-Texture2D     PostProcessSinks[];
-SamplerState  ColorSinks_sampler; // By convention, texture samplers must use the '_sampler' suffix
+#include "core/ShaderTypes.fxh"
 
-cbuffer SinkIndices
+struct PSInput
 {
-    int colorRT1;
-    int colorRT2;
-    int colorRT3;
-    int colorRT4;
-    int depthRT1;
-    int depthRT2;
-    int depthRT3;
-    uint hasPostProcess;
-    uint lightIndex;
-    uint lightFaceIndex;
-};
-
-struct PSInput 
-{ 
     float4 Pos : SV_POSITION;
     float2 UV  : TEX_COORD; 
 };
@@ -27,6 +10,11 @@ struct PSOutput
 {
     float4 Color : SV_TARGET;
 };
+
+Texture2D     ColorSinks[];
+Texture2D     DepthSinks[];
+Texture2D     PostProcessSinks[];
+SamplerState  ColorSinks_sampler; // By convention, texture samplers must use the '_sampler' suffix
 
 void main(in PSInput PSIn, out PSOutput PSOut)
 {
