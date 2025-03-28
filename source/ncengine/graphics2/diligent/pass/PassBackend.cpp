@@ -484,7 +484,6 @@ void PassBackend::MakePassesAndPipelines(IRenderDevice& device,
         m_finalColorTarget = m_particlePass->sinks.color;
     }
 
-
     // Create the post process passes
     m_postProcessPasses.reserve(passManifest.PostProcessPassDescs().size());
     for (const auto& passDesc : passManifest.PostProcessPassDescs())

@@ -17,8 +17,6 @@
 
 namespace nc::graphics
 {
-class ShaderFactory;
-
 constexpr auto ClearColor = nc::Vector4{0.050f, 0.050f, 0.050f, 1.0f};
 auto ToPassBaseId(const ShaderPaths& shaderPaths, std::string_view name) -> size_t;
 auto GetSinks(const PassManifest& passManifest, const PassDesc& passDesc) -> Sinks;
