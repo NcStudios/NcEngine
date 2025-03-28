@@ -6,6 +6,7 @@ target_sources(${NC_ENGINE_LIB}
         PassBackend.cpp
         PassManifest.cpp
         PassUtilities.cpp
+        PipelineShaders.cpp
         PostProcessPass.cpp
         WireframePass.cpp
 )

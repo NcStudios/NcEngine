@@ -3,14 +3,12 @@
 #include "Common/interface/RefCntAutoPtr.hpp"
 #include "Graphics/GraphicsEngine/interface/Shader.h"
 
-#include <array>
-#include <span>
 #include <string_view>
 #include <unordered_map>
 
 namespace nc::graphics
 {
-using ShaderMap = std::unordered_map<std::string_view, Diligent::RefCntAutoPtr<Diligent::IShader>>;
+class ShaderFactory;
 
 struct ShaderPaths
 {
@@ -22,6 +20,26 @@ struct PipelineShaders
 {
     Diligent::IShader* pixelShader = nullptr;
     Diligent::IShader* vertexShader = nullptr;
+};
+
+class ShaderCache
+{
+    public:
+        explicit ShaderCache(ShaderFactory& shaderFactory);
+
+        void Cache(std::string_view path,
+                   Diligent::RefCntAutoPtr<Diligent::IShader> shader)
+        {
+            m_shaders.emplace(path, std::move(shader));
+        }
+
+        auto IsCached(std::string_view path) const -> bool                { return m_shaders.contains(path); }
+        auto Get(std::string_view path)      const -> Diligent::IShader*;
+        auto Get(const ShaderPaths& paths)   const -> PipelineShaders;
+
+    private:
+        using map = std::unordered_map<std::string_view, Diligent::RefCntAutoPtr<Diligent::IShader>>;
+        map m_shaders;
 };
 
 namespace shader
@@ -45,28 +63,4 @@ constexpr auto UniShadowMapSkinnedVertex   = std::string_view{"UniShadowMapSkinn
 constexpr auto WireframeVertex             = std::string_view{"WireframeVertex.spv"};
 constexpr auto WireframeFragment           = std::string_view{"WireframeFragment.spv"};
 } // namespace shader
-
-constexpr auto g_fragmentShaderPaths = std::array{
-    shader::NormalsFragment,
-    shader::ParticleFragment,
-    shader::PointShadowMapFragment,
-    shader::PPEndFragment,
-    shader::PPFxaaFragment,
-    shader::PPNoiseFragment,
-    shader::PPOutlineFragment,
-    shader::ToonFragment,
-    shader::WireframeFragment
-};
-
-constexpr auto g_vertexShaderPaths = std::array{
-    shader::ParticleVertex,
-    shader::PointShadowMapVertex,
-    shader::PointShadowMapSkinnedVertex,
-    shader::PostProcessVertex,
-    shader::ToonVertex,
-    shader::ToonSkinnedVertex,
-    shader::UniShadowMapVertex,
-    shader::UniShadowMapSkinnedVertex,
-    shader::WireframeVertex
-};
 } // namespace nc::graphics

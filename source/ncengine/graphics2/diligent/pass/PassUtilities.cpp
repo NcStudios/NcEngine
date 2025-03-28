@@ -119,40 +119,6 @@ void BindUniShadowMapRenderTarget(Diligent::IDeviceContext& context,
     context.SetRenderTargets(0, nullptr, pDSV, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
 }
 
-auto LoadShaders(ShaderFactory& shaderFactory) -> ShaderMap
-{
-    auto map = ShaderMap{};
-    for (const auto& path : g_fragmentShaderPaths)
-    {
-        auto bytecode = shaderFactory.ReadShaderFile(path);
-        map.emplace(path, shaderFactory.MakeShaderFromByteCode(bytecode, path, Diligent::SHADER_TYPE_PIXEL));
-    }
-
-    for (const auto& path : g_vertexShaderPaths)
-    {
-        auto bytecode = shaderFactory.ReadShaderFile(path);
-        map.emplace(path, shaderFactory.MakeShaderFromByteCode(bytecode, path, Diligent::SHADER_TYPE_VERTEX));
-    }
-
-    return map;
-}
-
-auto GetShaders(const ShaderPaths& paths, const ShaderMap& shaderMap) -> PipelineShaders
-{
-    auto shaders = PipelineShaders{};
-    if (!paths.pixelShaderPath.empty())
-    {
-        shaders.pixelShader = shaderMap.at(paths.pixelShaderPath).RawPtr();
-    }
-
-    if (!paths.vertexShaderPath.empty())
-    {
-        shaders.vertexShader = shaderMap.at(paths.vertexShaderPath).RawPtr();
-    }
-
-    return shaders;
-}
-
 auto GetSinks(const PassManifest& passManifest, const PassDesc& passDesc) -> Sinks
 {
     return Sinks

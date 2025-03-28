@@ -21,8 +21,6 @@ class ShaderFactory;
 
 constexpr auto ClearColor = nc::Vector4{0.050f, 0.050f, 0.050f, 1.0f};
 auto ToPassBaseId(const ShaderPaths& shaderPaths, std::string_view name) -> size_t;
-auto LoadShaders(ShaderFactory& shaderFactory) -> ShaderMap;
-auto GetShaders(const ShaderPaths& paths, const ShaderMap& shaderMap) -> PipelineShaders;
 auto GetSinks(const PassManifest& passManifest, const PassDesc& passDesc) -> Sinks;
 auto GetSources(const PassManifest& passManifest, const PassDesc& passDesc) -> Sources;
 auto HasAnyColorSources(const Sources& sources) -> bool;

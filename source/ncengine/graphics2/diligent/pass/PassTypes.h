@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ShaderTypes.h"
+#include "PipelineShaders.h"
 
 #include "Graphics/GraphicsEngine/interface/GraphicsTypes.h"
 
