@@ -35,7 +35,7 @@ ForEach-Object {
     $InputFile = Join-Path $InputDir $_.Name
     $OutputFile = Join-Path $TempDir $FileName
     $Args = @(
-        '-V',                    # create SPIRV binary
+        '-V',                    # create SPIRV binary w/ Vulkan semantics
         '-D',                    # input is HLSL
         "-P$Preamble",           # prepended our definitions to each source file
         '-e', 'main',            # entry point
