@@ -165,7 +165,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .flag = MaterialPassFlag::UniShadow,
                     .name = "UniShadow",
                     .type = PassType::Material,
-                    .shaderPaths = ShaderPaths{.vertexShaderPath = "UniShadowMap.vsh"},
+                    .shaderPaths = ShaderPaths{.vertexShaderPath = shader::UniShadowMapVertex},
                     .shadowMapSink = ShadowMapTarget::Uni,
                     .isMsaa = false,
                     .useDepthTest = true
@@ -174,7 +174,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .flag = MaterialPassFlag::UniShadow,
                     .name = "UniShadowSkinned",
                     .type = PassType::SkinnedMaterial,
-                    .shaderPaths = ShaderPaths{.vertexShaderPath =  "UniShadowMapSkinned.vsh"},
+                    .shaderPaths = ShaderPaths{.vertexShaderPath =  shader::UniShadowMapSkinnedVertex},
                     .shadowMapSink = ShadowMapTarget::Uni,
                     .isMsaa = false,
                     .useDepthTest = true
@@ -183,7 +183,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .flag = MaterialPassFlag::PointShadow,
                     .name = "PointShadow",
                     .type = PassType::Material,
-                    .shaderPaths = ShaderPaths{"PointShadowMap.psh", "PointShadowMap.vsh"},
+                    .shaderPaths = ShaderPaths{shader::PointShadowMapFragment, shader::PointShadowMapVertex},
                     .shadowMapSink = ShadowMapTarget::Point,
                     .isMsaa = false,
                     .useDepthTest = true
@@ -192,7 +192,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .flag = MaterialPassFlag::PointShadow,
                     .name = "PointShadowSkinned",
                     .type = PassType::SkinnedMaterial,
-                    .shaderPaths = ShaderPaths{"PointShadowMap.psh", "PointShadowMapSkinned.vsh"},
+                    .shaderPaths = ShaderPaths{shader::PointShadowMapFragment, shader::PointShadowMapSkinnedVertex},
                     .shadowMapSink = ShadowMapTarget::Point,
                     .isMsaa = false,
                     .useDepthTest = true

@@ -26,26 +26,30 @@ struct PipelineShaders
 
 namespace shader
 {
-constexpr auto NormalsFragment        = std::string_view{"NormalsFragment.spv"};
-constexpr auto ParticleVertex         = std::string_view{"ParticleVertex.spv"};
-constexpr auto ParticleFragment       = std::string_view{"ParticleFragment.spv"};
-constexpr auto PostProcessVertex      = std::string_view{"PostProcessVertex.spv"};
-constexpr auto PPEndFragment          = std::string_view{"PPEndFragment.spv"};
-constexpr auto PPFxaaFragment         = std::string_view{"PPFxaaFragment.spv"};
-constexpr auto PPNoiseFragment        = std::string_view{"PPNoiseFragment.spv"};
-constexpr auto PPOutlineFragment      = std::string_view{"PPOutlineFragment.spv"};
-constexpr auto ShadowMapSkinnedVertex = std::string_view{"ShadowMapSkinnedVertex.spv"};
-constexpr auto ShadowMapVertex        = std::string_view{"ShadowMapVertex.spv"};
-constexpr auto ToonSkinnedVertex      = std::string_view{"ToonSkinnedVertex.spv"};
-constexpr auto ToonVertex             = std::string_view{"ToonVertex.spv"};
-constexpr auto ToonFragment           = std::string_view{"ToonFragment.spv"};
-constexpr auto WireframeVertex        = std::string_view{"WireframeVertex.spv"};
-constexpr auto WireframeFragment      = std::string_view{"WireframeFragment.spv"};
+constexpr auto NormalsFragment             = std::string_view{"NormalsFragment.spv"};
+constexpr auto ParticleVertex              = std::string_view{"ParticleVertex.spv"};
+constexpr auto ParticleFragment            = std::string_view{"ParticleFragment.spv"};
+constexpr auto PointShadowMapFragment      = std::string_view{"PointShadowMapFragment.spv"};
+constexpr auto PointShadowMapVertex        = std::string_view{"PointShadowMapVertex.spv"};
+constexpr auto PointShadowMapSkinnedVertex = std::string_view{"PointShadowMapSkinnedVertex.spv"};
+constexpr auto PostProcessVertex           = std::string_view{"PostProcessVertex.spv"};
+constexpr auto PPEndFragment               = std::string_view{"PPEndFragment.spv"};
+constexpr auto PPFxaaFragment              = std::string_view{"PPFxaaFragment.spv"};
+constexpr auto PPNoiseFragment             = std::string_view{"PPNoiseFragment.spv"};
+constexpr auto PPOutlineFragment           = std::string_view{"PPOutlineFragment.spv"};
+constexpr auto ToonVertex                  = std::string_view{"ToonVertex.spv"};
+constexpr auto ToonSkinnedVertex           = std::string_view{"ToonSkinnedVertex.spv"};
+constexpr auto ToonFragment                = std::string_view{"ToonFragment.spv"};
+constexpr auto UniShadowMapVertex          = std::string_view{"UniShadowMapVertex.spv"};
+constexpr auto UniShadowMapSkinnedVertex   = std::string_view{"UniShadowMapSkinnedVertex.spv"};
+constexpr auto WireframeVertex             = std::string_view{"WireframeVertex.spv"};
+constexpr auto WireframeFragment           = std::string_view{"WireframeFragment.spv"};
 } // namespace shader
 
 constexpr auto g_fragmentShaderPaths = std::array{
     shader::NormalsFragment,
     shader::ParticleFragment,
+    shader::PointShadowMapFragment,
     shader::PPEndFragment,
     shader::PPFxaaFragment,
     shader::PPNoiseFragment,
@@ -56,11 +60,13 @@ constexpr auto g_fragmentShaderPaths = std::array{
 
 constexpr auto g_vertexShaderPaths = std::array{
     shader::ParticleVertex,
+    shader::PointShadowMapVertex,
+    shader::PointShadowMapSkinnedVertex,
     shader::PostProcessVertex,
-    shader::ShadowMapSkinnedVertex,
-    shader::ShadowMapVertex,
-    shader::ToonSkinnedVertex,
     shader::ToonVertex,
+    shader::ToonSkinnedVertex,
+    shader::UniShadowMapVertex,
+    shader::UniShadowMapSkinnedVertex,
     shader::WireframeVertex
 };
 } // namespace nc::graphics
