@@ -493,7 +493,7 @@ void PassBackend::MakePassesAndPipelines(IRenderDevice& device,
     m_finalPostProcessTarget = m_postProcessPasses.back().sinks.postProcess;
 
     // Create a hardcoded dummy post process pass that always pipes the result of the last rendered render target to the swapchain
-    auto shaderPaths = ShaderPaths{shader::PPEndFragment, shader::PostProcessVertex};
+    auto shaderPaths = ShaderPaths{shader::PPEndPixel, shader::PostProcessVertex};
     auto name = "Final Pass";
     m_finalPass = std::make_unique<PostProcessPass>(device, swapChain, shaderCache.Get(shaderPaths), shaderBindings, passManifest, PassDesc
     {

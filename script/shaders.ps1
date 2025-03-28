@@ -23,7 +23,7 @@ Get-ChildItem -Path $InputDir | Where-Object { $_.Extension -eq '.psh' -or $_.Ex
 ForEach-Object {
     if ($_.Extension -eq '.psh') {
         $Stage = 'frag'
-        $FileName = "$($_.BaseName)Fragment.spv"
+        $FileName = "$($_.BaseName)Pixel.spv"
     } elseif ($_.Extension -eq '.vsh') {
         $Stage = 'vert'
         $FileName = "$($_.BaseName)Vertex.spv"
@@ -35,12 +35,12 @@ ForEach-Object {
     $InputFile = Join-Path $InputDir $_.Name
     $OutputFile = Join-Path $TempDir $FileName
     $Args = @(
-        '-V',
-        '-D',
-        "-P$Preamble",
-        '-e', 'main',
-        '-fhlsl_functionality1',
-        "-S", $Stage,
+        '-V',                    # create SPIRV binary
+        '-D',                    # input is HLSL
+        "-P$Preamble",           # prepended our definitions to each source file
+        '-e', 'main',            # entry point
+        '-fhlsl_functionality1', # enable functionality1 extension
+        "-S", $Stage,            # explicitly specify shader stage
         "-o", $OutputFile,
         $InputFile
     )
@@ -63,9 +63,10 @@ ForEach-Object {
     $InputFile = Join-Path $TempDir $_
     $OutputFile = Join-Path $OutputDir $_
     $Args = @(
-        '--legalize-hlsl',
-        '-O', $InputFile,
-        '-o', $OutputFile
+        '--legalize-hlsl', # optimizations to generate legal vulkan spir-v from hlsl input
+        '-O',              # default optimizations
+        $InputFile,        # input spirv
+        '-o', $OutputFile  # output spirv
     )
 
     & $Optimizer $Args

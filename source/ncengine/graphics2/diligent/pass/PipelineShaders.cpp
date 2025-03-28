@@ -7,28 +7,30 @@
 
 namespace
 {
-constexpr auto g_fragmentShaderPaths = std::array{
-    nc::graphics::shader::NormalsFragment,
-    nc::graphics::shader::ParticleFragment,
-    nc::graphics::shader::PointShadowMapFragment,
-    nc::graphics::shader::PPEndFragment,
-    nc::graphics::shader::PPFxaaFragment,
-    nc::graphics::shader::PPNoiseFragment,
-    nc::graphics::shader::PPOutlineFragment,
-    nc::graphics::shader::ToonFragment,
-    nc::graphics::shader::WireframeFragment
+using namespace nc::graphics::shader;
+
+constexpr auto g_pixelShaderPaths = std::array{
+    NormalsPixel,
+    ParticlePixel,
+    PointShadowMapPixel,
+    PPEndPixel,
+    PPFxaaPixel,
+    PPNoisePixel,
+    PPOutlinePixel,
+    ToonPixel,
+    WireframePixel
 };
 
 constexpr auto g_vertexShaderPaths = std::array{
-    nc::graphics::shader::ParticleVertex,
-    nc::graphics::shader::PointShadowMapVertex,
-    nc::graphics::shader::PointShadowMapSkinnedVertex,
-    nc::graphics::shader::PostProcessVertex,
-    nc::graphics::shader::ToonVertex,
-    nc::graphics::shader::ToonSkinnedVertex,
-    nc::graphics::shader::UniShadowMapVertex,
-    nc::graphics::shader::UniShadowMapSkinnedVertex,
-    nc::graphics::shader::WireframeVertex
+    ParticleVertex,
+    PointShadowMapVertex,
+    PointShadowMapSkinnedVertex,
+    PostProcessVertex,
+    ToonVertex,
+    ToonSkinnedVertex,
+    UniShadowMapVertex,
+    UniShadowMapSkinnedVertex,
+    WireframeVertex
 };
 } // anonymous namespace
 
@@ -55,8 +57,8 @@ auto ShaderCache::Get(const ShaderPaths& paths) const -> PipelineShaders
 
 ShaderCache::ShaderCache(ShaderFactory& shaderFactory)
 {
-    m_shaders.reserve(g_fragmentShaderPaths.size() + g_vertexShaderPaths.size());
-    for (const auto& path : g_fragmentShaderPaths)
+    m_shaders.reserve(g_pixelShaderPaths.size() + g_vertexShaderPaths.size());
+    for (const auto& path : g_pixelShaderPaths)
     {
         auto bytecode = shaderFactory.ReadShaderFile(path);
         Cache(path, shaderFactory.MakeShaderFromByteCode(bytecode, path, Diligent::SHADER_TYPE_PIXEL));

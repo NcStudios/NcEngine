@@ -183,7 +183,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .flag = MaterialPassFlag::PointShadow,
                     .name = "PointShadow",
                     .type = PassType::Material,
-                    .shaderPaths = ShaderPaths{shader::PointShadowMapFragment, shader::PointShadowMapVertex},
+                    .shaderPaths = ShaderPaths{shader::PointShadowMapPixel, shader::PointShadowMapVertex},
                     .shadowMapSink = ShadowMapTarget::Point,
                     .isMsaa = false,
                     .useDepthTest = true
@@ -192,7 +192,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .flag = MaterialPassFlag::PointShadow,
                     .name = "PointShadowSkinned",
                     .type = PassType::SkinnedMaterial,
-                    .shaderPaths = ShaderPaths{shader::PointShadowMapFragment, shader::PointShadowMapSkinnedVertex},
+                    .shaderPaths = ShaderPaths{shader::PointShadowMapPixel, shader::PointShadowMapSkinnedVertex},
                     .shadowMapSink = ShadowMapTarget::Point,
                     .isMsaa = false,
                     .useDepthTest = true
@@ -219,7 +219,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .flag = MaterialPassFlag::Toon,
                     .name = "Toon",
                     .type = PassType::Material,
-                    .shaderPaths = ShaderPaths{shader::ToonFragment, shader::ToonVertex},
+                    .shaderPaths = ShaderPaths{shader::ToonPixel, shader::ToonVertex},
                     .colorSink = ColorTarget::Main,
                     .depthSink = DepthTarget::Main,
                     .useDepthTest = true
@@ -229,7 +229,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .flag = MaterialPassFlag::Toon,
                     .name = "ToonSkinned",
                     .type = PassType::SkinnedMaterial,
-                    .shaderPaths = ShaderPaths{shader::ToonFragment, shader::ToonSkinnedVertex},
+                    .shaderPaths = ShaderPaths{shader::ToonPixel, shader::ToonSkinnedVertex},
                     .colorSink = ColorTarget::Main,
                     .depthSink = DepthTarget::Main,
                     .useDepthTest = true
@@ -238,7 +238,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .flag = MaterialPassFlag::Normals,
                     .name = "Normals",
                     .type = PassType::Material,
-                    .shaderPaths = ShaderPaths{shader::NormalsFragment, shader::ToonVertex},
+                    .shaderPaths = ShaderPaths{shader::NormalsPixel, shader::ToonVertex},
                     .colorSink = ColorTarget::Normals,
                     .depthSink = DepthTarget::Main,
                     .useDepthTest = true
@@ -247,7 +247,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .flag = MaterialPassFlag::Normals,
                     .name = "NormalsSkinned",
                     .type = PassType::SkinnedMaterial,
-                    .shaderPaths = ShaderPaths{shader::NormalsFragment, shader::ToonSkinnedVertex},
+                    .shaderPaths = ShaderPaths{shader::NormalsPixel, shader::ToonSkinnedVertex},
                     .colorSink = ColorTarget::Normals,
                     .depthSink = DepthTarget::Main,
                     .useDepthTest = true
@@ -256,7 +256,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .flag = MiscPassFlag::Wireframe,
                     .name = "Wireframe",
                     .type = PassType::Wireframe,
-                    .shaderPaths = ShaderPaths{shader::WireframeFragment, shader::WireframeVertex},
+                    .shaderPaths = ShaderPaths{shader::WireframePixel, shader::WireframeVertex},
                     .colorSink = ColorTarget::Main,
                     .depthSink = DepthTarget::Main,
                     .useDepthTest = true
@@ -265,7 +265,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .flag = MiscPassFlag::Particle,
                     .name = "Particle",
                     .type = PassType::Particle,
-                    .shaderPaths = ShaderPaths{shader::ParticleFragment, shader::ParticleVertex},
+                    .shaderPaths = ShaderPaths{shader::ParticlePixel, shader::ParticleVertex},
                     .colorSink = ColorTarget::Main,
                     .depthSink = DepthTarget::Main,
                     .useDepthTest = true
@@ -274,7 +274,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .flag = PostProcessPassFlag::Outline,
                     .name = "Post Process Outline",
                     .type = PassType::PostProcess,
-                    .shaderPaths = ShaderPaths{shader::PPOutlineFragment, shader::PostProcessVertex},
+                    .shaderPaths = ShaderPaths{shader::PPOutlinePixel, shader::PostProcessVertex},
                     .colorSources = std::vector{ColorTarget::Main, ColorTarget::Normals},
                     .depthSources = std::vector{DepthTarget::Main},
                     .postProcessSink = PostProcessTarget::PPOutline,
@@ -285,7 +285,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .flag = PostProcessPassFlag::Fxaa,
                     .name = "Post Process FXAA",
                     .type = PassType::PostProcess,
-                    .shaderPaths = ShaderPaths{shader::PPFxaaFragment, shader::PostProcessVertex},
+                    .shaderPaths = ShaderPaths{shader::PPFxaaPixel, shader::PostProcessVertex},
                     .postProcessSource = PostProcessTarget::PPOutline,
                     .postProcessSink = PostProcessTarget::PPFxaa,
                     .isMsaa = false,
@@ -295,7 +295,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .flag = PostProcessPassFlag::Noise,
                     .name = "Post Process Noise",
                     .type = PassType::PostProcess,
-                    .shaderPaths = ShaderPaths{shader::PPNoiseFragment, shader::PostProcessVertex},
+                    .shaderPaths = ShaderPaths{shader::PPNoisePixel, shader::PostProcessVertex},
                     .postProcessSource = PostProcessTarget::PPFxaa,
                     .postProcessSink = PostProcessTarget::PPNoise,
                     .isMsaa = false,
