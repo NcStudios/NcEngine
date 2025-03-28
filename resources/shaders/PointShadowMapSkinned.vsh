@@ -1,3 +1,5 @@
+#include "Lighting.fxh"
+
 struct VSInput
 {
     float3 Pos         : ATTRIB0;
@@ -12,11 +14,7 @@ struct VSInput
 struct PSInput
 {
     float4 Pos           : SV_POSITION;
-    float3 Normal        : NORMAL;
-    float2 UV            : TEX_COORD;
-    uint   MaterialIndex;
     float3 WorldPos;
-    float3 LocalPos;
 };
 
 struct TransformData
@@ -35,24 +33,12 @@ cbuffer SinkIndices
     int depthRT3;
     uint hasPostProcess;
     uint lightIndex;
-};
-
-struct LightData {
-    float3 diffuseColor;
-    int type; // 0: Directional, 1: Point, 2: Spot
-    float3 specularColor;
-    float radius;
-    float3 position;
-    float innerAngle;
-    float3 direction;
-    float outerAngle;
-    float intensity;
-    int castsShadows;
-    float4x4 viewProj;
+    uint lightFaceIndex;
 };
 
 StructuredBuffer<TransformData> Transforms;
 StructuredBuffer<LightData> Lights;
+StructuredBuffer<LightMatrix> LightMatrices;
 
 // todo: #802 Define this at compile time
 #define ENABLE_SKINNING 1
@@ -135,7 +121,7 @@ void main(in VSInput VSIn, uint InstanceID : SV_InstanceID, out PSInput PSIn)
 {
     INSTANCE_DATA instance = INSTANCE_BUFFER[InstanceID];
     float4 pos = float4(VSIn.Pos, 1.0);
-    float3 normal = VSIn.Normal;
+    float4 normal = float4(VSIn.Normal, 0.0f);
 
 #ifdef ENABLE_SKINNING
     if (IsValidBoneIndex(instance.boneIndex))
@@ -151,6 +137,8 @@ void main(in VSInput VSIn, uint InstanceID : SV_InstanceID, out PSInput PSIn)
 
     uint transformIndex = instance.transformIndex;
     float4 worldPos = mul(pos, Transforms[transformIndex].modelMatrix);
-    PSIn.Pos = mul(worldPos, Lights[lightIndex].viewProj);
 
+    LightData light = Lights[lightIndex];
+    PSIn.Pos = mul(worldPos, LightMatrices[light.lightMatrixIndex + lightFaceIndex].viewProjection);
+    PSIn.WorldPos = worldPos;
 }

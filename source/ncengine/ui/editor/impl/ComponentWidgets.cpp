@@ -1184,6 +1184,7 @@ void PointLightUIWidget(PointLight& light, EditorContext&, const std::any&)
     ui::InputColor3(light.specularColor, "specularColor");
     ui::DragFloat(light.intensity, "intensity", 0.1f, 0.0f, 200.0f);
     ui::DragFloat(light.radius, "radius", step, min, max);
+    nc::ui::Checkbox(light.castsShadows, "castsShadows");
 }
 
 void SpotLightUIWidget(SpotLight& light, EditorContext&, const std::any&)

@@ -9,14 +9,16 @@
 namespace
 {
 constexpr auto g_materialPassNames = std::array{
-    std::string_view{"Shadow"},
+    std::string_view{"UniShadow"},
+    std::string_view{"PointShadow"},
     std::string_view{"Depth"},
     std::string_view{"Toon"},
     std::string_view{"Normals"}
 };
 
 constexpr auto g_materialPassFlags = std::array{
-    nc::MaterialPassFlag::Shadow,
+    nc::MaterialPassFlag::UniShadow,
+    nc::MaterialPassFlag::PointShadow,
     nc::MaterialPassFlag::Depth,
     nc::MaterialPassFlag::Toon,
     nc::MaterialPassFlag::Normals

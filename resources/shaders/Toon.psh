@@ -5,10 +5,12 @@
 
 #include "Lighting.fxh"
 
-Texture2D     ShadowMapSinks[];
+Texture2D     UniShadowMapSinks[];
+TextureCube   PointShadowMapSinks[];
 Texture2D     Textures[];
 SamplerState  Textures_sampler; // By convention, texture samplers must use the '_sampler' suffix
-SamplerComparisonState  ShadowMapSinks_sampler; // By convention, texture samplers must use the '_sampler' suffix
+SamplerState  UniShadowMapSinks_sampler; // By convention, texture samplers must use the '_sampler' suffix
+SamplerState  PointShadowMapSinks_sampler; // By convention, texture samplers must use the '_sampler' suffix
 
 cbuffer EnvironmentProperties
 {
@@ -38,6 +40,7 @@ struct MaterialData
 
 StructuredBuffer<MaterialData> Materials : register(t1);
 StructuredBuffer<LightData> Lights : register(t2);
+StructuredBuffer<LightMatrix> LightMatrices;
 
 struct PSInput 
 { 
@@ -57,27 +60,6 @@ struct PSOutput
 
 const float Epsilon = 1e-10;
 
-float3 RGBtoHSV(in float3 RGB)
-{
-    float4 P = (RGB.g < RGB.b) ? float4(RGB.bg, -1.0, 2.0/3.0) : float4(RGB.gb, 0.0, -1.0/3.0);
-    float4 Q = (RGB.r < P.x) ? float4(P.xyw, RGB.r) : float4(RGB.r, P.yzx);
-    float C = Q.x - min(Q.w, Q.y);
-    float H = abs((Q.w - Q.y) / (6.0 * C + Epsilon) + Q.z);
-    float3 HCV = float3(H, C, Q.x);
-    float S = HCV.y / (HCV.z + Epsilon);
-    return float3(HCV.x, S, HCV.z);
-}
-
-float3 HSVtoRGB(in float3 HSV)
-{
-    float H = HSV.x;
-    float R = abs(H * 6.0 - 3.0) - 1.0;
-    float G = 2.0 - abs(H * 6.0 - 2.0);
-    float B = 2.0 - abs(H * 6.0 - 4.0);
-    float3 RGB = clamp( float3(R,G,B), 0.0, 1.0 );
-    return ((RGB - 1.0) * HSV.y + 1.0) * HSV.z;
-}
-
 float Band(float lightAmount)
 {
     if (lightAmount * 100 < 0.05f)
@@ -95,7 +77,7 @@ static const float4x4 biasMat = float4x4(
     0.5, 0.5, 0.0, 1.0
 );
 
-float ShadowCalculation(float4 fragPosLightSpace, Texture2D depthTex)
+float UniShadowCalculation(float4 fragPosLightSpace, Texture2D depthTex)
 {
     // Perform perspective divide
     float3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
@@ -112,7 +94,7 @@ float ShadowCalculation(float4 fragPosLightSpace, Texture2D depthTex)
     uint shadowMapWidth, shadowMapHeight;
     depthTex.GetDimensions(shadowMapWidth, shadowMapHeight);
     float2 texelSize = float2(1.0 / shadowMapWidth, 1.0 / shadowMapHeight);
-    const int sampleRadius = 4;
+    const int sampleRadius = 2;
 
     [unroll]
     for(int y = -sampleRadius; y <= sampleRadius; y++)
@@ -121,7 +103,7 @@ float ShadowCalculation(float4 fragPosLightSpace, Texture2D depthTex)
         for(int x = -sampleRadius; x <= sampleRadius; x++)
         {
             // Get closest depth value from light's perspective
-            float closestDepth = depthTex.SampleLevel(ShadowMapSinks_sampler, 
+            float closestDepth = depthTex.SampleLevel(UniShadowMapSinks_sampler, 
             projCoords.xy + float2(x, y) * texelSize, 0).r;
             if (currentDepth > closestDepth)
             {
@@ -144,6 +126,42 @@ float ShadowCalculation(float4 fragPosLightSpace, Texture2D depthTex)
     shadow *= falloff;
 
     return shadow;
+}
+
+float PointShadowCalculation(float4 fragPosWorldSpace, float3 lightPosWorldSpace, TextureCube depthTex)
+{
+    // Get the direction to sample the cubemap
+    float3 lightToFrag = lightPosWorldSpace - fragPosWorldSpace.xyz;
+    float distance = length(lightToFrag) / 150.0f;
+    float3 sampleDir = -normalize(lightToFrag);
+
+    // Set up params for the blur
+    float shadow = 0.0;
+    uint shadowMapWidth, shadowMapHeight;
+    depthTex.GetDimensions(shadowMapWidth, shadowMapHeight);
+    float texelSize = float2(1.0 / shadowMapWidth);
+    const int sampleCount = 4;
+
+    float3 offsets[4] = {
+        float3(3.0, 0.0, 0.0) * texelSize,
+        float3(-3.0, 0.0, 0.0) * texelSize,
+        float3(0.0, 3.0, 0.0) * texelSize,
+        float3(0.0, -3.0, 0.0) * texelSize,
+    };
+
+    // Blur the shadow
+    [unroll]
+    for (int i = 0; i < sampleCount; i++) 
+    {
+        float3 perturbedDir = normalize(sampleDir + offsets[i]);
+        float closestDepth = depthTex.Sample(PointShadowMapSinks_sampler, perturbedDir).r;
+
+        float gradientAmt = 0.0001f; // Adjust softness
+        shadow += smoothstep(closestDepth - gradientAmt, closestDepth + gradientAmt, distance);
+    }
+
+    shadow /= float(sampleCount);
+    return pow(shadow, 2.0f);
 }
 
 void main(in  PSInput  PSIn, out PSOutput PSOut)
@@ -170,7 +188,6 @@ void main(in  PSInput  PSIn, out PSOutput PSOut)
 
     uint shadowMapIndex = 0u;
     float3 result = 0.0f;
-    [unroll(lightCount)]
     for (int i = 0; i < lightCount; i++)
     {
         LightInfluence influence = LightRadiance(Lights[i], PSIn.WorldPos.xyz, cameraPosition, normals);
@@ -179,9 +196,18 @@ void main(in  PSInput  PSIn, out PSOutput PSOut)
         float shadowFactor = 1.0f;
         if (Lights[i].castsShadows)
         {
-            Texture2D depthTex = ShadowMapSinks[shadowMapIndex];
-            float rawShadow = ShadowCalculation(mul(mul(PSIn.WorldPos, Lights[i].viewProj), biasMat), depthTex);
-            shadowFactor = (1.0f - rawShadow); 
+            if (Lights[i].type == 1)
+            {
+                TextureCube depthTex = PointShadowMapSinks[shadowMapIndex];
+                float rawShadow = PointShadowCalculation(PSIn.WorldPos, Lights[i].position, depthTex);
+                shadowFactor = (1.0f - rawShadow);
+            }
+            else
+            {
+                Texture2D depthTex = UniShadowMapSinks[shadowMapIndex];
+                float rawShadow = UniShadowCalculation(mul(mul(PSIn.WorldPos, LightMatrices[Lights[i].lightMatrixIndex].viewProjection), biasMat), depthTex);
+                shadowFactor = (1.0f - rawShadow); 
+            }
             shadowMapIndex++;
         }
         float diffuseAmt = 0.0f;
@@ -201,6 +227,7 @@ void main(in  PSInput  PSIn, out PSOutput PSOut)
 
         // Apply lighting influences and shadows
         result += ((diffuseAmt * influence.diffuseColor * Color.rgb) + (specularAmt * influence.specularColor * Color.rgb )) * shadowFactor;
+        result *= lerp(0.3f, 1.0f, shadowFactor); // Darken shadowed areas more
 
         // Apply hatching
         if (Materials[PSIn.MaterialIndex].hatchTiling > 0.0f)
@@ -215,11 +242,6 @@ void main(in  PSInput  PSIn, out PSOutput PSOut)
             }
         }
     }
-
-    // Change saturation
-    float3 colHsv = RGBtoHSV(float3(result.r, result.g, result.b));
-    colHsv.z *= (1.5f);
-    result.rgb = HSVtoRGB(colHsv.rgb);
 
     // Gradient
     float3 gradient = lerp(Materials[PSIn.MaterialIndex].gradientStart, Materials[PSIn.MaterialIndex].gradientEnd, (normalize(PSIn.LocalPos).y + 1) * 0.5);

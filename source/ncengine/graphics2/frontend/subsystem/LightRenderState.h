@@ -9,5 +9,6 @@ namespace nc::graphics
 struct LightRenderState
 {
     std::span<const LightData> lights;
+    std::span<const LightMatrixData> lightMatrices;
 };
 } // namespace nc::graphics

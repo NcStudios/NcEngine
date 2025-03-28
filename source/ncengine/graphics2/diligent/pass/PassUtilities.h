@@ -37,9 +37,14 @@ void ClearPostProcessRenderTarget(Diligent::IDeviceContext& context,
                                   SinkBufferResource& postProcessSinkBufferResource,
                                   uint32_t postProcessIndex);
 
-void ClearShadowMapRenderTarget(Diligent::IDeviceContext& context,
-                                SinkBufferResource& shadowMapSinkBufferResource,
-                                uint32_t shadowMapIndex);
+void ClearPointShadowMapRenderTarget(Diligent::IDeviceContext& context,
+                                     CubeSinkBufferResource& shadowMapSinkBufferResource,
+                                     uint32_t lightIndex,
+                                     uint32_t faceIndex);
+
+void ClearUniShadowMapRenderTarget(Diligent::IDeviceContext& context,
+                                   SinkBufferResource& shadowMapSinkBufferResource,
+                                   uint32_t shadowMapIndex);
 
 void BindRenderTarget(Diligent::IDeviceContext& context,
                       Diligent::ISwapChain& swapChain,
@@ -53,9 +58,14 @@ void BindPostProcessRenderTarget(Diligent::IDeviceContext& context,
                                  SinkBufferResource& postProcessSinkBufferResource,
                                  uint32_t postProcessIndex);
 
-void BindShadowMapRenderTarget(Diligent::IDeviceContext& context,
-                               SinkBufferResource& shadowMapSinkBufferResource,
-                               uint32_t shadowMapIndex);
+void BindPointShadowMapRenderTarget(Diligent::IDeviceContext& context,
+                                    CubeSinkBufferResource& shadowMapSinkBufferResource,
+                                    uint32_t lightIndex,
+                                    uint32_t faceIndex);
+
+void BindUniShadowMapRenderTarget(Diligent::IDeviceContext& context,
+                                  SinkBufferResource& shadowMapSinkBufferResource,
+                                  uint32_t shadowMapIndex);
 
 auto ToDepthRenderTargetView(Diligent::ISwapChain& swapChain,
                              SinkBufferResource& depthSinkBufferResource,
@@ -65,6 +75,10 @@ auto ToDepthRenderTargetView(Diligent::ISwapChain& swapChain,
 auto ToPostProcessRenderTargetView(Diligent::ISwapChain& swapChain,
                                    SinkBufferResource& postProcessSinkBufferResource,
                                    uint32_t index) -> Diligent::ITextureView*;
+
+auto ToPostProcessCubeRenderTargetView(Diligent::ISwapChain& swapChain,
+                                       CubeSinkBufferResource& postProcessSinkBufferResource,
+                                       uint32_t index) -> Diligent::ITextureView*;
 
 auto ToColorRenderTargetView(Diligent::ISwapChain& swapChain,
                              SinkBufferResource& colorSinkBufferResource,

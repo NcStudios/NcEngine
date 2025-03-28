@@ -26,16 +26,10 @@ auto CalculateLightViewProjectionMatrix(DirectX::FXMMATRIX transformMatrix) -> D
 
 namespace pointlight2
 {
-constexpr float g_lightFieldOfView = nc::DegreesToRadians(60.0f);
-constexpr float g_nearClip = 0.25f;
-constexpr float g_farClip = 96.0f;
-const auto g_lightProjectionMatrix = DirectX::XMMatrixPerspectiveRH(g_lightFieldOfView, 1.0f, g_nearClip, g_farClip);
-
-auto CalculateLightViewProjectionMatrix(DirectX::FXMMATRIX transformMatrix) -> DirectX::XMMATRIX
-{
-    const auto look = DirectX::XMVector3TransformNormal(DirectX::g_XMIdentityR2, transformMatrix);
-    return DirectX::XMMatrixLookAtRH(transformMatrix.r[3], look, DirectX::g_XMNegIdentityR1) * g_lightProjectionMatrix;
-}
+constexpr float g_lightFieldOfView = DirectX::XM_PIDIV2; // 90 degrees
+constexpr float g_nearClip = 2.0;
+constexpr float g_farClip = 150.0f;
+const auto g_lightProjectionMatrix = DirectX::XMMatrixPerspectiveFovLH(g_lightFieldOfView, 1.f, g_nearClip, g_farClip);
 } // namespace pointlight2
 
 namespace spotlight2
@@ -57,23 +51,30 @@ namespace nc::graphics
 {
 auto LightSubsystem::BuildState(ecs::ExplicitEcs<DirectionalLight, PointLight, SpotLight, Transform> ecs) -> LightRenderState
 {
-    m_data.clear();
+    m_lightData.clear();
+    m_lightMatrixData.clear();
+    auto lightMatrixIndex = 0u;
 
     { // Directional Lights
         const auto& pool = ecs.GetPool<DirectionalLight>();
         for (auto [entity, light] : std::views::zip(pool.GetEntityPool(), pool.GetComponents()))
         {
             auto& transform = ecs.Get<Transform>(entity);
-            auto shadowMapMatrix = light.castsShadows == 1 ? directionallight::CalculateLightViewProjectionMatrix(transform.TransformationMatrix()) : DirectX::XMMatrixIdentity();
 
-            m_data.emplace_back(
+            m_lightData.emplace_back(
                 light.diffuseColor,
                 light.specularColor,
                 light.intensity,
                 transform.Forward(),
                 light.castsShadows,
-                shadowMapMatrix
+                lightMatrixIndex
             );
+
+            if (light.castsShadows)
+            {
+                m_lightMatrixData.push_back(LightMatrixData{.viewProjection = directionallight::CalculateLightViewProjectionMatrix(transform.TransformationMatrix())});
+                lightMatrixIndex++;
+            }
         }
     }
 
@@ -82,15 +83,62 @@ auto LightSubsystem::BuildState(ecs::ExplicitEcs<DirectionalLight, PointLight, S
         for (auto [entity, light] : std::views::zip(pool.GetEntityPool(), pool.GetComponents()))
         {
             auto& transform = ecs.Get<Transform>(entity);
-            m_data.emplace_back(
+            m_lightData.emplace_back(
                 light.diffuseColor,
                 light.specularColor,
                 light.intensity,
                 transform.Position(),
-                0, /** @todo, come up with shadow decisioning (which lights cast shadows) */
+                light.castsShadows,
                 light.radius,
-                pointlight2::CalculateLightViewProjectionMatrix(transform.TransformationMatrix())
+                lightMatrixIndex
             );
+
+            if (light.castsShadows)
+            {
+                // Positive X
+                {
+                    const auto look = DirectX::XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f);
+                    auto viewMatrix = DirectX::XMMatrixLookAtLH(transform.PositionXM(), DirectX::XMVectorAdd(transform.PositionXM(),look), DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f));
+                    m_lightMatrixData.push_back(LightMatrixData{.viewProjection = DirectX::XMMatrixMultiply(viewMatrix, pointlight2::g_lightProjectionMatrix)});
+                    lightMatrixIndex++;
+                }
+                // Negative X
+                {
+                    const auto look = DirectX::XMVectorSet(-1.0f, 0.0f, 0.0f, 0.0f);
+                    auto viewMatrix = DirectX::XMMatrixLookAtLH(transform.PositionXM(), DirectX::XMVectorAdd(transform.PositionXM(),look), DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f));
+                    m_lightMatrixData.push_back(LightMatrixData{.viewProjection = DirectX::XMMatrixMultiply(viewMatrix, pointlight2::g_lightProjectionMatrix)});
+                    lightMatrixIndex++;
+                }
+                // Positive Y
+                {
+                    const auto look = DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+                    auto viewMatrix = DirectX::XMMatrixLookAtLH(transform.PositionXM(),  DirectX::XMVectorAdd(transform.PositionXM(),look), DirectX::XMVectorSet(0.0f, 0.0f, -1.0f, 0.0f));
+                    m_lightMatrixData.push_back(LightMatrixData{.viewProjection = DirectX::XMMatrixMultiply(viewMatrix, pointlight2::g_lightProjectionMatrix)});
+                    lightMatrixIndex++;
+                }
+                    // Negative Y
+                {
+                    const auto look = DirectX::XMVectorSet(0.0f, -1.0f, 0.0f, 0.0f);
+                    auto viewMatrix = DirectX::XMMatrixLookAtLH(transform.PositionXM(),  DirectX::XMVectorAdd(transform.PositionXM(),look), DirectX::XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f));
+                    m_lightMatrixData.push_back(LightMatrixData{.viewProjection = DirectX::XMMatrixMultiply(viewMatrix, pointlight2::g_lightProjectionMatrix)});
+                    lightMatrixIndex++;
+                }
+ 
+                // Positive Z
+                {
+                    const auto look = DirectX::XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f);
+                    auto viewMatrix = DirectX::XMMatrixLookAtLH(transform.PositionXM(), DirectX::XMVectorAdd(transform.PositionXM(),look), DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f));
+                    m_lightMatrixData.push_back(LightMatrixData{.viewProjection = DirectX::XMMatrixMultiply(viewMatrix, pointlight2::g_lightProjectionMatrix)});
+                    lightMatrixIndex++;
+                }
+                // Negative Z
+                {
+                    const auto look = DirectX::XMVectorSet(0.0f, 0.0f, -1.0f, 0.0f);
+                    auto viewMatrix = DirectX::XMMatrixLookAtLH(transform.PositionXM(), DirectX::XMVectorAdd(transform.PositionXM(),look), DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f));
+                    m_lightMatrixData.push_back(LightMatrixData{.viewProjection = DirectX::XMMatrixMultiply(viewMatrix, pointlight2::g_lightProjectionMatrix)});
+                    lightMatrixIndex++;
+                }
+            }
         }
     }
 
@@ -100,9 +148,8 @@ auto LightSubsystem::BuildState(ecs::ExplicitEcs<DirectionalLight, PointLight, S
         {
             float outerAngle = cos(std::max(light.outerAngle, 0.0001f)) * (1 - light.radius * 0.01f);
             auto& transform = ecs.Get<Transform>(entity);
-            auto shadowMapMatrix = light.castsShadows == 1 ? spotlight2::CalculateLightViewProjectionMatrix(transform.TransformationMatrix(), (1-outerAngle)*1.75f, light.radius) : DirectX::XMMatrixIdentity();
 
-            m_data.emplace_back(
+            m_lightData.emplace_back(
                 light.diffuseColor,
                 light.specularColor,
                 light.intensity,
@@ -112,10 +159,16 @@ auto LightSubsystem::BuildState(ecs::ExplicitEcs<DirectionalLight, PointLight, S
                 outerAngle,
                 light.radius,
                 light.castsShadows,
-                shadowMapMatrix
+                lightMatrixIndex
             );
+
+            if (light.castsShadows)
+            {
+                m_lightMatrixData.push_back(LightMatrixData{.viewProjection = spotlight2::CalculateLightViewProjectionMatrix(transform.TransformationMatrix(), (1-outerAngle) * 1.75f, light.radius)});
+                lightMatrixIndex++;
+            }
         }
     }
-    return LightRenderState{m_data};
+    return LightRenderState{m_lightData, m_lightMatrixData};
 }
 } // namespace nc::graphics

@@ -51,6 +51,7 @@ struct PostProcessSinkIndexData
     int32_t depthRenderTargetIndex3;
     uint32_t hasPostProcessTarget;
     uint32_t lightIndex;
+    uint32_t lightFaceIndex;
 };
 
 // Object model for StaticMeshes (type: StructuredBuffer element type).
@@ -104,31 +105,31 @@ struct ParticleData
     uint32_t textureIndex = std::numeric_limits<uint32_t>::max();
 };
 
+struct LightType
+{
+    static constexpr int Directional = 0;
+    static constexpr int Point = 1;
+    static constexpr int Spot = 2;
+    static constexpr int Uninitialized = -1;
+};
+
 // Object model for lights (directional/point/spot) (type: StructuredBuffer element type).
 struct LightData
 {
-    struct LightType
-    {
-        static constexpr int Directional = 0;
-        static constexpr int Point = 1;
-        static constexpr int Spot = 2;
-        static constexpr int Uninitialized = -1;
-    };
-
     // Construct from DirectionalLight
     LightData(const Vector3& diffuseCol,
               const Vector3& specularCol,
               const float intensity_,
               const Vector3& dir,
               int32_t enableShadows,
-              DirectX::FXMMATRIX viewProj)
+              uint32_t viewProjIndex_)
         : diffuseColor{diffuseCol},
           type{LightType::Directional},
           specularColor{specularCol},
           direction{dir},
           intensity{intensity_},
           castsShadows{enableShadows},
-          viewProjection{viewProj}
+          viewProjIndex{viewProjIndex_}
     {
     }
 
@@ -139,7 +140,7 @@ struct LightData
               const Vector3& pos,
               int32_t enableShadows,
               float rad,
-              DirectX::FXMMATRIX viewProj)
+              uint32_t viewProjIndex_)
         : diffuseColor{diffuseCol},
           type{LightType::Point},
           specularColor{specularCol},
@@ -147,7 +148,7 @@ struct LightData
           position{pos},
           intensity{intensity_},
           castsShadows{enableShadows},
-          viewProjection{viewProj}
+          viewProjIndex{viewProjIndex_}
     {
     }
 
@@ -161,7 +162,7 @@ struct LightData
               float outAngle,
               float rad,
               int32_t enableShadows,
-              DirectX::FXMMATRIX viewProj)
+              uint32_t viewProjIndex_)
         : diffuseColor{diffuseCol},
           type{LightType::Spot},
           specularColor{specularCol},
@@ -172,7 +173,7 @@ struct LightData
           outerAngle{outAngle},
           intensity{intensity_},
           castsShadows{enableShadows},
-          viewProjection{viewProj}
+          viewProjIndex{viewProjIndex_}
     {
     }
 
@@ -186,6 +187,13 @@ struct LightData
     float outerAngle = 1.0f;
     float intensity = 1.0f;
     int castsShadows = 0;
+    uint32_t viewProjIndex = 0;
+    uint32_t padding = 0;
+};
+
+// Object model for light projection matrix for shadow mapping (type: StructuredBuffer element type)
+struct LightMatrixData
+{
     DirectX::XMMATRIX viewProjection = DirectX::XMMATRIX{};
 };
 

@@ -23,7 +23,8 @@ class LightSubsystem
         auto BuildState(ecs::ExplicitEcs<DirectionalLight, PointLight, SpotLight, Transform> ecs) -> LightRenderState;
 
     private:
-        std::vector<LightData> m_data;
+        std::vector<LightData> m_lightData;
+        std::vector<LightMatrixData> m_lightMatrixData;
 };
 } // namespace graphics
 } // namespace nc
