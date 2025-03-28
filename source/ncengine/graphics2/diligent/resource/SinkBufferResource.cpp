@@ -1,4 +1,5 @@
 #include "SinkBufferResource.h"
+#include "graphics2/diligent/pass/PassTypes.h"
 #include "ResourceTypes.h"
 
 #include "ncutility/NcError.h"
@@ -50,10 +51,10 @@ auto MakeColorSinkBufferDesc(uint32_t maxTextures) -> SinkBufferResourceDesc
     return SinkBufferResourceDesc{
         .name = "Color Render Target",
         .viewType = Diligent::TEXTURE_VIEW_RENDER_TARGET,
-        .format = Diligent::TEX_FORMAT_RGBA8_UNORM_SRGB,
+        .format = OffScreenColorRTFormat,
         .bindFlags = Diligent::BIND_SHADER_RESOURCE | Diligent::BIND_RENDER_TARGET,
         .clearValue = Diligent::OptimizedClearValue{
-            .Format = Diligent::TEX_FORMAT_RGBA8_UNORM_SRGB,
+            .Format = OffScreenColorRTFormat,
             .Color = {0.0f, 0.0f, 0.0f, 0.0f},
             .DepthStencil = Diligent::DepthStencilClearValue{}
         },
@@ -71,6 +72,22 @@ auto MakeDepthSinkBufferDesc(uint32_t maxTextures) -> SinkBufferResourceDesc
         .clearValue = Diligent::OptimizedClearValue{
             .Format = Diligent::TEX_FORMAT_D32_FLOAT,
             .DepthStencil = Diligent::DepthStencilClearValue{1.0f, 0}
+        },
+        .maxTextures = maxTextures
+    };
+}
+
+auto MakeUniShadowSinkBufferDesc(uint32_t maxTextures) -> SinkBufferResourceDesc
+{
+    return SinkBufferResourceDesc{
+        .name = "Shadow Render Target",
+        .viewType = Diligent::TEXTURE_VIEW_DEPTH_STENCIL,
+        .format = OffScreenDepthRTFormat,
+        .bindFlags = Diligent::BIND_SHADER_RESOURCE | Diligent::BIND_DEPTH_STENCIL,
+        .clearValue = Diligent::OptimizedClearValue{
+            .Format = OffScreenDepthRTFormat,
+            .Color = {0.0f, 0.0f, 0.0f, 0.0f},
+            .DepthStencil = Diligent::DepthStencilClearValue{}
         },
         .maxTextures = maxTextures
     };
@@ -195,5 +212,4 @@ void SinkBufferResource::Update()
 {
     SetArrayRegion(m_variable, std::span<Diligent::IDeviceObject*>(m_shaderResourceViews), 0u, m_shaderResourceViews.size());
 }
-
 } // namespace nc::graphics

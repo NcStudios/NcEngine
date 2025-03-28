@@ -32,6 +32,7 @@ class PerFrameResourceSignature
                                            const StructuredBufferDesc& materialResourceDesc,
                                            const StructuredBufferDesc& boneResourceDesc,
                                            const StructuredBufferDesc& particleResourceDesc,
+                                           const StructuredBufferDesc& lightMatrixResourceDesc,
                                            const TextureBufferDesc& textureResourceDesc,
                                            const UniformBufferDesc& environmentResourceDesc,
                                            const UniformBufferDesc& wireframeResourceDesc);
@@ -48,6 +49,7 @@ class PerFrameResourceSignature
         auto GetMaterialDataResource()      -> StructuredBuffer<MaterialData>&            { return *m_materialDataResource; }
         auto GetBoneDataResource()          -> StructuredBuffer<BoneData>&                { return *m_boneDataResource; }
         auto GetParticleDataBuffer()        -> StructuredBuffer<ParticleData>&            { return *m_particleDataResource; }
+        auto GetLightMatrixDataBuffer()     -> StructuredBuffer<LightMatrixData>&         { return *m_lightMatrixDataResource; }
         auto GetTextureBuffer()             -> TextureBufferResource&                     { return *m_textureResource; }
         auto GetEnvironmentBuffer()         -> EnvironmentBufferResource&                 { return *m_environmentResource; }
         auto GetWireframeBuffer()           -> WireframeBufferResource&                   { return *m_wireframeBufferResource; }
@@ -62,6 +64,7 @@ class PerFrameResourceSignature
         std::unique_ptr<StructuredBuffer<MaterialData>> m_materialDataResource;
         std::unique_ptr<StructuredBuffer<BoneData>> m_boneDataResource;
         std::unique_ptr<StructuredBuffer<ParticleData>> m_particleDataResource;
+        std::unique_ptr<StructuredBuffer<LightMatrixData>> m_lightMatrixDataResource;
         std::unique_ptr<TextureBufferResource> m_textureResource;
         std::unique_ptr<EnvironmentBufferResource> m_environmentResource;
         std::unique_ptr<WireframeBufferResource> m_wireframeBufferResource;

@@ -36,6 +36,18 @@ auto ToPipelineResourceDesc(const UniformBufferDesc& resourceDesc) -> Diligent::
     };
 }
 
+auto ToPipelineResourceDesc(const CubeSinkBufferDesc& resourceDesc) -> Diligent::PipelineResourceDesc
+{
+    return Diligent::PipelineResourceDesc{
+        resourceDesc.shaderType,
+        resourceDesc.resourceKey.data(),
+        resourceDesc.maxElementCount,
+        Diligent::SHADER_RESOURCE_TYPE_TEXTURE_SRV,
+        resourceDesc.dynamic ? Diligent::SHADER_RESOURCE_VARIABLE_TYPE_DYNAMIC : Diligent::SHADER_RESOURCE_VARIABLE_TYPE_MUTABLE,
+        Diligent::PIPELINE_RESOURCE_FLAG_RUNTIME_ARRAY
+    };
+}
+
 auto ToPipelineResourceDesc(const SinkBufferDesc& resourceDesc) -> Diligent::PipelineResourceDesc
 {
     return Diligent::PipelineResourceDesc{

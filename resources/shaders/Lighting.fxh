@@ -9,7 +9,8 @@ struct LightData {
     float outerAngle;
     float intensity;
     int castsShadows;
-    float4x4 viewProj;
+    uint lightMatrixIndex;
+    uint padding;
 };
 
 struct LightInfluence
@@ -19,6 +20,11 @@ struct LightInfluence
     float specularAmt;
     float diffuseAmt;
     float intensity;
+};
+
+struct LightMatrix
+{
+    float4x4 viewProjection;
 };
 
 float CalculateDiffuse(float3 L, float3 N)

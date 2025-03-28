@@ -15,7 +15,8 @@ PerPassResourceSignature::PerPassResourceSignature(Diligent::IRenderDevice& devi
                                                    const SinkBufferDesc& colorSinksDesc,
                                                    const SinkBufferDesc& depthSinksDesc,
                                                    const SinkBufferDesc& postProcessSinksDesc,
-                                                   const SinkBufferDesc& shadowMapSinksDesc,
+                                                   const SinkBufferDesc& uniShadowMapSinksDesc,
+                                                   const CubeSinkBufferDesc& pointShadowMapSinksDesc,
                                                    const UniformBufferDesc& postProcessPassPropertiesDesc,
                                                    const UniformBufferDesc& sinkIndexDesc)
     : m_postProcessSinkCount{postProcessSinksDesc.maxElementCount},
@@ -29,12 +30,14 @@ PerPassResourceSignature::PerPassResourceSignature(Diligent::IRenderDevice& devi
         ToPipelineResourceDesc(postProcessTexDesc), // Even though we have multiple post process resources, we only ever bind one at a time.
         ToPipelineResourceDesc(sinkIndexDesc),
         ToPipelineResourceDesc(postProcessPassPropertiesDesc),
-        ToPipelineResourceDesc(shadowMapSinksDesc)
+        ToPipelineResourceDesc(uniShadowMapSinksDesc),
+        ToPipelineResourceDesc(pointShadowMapSinksDesc)
     };
 
     const auto samplers = std::array{
         SinkBufferResource::MakeSamplerDesc(colorSinksDesc.resourceKey),
-        SinkBufferResource::MakeShadowSamplerDesc(shadowMapSinksDesc.resourceKey),
+        SinkBufferResource::MakeShadowSamplerDesc(uniShadowMapSinksDesc.resourceKey),
+        CubeSinkBufferResource::MakeShadowSamplerDesc(pointShadowMapSinksDesc.resourceKey),
     };
 
     auto desc = Diligent::PipelineResourceSignatureDesc{};
@@ -89,11 +92,18 @@ PerPassResourceSignature::PerPassResourceSignature(Diligent::IRenderDevice& devi
         GetVariable(postProcessPassPropertiesDesc.shaderType, postProcessPassPropertiesDesc.resourceKey.data(), m_srb)
     );
 
-    m_shadowMapSinksResource = std::make_unique<SinkBufferResource>(
-        GetVariable(shadowMapSinksDesc.shaderType, shadowMapSinksDesc.resourceKey.data(), m_srb),
-        MakeDepthSinkBufferDesc(shadowMapSinksDesc.maxElementCount)
+    m_uniShadowMapSinksResource = std::make_unique<SinkBufferResource>(
+        GetVariable(uniShadowMapSinksDesc.shaderType, uniShadowMapSinksDesc.resourceKey.data(), m_srb),
+        MakeUniShadowSinkBufferDesc(uniShadowMapSinksDesc.maxElementCount)
     );
-    m_shadowMapSinksResource->Update();
+    m_uniShadowMapSinksResource->Update();
+
+    m_pointShadowMapSinksResource = std::make_unique<CubeSinkBufferResource>(
+        GetVariable(pointShadowMapSinksDesc.shaderType, pointShadowMapSinksDesc.resourceKey.data(), m_srb),
+        MakeCubeShadowSinkBufferDesc(pointShadowMapSinksDesc.maxElementCount)
+    );
+
+    m_pointShadowMapSinksResource->Update();
 }
 
 void PerPassResourceSignature::BindPostProcessSink(uint32_t index)

@@ -31,6 +31,7 @@ class ShaderBindings
                 StructuredBufferDesc{"Materials",          Diligent::SHADER_TYPE_PIXEL,  memorySettings.maxRenderers,        memorySettings.maxRenderers / 2},
                 StructuredBufferDesc{"Bones",              Diligent::SHADER_TYPE_VERTEX, memorySettings.maxBones,            memorySettings.maxBones / 4},
                 StructuredBufferDesc{"Particles",          Diligent::SHADER_TYPE_VS_PS,  memorySettings.maxParticles,        memorySettings.maxParticles / 4},
+                StructuredBufferDesc{"LightMatrices",      Diligent::SHADER_TYPE_VS_PS,  GetTotalLightMatricesCount(memorySettings), GetTotalLightMatricesCount(memorySettings)},
                 TextureBufferDesc{"Textures",              Diligent::SHADER_TYPE_PIXEL,  memorySettings.maxTextures},
                 UniformBufferDesc{"EnvironmentProperties", Diligent::SHADER_TYPE_VS_PS},
                 UniformBufferDesc{"WireframeProperties",   Diligent::SHADER_TYPE_VS_PS}
@@ -42,7 +43,8 @@ class ShaderBindings
                 SinkBufferDesc{"ColorSinks",               Diligent::SHADER_TYPE_PIXEL, 20},
                 SinkBufferDesc{"DepthSinks",               Diligent::SHADER_TYPE_PIXEL, 20},
                 SinkBufferDesc{"PostProcessSinks",         Diligent::SHADER_TYPE_PIXEL, 3, true},
-                SinkBufferDesc{"ShadowMapSinks",           Diligent::SHADER_TYPE_VS_PS, memorySettings.maxDirectionalLights + memorySettings.maxSpotLights},
+                SinkBufferDesc{"UniShadowMapSinks",        Diligent::SHADER_TYPE_VS_PS, memorySettings.maxDirectionalLights + memorySettings.maxSpotLights},
+                CubeSinkBufferDesc{"PointShadowMapSinks",  Diligent::SHADER_TYPE_VS_PS, memorySettings.maxPointLights},
                 UniformBufferDesc{"PostProcessProperties", Diligent::SHADER_TYPE_PIXEL, true},
                 UniformBufferDesc{"SinkIndices",           Diligent::SHADER_TYPE_VS_PS}
             }
@@ -77,6 +79,13 @@ class ShaderBindings
         {
             return settings.maxDirectionalLights +
                    settings.maxPointLights       +
+                   settings.maxSpotLights;
+        }
+
+        static auto GetTotalLightMatricesCount(const config::MemorySettings& settings) -> uint32_t
+        {
+            return settings.maxDirectionalLights +
+                   settings.maxPointLights * 6   +
                    settings.maxSpotLights;
         }
 };

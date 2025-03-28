@@ -14,6 +14,7 @@ cbuffer SinkIndices
     int depthRT3;
     uint hasPostProcess;
     uint lightIndex;
+    uint lightFaceIndex;
 };
 
 struct PSInput 

@@ -28,14 +28,30 @@ auto CreatePipeline(Diligent::IRenderDevice& device,
     ci.pPS = shaders.pixelShader;
     ci.pVS = shaders.vertexShader;
 
+    auto colorFormat = TEX_FORMAT_UNKNOWN;
+    if (passDesc.colorSink != ColorTarget::None)
+    {
+        colorFormat = OffScreenColorRTFormat;
+    }
+    else if (passDesc.shadowMapSink == ShadowMapTarget::Point)
+    {
+        colorFormat = OffScreenShadowMapRTFormat;
+    }
+
+    auto numColorTargets = 0u;
+    if (passDesc.colorSink != ColorTarget::None || passDesc.shadowMapSink == ShadowMapTarget::Point)
+    {
+        numColorTargets = 1;
+    }
+
     auto depthFormat = TEX_FORMAT_UNKNOWN;
     if (passDesc.depthSink != DepthTarget::None || passDesc.shadowMapSink != ShadowMapTarget::None)
     {
-      depthFormat = OffScreenDepthRTFormat;
+        depthFormat = OffScreenDepthRTFormat;
     }
 
-    ci.GraphicsPipeline.NumRenderTargets                  = passDesc.colorSink == ColorTarget::None ? 0 : 1;
-    ci.GraphicsPipeline.RTVFormats[0]                     = passDesc.colorSink == ColorTarget::None ? TEX_FORMAT_UNKNOWN : OffScreenColorRTFormat;
+    ci.GraphicsPipeline.NumRenderTargets                  = static_cast<uint8_t>(numColorTargets);
+    ci.GraphicsPipeline.RTVFormats[0]                     = colorFormat;
     ci.GraphicsPipeline.DSVFormat                         = depthFormat;
     ci.GraphicsPipeline.RasterizerDesc.CullMode           = CULL_MODE_BACK;
     ci.GraphicsPipeline.DepthStencilDesc.DepthEnable      = passDesc.useDepthTest;

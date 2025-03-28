@@ -1,3 +1,5 @@
+#include "Lighting.fxh"
+
 struct VSInput
 {
     // Vertex attributes
@@ -9,6 +11,7 @@ struct VSInput
 struct PSInput 
 {
     float4 Pos : SV_POSITION;
+    float4 WorldPos;
 };
 
 struct TransformData
@@ -16,22 +19,9 @@ struct TransformData
     float4x4 model;
 };
 
-struct LightData {
-    float3 diffuseColor;
-    int type; // 0: Directional, 1: Point, 2: Spot
-    float3 specularColor;
-    float radius;
-    float3 position;
-    float innerAngle;
-    float3 direction;
-    float outerAngle;
-    float intensity;
-    int castsShadows;
-    float4x4 viewProj;
-};
-
 StructuredBuffer<TransformData> Transforms;
 StructuredBuffer<LightData> Lights;
+StructuredBuffer<LightMatrix> LightMatrices;
 
 struct StaticMeshInstanceData
 {
@@ -62,11 +52,15 @@ cbuffer SinkIndices
     int depthRT3;
     uint hasPostProcess;
     uint lightIndex;
+    uint lightFaceIndex;
 };
 
 void main(in  VSInput VSIn, uint InstanceID : SV_InstanceID,  out PSInput PSIn)
 {
     uint transformIndex = StaticInstances[InstanceID].transformIndex;
     float4 TransformedPos = mul(float4(VSIn.Pos, 1.0), Transforms[transformIndex].model);
-    PSIn.Pos = mul(TransformedPos, Lights[lightIndex].viewProj);
+    PSIn.WorldPos = TransformedPos;
+
+    LightData light = Lights[lightIndex];
+    PSIn.Pos = mul(TransformedPos, LightMatrices[light.lightMatrixIndex  + lightFaceIndex].viewProjection);
 }

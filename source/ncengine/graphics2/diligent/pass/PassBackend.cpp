@@ -1,5 +1,6 @@
 #include "PassBackend.h"
 #include "PassUtilities.h"
+#include "graphics2/ShaderTypes.h"
 #include "graphics2/diligent/resource/PerPassResourceSignature.h"
 #include "graphics2/diligent/resource/PostProcessPropertyBufferResource.h"
 #include "graphics2/diligent/resource/ResourceTypes.h"
@@ -133,7 +134,8 @@ PassBackend::PassBackend(IRenderDevice& device,
     auto& perPassSignature = shaderBindings.GetPerPassSignature();
     auto& colorSinks = perPassSignature.GetColorSinksResource();
     auto& depthSinks = perPassSignature.GetDepthSinksResource();
-    auto& shadowMapSinks = perPassSignature.GetShadowMapSinksResource();
+    auto& uniShadowMapSinks = perPassSignature.GetUniShadowMapSinksResource();
+    auto& pointShadowMapSinks = perPassSignature.GetPointShadowMapSinksResource();
 
     // Get swapchain width and height to create screen-sized render targets
     auto screenWidth = swapChain.GetDesc().Width;
@@ -160,7 +162,8 @@ PassBackend::PassBackend(IRenderDevice& device,
     }
 
     // Make all the shadow map render targets that will be used by the passes
-    shadowMapSinks.Add(device, context, memorySettings.maxSpotLights + memorySettings.maxDirectionalLights, graphicsSettings.shadowMapResolution, graphicsSettings.shadowMapResolution);
+    uniShadowMapSinks.Add(device, context, memorySettings.maxSpotLights + memorySettings.maxDirectionalLights, graphicsSettings.shadowMapResolution, graphicsSettings.shadowMapResolution);
+    pointShadowMapSinks.Add(device, context, memorySettings.maxPointLights, graphicsSettings.shadowMapResolution, graphicsSettings.shadowMapResolution);
 
     // Make the pass and pipeline objects
     MakePassesAndPipelines(device, swapChain, shaderFactory, shaderBindings, passManifest);
@@ -197,31 +200,57 @@ void PassBackend::RenderShadowPass(IDeviceContext& context,
                                    const std::span<const LightData>& lights)
 {
     auto& sinkIndexBuffer = perPassResourceSignature.GetSinkIndexBufferResource();
-    auto& shadowMapsBuffer = perPassResourceSignature.GetShadowMapSinksResource();
+    auto& uniShadowMapsBuffer = perPassResourceSignature.GetUniShadowMapSinksResource();
+    auto& pointShadowMapsBuffer = perPassResourceSignature.GetPointShadowMapSinksResource();
     bool hasSomeShadowCaster = false;
-    auto renderTargetIndex = 0u;
+    auto pointRenderTargetIndex = 0u;
+    auto uniRenderTargetIndex = 0u;
 
     // LightDataIndex corresponds to the index the shader will use to index the LightData buffer.
-    // RenderTargetIndex corresponds to the index of the shadow map in the SinkBuffer.
+    // PointRenderTargetIndex and uniRenderTargetIndex correspond to the index of the shadow map in the SinkBuffers.
     for (const auto& [lightDataIndex, light] : std::views::enumerate(lights))
     {
+        auto lightIndex = static_cast<uint32_t>(lightDataIndex);
+
         if (!light.castsShadows)
         {
             continue;
         }
 
         hasSomeShadowCaster = true;
-        sinkIndexBuffer.Update(context, std::vector<uint32_t>{}, std::vector<uint32_t>{}, false, static_cast<uint32_t>(lightDataIndex));
-        perPassResourceSignature.Commit(context);
 
-        BindShadowMapRenderTarget(context, shadowMapsBuffer, renderTargetIndex);
-        ClearShadowMapRenderTarget(context, shadowMapsBuffer, renderTargetIndex);
+        if (staticPass.flag & MaterialPassFlag::UniShadow && light.type != LightType::Point)
+        {
+            sinkIndexBuffer.Update(context, std::vector<uint32_t>{}, std::vector<uint32_t>{}, false, lightIndex);
+            perPassResourceSignature.Commit(context);
 
-        context.SetPipelineState(staticPass.pso);
-        DrawIndexed(context, staticBatches);
-        context.SetPipelineState(skinnedPass.pso);
-        DrawIndexed(context, skinnedBatches);
-        renderTargetIndex++;
+            BindUniShadowMapRenderTarget(context, uniShadowMapsBuffer, uniRenderTargetIndex);
+            ClearUniShadowMapRenderTarget(context, uniShadowMapsBuffer, uniRenderTargetIndex);
+
+            context.SetPipelineState(staticPass.pso);
+            DrawIndexed(context, staticBatches);
+            context.SetPipelineState(skinnedPass.pso);
+            DrawIndexed(context, skinnedBatches);
+            uniRenderTargetIndex++;
+        }
+        else if (staticPass.flag & MaterialPassFlag::PointShadow && light.type == LightType::Point) // Point lights have six faces to render, not one
+        {
+            // Iterate through face indices for the point light
+            for (auto faceIndex = 0u; faceIndex < 6u; faceIndex++)
+            {
+                sinkIndexBuffer.Update(context, std::vector<uint32_t>{}, std::vector<uint32_t>{}, false, lightIndex, faceIndex);
+                perPassResourceSignature.Commit(context);
+
+                BindPointShadowMapRenderTarget(context, pointShadowMapsBuffer, pointRenderTargetIndex, faceIndex);
+                ClearPointShadowMapRenderTarget(context, pointShadowMapsBuffer, pointRenderTargetIndex, faceIndex);
+        
+                context.SetPipelineState(staticPass.pso);
+                DrawIndexed(context, staticBatches);
+                context.SetPipelineState(skinnedPass.pso);
+                DrawIndexed(context, skinnedBatches);
+            }
+            pointRenderTargetIndex++;
+        }
     }
 
     if (!hasSomeShadowCaster)
@@ -259,7 +288,7 @@ void PassBackend::RenderMaterial(IDeviceContext& context,
     {
         m_finalColorTarget = m_finalColorTarget.has_value() ? std::min(staticPass.sinks.color, m_finalColorTarget.value()) : staticPass.sinks.color;
 
-        if (staticPass.flag & MaterialPassFlag::Shadow)
+        if (staticPass.flag & MaterialPassFlag::UniShadow || staticPass.flag & MaterialPassFlag::PointShadow)
         {
             RenderShadowPass(context, perPassResourceSignature, staticPass, skinnedPass, staticBatches, skinnedBatches, lights);
             continue;
