@@ -37,7 +37,7 @@ auto MakePostProcessPassInstances(PostProcessPassFlag::type passId) -> std::vect
 
 auto CreatePipeline(Diligent::IRenderDevice& device,
                     ISwapChain& swapChain,
-                    ShaderFactory& shaderFactory,
+                    const PipelineShaders& shaders,
                     ShaderBindings& shaderBindings,
                     const PassDesc& passDesc) -> Diligent::RefCntAutoPtr<Diligent::IPipelineState>
 {
@@ -48,10 +48,8 @@ auto CreatePipeline(Diligent::IRenderDevice& device,
     ci.PSODesc.Name = passDesc.name.data();
     ci.PSODesc.ResourceLayout.DefaultVariableType = SHADER_RESOURCE_VARIABLE_TYPE_STATIC;
 
-    RefCntAutoPtr<IShader> pixelShader = CreateShaderFromSourceIfInitialized(shaderFactory, SHADER_TYPE_PIXEL, passDesc.shaderPaths);
-    RefCntAutoPtr<IShader> vertexShader = CreateShaderFromSourceIfInitialized(shaderFactory, SHADER_TYPE_VERTEX, passDesc.shaderPaths);
-    ci.pPS = pixelShader;
-    ci.pVS = vertexShader;
+    ci.pPS = shaders.pixelShader;
+    ci.pVS = shaders.vertexShader;
 
     if (passDesc.colorSink == ColorTarget::Swapchain)
     {
@@ -106,12 +104,16 @@ namespace nc::graphics
 
 PostProcessPass::PostProcessPass(IRenderDevice& device,
                                  ISwapChain& swapChain,
-                                 ShaderFactory& shaderFactory,
+                                 const PipelineShaders& shaders,
                                  ShaderBindings& shaderBindings,
                                  const PassManifest& passManifest,
                                  const PassDesc& passDesc,
                                  bool isFinalPass)
-    : Pass{CreatePipeline(device, swapChain, shaderFactory, shaderBindings, passDesc), GetSinks(passManifest, passDesc), GetSources(passManifest, passDesc)},
+    : Pass{
+        CreatePipeline(device, swapChain, shaders, shaderBindings, passDesc),
+        GetSinks(passManifest, passDesc),
+        GetSources(passManifest, passDesc)
+        },
       instances{isFinalPass ? std::vector<PostProcessPipelineInstance>{} : MakePostProcessPassInstances(passDesc.flag)},
       flag{passDesc.flag}
 {

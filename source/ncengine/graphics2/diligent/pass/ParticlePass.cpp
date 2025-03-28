@@ -13,7 +13,7 @@ using namespace Diligent;
 using namespace nc::graphics;
 
 auto CreatePipeline(Diligent::IRenderDevice& device,
-                    ShaderFactory& shaderFactory,
+                    const PipelineShaders& shaders,
                     ShaderBindings& shaderBindings,
                     const PassDesc& passDesc,
                     uint32_t numSamples) -> Diligent::RefCntAutoPtr<Diligent::IPipelineState>
@@ -25,10 +25,8 @@ auto CreatePipeline(Diligent::IRenderDevice& device,
     ci.PSODesc.Name = passDesc.name.data();
     ci.PSODesc.ResourceLayout.DefaultVariableType = SHADER_RESOURCE_VARIABLE_TYPE_STATIC;
 
-    RefCntAutoPtr<IShader> pixelShader = CreateShaderFromSourceIfInitialized(shaderFactory, SHADER_TYPE_PIXEL, passDesc.shaderPaths);
-    RefCntAutoPtr<IShader> vertexShader = CreateShaderFromSourceIfInitialized(shaderFactory, SHADER_TYPE_VERTEX, passDesc.shaderPaths);
-    ci.pPS = pixelShader;
-    ci.pVS = vertexShader;
+    ci.pPS = shaders.pixelShader;
+    ci.pVS = shaders.vertexShader;
 
     ci.GraphicsPipeline.NumRenderTargets                  = passDesc.colorSink == ColorTarget::None ? 0 : 1;
     ci.GraphicsPipeline.RTVFormats[0]                     = passDesc.colorSink == ColorTarget::None ? TEX_FORMAT_UNKNOWN : OffScreenColorRTFormat;
@@ -67,12 +65,16 @@ auto CreatePipeline(Diligent::IRenderDevice& device,
 namespace nc::graphics
 {
 ParticlePass::ParticlePass(Diligent::IRenderDevice& device,
-                           ShaderFactory& shaderFactory,
+                           const PipelineShaders& shaders,
                            ShaderBindings& shaderBindings,
                            const PassManifest& passManifest,
                            const PassDesc& passDesc,
                            uint32_t numSamples)
-    : Pass(CreatePipeline(device, shaderFactory, shaderBindings, passDesc, numSamples), GetSinks(passManifest, passDesc), GetSources(passManifest, passDesc)),
+    : Pass{
+        CreatePipeline(device, shaders, shaderBindings, passDesc, numSamples),
+        GetSinks(passManifest, passDesc),
+        GetSources(passManifest, passDesc)
+      },
       isMsaa{numSamples > 1}
 {
 }

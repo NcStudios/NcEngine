@@ -34,7 +34,7 @@ struct PostProcessPass : public Pass
 {
     PostProcessPass(Diligent::IRenderDevice& device,
                     Diligent::ISwapChain& swapChain,
-                    ShaderFactory& shaderFactory,
+                    const PipelineShaders& shaders,
                     ShaderBindings& shaderBindings,
                     const PassManifest& passManifest,
                     const PassDesc& passDesc,

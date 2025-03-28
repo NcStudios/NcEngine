@@ -15,7 +15,7 @@ class ShaderFactory;
 struct ParticlePass : public Pass
 {
     explicit ParticlePass(Diligent::IRenderDevice& device,
-                          ShaderFactory& shaderFactory,
+                          const PipelineShaders& shaders,
                           ShaderBindings& shaderBindings,
                           const PassManifest& passManifest,
                           const PassDesc& passDesc,

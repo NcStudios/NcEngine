@@ -119,27 +119,6 @@ void BindUniShadowMapRenderTarget(Diligent::IDeviceContext& context,
     context.SetRenderTargets(0, nullptr, pDSV, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
 }
 
-auto CreateShaderFromSourceIfInitialized(ShaderFactory& shaderFactory, Diligent::SHADER_TYPE shaderType, const nc::graphics::ShaderPaths& shaderPaths) -> Diligent::RefCntAutoPtr<Diligent::IShader>
-{
-    Diligent::RefCntAutoPtr<Diligent::IShader> shader;
-    const auto& shaderPath = shaderType == Diligent::SHADER_TYPE_VERTEX ? shaderPaths.vertexShaderPath : shaderPaths.pixelShaderPath;
-
-    if (shaderPath == "")
-    {
-        return shader;
-    }
-
-    auto source = shaderFactory.ReadShaderFile(shaderPath);
-    shader = shaderFactory.MakeShaderFromSource(
-        source,
-        shaderPath.data(),
-        shaderType,
-        Diligent::SHADER_SOURCE_LANGUAGE_HLSL
-    );
-
-    return shader;
-}
-
 auto GetSinks(const PassManifest& passManifest, const PassDesc& passDesc) -> Sinks
 {
     return Sinks

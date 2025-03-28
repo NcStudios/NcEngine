@@ -14,12 +14,11 @@
 namespace nc::graphics
 {
 class ShaderBindings;
-class ShaderFactory;
 
 struct MaterialPass : public Pass
 {
     explicit MaterialPass(Diligent::IRenderDevice& device,
-                          ShaderFactory& shaderFactory,
+                          const PipelineShaders& shaders,
                           ShaderBindings& shaderBindings,
                           const PassManifest& passManifest,
                           const PassDesc& passDesc,

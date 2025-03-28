@@ -1,8 +1,3 @@
-#ifdef VULKAN
-// NonUniformResourceIndex is not supported by GLSLang
-#   define NonUniformResourceIndex(x) x
-#endif
-
 #include "Lighting.fxh"
 
 Texture2D     UniShadowMapSinks[];
