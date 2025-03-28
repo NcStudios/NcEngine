@@ -1,21 +1,36 @@
+# When compiling with DebugMode, shaders are output to a 'debug' subdirectory. 'shaders_path' in the config also needs
+# to be updated to point to that subdirectory.
+
 param
 (
 [Parameter(Mandatory=$false)]
 [string]$InputDir = "" + $(get-location).Path + "\resources\shaders",
 
 [Parameter(Mandatory=$false)]
-[string]$OutputDir = "" + $(get-location).Path + "\resources\shaders\compiled"
+[string]$OutputDir = "" + $(get-location).Path + "\resources\shaders\compiled",
+
+[Parameter(Mandatory=$false)]
+[bool]$DebugMode = $false
 )
 
 $Compiler = $Env:VULKAN_SDK + "\Bin\glslangValidator.exe"
 $Optimizer = $Env:VULKAN_SDK + "\Bin\spirv-opt.exe"
 $Preamble = "#pragma pack_matrix(row_major)"
-$TempDir = Join-Path $OutputDir "temp"
+
+if ($DebugMode) {
+    $CompilerOutputDir = Join-Path $OutputDir "debug"
+    if (-not (Test-Path -Path $OutputDir)) {
+        New-Item -Path $OutputDir -ItemType Directory | Out-Null
+    }
+}
+else {
+    $CompilerOutputDir = Join-Path $OutputDir "temp"
+}
 
 $FailureCount = 0
 
-if (-not (Test-Path -Path $TempDir)) {
-    New-Item -Path $TempDir -ItemType Directory | Out-Null
+if (-not (Test-Path -Path $CompilerOutputDir)) {
+    New-Item -Path $CompilerOutputDir -ItemType Directory | Out-Null
 }
 
 Write-Host "--Compiling Shaders--"
@@ -33,7 +48,7 @@ ForEach-Object {
 
     Write-Output "Compiling $_"
     $InputFile = Join-Path $InputDir $_.Name
-    $OutputFile = Join-Path $TempDir $FileName
+    $OutputFile = Join-Path $CompilerOutputDir $FileName
     $Args = @(
         '-V',                    # create SPIRV binary w/ Vulkan semantics
         '-D',                    # input is HLSL
@@ -44,6 +59,10 @@ ForEach-Object {
         "-o", $OutputFile,
         $InputFile
     )
+
+    if ($DebugMode) {
+        $Args = @('-g') + $Args
+    }
 
     & $Compiler @Args
 
@@ -56,28 +75,32 @@ ForEach-Object {
     }
 }
 
-Write-Host "--Optimizing Shaders--"
-Get-ChildItem -Path $TempDir -Filter *.spv |
-ForEach-Object {
-    Write-Host "Optimizing $_"
-    $InputFile = Join-Path $TempDir $_
-    $OutputFile = Join-Path $OutputDir $_
-    $Args = @(
-        '--legalize-hlsl', # optimizations to generate legal vulkan spir-v from hlsl input
-        '-O',              # default optimizations
-        $InputFile,        # input spirv
-        '-o', $OutputFile  # output spirv
-    )
+if (-not $DebugMode) {
+    Write-Host "--Optimizing Shaders--"
+    Get-ChildItem -Path $CompilerOutputDir -Filter *.spv |
+    ForEach-Object {
+        Write-Host "Optimizing $_"
+        $InputFile = Join-Path $CompilerOutputDir $_
+        $OutputFile = Join-Path $OutputDir $_
+        $Args = @(
+            '--legalize-hlsl', # optimizations to generate legal vulkan spir-v from hlsl input
+            '-O',              # default optimizations
+            $InputFile,        # input spirv
+            '-o', $OutputFile  # output spirv
+        )
 
-    & $Optimizer $Args
+        & $Optimizer $Args
 
-    if ($LASTEXITCODE -eq 0) {
-        Write-Host "OPTIMIZE SUCCEEDED: $_ -> $OutputFile" -ForegroundColor Green
+        if ($LASTEXITCODE -eq 0) {
+            Write-Host "OPTIMIZE SUCCEEDED: $_ -> $OutputFile" -ForegroundColor Green
+        }
+        else {
+            Write-Host "OPTIMIZE FAILED: $_" -ForegroundColor Red
+            $FailureCount++
+        }
     }
-    else {
-        Write-Host "OPTIMIZE FAILED: $_" -ForegroundColor Red
-        $FailureCount++
-    }
+
+    Remove-Item -Path $CompilerOutputDir -Recurse
 }
 
 if ($FailureCount -eq 0) {
@@ -86,5 +109,3 @@ if ($FailureCount -eq 0) {
 else {
     Write-Host "`n$FailureCount Failures" -ForegroundColor Red
 }
-
-Remove-Item -Path $TempDir -Recurse
