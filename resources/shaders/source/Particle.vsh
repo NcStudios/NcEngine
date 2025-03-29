@@ -1,3 +1,5 @@
+#include "core/PerFrameTypes.fxh"
+
 struct VSInput
 {
     float3 Pos         : ATTRIB0;
@@ -10,22 +12,6 @@ struct PSOutput
     float4 Pos           : SV_POSITION;
     float2 UV            : TEX_COORD;
     uint   TextureIndex;
-};
-
-cbuffer EnvironmentProperties
-{
-    float4x4 cameraViewProjection;
-    float4x4 cameraInvProjection;
-    float3 cameraPosition;
-    uint lightCount;
-    float nearClip;
-    float farClip;
-};
-
-struct ParticleData
-{
-    float4x4 model;
-    uint textureIndex;
 };
 
 StructuredBuffer<ParticleData> Particles;

@@ -1,3 +1,5 @@
+#include "core/PerFrameTypes.fxh"
+
 struct VSInput
 {
     float3 Pos : ATTRIB0;
@@ -6,20 +8,6 @@ struct VSInput
 struct PSInput
 {
     float4 Pos : SV_POSITION;
-};
-
-cbuffer EnvironmentProperties
-{
-    float4x4 cameraViewProjection;
-    float4x4 cameraInvProjection;
-    float3 cameraPosition;
-    uint lightCount;
-};
-
-cbuffer WireframeProperties
-{
-    float4x4 wireframeModelMatrix;
-    float4 wireframeColor;
 };
 
 void main(in VSInput VSIn, uint InstanceID : SV_InstanceID, out PSInput PSIn)

@@ -1,4 +1,6 @@
-#include "Lighting.fxh"
+#include "core/PerFrameTypes.fxh"
+#include "core/PerPassTypes.fxh"
+#include "core/Lighting.fxh"
 
 struct VSInput
 {
@@ -19,35 +21,9 @@ struct PSOutput
     float4 Color : SV_TARGET;
 };
 
-struct TransformData
-{
-    float4x4 model;
-};
-
 StructuredBuffer<TransformData> Transforms;
 StructuredBuffer<LightData> Lights;
-
-struct StaticMeshInstanceData
-{
-    uint transformIndex;
-    uint materialIndex;
-};
-
 StructuredBuffer<StaticMeshInstanceData> StaticInstances;
-
-cbuffer SinkIndices
-{
-    int colorRT1;
-    int colorRT2;
-    int colorRT3;
-    int colorRT4;
-    int depthRT1;
-    int depthRT2;
-    int depthRT3;
-    uint hasPostProcess;
-    uint lightIndex;
-    uint lightFaceIndex;
-};
 
 void main(in PSInput PSIn, out PSOutput PSOut)
 {

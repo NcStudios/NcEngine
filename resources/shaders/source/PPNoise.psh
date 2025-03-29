@@ -1,32 +1,4 @@
-Texture2D     Textures[];
-Texture2D     ColorSinks[];
-Texture2D     DepthSinks[];
-Texture2D     PostProcessSinks[];
-SamplerState  ColorSinks_sampler; // By convention, texture samplers must use the '_sampler' suffix
-
-cbuffer EnvironmentProperties
-{
-    float4x4 cameraViewProjection;
-    float4x4 cameraInvProjection;
-    float3 cameraPosition;
-    uint lightCount;
-    float nearClip;
-    float farClip;
-};
-
-cbuffer SinkIndices
-{
-    int colorRT1;
-    int colorRT2;
-    int colorRT3;
-    int colorRT4;
-    int depthRT1;
-    int depthRT2;
-    int depthRT3;
-    uint hasPostProcess;
-    uint lightIndex;
-    uint lightFaceIndex;
-};
+#include "core/PerFrameTypes.fxh"
 
 cbuffer PostProcessProperties
 {
@@ -38,16 +10,22 @@ cbuffer PostProcessProperties
     float noiseTexTiling;
 };
 
-struct PSInput 
-{ 
+struct PSInput
+{
     float4 Pos : SV_POSITION;
-    float2 UV  : TEX_COORD; 
+    float2 UV  : TEX_COORD;
 };
 
 struct PSOutput
 {
     float4 Color : SV_TARGET;
 };
+
+Texture2D     Textures[];
+Texture2D     ColorSinks[];
+Texture2D     DepthSinks[];
+Texture2D     PostProcessSinks[];
+SamplerState  ColorSinks_sampler; // By convention, texture samplers must use the '_sampler' suffix
 
 float RgbToLuma(float3 rgb){
     return sqrt(dot(rgb, float3(0.299, 0.587, 0.114)));
