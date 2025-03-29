@@ -15,4 +15,8 @@ struct MeshCollider;
 struct MeshVertex;
 struct SkeletalAnimation;
 struct Texture;
+struct TextureSubResource;
+
+enum class TextureFormat : int;
+enum class CompressionQuality : int;
 } // namespace nc::asset

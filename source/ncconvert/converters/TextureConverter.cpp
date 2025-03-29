@@ -6,9 +6,10 @@
 #include "ncutility/NcError.h"
 
 #define STB_IMAGE_IMPLEMENTATION
-#include "stb/stb_image.h"
-
+#define STB_IMAGE_RESIZE_IMPLEMENTATION
 #define STB_DXT_IMPLEMENTATION
+#include "stb/stb_image.h"
+#include "stb/stb_image_resize2.h"
 #include "stb/stb_dxt.h"
 
 #include <algorithm>
@@ -34,67 +35,6 @@ auto ReadTextureFromAtlas(const nc::asset::Texture& atlas, unsigned char* dest, 
     }
 
     return bytesRead;
-}
-
-auto CompressBC3(const std::string&, unsigned char* src, int width, int height, int) -> nc::asset::Texture
-{
-    if (width % 4 != 0 || height % 4 != 0) {
-        // throw leaks/i guess crashes us, but...
-        // also can we pad or something?... that might be bad in-game?
-
-        if (width >= 4 || height >= 4)
-        {
-            throw nc::NcError{"invalid assumptions"};
-        }
-
-        auto newSrc = (unsigned char*)std::malloc(4 * 4 * 4);
-        // std::memset(newSrc, 0, 4 * 4 * 4);
-        std::memcpy(newSrc, src, width * height * 4);
-        // std::free(src);
-        src = newSrc;
-        width = 4;
-        height = 4;
-
-        // throw nc::NcError{fmt::format(
-        //     "dimensions not divisible by 4: {}, {}x{}",
-        //     name, width, height
-        // )};
-        // stbi_image_free(imageData);
-    }
-
-    // Allocate memory for the compressed data
-    // size_t blockSize = 8; // BC1/DXT1 block size is 8 bytes
-    size_t blockSize = 16;
-    size_t numBlocks = (width / 4) * (height / 4);
-    std::vector<unsigned char> compressedData(numBlocks * blockSize);
-
-    // Compress each 4x4 block
-    unsigned char* rgbaBlock = new unsigned char[16 * 4]; // Temporary storage for a 4x4 RGBA block
-    for (int y = 0; y < height; y += 4) {
-        for (int x = 0; x < width; x += 4) {
-            // Extract a 4x4 block from the image
-            for (int j = 0; j < 4; ++j) {
-                for (int i = 0; i < 4; ++i) {
-                    int srcX = x + i;
-                    int srcY = y + j;
-                    int srcIndex = (srcY * width + srcX) * 4;
-
-                    int dstIndex = (j * 4 + i) * 4;
-                    memcpy(rgbaBlock + dstIndex, src + srcIndex, 4); // Copy RGBA
-                }
-            }
-
-            // Compress the block to BC1 (DXT1)
-            size_t blockIndex = ((y / 4) * (width / 4) + (x / 4)) * blockSize;
-            stb_compress_dxt_block(&compressedData[blockIndex], rgbaBlock, 1, STB_DXT_NORMAL);
-        }
-    }
-
-    return nc::asset::Texture{
-        static_cast<uint32_t>(width),
-        static_cast<uint32_t>(height),
-        std::move(compressedData)
-    };
 }
 } // anonymous namespace
 
@@ -128,30 +68,110 @@ auto TextureConverter::ImportTexture(const std::filesystem::path& path) -> asset
         throw NcError("Invalid input file: ", path.string());
     }
 
+    auto image = Image{path};
+    auto subresource = image.MakeTextureSubResource();
+    return asset::Texture{
+        subresource.width,
+        subresource.height,
+        std::move(subresource.pixelData)
+    };
+}
+
+
+Image::Image(const std::filesystem::path& path)
+{
     const auto pathString = path.string(); // because path.c_str() is wchar* on Windows
-    auto width = int32_t{};
-    auto height = int32_t {};
     auto nChannels = int32_t{};
-    auto* rawPixels = stbi_load(pathString.c_str(), &width, &height, &nChannels, STBI_rgb_alpha);
-    if(!rawPixels)
+    m_data = stbi_load(pathString.c_str(), &m_width, &m_height, &nChannels, STBI_rgb_alpha);
+    if(!m_data)
     {
         throw NcError("Failed to load texture file: ", pathString);
     }
+}
 
-    auto texture = CompressBC3(path.string(), rawPixels, width, height, asset::Texture::numChannels);
-    ::free(rawPixels);
-    return texture;
+Image::~Image() noexcept
+{
+    if (m_data)
+    {
+        std::free(m_data);
+    }
+}
 
-    // auto pixels = std::vector<unsigned char>{};
-    // const auto nBytes = width * height * asset::Texture::numChannels; // ignore nChannels because we force to 4 8-bit channels
-    // pixels.reserve(nBytes);
-    // std::copy(rawPixels, rawPixels + nBytes, std::back_inserter(pixels));
-    // ::free(rawPixels);
+auto Image::GetSizeInBytes() const -> uint32_t
+{
+    return m_width * m_height * numChannels;
+}
 
-    // return nc::asset::Texture{
-    //     static_cast<uint32_t>(width),
-    //     static_cast<uint32_t>(height),
-    //     std::move(pixels)
-    // };
+auto Image::MakeTextureSubResource() const -> asset::TextureSubResource
+{
+    const auto numBytes = GetSizeInBytes();
+    auto pixels = std::vector<unsigned char>(numBytes);
+    std::memcpy(pixels.data(), m_data, numBytes);
+    return asset::TextureSubResource{
+        .width = static_cast<uint32_t>(m_width),
+        .height = static_cast<uint32_t>(m_height),
+        .pixelData = std::move(pixels)
+    };
+}
+
+// should be const
+auto Image::Compress(asset::TextureFormat format,
+                     asset::CompressionQuality quality) const -> asset::TextureSubResource
+{
+    const auto hasAlpha = format == asset::TextureFormat::BC3;
+    const auto mode = std::to_underlying(quality);
+
+    if (m_width % 4 != 0 || m_height % 4 != 0) {
+        // throw leaks/i guess crashes us, but...
+        // also can we pad or something?... that might be bad in-game?
+
+        // DON"T DO THIS: we're returning a copy...
+
+        // if (m_width >= 4 || m_height >= 4)
+        {
+            throw nc::NcError{"invalid assumptions"};
+        }
+
+        // auto newSrc = (unsigned char*)std::malloc(4 * 4 * 4);
+        // // std::memset(newSrc, 0, 4 * 4 * 4);
+        // std::memcpy(newSrc, m_data, m_width * m_height * 4);
+        // // std::free(src);
+        // m_data = newSrc;
+        // m_width = 4;
+        // m_height = 4;
+    }
+
+    constexpr auto blockSize = 16;
+    const auto numBlocks = (m_width / 4) * (m_height / 4);
+    auto compressedData = std::vector<unsigned char>(numBlocks * blockSize);
+
+    // 4x4 RGBA block
+    unsigned char block[4 * 4 * 4];
+    for (auto y = 0; y < m_height; y += 4)
+    {
+        for (auto x = 0; x < m_width; x += 4)
+        {
+            for (auto j = 0; j < 4; ++j)
+            {
+                for (auto i = 0; i < 4; ++i)
+                {
+                    const auto srcX = x + i;
+                    const auto srcY = y + j;
+                    const auto srcIndex = (srcY * m_width + srcX) * 4;
+                    const auto dstIndex = (j * 4 + i) * 4;
+                    std::memcpy(block + dstIndex, m_data + srcIndex, 4);
+                }
+            }
+
+            const auto blockIndex = ((y / 4) * (m_width / 4) + (x / 4)) * blockSize;
+            stb_compress_dxt_block(&compressedData[blockIndex], block, hasAlpha, mode);
+        }
+    }
+
+    return asset::TextureSubResource{
+        .width = static_cast<uint32_t>(m_width),
+        .height = static_cast<uint32_t>(m_height),
+        .pixelData = std::move(compressedData)
+    };
 }
 } // namespace nc::covnert

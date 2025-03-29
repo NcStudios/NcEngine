@@ -122,6 +122,28 @@ struct SkeletalAnimation
     std::unordered_map<std::string, SkeletalAnimationFrames> framesPerBone;
 };
 
+enum class TextureFormat : int
+{
+    RGBA, ///< RGBA data uncompressed
+    BC1,  ///< RGBA data compressed with BC1 (DXT1)
+    BC3,  ///< RGBA data compressed with BC3 (DXT5)
+    BC4,
+    BC5
+};
+
+enum class CompressionQuality : int
+{
+    Normal = 0,
+    High = 1
+};
+
+struct TextureSubResource
+{
+    uint32_t width = 0u;
+    uint32_t height = 0u;
+    std::vector<unsigned char> pixelData = {};
+};
+
 struct Texture
 {
     static constexpr uint32_t numChannels = 4u;
