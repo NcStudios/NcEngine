@@ -98,9 +98,13 @@ auto GetVariable(Diligent::SHADER_TYPE shaderType, const char* name, Diligent::I
 
 auto ToTextureFormat(nc::asset::AssetSubtype subtype) -> Diligent::TEXTURE_FORMAT
 {
+    // return subtype == nc::asset::AssetSubtype::NormalTexture
+    //     ? Diligent::TEX_FORMAT_RGBA8_UNORM
+    //     : Diligent::TEX_FORMAT_RGBA8_UNORM_SRGB;
+
     return subtype == nc::asset::AssetSubtype::NormalTexture
-        ? Diligent::TEX_FORMAT_RGBA8_UNORM
-        : Diligent::TEX_FORMAT_RGBA8_UNORM_SRGB;
+        ? Diligent::TEX_FORMAT_BC3_UNORM
+        : Diligent::TEX_FORMAT_BC3_UNORM_SRGB;
 }
 
 auto ToTextureDesc(const nc::asset::Texture& texture, Diligent::TEXTURE_FORMAT format, uint32_t mipLevels) -> Diligent::TextureDesc
@@ -115,7 +119,8 @@ auto ToTextureDesc(const nc::asset::Texture& texture, Diligent::TEXTURE_FORMAT f
         format
     };
 
-    texDesc.MipLevels = mipLevels;
+    // texDesc.MipLevels = mipLevels;
+    texDesc.MipLevels = 1;
     texDesc.BindFlags = Diligent::BIND_FLAGS::BIND_SHADER_RESOURCE;
     if (mipLevels > 1) 
     {
@@ -139,15 +144,20 @@ void SetArrayRegion(Diligent::IShaderResourceVariable* variable, std::span<Dilig
     );
 }
 
-void InitializeArray(Diligent::IDeviceContext& context, Diligent::IRenderDevice& device, Diligent::IShaderResourceVariable* variable, uint32_t arraySize, bool transition)
+void InitializeArray(Diligent::IDeviceContext& context, Diligent::IRenderDevice& device, Diligent::IShaderResourceVariable* variable, uint32_t arraySize, bool transition, Diligent::TEXTURE_FORMAT override)
 {
     auto dummyTexture = asset::TextureWithId
     {
         asset::Texture
         {
-            .width = 1u,
-            .height = 1u,
-            .pixelData = std::vector<unsigned char> {0x1A, 0x2A, 0x3A, 0x4A}
+            .width = 4u,
+            .height = 4u,
+            .pixelData = std::vector<unsigned char>{
+                0x1A, 0x2A, 0x3A, 0x4A,
+                0x1A, 0x2A, 0x3A, 0x4A,
+                0x1A, 0x2A, 0x3A, 0x4A,
+                0x1A, 0x2A, 0x3A, 0x4A
+            }
         },
         1,
         asset::AssetSubtype::None
@@ -168,7 +178,13 @@ void InitializeArray(Diligent::IDeviceContext& context, Diligent::IRenderDevice&
     {
         auto subResource = ToTextureSubResData(texture);
         auto texData = Diligent::TextureData{&subResource, 1, &context};
-        auto desc = ToTextureDesc(texture, ToTextureFormat(flags));
+
+        auto format = override == Diligent::TEX_FORMAT_UNKNOWN
+            ? ToTextureFormat(flags)
+            : override;
+
+
+        auto desc = ToTextureDesc(texture, format);
         auto& textureHandle = dummyTextures.emplace_back();
         device.CreateTexture(desc, &texData, &textureHandle);
         if (!textureHandle)

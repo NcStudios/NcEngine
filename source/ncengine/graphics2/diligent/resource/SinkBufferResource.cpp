@@ -140,7 +140,7 @@ void SinkBufferResource::Add(Diligent::IRenderDevice& device,
 
     if (!m_initialLoadComplete)
     {
-        InitializeArray(context, device, m_variable, m_desc.maxTextures, false);
+        InitializeArray(context, device, m_variable, m_desc.maxTextures, false, Diligent::TEX_FORMAT_RGBA8_UNORM_SRGB);
         m_initialLoadComplete = true;
     }
 
