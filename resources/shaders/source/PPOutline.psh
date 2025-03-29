@@ -1,6 +1,7 @@
 // Much credit given to: https://roystan.net/articles/outline-shader/
 
-#include "core/ShaderTypes.fxh"
+#include "core/PerFrameTypes.fxh"
+#include "core/PerPassTypes.fxh"
 
 cbuffer PostProcessProperties
 {

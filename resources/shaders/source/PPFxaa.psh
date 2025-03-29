@@ -1,6 +1,6 @@
 // Much credit to Timothy Lottes and Simon Rodriguez https://blog.simonrodriguez.fr/articles/2016/07/implementing_fxaa.html
 
-#include "core/ShaderTypes.fxh"
+#include "core/PerFrameTypes.fxh"
 
 struct PSInput
 {

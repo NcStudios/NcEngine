@@ -1,4 +1,4 @@
-#include "core/ShaderTypes.fxh"
+#include "core/PerFrameTypes.fxh"
 
 struct PSInput
 {

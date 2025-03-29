@@ -1,4 +1,5 @@
-#include "core/ShaderTypes.fxh"
+#include "core/PerFrameTypes.fxh"
+#include "core/PerPassTypes.fxh"
 #include "core/Lighting.fxh"
 
 struct VSInput
