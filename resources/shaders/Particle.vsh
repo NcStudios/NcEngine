@@ -20,8 +20,9 @@ cbuffer EnvironmentProperties
     uint lightCount;
     float nearClip;
     float farClip;
+    uint skyboxIndex;
+    uint useSkybox;
 };
-
 struct ParticleData
 {
     float4x4 model;

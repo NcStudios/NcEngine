@@ -26,7 +26,8 @@ constexpr auto g_materialPassFlags = std::array{
 
 constexpr auto g_miscPassFlags = std::array{
     nc::MiscPassFlag::Wireframe,
-    nc::MiscPassFlag::Particle
+    nc::MiscPassFlag::Particle,
+    nc::MiscPassFlag::Skybox
 };
 
 constexpr auto g_postProcessPassNames = std::array{

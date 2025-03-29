@@ -7,5 +7,6 @@ target_sources(${NC_ENGINE_LIB}
         PassManifest.cpp
         PassUtilities.cpp
         PostProcessPass.cpp
+        SkyboxPass.cpp
         WireframePass.cpp
 )

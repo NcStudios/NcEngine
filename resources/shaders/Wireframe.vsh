@@ -14,6 +14,10 @@ cbuffer EnvironmentProperties
     float4x4 cameraInvProjection;
     float3 cameraPosition;
     uint lightCount;
+    float nearClip;
+    float farClip;
+    uint skyboxIndex;
+    uint useSkybox;
 };
 
 cbuffer WireframeProperties

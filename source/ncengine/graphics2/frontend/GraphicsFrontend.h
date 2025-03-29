@@ -3,6 +3,7 @@
 #include "subsystem/animation/SkeletalAnimationSubsystem.h"
 #include "subsystem/AssetDispatch.h"
 #include "subsystem/CameraSubsystem.h"
+#include "subsystem/EnvironmentSubsystem.h"
 #include "subsystem/LightSubsystem.h"
 #include "subsystem/MaterialRegistry.h"
 #include "subsystem/MeshSubsystem.h"
@@ -23,6 +24,7 @@ class GraphicsFrontend
     public:
         GraphicsFrontend(Diligent::IDeviceContext& context,
                          Diligent::IRenderDevice& device,
+                         CubeMapBufferResource& cubeMapBuffer,
                          TextureBufferResource& textureBuffer,
                          MeshBuffer& meshBuffer,
                          ecs::Ecs world,
@@ -33,6 +35,7 @@ class GraphicsFrontend
                          uint32_t maxBones,
                          uint32_t maxParticles,
                          uint32_t initialBatchSize,
+                         Signal<const asset::CubeMapUpdateEventData&>& onCubeMapEvent,
                          Signal<const asset::TextureUpdateEventData&>& onTextureEvent,
                          Signal<const asset::MeshUpdateEventData&>& onMeshEvent,
                          Signal<const asset::SkeletalAnimationUpdateEventData&>& onAnimationEvent,
@@ -41,9 +44,11 @@ class GraphicsFrontend
               m_assetDispatch{
                 context,
                 device,
+                cubeMapBuffer,
                 textureBuffer,
                 meshBuffer,
                 m_animationSystem.GetStorage(),
+                onCubeMapEvent,
                 onTextureEvent,
                 onMeshEvent,
                 onAnimationEvent,
@@ -52,6 +57,7 @@ class GraphicsFrontend
               m_materialRegistry{maxRenderers},
               m_uiSystem{world, modules, events},
               m_cameraSystem{},
+              m_environmentSystem{},
               m_meshSystem{
                 m_animationSystem,
                 events,
@@ -81,6 +87,7 @@ class GraphicsFrontend
         }
 
         auto GetCameraSubsystem()                  ->       CameraSubsystem&            { return m_cameraSystem;      }
+        auto GetEnvironmentSubsystem()             ->       EnvironmentSubsystem&       { return m_environmentSystem; }
         auto GetMeshSubsystem()                    ->       MeshSubsystem&              { return m_meshSystem;        }
         auto GetMaterialRegistry()                 ->       MaterialRegistry&           { return m_materialRegistry;  }
         auto GetPostProcessSubsystem()             ->       PostProcessSubsystem&       { return m_postProcessSystem; }
@@ -97,6 +104,7 @@ class GraphicsFrontend
         MaterialRegistry m_materialRegistry;
         UISubsystem m_uiSystem;
         CameraSubsystem m_cameraSystem;
+        EnvironmentSubsystem m_environmentSystem;
         MeshSubsystem m_meshSystem;
         ParticleSubsystem m_particleSystem;
         LightSubsystem m_lightSubsystem;

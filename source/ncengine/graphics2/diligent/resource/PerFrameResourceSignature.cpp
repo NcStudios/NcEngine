@@ -1,5 +1,6 @@
 #include "PerFrameResourceSignature.h"
 #include "EnvironmentBufferResource.h"
+#include "CubeMapBufferResource.h"
 #include "TextureBufferResource.h"
 #include "WireframeBufferResource.h"
 #include "PostProcessPropertyBufferResource.h"
@@ -22,6 +23,7 @@ PerFrameResourceSignature::PerFrameResourceSignature(Diligent::IDeviceContext& c
                                                      const StructuredBufferDesc& boneResourceDesc,
                                                      const StructuredBufferDesc& particleResourceDesc,
                                                      const StructuredBufferDesc& lightMatrixResourceDesc,
+                                                     const CubeMapBufferDesc& cubeMapResourceDesc,
                                                      const TextureBufferDesc& textureResourceDesc,
                                                      const UniformBufferDesc& environmentResourceDesc,
                                                      const UniformBufferDesc& wireframeResourceDesc)
@@ -35,6 +37,7 @@ PerFrameResourceSignature::PerFrameResourceSignature(Diligent::IDeviceContext& c
         ToPipelineResourceDesc(boneResourceDesc),
         ToPipelineResourceDesc(particleResourceDesc),
         ToPipelineResourceDesc(lightMatrixResourceDesc),
+        ToPipelineResourceDesc(cubeMapResourceDesc),
         ToPipelineResourceDesc(textureResourceDesc),
         ToPipelineResourceDesc(environmentResourceDesc),
         ToPipelineResourceDesc(wireframeResourceDesc),
@@ -120,6 +123,11 @@ PerFrameResourceSignature::PerFrameResourceSignature(Diligent::IDeviceContext& c
         device,
         GetVariable(lightMatrixResourceDesc, m_srb),
         lightMatrixResourceDesc
+    );
+
+    m_cubeMapResource = std::make_unique<CubeMapBufferResource>(
+        GetVariable(cubeMapResourceDesc, m_srb),
+        cubeMapResourceDesc.maxElementCount
     );
 
     m_textureResource = std::make_unique<TextureBufferResource>(

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "graphics2/frontend/subsystem/EnvironmentRenderState.h"
 #include "graphics2/frontend/subsystem/LightRenderState.h"
 #include "graphics2/frontend/subsystem/MeshRenderState.h"
 #include "graphics2/frontend/subsystem/particle/ParticleRenderState.h"
@@ -8,6 +9,7 @@
 #include "ParticlePass.h"
 #include "PassManifest.h"
 #include "PostProcessPass.h"
+#include "SkyboxPass.h"
 #include "WireframePass.h"
 
 #include "Graphics/GraphicsEngine/interface/DeviceContext.h"
@@ -51,6 +53,11 @@ class PassBackend
                               const std::vector<Batch>& skinnedBatches,
                               const std::span<const LightData>& lights);
 
+        void RenderSkybox(Diligent::IDeviceContext& context,
+                          Diligent::ISwapChain& swapChain,
+                          PerPassResourceSignature& perPassResourceSignature,
+                          const nc::graphics::EnvironmentRenderState& environmentRenderState);
+
         void RenderMaterial(Diligent::IDeviceContext& context,
                             Diligent::ISwapChain& swapChain,
                             PerPassResourceSignature& perPassResourceSignature,
@@ -86,6 +93,7 @@ class PassBackend
 
         std::vector<MaterialPass> m_staticMaterialPasses;
         std::vector<MaterialPass> m_skinnedMaterialPasses;
+        std::unique_ptr<SkyboxPass> m_skyboxPass;
         std::unique_ptr<WireframePass> m_wireframePass;
         std::unique_ptr<ParticlePass> m_particlePass;
         std::vector<PostProcessPass> m_postProcessPasses;

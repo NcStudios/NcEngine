@@ -39,6 +39,8 @@ cbuffer EnvironmentProperties
     uint lightCount;
     float nearClip;
     float farClip;
+    uint skyboxIndex;
+    uint useSkybox;
 };
 
 cbuffer SinkIndices

@@ -1,0 +1,39 @@
+
+TextureCube   Skyboxes[];
+SamplerState  Textures_sampler; // By convention, texture samplers must use the '_sampler' suffix
+
+cbuffer EnvironmentProperties
+{
+    float4x4 cameraViewProjection;
+    float4x4 cameraInvProjection;
+    float3 cameraPosition;
+    uint lightCount;
+    float nearClip;
+    float farClip;
+    uint skyboxIndex;
+    uint useSkybox;
+};
+
+struct PSInput
+{
+    float4 Pos           : SV_POSITION;
+    float3 UVW;
+};
+
+struct PSOutput
+{
+    float4 Color : SV_TARGET;
+};
+
+void main(in PSInput PSIn, out PSOutput PSOut)
+{
+    if (useSkybox == 1)
+    {
+        TextureCube skyboxTex = Skyboxes[skyboxIndex];
+        PSOut.Color = skyboxTex.Sample(Textures_sampler, PSIn.UVW);
+    }
+    else
+    {
+        PSOut.Color = float4(0.0f, 0.0f, 1.0f, 1.0f);
+    }
+}

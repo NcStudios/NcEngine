@@ -39,7 +39,10 @@ cbuffer EnvironmentProperties
     uint lightCount;
     float nearClip;
     float farClip;
+    uint skyboxIndex;
+    uint useSkybox;
 };
+
 void main(in  VSInput VSIn, uint InstanceID : SV_InstanceID,  out PSInput PSIn)
 {
     uint transformIndex = StaticInstances[InstanceID].transformIndex;

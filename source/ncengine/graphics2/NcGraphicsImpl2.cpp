@@ -162,6 +162,14 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
             std::vector<PassDesc>
             {
                 PassDesc{
+                    .flag = MiscPassFlag::Skybox,
+                    .name = "Skybox",
+                    .type = PassType::Skybox,
+                    .shaderPaths = ShaderPaths{"Skybox.psh", "Skybox.vsh"},
+                    .colorSink = ColorTarget::Main,
+                    .useDepthTest = false
+                },
+                PassDesc{
                     .flag = MaterialPassFlag::UniShadow,
                     .name = "UniShadow",
                     .type = PassType::Material,
@@ -223,7 +231,6 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .colorSink = ColorTarget::Main,
                     .depthSink = DepthTarget::Main,
                     .useDepthTest = true
-                    
                 },
                 PassDesc{
                     .flag = MaterialPassFlag::Toon,
@@ -320,6 +327,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
           m_frontend{
             m_engine.GetContext(),
             m_engine.GetDevice(),
+            m_shaderBindings.GetPerFrameSignature().GetCubeMapBuffer(),
             m_shaderBindings.GetPerFrameSignature().GetTextureBuffer(),
             m_shaderBindings.GetMeshBuffer(),
             m_world,
@@ -330,6 +338,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
             memorySettings.maxBones,
             memorySettings.maxParticles,
             graphicsSettings.initialBatchSize,
+            modules.Get<asset::NcAsset>()->OnCubeMapUpdate(),
             modules.Get<asset::NcAsset>()->OnTextureUpdate(),
             modules.Get<asset::NcAsset>()->OnMeshUpdate(),
             modules.Get<asset::NcAsset>()->OnSkeletalAnimationUpdate(),
@@ -368,7 +377,7 @@ bool NcGraphicsImpl2::IsUiHovered() const noexcept
 
 void NcGraphicsImpl2::SetSkybox(const std::string& path)
 {
-    (void)path;
+    m_frontend.GetEnvironmentSubsystem().SetSkybox(path);
 }
 
 void NcGraphicsImpl2::ClearEnvironment()
@@ -465,6 +474,13 @@ void NcGraphicsImpl2::Run()
     m_shaderBindings.GetPerFrameSignature().Commit(context);
     m_shaderBindings.GetPerPassSignature().Commit(context);
     m_shaderBindings.GetMeshBuffer().SetBuffers(context);
+
+    m_passBackend.RenderSkybox(
+        context,
+        swapChain,
+        m_shaderBindings.GetPerPassSignature(),
+        renderState.environmentRenderState
+    );
 
     m_passBackend.RenderMaterial(
         context,
