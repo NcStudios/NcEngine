@@ -220,14 +220,14 @@ TEST(ImageTest, ResizePadded_onDimensionTooSmall_resizesOneDimension)
 TEST(ImageTest, ResizePadded_invalidDimensions_resizes)
 {
     // 13x5 -> 16x8
-    constexpr auto inputWidth = 7;
-    constexpr auto inputHeight = 3;
+    constexpr auto inputWidth = 13;
+    constexpr auto inputHeight = 5;
     auto uut = nc::convert::Image{inputWidth, inputHeight, g_inputRGBA};
     uut.ResizePadded();
 
-    EXPECT_EQ(8, uut.GetWidth());
-    EXPECT_EQ(4, uut.GetHeight());
-    EXPECT_EQ(4 * 8 * 4, uut.GetSizeInBytes());
+    EXPECT_EQ(16, uut.GetWidth());
+    EXPECT_EQ(8, uut.GetHeight());
+    EXPECT_EQ(16 * 8 * 4, uut.GetSizeInBytes());
     const auto result = CheckPaddedImage(uut, inputWidth, inputHeight);
     EXPECT_TRUE(result) << result;
 }
