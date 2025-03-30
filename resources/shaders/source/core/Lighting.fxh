@@ -1,18 +1,3 @@
-struct LightData {
-    float3 diffuseColor;
-    int type; // 0: Directional, 1: Point, 2: Spot
-    float3 specularColor;
-    float radius;
-    float3 position;
-    float innerAngle;
-    float3 direction;
-    float outerAngle;
-    float intensity;
-    int castsShadows;
-    uint lightMatrixIndex;
-    uint padding;
-};
-
 struct LightInfluence
 {
     float3 diffuseColor;
@@ -20,11 +5,6 @@ struct LightInfluence
     float specularAmt;
     float diffuseAmt;
     float intensity;
-};
-
-struct LightMatrix
-{
-    float4x4 viewProjection;
 };
 
 float CalculateDiffuse(float3 L, float3 N)

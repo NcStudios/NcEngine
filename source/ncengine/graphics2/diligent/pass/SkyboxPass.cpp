@@ -13,7 +13,7 @@ using namespace Diligent;
 using namespace nc::graphics;
 
 auto CreatePipeline(Diligent::IRenderDevice& device,
-                    ShaderFactory& shaderFactory,
+                    const PipelineShaders& shaders,
                     ShaderBindings& shaderBindings,
                     const PassDesc& passDesc) -> Diligent::RefCntAutoPtr<Diligent::IPipelineState>
 {
@@ -24,10 +24,8 @@ auto CreatePipeline(Diligent::IRenderDevice& device,
     ci.PSODesc.Name = passDesc.name.data();
     ci.PSODesc.ResourceLayout.DefaultVariableType = SHADER_RESOURCE_VARIABLE_TYPE_STATIC;
 
-    RefCntAutoPtr<IShader> pixelShader = CreateShaderFromSourceIfInitialized(shaderFactory, SHADER_TYPE_PIXEL, passDesc.shaderPaths);
-    RefCntAutoPtr<IShader> vertexShader = CreateShaderFromSourceIfInitialized(shaderFactory, SHADER_TYPE_VERTEX, passDesc.shaderPaths);
-    ci.pPS = pixelShader;
-    ci.pVS = vertexShader;
+    ci.pPS = shaders.pixelShader;
+    ci.pVS = shaders.vertexShader;
 
     auto colorFormat = OffScreenColorRTFormat;
 
@@ -64,11 +62,11 @@ auto CreatePipeline(Diligent::IRenderDevice& device,
 namespace nc::graphics
 {
 SkyboxPass::SkyboxPass(Diligent::IRenderDevice& device,
-                           ShaderFactory& shaderFactory,
-                           ShaderBindings& shaderBindings,
-                           const PassManifest& passManifest,
-                           const PassDesc& passDesc)
-    : Pass{CreatePipeline(device, shaderFactory, shaderBindings, passDesc), GetSinks(passManifest, passDesc), GetSources(passManifest, passDesc)}
+                       const PipelineShaders& shaders,
+                       ShaderBindings& shaderBindings,
+                       const PassManifest& passManifest,
+                       const PassDesc& passDesc)
+    : Pass{CreatePipeline(device, shaders, shaderBindings, passDesc), GetSinks(passManifest, passDesc), GetSources(passManifest, passDesc)}
 {
 }
 

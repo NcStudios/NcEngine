@@ -1,4 +1,6 @@
-#include "Lighting.fxh"
+#include "core/PerFrameTypes.fxh"
+#include "core/PerPassTypes.fxh"
+#include "core/Lighting.fxh"
 
 struct VSInput
 {
@@ -14,48 +16,10 @@ struct PSInput
     float4 WorldPos;
 };
 
-struct TransformData
-{
-    float4x4 model;
-};
-
 StructuredBuffer<TransformData> Transforms;
 StructuredBuffer<LightData> Lights;
 StructuredBuffer<LightMatrix> LightMatrices;
-
-struct StaticMeshInstanceData
-{
-    uint transformIndex;
-    uint materialIndex;
-};
-
 StructuredBuffer<StaticMeshInstanceData> StaticInstances;
-
-cbuffer EnvironmentProperties
-{
-    float4x4 cameraViewProjection;
-    float4x4 cameraInvProjection;
-    float3 cameraPosition;
-    uint lightCount;
-    float nearClip;
-    float farClip;
-    uint skyboxIndex;
-    uint useSkybox;
-};
-
-cbuffer SinkIndices
-{
-    int colorRT1;
-    int colorRT2;
-    int colorRT3;
-    int colorRT4;
-    int depthRT1;
-    int depthRT2;
-    int depthRT3;
-    uint hasPostProcess;
-    uint lightIndex;
-    uint lightFaceIndex;
-};
 
 void main(in  VSInput VSIn, uint InstanceID : SV_InstanceID,  out PSInput PSIn)
 {

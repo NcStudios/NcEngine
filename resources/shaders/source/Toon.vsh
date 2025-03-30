@@ -1,3 +1,5 @@
+#include "core/PerFrameTypes.fxh"
+
 struct VSInput
 {
     // Vertex attributes
@@ -6,7 +8,7 @@ struct VSInput
     float2 UV          : ATTRIB2;
 };
 
-struct PSInput 
+struct PSInput
 {
     float4 Pos           : SV_POSITION;
     float3 Normal        : NORMAL;
@@ -16,32 +18,8 @@ struct PSInput
     float3 LocalPos;
 };
 
-struct TransformData
-{
-    float4x4 model;
-};
-
 StructuredBuffer<TransformData> Transforms;
-
-struct StaticMeshInstanceData
-{
-    uint transformIndex;
-    uint materialIndex;
-};
-
 StructuredBuffer<StaticMeshInstanceData> StaticInstances;
-
-cbuffer EnvironmentProperties
-{
-    float4x4 cameraViewProjection;
-    float4x4 cameraInvProjection;
-    float3 cameraPosition;
-    uint lightCount;
-    float nearClip;
-    float farClip;
-    uint skyboxIndex;
-    uint useSkybox;
-};
 
 void main(in  VSInput VSIn, uint InstanceID : SV_InstanceID,  out PSInput PSIn)
 {
@@ -50,7 +28,7 @@ void main(in  VSInput VSIn, uint InstanceID : SV_InstanceID,  out PSInput PSIn)
     float4 TransformedPos = mul(float4(VSIn.Pos, 1.0), Transforms[transformIndex].model);
     PSIn.Pos = mul(TransformedPos, cameraViewProjection);
     PSIn.UV  = VSIn.UV;
-    PSIn.Normal = normalize( mul(VSIn.Normal, Transforms[transformIndex].model));
+    PSIn.Normal = normalize( mul(float4(VSIn.Normal, 0.0), Transforms[transformIndex].model));
     PSIn.WorldPos = TransformedPos;
     PSIn.LocalPos = VSIn.Pos.xyz;
     PSIn.MaterialIndex = materialIndex;

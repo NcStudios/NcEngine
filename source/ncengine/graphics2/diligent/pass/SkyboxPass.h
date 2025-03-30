@@ -19,7 +19,7 @@ class ShaderFactory;
 struct SkyboxPass : public Pass
 {
     explicit SkyboxPass(Diligent::IRenderDevice& device,
-                        ShaderFactory& shaderFactory,
+                        const PipelineShaders& shaders,
                         ShaderBindings& shaderBindings,
                         const PassManifest& passManifest,
                         const PassDesc& passDesc);

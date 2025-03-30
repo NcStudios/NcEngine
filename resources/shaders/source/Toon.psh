@@ -1,51 +1,8 @@
-#ifdef VULKAN
-// NonUniformResourceIndex is not supported by GLSLang
-#   define NonUniformResourceIndex(x) x
-#endif
+#include "core/PerFrameTypes.fxh"
+#include "core/Lighting.fxh"
 
-#include "Lighting.fxh"
-
-Texture2D     UniShadowMapSinks[];
-TextureCube   PointShadowMapSinks[];
-Texture2D     Textures[];
-SamplerState  Textures_sampler; // By convention, texture samplers must use the '_sampler' suffix
-SamplerState  UniShadowMapSinks_sampler; // By convention, texture samplers must use the '_sampler' suffix
-SamplerState  PointShadowMapSinks_sampler; // By convention, texture samplers must use the '_sampler' suffix
-
-cbuffer EnvironmentProperties
+struct PSInput
 {
-    float4x4 cameraViewProjection;
-    float4x4 cameraInvProjection;
-    float3 cameraPosition;
-    uint lightCount;
-    float nearClip;
-    float farClip;
-    uint skyboxIndex;
-    uint useSkybox;
-};
-
-struct MaterialData
-{
-    float3 gradientStart;
-    uint diffuseTexIndex;
-    float3 gradientEnd;
-    uint normalTexIndex;
-    uint hatchTexIndex;
-    float normalIntensity;
-    float hatchTiling;
-    float gradientAmount;
-    float reflectivity;
-    uint useTextureNormals;
-    uint useFlatShading;
-    float padding1;
-};
-
-StructuredBuffer<MaterialData> Materials : register(t1);
-StructuredBuffer<LightData> Lights : register(t2);
-StructuredBuffer<LightMatrix> LightMatrices;
-
-struct PSInput 
-{ 
     float4 Pos           : SV_POSITION;
     float3 Normal        : NORMAL;
     float2 UV            : TEX_COORD; 
@@ -59,6 +16,17 @@ struct PSOutput
 {
     float4 Color : SV_TARGET;
 };
+
+Texture2D     UniShadowMapSinks[];
+TextureCube   PointShadowMapSinks[];
+Texture2D     Textures[];
+SamplerState  Textures_sampler; // By convention, texture samplers must use the '_sampler' suffix
+SamplerState  UniShadowMapSinks_sampler; // By convention, texture samplers must use the '_sampler' suffix
+SamplerState  PointShadowMapSinks_sampler; // By convention, texture samplers must use the '_sampler' suffix
+
+StructuredBuffer<MaterialData> Materials : register(t1);
+StructuredBuffer<LightData> Lights : register(t2);
+StructuredBuffer<LightMatrix> LightMatrices;
 
 const float Epsilon = 1e-10;
 

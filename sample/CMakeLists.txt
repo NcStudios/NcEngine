@@ -42,9 +42,8 @@ install(DIRECTORY      ${PROJECT_SOURCE_DIR}/sample/assets/font
 install(DIRECTORY   ${PROJECT_SOURCE_DIR}/resources/nca
         DESTINATION sample
 )
-install(DIRECTORY      ${PROJECT_SOURCE_DIR}/resources/shaders/
+install(DIRECTORY      ${PROJECT_SOURCE_DIR}/resources/shaders/compiled/
         DESTINATION    sample/nca/shaders
-        FILES_MATCHING REGEX ".*\.(fxh|psh|vsh)"
 )
 install(FILES       ${PROJECT_SOURCE_DIR}/sample/config.ini
         DESTINATION sample

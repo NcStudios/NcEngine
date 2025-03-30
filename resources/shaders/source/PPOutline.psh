@@ -1,34 +1,7 @@
 // Much credit given to: https://roystan.net/articles/outline-shader/
 
-Texture2D     ColorSinks[];
-Texture2D     DepthSinks[];
-SamplerState  ColorSinks_sampler; // By convention, texture samplers must use the '_sampler' suffix
-
-cbuffer EnvironmentProperties
-{
-    float4x4 cameraViewProjection;
-    float4x4 cameraInvProjection;
-    float3 cameraPosition;
-    uint lightCount;
-    float nearClip;
-    float farClip;
-    uint skyboxIndex;
-    uint useSkybox;
-};
-
-cbuffer SinkIndices
-{
-    int colorRT1;
-    int colorRT2;
-    int colorRT3;
-    int colorRT4;
-    int depthRT1;
-    int depthRT2;
-    int depthRT3;
-    uint hasPostProcess;
-    uint lightIndex;
-    uint lightFaceIndex;
-};
+#include "core/PerFrameTypes.fxh"
+#include "core/PerPassTypes.fxh"
 
 cbuffer PostProcessProperties
 {
@@ -39,8 +12,8 @@ cbuffer PostProcessProperties
     float normalsThreshold;
 };
 
-struct PSInput 
-{ 
+struct PSInput
+{
     float4 Pos : SV_POSITION;
     float2 UV  : TEX_COORD; 
 };
@@ -49,6 +22,10 @@ struct PSOutput
 {
     float4 Color : SV_TARGET;
 };
+
+Texture2D     ColorSinks[];
+Texture2D     DepthSinks[];
+SamplerState  ColorSinks_sampler; // By convention, texture samplers must use the '_sampler' suffix
 
 // Depth is non-linear. Linearize it and normalize it.
 float SampleNormalizeDepth(Texture2D tex, SamplerState smplr, float2 uv)

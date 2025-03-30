@@ -20,6 +20,9 @@ build/
 install/
 scratch/
 
+#debug shaders
+resources/shaders/compiled/debug/
+
 #gprof analysis
 analysis.txt
 
