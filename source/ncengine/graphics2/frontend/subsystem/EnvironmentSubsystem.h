@@ -16,6 +16,11 @@ class EnvironmentSubsystem
             m_skyboxIndex = asset::AssetService<asset::CubeMapView>::Get()->Acquire(skyboxPath).index;
         };
 
+        void ClearSkybox()
+        {
+            m_useSkybox = false;
+        };
+
         auto BuildState() -> EnvironmentRenderState { return EnvironmentRenderState{.skyboxIndex = m_skyboxIndex, .useSkybox = static_cast<uint32_t>(m_useSkybox)};};
 
     private:

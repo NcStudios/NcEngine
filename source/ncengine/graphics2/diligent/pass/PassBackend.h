@@ -89,7 +89,6 @@ class PassBackend
                               ShaderFactory& shaderFactory,
                               ShaderBindings& shaderBindings,
                               const PassManifest& passManifest);
-        
 
         std::vector<MaterialPass> m_staticMaterialPasses;
         std::vector<MaterialPass> m_skinnedMaterialPasses;

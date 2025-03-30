@@ -167,7 +167,8 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .type = PassType::Skybox,
                     .shaderPaths = ShaderPaths{"Skybox.psh", "Skybox.vsh"},
                     .colorSink = ColorTarget::Main,
-                    .useDepthTest = false
+                    .depthSink = DepthTarget::Main,
+                    .useDepthTest = true
                 },
                 PassDesc{
                     .flag = MaterialPassFlag::UniShadow,
@@ -382,6 +383,7 @@ void NcGraphicsImpl2::SetSkybox(const std::string& path)
 
 void NcGraphicsImpl2::ClearEnvironment()
 {
+    m_frontend.GetEnvironmentSubsystem().ClearSkybox();
 }
 
 auto NcGraphicsImpl2::IsPostProcessEffectEnabled(PostProcessEffectId effectId) const -> bool
@@ -410,6 +412,7 @@ void NcGraphicsImpl2::SetPostProcessEffectProperties(PostProcessEffectId effectI
 void NcGraphicsImpl2::OnBeforeSceneLoad()
 {
     m_frontend.OnBeforeSceneLoad();
+    ClearEnvironment();
 }
 
 void NcGraphicsImpl2::Clear() noexcept
@@ -475,13 +478,6 @@ void NcGraphicsImpl2::Run()
     m_shaderBindings.GetPerPassSignature().Commit(context);
     m_shaderBindings.GetMeshBuffer().SetBuffers(context);
 
-    m_passBackend.RenderSkybox(
-        context,
-        swapChain,
-        m_shaderBindings.GetPerPassSignature(),
-        renderState.environmentRenderState
-    );
-
     m_passBackend.RenderMaterial(
         context,
         swapChain,
@@ -489,6 +485,13 @@ void NcGraphicsImpl2::Run()
         renderState.meshRenderState.staticMeshBatches,
         renderState.meshRenderState.skinnedMeshBatches,
         renderState.lightRenderState.lights
+    );
+
+    m_passBackend.RenderSkybox(
+        context,
+        swapChain,
+        m_shaderBindings.GetPerPassSignature(),
+        renderState.environmentRenderState
     );
 
     m_passBackend.RenderWireframe(

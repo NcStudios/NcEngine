@@ -35,5 +35,5 @@ void main(in  VSInput VSIn, uint InstanceID : SV_InstanceID,  out PSInput PSIn)
 {
     float4 TransformedPos = mul(float4(VSIn.Pos, 1.0), modelMatrix);
     PSIn.Pos = mul(TransformedPos, cameraViewProjection);
-    PSIn.UVW  = PSIn.Pos.xyz;
+    PSIn.UVW  = VSIn.Pos;
 }

@@ -54,15 +54,23 @@ void CubeMapBufferResource::Load(std::span<const asset::CubeMapWithId> cubeMaps,
     barriers.reserve(cubeMapCount);
     m_cubeMaps.reserve(m_cubeMaps.size() + cubeMapCount);
     m_shaderResourceViews.reserve(m_shaderResourceViews.size() + cubeMapCount);
-    // m_renderTargetViews.reserve(m_renderTargetViews.size() + cubeMapCount * 6);
 
     for (const auto& [cubeMap, id] : cubeMaps)
     {
-        auto faceSubResources = std::vector<Diligent::TextureSubResData>{6};
-        for (auto& face : faceSubResources)
+        // Assuming cubeMap.pixelData contains data for all 6 faces in order: +X, -X, +Y, -Y, +Z, -Z
+        auto faceSubResources = std::vector<Diligent::TextureSubResData>(6);
+        const uint32_t faceSizeInBytes = cubeMap.faceSideLength * cubeMap.faceSideLength * 4; // Assuming RGBA format
+        
+        for (uint32_t face = 0; face < 6; ++face)
         {
-            face = TextureSubResData{cubeMap.pixelData.data(), cubeMap.faceSideLength * 4u};
+            // Offset the data pointer for each face
+            const void* faceData = static_cast<const uint8_t*>(cubeMap.pixelData.data()) + (face * faceSizeInBytes);
+            faceSubResources[face] = TextureSubResData{
+                faceData,
+                cubeMap.faceSideLength * 4u // Stride per row
+            };
         }
+
         auto texData = TextureData{faceSubResources.data(), 6, &context};
         auto desc = ToTextureCubeDesc(cubeMap);
         auto& cubeMapTextureHandle = m_cubeMaps.emplace_back();
