@@ -4,6 +4,8 @@
  */
 #pragma once
 
+#include <cstdint>
+
 namespace nc::asset
 {
 struct AudioClip;
@@ -17,6 +19,7 @@ struct SkeletalAnimation;
 struct Texture;
 struct TextureSubResource;
 
-enum class TextureFormat : int;
-enum class CompressionQuality : int;
+enum class AssetType : int;
+enum class AssetSubtype : uint8_t;
+enum class TextureFormat : uint8_t;
 } // namespace nc::asset

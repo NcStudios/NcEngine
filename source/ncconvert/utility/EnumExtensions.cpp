@@ -4,6 +4,7 @@
 #include "ncutility/NcError.h"
 
 #include <algorithm>
+#include <utility>
 
 namespace nc::convert
 {
@@ -57,7 +58,43 @@ auto ToString(asset::AssetType type) -> std::string
     }
 
     throw NcError(
-        fmt::format("Unknown AssetType: {}", static_cast<int>(type))
+        fmt::format("Unknown AssetType: {}", std::to_underlying(type))
     );
+}
+
+auto IsCompressedTextureFormat(asset::TextureFormat format) -> bool
+{
+    using enum asset::TextureFormat;
+    switch (format)
+    {
+        case RGBA8_UNORM_SRGB: [[fallthrough]];
+        case RGBA8_UNORM:      return false;
+        case BC1_UNORM_SRGB:   [[fallthrough]];
+        case BC1_UNORM:        [[fallthrough]];
+        case BC3_UNORM_SRGB:   [[fallthrough]];
+        case BC3_UNORM:        return true;
+    }
+
+    throw NcError{
+        fmt::format("Unknown TextureFormat: {}", std::to_underlying(format))
+    };
+}
+
+auto TextureFormatHasAlpha(asset::TextureFormat format) -> bool
+{
+    using enum asset::TextureFormat;
+    switch (format)
+    {
+        case RGBA8_UNORM_SRGB: [[fallthrough]];
+        case RGBA8_UNORM:      [[fallthrough]];
+        case BC3_UNORM_SRGB:   [[fallthrough]];
+        case BC3_UNORM:        return true;
+        case BC1_UNORM_SRGB:   [[fallthrough]];
+        case BC1_UNORM:        return false;
+    }
+
+    throw NcError{
+        fmt::format("Unknown TextureFormat: {}", std::to_underlying(format))
+    };
 }
 } // namespace nc::convert

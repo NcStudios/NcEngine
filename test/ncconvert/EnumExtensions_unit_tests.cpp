@@ -34,3 +34,23 @@ TEST(EnumExtensionsTest, ToString_badAssetType_throws)
 {
     EXPECT_THROW(nc::convert::ToString(static_cast<nc::asset::AssetType>(999)), nc::NcError);
 }
+
+TEST(EnumExtensionsTest, IsCompressedTextureFormat_returnsExpectedValue)
+{
+    EXPECT_FALSE(nc::convert::IsCompressedTextureFormat(nc::asset::TextureFormat::RGBA8_UNORM_SRGB));
+    EXPECT_FALSE(nc::convert::IsCompressedTextureFormat(nc::asset::TextureFormat::RGBA8_UNORM_SRGB));
+    EXPECT_TRUE(nc::convert::IsCompressedTextureFormat(nc::asset::TextureFormat::BC1_UNORM_SRGB));
+    EXPECT_TRUE(nc::convert::IsCompressedTextureFormat(nc::asset::TextureFormat::BC1_UNORM));
+    EXPECT_TRUE(nc::convert::IsCompressedTextureFormat(nc::asset::TextureFormat::BC3_UNORM_SRGB));
+    EXPECT_TRUE(nc::convert::IsCompressedTextureFormat(nc::asset::TextureFormat::BC3_UNORM));
+}
+
+TEST(EnumExtensionsTest, TextureFormatHasAlpha_returnsExpectedValue)
+{
+    EXPECT_TRUE(nc::convert::TextureFormatHasAlpha(nc::asset::TextureFormat::RGBA8_UNORM_SRGB));
+    EXPECT_TRUE(nc::convert::TextureFormatHasAlpha(nc::asset::TextureFormat::RGBA8_UNORM_SRGB));
+    EXPECT_FALSE(nc::convert::TextureFormatHasAlpha(nc::asset::TextureFormat::BC1_UNORM_SRGB));
+    EXPECT_FALSE(nc::convert::TextureFormatHasAlpha(nc::asset::TextureFormat::BC1_UNORM));
+    EXPECT_TRUE(nc::convert::TextureFormatHasAlpha(nc::asset::TextureFormat::BC3_UNORM_SRGB));
+    EXPECT_TRUE(nc::convert::TextureFormatHasAlpha(nc::asset::TextureFormat::BC3_UNORM));
+}

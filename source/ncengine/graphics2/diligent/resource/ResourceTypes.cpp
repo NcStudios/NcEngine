@@ -145,8 +145,8 @@ void InitializeArray(Diligent::IDeviceContext& context, Diligent::IRenderDevice&
     {
         asset::Texture
         {
-            .width = 4u,
-            .height = 4u,
+            .width = 1u,
+            .height = 1u,
             .pixelData = std::vector<unsigned char>{0x1A, 0x2A, 0x3A, 0x4A}
         },
         1,
