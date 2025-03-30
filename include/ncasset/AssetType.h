@@ -33,9 +33,13 @@ enum class AssetSubtype : uint8_t
 /**
  * @brief Texture formats
  * 
- * Compressed formats require input images to be at least 4x4 and have dimensions that are powers of two. This
- * is enforced via resizing in the converter. BC1 is ideal for fully opaque images, while BC3 encodes alpha via
- * interpolation.
+ * Formats:
+ * - RGBA8: Uncompressed signed-normalized-integer format with 8 bit channels.
+ * - BC1:   RGB data compressing 4x4 blocks in 8 bytes. Ideal for typical color images with full opacity.
+ * - BC3:   RGBA data compressing 4x4 blocks into 16 bytes. Ideal for color images with alpha.
+ * 
+ * BCn formats require input image dimension to be powers of two and be at least 4x4. This is enforced at conversion
+ * time by padding the image.
  */
 enum class TextureFormat : uint8_t
 {
@@ -46,5 +50,4 @@ enum class TextureFormat : uint8_t
     BC3_UNORM_SRGB,   ///< 32-bit unorm sRGB compressed with BC3 (DXT5)
     BC3_UNORM         ///< 32-bit unorm compressed with BC3 (DXT5)
 };
-
 } // namespace nc::asset

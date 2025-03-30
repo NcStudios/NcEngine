@@ -11,6 +11,8 @@
 #include "stb/stb_image.h"
 #include "stb/stb_image_resize2.h"
 
+#include <utility>
+
 namespace
 {
 auto ToVector(const nc::convert::RawImage& image, uint32_t numBytes) -> std::vector<unsigned char>
@@ -104,7 +106,6 @@ auto Image::Compress(asset::TextureFormat format) const -> asset::TextureSubReso
         )
     );
 
-    // TODO: is DXT1 8 bytes?...
     constexpr auto blockSize = 16;
     const auto useAlpha = TextureFormatHasAlpha(format);
     const auto numBlocks = (m_width / 4) * (m_height / 4);
