@@ -4,7 +4,7 @@
 param
 (
 [Parameter(Mandatory=$false)]
-[string]$InputDir = "" + $(get-location).Path + "\resources\shaders",
+[string]$InputDir = "" + $(get-location).Path + "\resources\shaders\source",
 
 [Parameter(Mandatory=$false)]
 [string]$OutputDir = "" + $(get-location).Path + "\resources\shaders\compiled",

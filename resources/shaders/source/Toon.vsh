@@ -1,3 +1,5 @@
+#include "core/PerFrameTypes.fxh"
+
 struct VSInput
 {
     // Vertex attributes
@@ -6,7 +8,7 @@ struct VSInput
     float2 UV          : ATTRIB2;
 };
 
-struct PSInput 
+struct PSInput
 {
     float4 Pos           : SV_POSITION;
     float3 Normal        : NORMAL;
@@ -16,30 +18,9 @@ struct PSInput
     float3 LocalPos;
 };
 
-struct TransformData
-{
-    float4x4 model;
-};
-
 StructuredBuffer<TransformData> Transforms;
-
-struct StaticMeshInstanceData
-{
-    uint transformIndex;
-    uint materialIndex;
-};
-
 StructuredBuffer<StaticMeshInstanceData> StaticInstances;
 
-cbuffer EnvironmentProperties
-{
-    float4x4 cameraViewProjection;
-    float4x4 cameraInvProjection;
-    float3 cameraPosition;
-    uint lightCount;
-    float nearClip;
-    float farClip;
-};
 void main(in  VSInput VSIn, uint InstanceID : SV_InstanceID,  out PSInput PSIn)
 {
     uint transformIndex = StaticInstances[InstanceID].transformIndex;
