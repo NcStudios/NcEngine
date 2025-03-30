@@ -87,6 +87,7 @@ class GraphicsFrontend
         }
 
         auto GetCameraSubsystem()                  ->       CameraSubsystem&            { return m_cameraSystem;      }
+        auto GetEnvironmentSubsystem()       const -> const EnvironmentSubsystem&       { return m_environmentSystem; }
         auto GetEnvironmentSubsystem()             ->       EnvironmentSubsystem&       { return m_environmentSystem; }
         auto GetMeshSubsystem()                    ->       MeshSubsystem&              { return m_meshSystem;        }
         auto GetMaterialRegistry()                 ->       MaterialRegistry&           { return m_materialRegistry;  }

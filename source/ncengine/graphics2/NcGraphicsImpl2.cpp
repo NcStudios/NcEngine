@@ -48,6 +48,7 @@ struct NcGraphicsStub2 : nc::NcGraphics
     void SetUi(nc::ui::IUI*) noexcept override {}
     bool IsUiHovered() const noexcept override { return false; }
     void SetSkybox(const std::string&) override {}
+    auto GetSkybox() const -> nc::asset::AssetId override { return nc::asset::NullAssetId; }
     void ClearEnvironment() override {}
     auto IsPostProcessEffectEnabled(nc::PostProcessEffectId) const -> bool override { return false; }
     void SetPostProcessEffectEnabled(nc::PostProcessEffectId, bool) override {}
@@ -379,6 +380,11 @@ bool NcGraphicsImpl2::IsUiHovered() const noexcept
 void NcGraphicsImpl2::SetSkybox(const std::string& path)
 {
     m_frontend.GetEnvironmentSubsystem().SetSkybox(path);
+}
+
+auto NcGraphicsImpl2::GetSkybox() const -> nc::asset::AssetId
+{
+    return m_frontend.GetEnvironmentSubsystem().GetSkybox();
 }
 
 void NcGraphicsImpl2::ClearEnvironment()
