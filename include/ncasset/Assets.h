@@ -122,6 +122,13 @@ struct SkeletalAnimation
     std::unordered_map<std::string, SkeletalAnimationFrames> framesPerBone;
 };
 
+struct TextureSubResource
+{
+    uint32_t width = 0u;
+    uint32_t height = 0u;
+    std::vector<unsigned char> pixelData = {};
+};
+
 struct Texture
 {
     static constexpr uint32_t numChannels = 4u;
