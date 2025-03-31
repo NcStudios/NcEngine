@@ -73,6 +73,7 @@ auto IsCompressedTextureFormat(asset::TextureFormat format) -> bool
         case BC1_UNORM:        [[fallthrough]];
         case BC3_UNORM_SRGB:   [[fallthrough]];
         case BC3_UNORM:        return true;
+        case UNKNOWN:          break;
     }
 
     throw NcError{
