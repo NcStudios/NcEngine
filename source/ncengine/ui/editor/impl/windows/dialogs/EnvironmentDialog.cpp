@@ -12,16 +12,17 @@
 
 namespace
 {
-void DrawEnvironmentInfo(nc::NcGraphics* ncGraphics,
-                         nc::asset::NcAsset* ncAsset)
+void DrawEnvironmentInfo(nc::NcGraphics* ncGraphics, nc::asset::NcAsset* ncAsset)
 {
     ImGui::Separator();
     ImGui::Text("Skybox");
     ImGui::Separator();
 
     static constexpr auto assetType = nc::asset::AssetType::CubeMap;
-    const auto cubeMapAssets = nc::ui::editor::GetLoadedAssets(assetType);
-    auto modified = false;
+    auto cubeMapAssets = nc::ui::editor::GetLoadedAssets(assetType);
+
+    static const std::string noneOption = "none";
+    cubeMapAssets.insert(cubeMapAssets.begin(), noneOption); 
 
     auto skyboxId = ncGraphics->GetSkybox();
     auto skyboxPath = std::string();
@@ -32,18 +33,25 @@ void DrawEnvironmentInfo(nc::NcGraphics* ncGraphics,
     }
     else
     {
-        skyboxPath = std::string{nc::asset::DefaultSkyboxCubeMap};
+        skyboxPath = noneOption;
     }
 
     if (nc::ui::Combobox(skyboxPath, "skybox", cubeMapAssets))
     {
-        auto newSkybox = nc::asset::AssetService<nc::asset::CubeMapView>::Get()->Acquire(skyboxPath);
-        if (newSkybox.id != skyboxId)
+        if (skyboxPath == noneOption)
         {
-            modified = true;
-            ncGraphics->SetSkybox(skyboxPath);
+            ncGraphics->ClearEnvironment();
         }
-    }
+        else
+        {
+            auto newSkybox = nc::asset::AssetService<nc::asset::CubeMapView>::Get()->Acquire(skyboxPath);
+            if (newSkybox.id != skyboxId)
+            {
+                ncGraphics->SetSkybox(skyboxPath);
+            }
+        }
+    }   
+
     ImGui::Separator();
 }
 } // anonymous namespace
