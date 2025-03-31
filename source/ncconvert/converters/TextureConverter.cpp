@@ -70,7 +70,7 @@ auto TextureConverter::ImportTexture(const std::filesystem::path& path) -> asset
     auto image = Image{path};
     auto subresource = image.MakeTextureSubResource();
     auto texture = asset::Texture{
-        .format = asset::TextureFormat::UNKNOWN,
+        .format = asset::TextureFormat::RGBA8_UNORM_SRGB,
         .width = subresource.width,
         .height = subresource.height,
         .pixelData = std::move(subresource.pixelData),
