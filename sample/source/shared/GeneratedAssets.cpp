@@ -58,7 +58,6 @@ namespace cube_map
 const auto g_paths = std::array{
     std::string{path::default_skybox},
     std::string{path::night_sky},
-    std::string{path::cross},
 };
 
 void Load()

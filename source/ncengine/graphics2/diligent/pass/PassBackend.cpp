@@ -1,4 +1,5 @@
 #include "PassBackend.h"
+#include "asset/AssetService.h"
 #include "PassUtilities.h"
 #include "graphics2/ShaderTypes.h"
 #include "graphics2/diligent/resource/PerPassResourceSignature.h"
@@ -11,8 +12,6 @@
 #include "graphics2/frontend/subsystem/PostProcessState.h"
 #include "ncengine/config/Config.h"
 #include "ncengine/debug/Profile.h"
-
-#include "asset/AssetService.h"
 
 #include "ncasset/DefaultAssets.h"
 #include "ncutility/NcError.h"
@@ -278,11 +277,10 @@ void PassBackend::RenderSkybox(Diligent::IDeviceContext& context,
         return;
     }
 
-    // We need to transition resource state manually for the color target here.
+    // We need to transition resource state manually for the color and depth target here.
     auto* colorTargetTexture = perPassResourceSignature.GetColorSinksResource().GetTexture(m_skyboxPass->sinks.color);
     auto* depthTargetTexture = perPassResourceSignature.GetDepthSinksResource().GetTexture(m_skyboxPass->sinks.depth);
 
-    auto state = colorTargetTexture->GetState();
     auto barriers = std::vector<Diligent::StateTransitionDesc>();
     barriers.reserve(2);
     barriers.emplace_back(
@@ -299,19 +297,16 @@ void PassBackend::RenderSkybox(Diligent::IDeviceContext& context,
     );
     context.TransitionResourceStates(static_cast<uint32_t>(barriers.size()), barriers.data());
 
-    state = colorTargetTexture->GetState();
-
     colorTargetTexture->SetState(Diligent::RESOURCE_STATE_UNKNOWN); // Disables automatic resource state management for just this texture.
     depthTargetTexture->SetState(Diligent::RESOURCE_STATE_UNKNOWN); // Disables automatic resource state management for just this texture.
 
     m_finalColorTarget = m_skyboxPass->sinks.color;
     BindRenderTarget(context, swapChain, perPassResourceSignature, m_skyboxPass->sinks.color, m_skyboxPass->sinks.depth, false);
-    // ClearRenderTarget(context, swapChain, perPassResourceSignature, m_skyboxPass->sinks.color, m_skyboxPass->sinks.depth, false);
     context.SetPipelineState(m_skyboxPass->pso);
 
     perPassResourceSignature.Commit(context);
     colorTargetTexture->SetState(Diligent::RESOURCE_STATE_RENDER_TARGET); // Enables automatic resource state management for just this texture.
-    depthTargetTexture->SetState(Diligent::RESOURCE_STATE_DEPTH_WRITE); // Disables automatic resource state management for just this texture.
+    depthTargetTexture->SetState(Diligent::RESOURCE_STATE_DEPTH_WRITE); // Enables automatic resource state management for just this texture.
 
     const auto meshAccessor = asset::AssetService<asset::MeshView>::Get()->Acquire(nc::asset::SkyboxMesh);
     const auto attribs = DrawIndexedAttribs{
@@ -324,9 +319,7 @@ void PassBackend::RenderSkybox(Diligent::IDeviceContext& context,
         0
     };
 
-    state = colorTargetTexture->GetState();
     context.DrawIndexed(attribs);
-    state = colorTargetTexture->GetState();
 }
 
 void PassBackend::RenderMaterial(IDeviceContext& context,

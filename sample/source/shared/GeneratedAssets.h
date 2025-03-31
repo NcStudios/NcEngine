@@ -43,7 +43,6 @@ namespace path
 {
 constexpr auto default_skybox = "default/skybox.nca";
 constexpr auto night_sky = "night_sky.nca";
-constexpr auto cross = "cross.nca";
 } // namespace path
 
 void Load();

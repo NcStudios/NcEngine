@@ -22,10 +22,6 @@
         {
             "sourcePath": "raw/image/cube_maps/night_sky.png",
             "assetName": "cube_map/night_sky.nca"
-        },
-        {
-            "sourcePath": "raw/image/cube_maps/cross.png",
-            "assetName": "cube_map/cross.nca"
         }
     ],
     "mesh": [

@@ -24,7 +24,6 @@ class EnvironmentSubsystem
             m_skyboxId = nc::asset::NullAssetId;
         };
 
-        auto UseSkybox() const -> bool { return m_useSkybox; }
         auto GetSkybox() const -> nc::asset::AssetId { return m_skyboxId; }
         auto BuildState() -> EnvironmentRenderState { return EnvironmentRenderState{.skyboxIndex = m_skyboxIndex, .useSkybox = static_cast<uint32_t>(m_useSkybox)};};
 
