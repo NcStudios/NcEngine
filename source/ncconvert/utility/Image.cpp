@@ -26,6 +26,21 @@ auto GetPaddedDimension(int dimension) -> int
 {
     return (dimension + 3) & ~3;
 }
+
+auto GetBlockSizeInBytes(nc::asset::TextureFormat format) -> uint32_t
+{
+    using enum nc::asset::TextureFormat;
+    switch (format)
+    {
+        case BC1_UNORM_SRGB: [[fallthrough]];
+        case BC1_UNORM:      return 8u;
+        case BC3_UNORM_SRGB: [[fallthrough]];
+        case BC3_UNORM:      return 16u;
+        default:
+            NC_ASSERT(false, "Uncompressed format provided");
+            std::unreachable();
+    }
+}
 } // anonymous namespace
 
 namespace nc::convert
@@ -106,32 +121,33 @@ auto Image::Compress(asset::TextureFormat format) const -> asset::TextureSubReso
         )
     );
 
-    constexpr auto blockSize = 16;
+    constexpr auto blockSideLen = 4;
+    constexpr auto pixelsPerBlock = blockSideLen * blockSideLen;
+    constexpr auto rowStride = blockSideLen * numChannels;
+    const auto numBlocksX = m_width / blockSideLen;
+    const auto numBlocksY = m_height / blockSideLen;
+    const auto numBlocks = numBlocksX * numBlocksY;
     const auto useAlpha = TextureFormatHasAlpha(format);
-    const auto numBlocks = (m_width / 4) * (m_height / 4);
-    auto compressedData = std::vector<unsigned char>(numBlocks * blockSize);
-    unsigned char block[blockSize * 4];
+    const auto compressedBlockSize = GetBlockSizeInBytes(format);
+    auto compressedData = std::vector<unsigned char>(numBlocks * compressedBlockSize);
+    unsigned char block[pixelsPerBlock * numChannels];
 
     // compress in 4x4 RGBA blocks
     const auto src = m_data.get();
-    for (auto y = 0; y < m_height; y += 4)
+    for (auto blockRow = 0; blockRow < m_height; blockRow += blockSideLen)
     {
-        for (auto x = 0; x < m_width; x += 4)
+        for (auto blockCol = 0; blockCol < m_width; blockCol += blockSideLen)
         {
-            for (auto j = 0; j < 4; ++j)
+            for (auto row = 0; row < blockSideLen; ++row)
             {
-                for (auto i = 0; i < 4; ++i)
-                {
-                    const auto srcX = x + i;
-                    const auto srcY = y + j;
-                    const auto srcIndex = (srcY * m_width + srcX) * 4;
-                    const auto dstIndex = (j * 4 + i) * 4;
-                    std::memcpy(block + dstIndex, src + srcIndex, 4);
-                }
+                const auto srcIndex = ((blockRow + row) * m_width + blockCol) * numChannels;
+                const auto blockIndex = row * rowStride;
+                std::memcpy(block + blockIndex, src + srcIndex, rowStride);
             }
 
-            const auto blockIndex = ((y / 4) * (m_width / 4) + (x / 4)) * blockSize;
-            stb_compress_dxt_block(&compressedData[blockIndex], block, useAlpha, STB_DXT_HIGHQUAL);
+            const auto blockIndex = (blockRow / blockSideLen) * numBlocksX + (blockCol / blockSideLen);
+            const auto compressedBlockIndex = blockIndex * compressedBlockSize;
+            stb_compress_dxt_block(&compressedData[compressedBlockIndex], block, useAlpha, STB_DXT_HIGHQUAL);
         }
     }
 
