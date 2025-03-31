@@ -74,7 +74,7 @@ endif()
 
 FetchContent_Declare(optick
                      GIT_REPOSITORY https://github.com/NcStudios/optick.git
-                     GIT_TAG        v1.3.0+nc.1
+                     GIT_TAG        v1.3.0+nc.2
                      GIT_SHALLOW    TRUE
 )
 
