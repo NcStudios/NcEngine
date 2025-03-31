@@ -59,8 +59,8 @@ set(TF_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(TF_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 
 FetchContent_Declare(taskflow
-                     GIT_REPOSITORY https://github.com/taskflow/taskflow.git
-                     GIT_TAG        v3.6.0
+                     GIT_REPOSITORY https://github.com/NcStudios/taskflow.git
+                     GIT_TAG        v3.9.0+nc.1
                      GIT_SHALLOW    TRUE
 )
 
@@ -74,7 +74,7 @@ endif()
 
 FetchContent_Declare(optick
                      GIT_REPOSITORY https://github.com/NcStudios/optick.git
-                     GIT_TAG        v1.3.0+nc.1
+                     GIT_TAG        v1.3.0+nc.2
                      GIT_SHALLOW    TRUE
 )
 
