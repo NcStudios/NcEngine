@@ -309,6 +309,9 @@ TEST(AssetSerializationTest, Mesh_noBones_roundTrip_succeeds)
 
 TEST(AssetSerializationTest, Texture_roundTrip_succeeds)
 {
+    // TODO: update w/ subresources
+
+
     constexpr auto version = nc::asset::currentVersion;
     const auto expectedAsset = nc::asset::Texture{
         .width = 2, .height = 2,

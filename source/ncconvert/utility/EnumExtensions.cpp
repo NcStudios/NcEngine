@@ -97,4 +97,41 @@ auto TextureFormatHasAlpha(asset::TextureFormat format) -> bool
         fmt::format("Unknown TextureFormat: {}", std::to_underlying(format))
     };
 }
+
+auto GetMinimumDimension(asset::TextureFormat format) -> uint32_t
+{
+    using enum asset::TextureFormat;
+    switch (format)
+    {
+        case RGBA8_UNORM_SRGB: [[fallthrough]];
+        case RGBA8_UNORM:      return 1u;
+        case BC3_UNORM_SRGB:   [[fallthrough]];
+        case BC3_UNORM:        [[fallthrough]];
+        case BC1_UNORM_SRGB:   [[fallthrough]];
+        case BC1_UNORM:        return 4u;
+    }
+
+    throw NcError{
+        fmt::format("Unknown TextureFormat: {}", std::to_underlying(format))
+    };
+}
+
+auto ToString(asset::TextureFormat format) -> std::string_view
+{
+    using enum asset::TextureFormat;
+    switch (format)
+    {
+        case UNKNOWN:          return "UNKNOWN";
+        case RGBA8_UNORM_SRGB: return "RGBA8_UNORM_SRGB";
+        case RGBA8_UNORM:      return "RGBA8_UNORM";
+        case BC1_UNORM_SRGB:   return "BC1_UNORM_SRGB";
+        case BC1_UNORM:        return "BC1_UNORM";
+        case BC3_UNORM_SRGB:   return "BC3_UNORM_SRGB";
+        case BC3_UNORM:        return "BC3_UNORM";
+    }
+
+    throw NcError{
+        fmt::format("Unknown TextureFormat: {}", std::to_underlying(format))
+    };
+}
 } // namespace nc::convert

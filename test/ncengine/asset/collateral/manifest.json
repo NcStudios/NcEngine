@@ -80,18 +80,22 @@
             ]
         }
     ],
-    "texture": [
-        {
-            "sourcePath": "texture_base.png",
-            "assetName": "texture_base"
-        },
-        {
-            "sourcePath": "texture_normal.png",
-            "assetName": "texture_normal"
-        },
-        {
-            "sourcePath": "texture_roughness.png",
-            "assetName": "texture_roughness"
-        }
-    ]
+    "texture": {
+        "diffuse" : [
+            {
+                "sourcePath": "texture_base.png",
+                "assetName": "texture_base"
+            },
+            {
+                "sourcePath": "texture_roughness.png",
+                "assetName": "texture_roughness"
+            }
+        ],
+        "normal" : [
+            {
+                "sourcePath": "texture_normal.png",
+                "assetName": "texture_normal"
+            }
+        ]
+    }
 }

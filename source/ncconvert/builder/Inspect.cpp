@@ -57,8 +57,10 @@ R"(Data
 
 constexpr auto textureTemplate =
 R"(Data
+  format {}
   width  {}
-  height {})";
+  height {}
+  mips   {})";
 
 } // anonymous namespace
 
@@ -131,7 +133,7 @@ void Inspect(const std::filesystem::path& ncaPath)
         case asset::AssetType::Texture:
         {
             const auto asset = asset::ImportTexture(ncaPath);
-            LOG(textureTemplate, asset.width, asset.height);
+            LOG(textureTemplate, ToString(asset.format), asset.width, asset.height, 1 + asset.mipmaps.size());
             break;
         }
         case asset::AssetType::Font:
