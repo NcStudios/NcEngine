@@ -60,7 +60,7 @@ set(TF_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 
 FetchContent_Declare(taskflow
                      GIT_REPOSITORY https://github.com/taskflow/taskflow.git
-                     GIT_TAG        v3.6.0
+                     GIT_TAG        v3.9.0
                      GIT_SHALLOW    TRUE
 )
 
