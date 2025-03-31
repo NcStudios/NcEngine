@@ -1,3 +1,5 @@
+#include "core/PerFrameTypes.fxh"
+
 struct VSInput
 {
     // Vertex attributes
@@ -12,17 +14,6 @@ struct PSInput
     float3 UVW;
 };
 
-cbuffer EnvironmentProperties
-{
-    float4x4 cameraViewProjection;
-    float4x4 cameraInvProjection;
-    float3 cameraPosition;
-    uint lightCount;
-    float nearClip;
-    float farClip;
-    uint skyboxIndex;
-    uint useSkybox;
-};
 
 static float4x4 modelMatrix = float4x4(
     100.0f, 0.0f,   0.0f,   0.0f,
