@@ -135,7 +135,7 @@ struct Texture
 {
     static constexpr uint32_t numChannels = 4u;
 
-    TextureFormat format = TextureFormat::RGBA8_UNORM_SRGB;
+    TextureFormat format = TextureFormat::UNKNOWN;
     uint32_t width = 0u;
     uint32_t height = 0u;
     std::vector<unsigned char> pixelData = {};

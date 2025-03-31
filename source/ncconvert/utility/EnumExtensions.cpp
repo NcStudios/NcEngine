@@ -35,7 +35,7 @@ auto ToAssetType(std::string type) -> asset::AssetType
     throw NcError("Failed to parse asset type from: " + type);
 }
 
-auto ToString(asset::AssetType type) -> std::string
+auto ToString(asset::AssetType type) -> std::string_view
 {
     switch(type)
     {

@@ -309,15 +309,35 @@ TEST(AssetSerializationTest, Mesh_noBones_roundTrip_succeeds)
 
 TEST(AssetSerializationTest, Texture_roundTrip_succeeds)
 {
-    // TODO: update w/ subresources
-
-
     constexpr auto version = nc::asset::currentVersion;
-    const auto expectedAsset = nc::asset::Texture{
+    const auto expectedSubResource1 = nc::asset::TextureSubResource{
         .width = 2, .height = 2,
         .pixelData = std::vector<unsigned char>{
             0xA1, 0xA2, 0xA3, 0xA4,  0xB5, 0xB6, 0xB7, 0xB8,
             0xCA, 0xCB, 0xCC, 0xCD,  0xD0, 0xD1, 0xD2, 0xD3
+        }
+    };
+
+    const auto expectedSubResource2 = nc::asset::TextureSubResource{
+        .width = 1, .height = 1,
+        .pixelData = std::vector<unsigned char>{
+            0xA1, 0xA2, 0xA3, 0xA4
+        }
+    };
+
+    const auto expectedAsset = nc::asset::Texture{
+        .format = nc::asset::TextureFormat::RGBA8_UNORM_SRGB,
+        .width = 4,
+        .height = 4,
+        .pixelData = std::vector<unsigned char>{
+            0xA1, 0xA2, 0xA3, 0xA4,  0xB5, 0xB6, 0xB7, 0xB8,  0xCA, 0xCB, 0xCC, 0xCD,  0xD0, 0xD1, 0xD2, 0xD3,
+            0xA1, 0xA2, 0xA3, 0xA4,  0xB5, 0xB6, 0xB7, 0xB8,  0xCA, 0xCB, 0xCC, 0xCD,  0xD0, 0xD1, 0xD2, 0xD3,
+            0xA1, 0xA2, 0xA3, 0xA4,  0xB5, 0xB6, 0xB7, 0xB8,  0xCA, 0xCB, 0xCC, 0xCD,  0xD0, 0xD1, 0xD2, 0xD3,
+            0xA1, 0xA2, 0xA3, 0xA4,  0xB5, 0xB6, 0xB7, 0xB8,  0xCA, 0xCB, 0xCC, 0xCD,  0xD0, 0xD1, 0xD2, 0xD3
+        },
+        .mipmaps = {
+            expectedSubResource1,
+            expectedSubResource2
         }
     };
 
@@ -330,6 +350,7 @@ TEST(AssetSerializationTest, Texture_roundTrip_succeeds)
     EXPECT_EQ(nc::convert::GetBlobSize(expectedAsset), actualHeader.size);
     EXPECT_STREQ("NONE", actualHeader.compressionAlgorithm);
 
+    EXPECT_EQ(expectedAsset.format, actualAsset.format);
     EXPECT_EQ(expectedAsset.width, actualAsset.width);
     EXPECT_EQ(expectedAsset.height, actualAsset.height);
     ASSERT_EQ(expectedAsset.pixelData.size(), actualAsset.pixelData.size());
@@ -337,6 +358,17 @@ TEST(AssetSerializationTest, Texture_roundTrip_succeeds)
     EXPECT_TRUE(std::equal(expectedAsset.pixelData.cbegin(),
                            expectedAsset.pixelData.cend(),
                            actualAsset.pixelData.cbegin()));
+
+    ASSERT_EQ(expectedAsset.mipmaps.size(), actualAsset.mipmaps.size());
+    for (const auto [expectedSubResource, actualSubResource] : std::views::zip(expectedAsset.mipmaps, actualAsset.mipmaps))
+    {
+        EXPECT_EQ(expectedSubResource.width, actualSubResource.width);
+        EXPECT_EQ(expectedSubResource.height, actualSubResource.height);
+        ASSERT_EQ(expectedSubResource.pixelData.size(), actualSubResource.pixelData.size());
+        EXPECT_TRUE(std::equal(expectedSubResource.pixelData.cbegin(),
+                               expectedSubResource.pixelData.cend(),
+                               actualSubResource.pixelData.cbegin()));
+    }
 }
 
 TEST(AssetSerializationTest, AudioClip_roundTrip_succeeds)

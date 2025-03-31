@@ -62,16 +62,19 @@ auto TextureConverter::ImportTexture(const std::filesystem::path& path) -> asset
         throw NcError("Invalid input file: ", path.string());
     }
 
+    /** @todo 751 Currently, texture format in the asset is not used and mips are always generated. Should:
+     *            - generate mips only when specified
+     *            - embed actual format in the asset
+     *            - compress if required by format
+     */
     auto image = Image{path};
     auto subresource = image.MakeTextureSubResource();
-
     auto texture = asset::Texture{
-        .format = asset::TextureFormat::RGBA8_UNORM_SRGB, // TODO: take as param
+        .format = asset::TextureFormat::UNKNOWN,
         .width = subresource.width,
         .height = subresource.height,
         .pixelData = std::move(subresource.pixelData),
-        .mipmaps = {
-        },
+        .mipmaps = {},
     };
 
     const auto minDimension = GetMinimumDimension(texture.format);
