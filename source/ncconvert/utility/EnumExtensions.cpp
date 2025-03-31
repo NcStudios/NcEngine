@@ -91,6 +91,7 @@ auto TextureFormatHasAlpha(asset::TextureFormat format) -> bool
         case BC3_UNORM:        return true;
         case BC1_UNORM_SRGB:   [[fallthrough]];
         case BC1_UNORM:        return false;
+        case UNKNOWN:          break;
     }
 
     throw NcError{
@@ -109,6 +110,7 @@ auto GetMinimumDimension(asset::TextureFormat format) -> uint32_t
         case BC3_UNORM:        [[fallthrough]];
         case BC1_UNORM_SRGB:   [[fallthrough]];
         case BC1_UNORM:        return 4u;
+        case UNKNOWN:          break;
     }
 
     throw NcError{
