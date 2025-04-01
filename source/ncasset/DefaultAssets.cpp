@@ -73,16 +73,4 @@ auto GetDefaultTexturePaths() -> std::span<const std::string_view>
 
     return paths;
 }
-
-auto GetDefaultTextureSubtypes() -> std::span<const AssetSubtype>
-{
-    static constexpr auto subtypes = std::array{
-        AssetSubtype::ColorTexture,
-        AssetSubtype::ColorTexture,
-        AssetSubtype::NormalTexture,
-        AssetSubtype::ColorTexture
-    };
-
-    return subtypes;
-}
 } // namespace nc::asset

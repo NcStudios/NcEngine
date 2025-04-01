@@ -29,17 +29,8 @@ class IAssetService : public IAssetServiceBase
 
         IAssetService();
 
-        virtual bool Load(const InputType& input,
-                          AssetSubtype subtype = AssetSubtype::None) = 0;
-        virtual bool Load(std::span<const InputType> inputs,
-                          AssetSubtype subtype = AssetSubtype::None) = 0;
-        virtual bool Load(std::span<const InputType> inputs,
-                          std::span<const AssetSubtype> subtypes)
-        {
-            (void)subtypes;
-            return Load(inputs);
-        }
-
+        virtual bool Load(const InputType& input)                        = 0;
+        virtual bool Load(std::span<const InputType> inputs)             = 0;
         virtual bool Unload(const InputType& input)                      = 0;
         virtual void UnloadAll()                                         = 0;
         virtual auto Acquire(const InputType& input)  const -> data_type = 0;

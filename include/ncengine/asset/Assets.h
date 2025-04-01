@@ -58,10 +58,8 @@ auto AcquireMeshAsset(AssetId id) -> MeshView;
 /** Supported file types: .nca 
  *  @note Unloading textures invalidates all TextureViews. It is intended
  *  to be done on scene change. */
-
-bool LoadTextureAsset(const std::string& path, AssetSubtype subtype = AssetSubtype::ColorTexture);
-bool LoadTextureAssets(std::span<const std::string> paths, AssetSubtype subtype = AssetSubtype::ColorTexture);
-bool LoadTextureAssets(std::span<const std::string> paths, std::span<const AssetSubtype> subtypes);
+bool LoadTextureAsset(const std::string& path);
+bool LoadTextureAssets(std::span<const std::string> paths);
 bool UnloadTextureAsset(const std::string& path);
 void UnloadAllTextureAssets();
 auto AcquireTextureAsset(const std::string& path) -> TextureView;

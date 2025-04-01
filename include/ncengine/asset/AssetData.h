@@ -66,7 +66,6 @@ struct TextureWithId
 {
     Texture texture;
     size_t id;
-    AssetSubtype subtype = AssetSubtype::None;
 };
 
 /** @brief Event data for texture load and unload operations. */

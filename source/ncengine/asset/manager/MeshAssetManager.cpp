@@ -39,7 +39,7 @@ auto MeshAssetManager::ImportMesh(const std::string& path) -> asset::Mesh
     return mesh;
 }
 
-auto MeshAssetManager::Load(const std::string& path, AssetSubtype) -> bool
+auto MeshAssetManager::Load(const std::string& path) -> bool
 {
     if (IsLoaded(path))
     {
@@ -61,7 +61,7 @@ auto MeshAssetManager::Load(const std::string& path, AssetSubtype) -> bool
     return true;
 }
 
-auto MeshAssetManager::Load(std::span<const std::string> paths, AssetSubtype) -> bool
+auto MeshAssetManager::Load(std::span<const std::string> paths) -> bool
 {
     auto idsToLoad = std::vector<std::string>{};
     auto bones = std::vector<BonesData>{};

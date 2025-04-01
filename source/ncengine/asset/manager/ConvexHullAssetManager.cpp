@@ -11,7 +11,7 @@ ConvexHullAssetManager::ConvexHullAssetManager(const std::string& assetDirectory
 {
 }
 
-auto ConvexHullAssetManager::Load(const std::string& path, AssetSubtype) -> bool
+auto ConvexHullAssetManager::Load(const std::string& path) -> bool
 {
     if (IsLoaded(path))
     {
@@ -31,7 +31,7 @@ auto ConvexHullAssetManager::Load(const std::string& path, AssetSubtype) -> bool
     return true;
 }
 
-auto ConvexHullAssetManager::Load(std::span<const std::string> paths, AssetSubtype) -> bool
+auto ConvexHullAssetManager::Load(std::span<const std::string> paths) -> bool
 {
     auto anyLoaded = false;
     auto assets = std::vector<ConvexHull>{};
