@@ -190,3 +190,31 @@ TEST(TextureAnalysisTest, GetSubTextureInfo_invalidDimensions_throws)
     EXPECT_THROW(nc::convert::GetSubTextureInfo(badAtlas3), nc::NcError);
     EXPECT_THROW(nc::convert::GetSubTextureInfo(badAtlas4), nc::NcError);
 }
+
+TEST(TextureAnalysisTest, GetMipLevels)
+{
+    {
+        const auto result1x1 = nc::convert::GetMipLevels(1, 1);
+        const auto result1x4 = nc::convert::GetMipLevels(1, 4);
+        const auto result2x4 = nc::convert::GetMipLevels(2, 4);
+        const auto result4x4 = nc::convert::GetMipLevels(4, 4);
+        const auto result8x8 = nc::convert::GetMipLevels(8, 8);
+
+        EXPECT_EQ(1, result1x1);
+        EXPECT_EQ(3, result1x4);
+        EXPECT_EQ(3, result2x4);
+        EXPECT_EQ(3, result4x4);
+        EXPECT_EQ(4, result8x8);
+    }
+
+    {
+        constexpr auto minDimension = 4;
+        const auto result4x4 = nc::convert::GetMipLevels(4, 4, minDimension);
+        const auto result8x8 = nc::convert::GetMipLevels(8, 8, minDimension);
+        const auto result8x12 = nc::convert::GetMipLevels(8, 12, minDimension);
+
+        EXPECT_EQ(1, result4x4);
+        EXPECT_EQ(2, result8x8);
+        EXPECT_EQ(3, result8x12);
+    }
+}

@@ -129,6 +129,7 @@ if(NC_BUILD_NCCONVERT)
             ${PROJECT_SOURCE_DIR}/source/ncconvert/optimizer/MeshOptimization.cpp
             ${PROJECT_SOURCE_DIR}/source/ncconvert/utility/BlobSize.cpp
             ${PROJECT_SOURCE_DIR}/source/ncconvert/utility/EnumExtensions.cpp
+            ${PROJECT_SOURCE_DIR}/source/ncconvert/utility/Image.cpp
             ${PROJECT_SOURCE_DIR}/source/ncconvert/utility/Path.cpp
     )
 
@@ -246,6 +247,47 @@ target_link_libraries(GeometryAnalysis_unit_tests
 
 add_test(GeometryAnalysis_unit_tests GeometryAnalysis_unit_tests)
 
+## Image Tests ###
+add_executable(Image_unit_tests
+    Image_unit_tests.cpp
+)
+
+target_compile_options(Image_unit_tests
+    PUBLIC
+        ${NC_COMPILER_FLAGS}
+)
+
+target_compile_definitions(Image_unit_tests
+    PRIVATE
+        TEST_COLLATERAL_DIR="${NC_CONVERT_TEST_COLLATERAL_DIR}"
+)
+
+target_include_directories(Image_unit_tests
+    PRIVATE
+        ${NC_CONVERT_TEST_COLLATERAL_DIR}
+        ${PROJECT_SOURCE_DIR}/include
+        ${PROJECT_SOURCE_DIR}/source/ncconvert
+)
+
+target_include_directories(Image_unit_tests
+    SYSTEM PRIVATE
+        ${PROJECT_SOURCE_DIR}/source/external
+)
+
+target_sources(Image_unit_tests
+    PRIVATE
+        ${PROJECT_SOURCE_DIR}/source/ncconvert/utility/EnumExtensions.cpp
+        ${PROJECT_SOURCE_DIR}/source/ncconvert/utility/Image.cpp
+)
+
+target_link_libraries(Image_unit_tests
+    PRIVATE
+        gtest_main
+        NcMath
+)
+
+add_test(Image_unit_tests Image_unit_tests)
+
 ## TextureAnalysis Tests ###
 add_executable(TextureAnalysis_unit_tests
     TextureAnalysis_unit_tests.cpp
@@ -306,6 +348,8 @@ target_sources(TextureConverter_unit_tests
     PRIVATE
         ${PROJECT_SOURCE_DIR}/source/ncconvert/analysis/TextureAnalysis.cpp
         ${PROJECT_SOURCE_DIR}/source/ncconvert/converters/TextureConverter.cpp
+        ${PROJECT_SOURCE_DIR}/source/ncconvert/utility/EnumExtensions.cpp
+        ${PROJECT_SOURCE_DIR}/source/ncconvert/utility/Image.cpp
         ${PROJECT_SOURCE_DIR}/source/ncconvert/utility/Path.cpp
 )
 

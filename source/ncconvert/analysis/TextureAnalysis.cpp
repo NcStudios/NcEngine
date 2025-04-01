@@ -91,4 +91,17 @@ auto GetSubTextureInfo(const nc::asset::Texture& texture) -> CubeMapAtlasSubText
         }
     }
 }
+
+auto GetMipLevels(uint32_t width, uint32_t height, uint32_t minDimension) -> uint32_t
+{
+    auto levels = 0;
+    while (width > minDimension || height > minDimension)
+    {
+        width = std::max(width / 2, 1u);
+        height = std::max(height / 2, 1u);
+        levels++;
+    }
+
+    return levels + 1;
+}
 } // namespace nc::convert

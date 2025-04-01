@@ -34,3 +34,44 @@ TEST(EnumExtensionsTest, ToString_badAssetType_throws)
 {
     EXPECT_THROW(nc::convert::ToString(static_cast<nc::asset::AssetType>(999)), nc::NcError);
 }
+
+TEST(EnumExtensionsTest, IsCompressedTextureFormat_returnsExpectedValue)
+{
+    EXPECT_FALSE(nc::convert::IsCompressedTextureFormat(nc::asset::TextureFormat::RGBA8_UNORM_SRGB));
+    EXPECT_FALSE(nc::convert::IsCompressedTextureFormat(nc::asset::TextureFormat::RGBA8_UNORM_SRGB));
+    EXPECT_TRUE(nc::convert::IsCompressedTextureFormat(nc::asset::TextureFormat::BC1_UNORM_SRGB));
+    EXPECT_TRUE(nc::convert::IsCompressedTextureFormat(nc::asset::TextureFormat::BC1_UNORM));
+    EXPECT_TRUE(nc::convert::IsCompressedTextureFormat(nc::asset::TextureFormat::BC3_UNORM_SRGB));
+    EXPECT_TRUE(nc::convert::IsCompressedTextureFormat(nc::asset::TextureFormat::BC3_UNORM));
+}
+
+TEST(EnumExtensionsTest, TextureFormatHasAlpha_returnsExpectedValue)
+{
+    EXPECT_TRUE(nc::convert::TextureFormatHasAlpha(nc::asset::TextureFormat::RGBA8_UNORM_SRGB));
+    EXPECT_TRUE(nc::convert::TextureFormatHasAlpha(nc::asset::TextureFormat::RGBA8_UNORM_SRGB));
+    EXPECT_FALSE(nc::convert::TextureFormatHasAlpha(nc::asset::TextureFormat::BC1_UNORM_SRGB));
+    EXPECT_FALSE(nc::convert::TextureFormatHasAlpha(nc::asset::TextureFormat::BC1_UNORM));
+    EXPECT_TRUE(nc::convert::TextureFormatHasAlpha(nc::asset::TextureFormat::BC3_UNORM_SRGB));
+    EXPECT_TRUE(nc::convert::TextureFormatHasAlpha(nc::asset::TextureFormat::BC3_UNORM));
+}
+
+TEST(EnumExtensionsTest, GetMinimumDimensions_returnsExpectedValue)
+{
+    EXPECT_EQ(nc::convert::GetMinimumDimension(nc::asset::TextureFormat::RGBA8_UNORM_SRGB), 1);
+    EXPECT_EQ(nc::convert::GetMinimumDimension(nc::asset::TextureFormat::RGBA8_UNORM), 1);
+    EXPECT_EQ(nc::convert::GetMinimumDimension(nc::asset::TextureFormat::BC1_UNORM_SRGB), 4);
+    EXPECT_EQ(nc::convert::GetMinimumDimension(nc::asset::TextureFormat::BC1_UNORM), 4);
+    EXPECT_EQ(nc::convert::GetMinimumDimension(nc::asset::TextureFormat::BC3_UNORM_SRGB), 4);
+    EXPECT_EQ(nc::convert::GetMinimumDimension(nc::asset::TextureFormat::BC3_UNORM), 4);
+}
+
+TEST(EnumExtensionsTest, ToString_fromTextureFormat_succeeds)
+{
+    EXPECT_EQ(nc::convert::ToString(nc::asset::TextureFormat::UNKNOWN), "UNKNOWN");
+    EXPECT_EQ(nc::convert::ToString(nc::asset::TextureFormat::RGBA8_UNORM_SRGB), "RGBA8_UNORM_SRGB");
+    EXPECT_EQ(nc::convert::ToString(nc::asset::TextureFormat::RGBA8_UNORM), "RGBA8_UNORM");
+    EXPECT_EQ(nc::convert::ToString(nc::asset::TextureFormat::BC1_UNORM_SRGB), "BC1_UNORM_SRGB");
+    EXPECT_EQ(nc::convert::ToString(nc::asset::TextureFormat::BC1_UNORM), "BC1_UNORM");
+    EXPECT_EQ(nc::convert::ToString(nc::asset::TextureFormat::BC3_UNORM_SRGB), "BC3_UNORM_SRGB");
+    EXPECT_EQ(nc::convert::ToString(nc::asset::TextureFormat::BC3_UNORM), "BC3_UNORM");
+}

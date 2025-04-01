@@ -1,16 +1,14 @@
 #include "TextureConverter.h"
 #include "analysis/TextureAnalysis.h"
+#include "utility/EnumExtensions.h"
+#include "utility/Image.h"
 #include "utility/Path.h"
 
 #include "ncasset/Assets.h"
 #include "ncutility/NcError.h"
 
-#define STB_IMAGE_IMPLEMENTATION
-#include "stb/stb_image.h"
-
 #include <algorithm>
 #include <array>
-#include <cstdlib>
 
 namespace
 {
@@ -64,26 +62,35 @@ auto TextureConverter::ImportTexture(const std::filesystem::path& path) -> asset
         throw NcError("Invalid input file: ", path.string());
     }
 
-    const auto pathString = path.string(); // because path.c_str() is wchar* on Windows
-    auto width = int32_t{};
-    auto height = int32_t {};
-    auto nChannels = int32_t{};
-    auto* rawPixels = stbi_load(pathString.c_str(), &width, &height, &nChannels, STBI_rgb_alpha);
-    if(!rawPixels)
+    /** @todo 751 Currently, texture format in the asset is not used and mips are always generated. Should:
+     *            - generate mips only when specified
+     *            - embed actual format in the asset
+     *            - compress if required by format
+     */
+    auto image = Image{path};
+    auto subresource = image.MakeTextureSubResource();
+    auto texture = asset::Texture{
+        .format = asset::TextureFormat::RGBA8_UNORM_SRGB,
+        .width = subresource.width,
+        .height = subresource.height,
+        .pixelData = std::move(subresource.pixelData),
+        .mipmaps = {},
+    };
+
+    const auto minDimension = GetMinimumDimension(texture.format);
+    const auto mipLevels = GetMipLevels(texture.width, texture.height, minDimension);
+    NC_ASSERT(mipLevels >= 1, "Unexpected mipLevels");
+    texture.mipmaps.reserve(mipLevels - 1);
+    auto halfWidth = texture.width;
+    auto halfHeight = texture.height;
+    for (auto i = 1u; i < mipLevels; ++i)
     {
-        throw NcError("Failed to load texture file: ", pathString);
+        halfWidth = std::max(halfWidth / 2, minDimension);
+        halfHeight = std::max(halfHeight / 2, minDimension);
+        image.Resize(halfWidth, halfHeight);
+        texture.mipmaps.push_back(image.MakeTextureSubResource());
     }
 
-    auto pixels = std::vector<unsigned char>{};
-    const auto nBytes = width * height * asset::Texture::numChannels; // ignore nChannels because we force to 4 8-bit channels
-    pixels.reserve(nBytes);
-    std::copy(rawPixels, rawPixels + nBytes, std::back_inserter(pixels));
-    ::free(rawPixels);
-
-    return nc::asset::Texture{
-        static_cast<uint32_t>(width),
-        static_cast<uint32_t>(height),
-        std::move(pixels)
-    };
+    return texture;
 }
 } // namespace nc::covnert
