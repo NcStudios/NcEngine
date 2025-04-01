@@ -270,7 +270,7 @@ void WriteTextures(std::ostream& header,
     BeginNamespace(source, ns);
     WriteVariableDefinitions(source, assets, "nc::asset::TextureView");
     WritePathsArray(source, assets, "g_paths");
-    WriteLoadFunction(source, "nc::asset::LoadTextureAssets", "g_paths, g_subtypes");
+    WriteLoadFunction(source, "nc::asset::LoadTextureAssets", "g_paths");
     WriteAcquireFunction(source, assets, "nc::asset::AcquireTextureAsset");
     EndNamespace(source, ns);
 }
