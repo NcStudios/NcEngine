@@ -116,13 +116,6 @@ auto ToTextureFormat(nc::asset::TextureFormat format) -> Diligent::TEXTURE_FORMA
     std::unreachable();
 }
 
-// auto ToTextureFormat(nc::asset::AssetSubtype subtype) -> Diligent::TEXTURE_FORMAT
-// {
-//     return subtype == nc::asset::AssetSubtype::NormalTexture
-//         ? Diligent::TEX_FORMAT_RGBA8_UNORM
-//         : Diligent::TEX_FORMAT_RGBA8_UNORM_SRGB;
-// }
-
 auto ToTextureDesc(const nc::asset::Texture& texture) -> Diligent::TextureDesc
 {
     auto texDesc = Diligent::TextureDesc{

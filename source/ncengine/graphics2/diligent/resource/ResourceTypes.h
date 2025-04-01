@@ -68,7 +68,6 @@ auto GetVariable(const ResourceDesc& desc, Diligent::IShaderResourceBinding* srb
 }
 
 auto ToTextureFormat(nc::asset::TextureFormat format) -> Diligent::TEXTURE_FORMAT;
-// auto ToTextureFormat(nc::asset::AssetSubtype subtype) -> Diligent::TEXTURE_FORMAT;
 auto ToTextureDesc(const nc::asset::Texture& texture) -> Diligent::TextureDesc;
 auto ToTextureSubResData(const nc::asset::Texture& texture) -> std::vector<Diligent::TextureSubResData>;
 void SetArrayRegion(Diligent::IShaderResourceVariable* variable, std::span<Diligent::IDeviceObject*> views, size_t offset, size_t count);

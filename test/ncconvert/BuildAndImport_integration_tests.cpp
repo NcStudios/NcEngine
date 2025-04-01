@@ -68,7 +68,6 @@ TEST_F(BuildAndImportTest, Texture_from_png)
         const auto actualPixel = ReadPixel(asset.pixelData.data(), pixelIndex * 4);
         EXPECT_EQ(expectedPixel, actualPixel);
     }
-
 }
 
 TEST_F(BuildAndImportTest, MeshCollider_from_fbx)

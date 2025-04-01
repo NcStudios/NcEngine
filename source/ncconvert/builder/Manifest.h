@@ -16,9 +16,8 @@ using ReflectedTargetMap = std::unordered_map<asset::AssetType, std::vector<Refl
 /** @brief Manifest file options. */
 struct GlobalManifestOptions
 {
-    std::filesystem::path outputDirectory;
-    std::filesystem::path workingDirectory;
-
+    std::filesystem::path outputDirectory = "./";
+    std::filesystem::path workingDirectory = "./";
     TargetOptions defaultMeshOptions = TargetOptions{};
     TargetOptions defaultDiffuseTextureOptions = TargetOptions{};
     TargetOptions defaultNormalTextureOptions = TargetOptions{};

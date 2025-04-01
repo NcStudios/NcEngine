@@ -10,8 +10,8 @@ namespace nc::convert
 /** @brief Target-specific options */
 struct TargetOptions
 {
-    asset::AssetSubtype subtype = asset::AssetSubtype::None; // may not need anymore
-    asset::TextureFormat textureFormat = asset::TextureFormat::RGBA8_UNORM_SRGB; // in order to use UNKNOWN we must update single target mode
+    asset::AssetSubtype subtype = asset::AssetSubtype::None; /** @todo 923 replace w/ format, remove */
+    asset::TextureFormat textureFormat = asset::TextureFormat::RGBA8_UNORM_SRGB;
     bool generateMips = false;
     bool optimizeMesh = false;
 };

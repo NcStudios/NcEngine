@@ -126,7 +126,7 @@ TEST_F(NcConvertIntegration, SingleTarget_mesh_wrongSourceType_fails)
     EXPECT_EQ(RunCmd(cmd), ResultCode::RuntimeError);
 }
 
-TEST_F(NcConvertIntegration, SingleTarget_texture_succeeds)
+TEST_F(NcConvertIntegration, SingleTarget_textureDefaultOptions_succeeds)
 {
     const auto cmd = BuildSingleTargetCommand("texture", "rgb_corners_4x8.png", "myTexture");
     ASSERT_EQ(RunCmd(cmd), ResultCode::Success);

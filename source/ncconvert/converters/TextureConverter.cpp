@@ -36,24 +36,21 @@ auto MakePrimaryTexture(nc::convert::Image& image,
                         nc::asset::TextureFormat format,
                         bool useCompression) -> nc::asset::Texture
 {
-    if (useCompression)
-    {
-        if (image.RequiresCompressionPadding())
+    auto subresource = [&](){
+        if (useCompression)
         {
-            image.ResizePadded();
-            LOG("Invalid dimensions for compression. Image padded to '{}'x'{}'.", image.GetWidth(), image.GetHeight());
+            if (image.RequiresCompressionPadding())
+            {
+                image.ResizePadded();
+                LOG("Invalid dimensions for compression. Image padded to '{}'x'{}'.", image.GetWidth(), image.GetHeight());
+            }
+
+            return image.Compress(format);
         }
 
-        auto subresource = image.Compress(format);
-        return nc::asset::Texture{
-            .format = format,
-            .width = subresource.width,
-            .height = subresource.height,
-            .pixelData = std::move(subresource.pixelData)
-        };
-    }
+        return image.MakeTextureSubResource();
+    }();
 
-    auto subresource = image.MakeTextureSubResource();
     return nc::asset::Texture{
         .format = format,
         .width = subresource.width,
