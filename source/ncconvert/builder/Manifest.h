@@ -18,6 +18,12 @@ struct GlobalManifestOptions
 {
     std::filesystem::path outputDirectory;
     std::filesystem::path workingDirectory;
+
+    TargetOptions defaultMeshOptions = TargetOptions{};
+    TargetOptions defaultDiffuseTextureOptions = TargetOptions{};
+    TargetOptions defaultNormalTextureOptions = TargetOptions{};
+    TargetOptions defaultParticleTextureOptions = TargetOptions{};
+    TargetOptions defaultEffectTextureOptions = TargetOptions{};
 };
 
 /** @brief Manifest json parser. */

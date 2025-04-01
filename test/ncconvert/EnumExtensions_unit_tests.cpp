@@ -75,3 +75,14 @@ TEST(EnumExtensionsTest, ToString_fromTextureFormat_succeeds)
     EXPECT_EQ(nc::convert::ToString(nc::asset::TextureFormat::BC3_UNORM_SRGB), "BC3_UNORM_SRGB");
     EXPECT_EQ(nc::convert::ToString(nc::asset::TextureFormat::BC3_UNORM), "BC3_UNORM");
 }
+
+TEST(EnumExtensionsTest, ToTextureFormat_fromString_succeeds)
+{
+    EXPECT_EQ(nc::convert::ToTextureFormat("UNKNOWN"), nc::asset::TextureFormat::UNKNOWN);
+    EXPECT_EQ(nc::convert::ToTextureFormat("RGBA8_UNORM_SRGB"), nc::asset::TextureFormat::RGBA8_UNORM_SRGB);
+    EXPECT_EQ(nc::convert::ToTextureFormat("RGBA8_UNORM"), nc::asset::TextureFormat::RGBA8_UNORM);
+    EXPECT_EQ(nc::convert::ToTextureFormat("BC1_UNORM_SRGB"), nc::asset::TextureFormat::BC1_UNORM_SRGB);
+    EXPECT_EQ(nc::convert::ToTextureFormat("BC1_UNORM"), nc::asset::TextureFormat::BC1_UNORM);
+    EXPECT_EQ(nc::convert::ToTextureFormat("BC3_UNORM_SRGB"), nc::asset::TextureFormat::BC3_UNORM_SRGB);
+    EXPECT_EQ(nc::convert::ToTextureFormat("BC3_UNORM"), nc::asset::TextureFormat::BC3_UNORM);
+}

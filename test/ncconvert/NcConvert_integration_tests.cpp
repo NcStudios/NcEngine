@@ -133,6 +133,18 @@ TEST_F(NcConvertIntegration, SingleTarget_texture_succeeds)
     EXPECT_TRUE(std::filesystem::exists(ncaTestOutDirectory / "myTexture.nca"));
 }
 
+TEST_F(NcConvertIntegration, SingleTarget_textureWithOptions_succeeds)
+{
+    const auto source = (collateral::collateralDirectory / "rgb_corners_4x8.png").string();
+    const auto cmd = fmt::format(
+        "{} -t texture -s {} -n {} -f BC3_UNORM -p generateMips -o {}",
+        exeName, source, "myTexture", ncaTestOutDirectory.string()
+    );
+
+    ASSERT_EQ(RunCmd(cmd), ResultCode::Success);
+    EXPECT_TRUE(std::filesystem::exists(ncaTestOutDirectory / "myTexture.nca"));
+}
+
 TEST_F(NcConvertIntegration, SingleTarget_texture_wrongSourceType_fails)
 {
     const auto cmd = BuildSingleTargetCommand("texture", "cube.fbx", "myTexture");

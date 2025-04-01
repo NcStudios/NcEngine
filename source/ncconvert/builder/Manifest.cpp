@@ -12,6 +12,42 @@
 
 namespace
 {
+namespace key
+{
+using namespace std::string_view_literals;
+constexpr auto globalOptions = "globalOptions"sv;
+constexpr auto outputDirectory = "outputDirectory"sv;
+constexpr auto workingDirectory = "workingDirectory"sv;
+constexpr auto defaultMeshOptions = "defaultMeshOptions"sv;
+constexpr auto defaultDiffuseTextureOptions = "defaultDiffuseTextureOptions"sv;
+constexpr auto defaultNormalTextureOptions = "defaultNormalTextureOptions"sv;
+constexpr auto defaultParticleTextureOptions = "defaultParticleTextureOptions"sv;
+constexpr auto defaultEffectTextureOptions = "defaultEffectTextureOptions"sv;
+
+constexpr auto audioClip = "audio-clip"sv;
+constexpr auto convexHull = "convex-hull"sv;
+constexpr auto cubeMap = "cube-map"sv;
+constexpr auto mesh = "mesh"sv;
+constexpr auto meshCollider = "mesh-collider"sv;
+constexpr auto skeletalAnimation = "skeletal-animation"sv;
+constexpr auto texture = "texture"sv;
+
+constexpr auto diffuse = "diffuse"sv;
+constexpr auto normal = "normal"sv;
+constexpr auto particle = "particle"sv;
+constexpr auto effect = "effect"sv;
+
+constexpr auto sourcePath = "sourcePath"sv;
+constexpr auto assetName = "assetName"sv;
+constexpr auto assetNames = "assetNames"sv;
+constexpr auto subResourceName = "subResourceName"sv;
+
+constexpr auto options = "options"sv;
+constexpr auto textureFormat = "textureFormat"sv;
+constexpr auto generateMips = "generateMips"sv;
+constexpr auto optimizeMesh = "optimizeMesh"sv;
+}
+
 const auto jsonAssetObjectTags = std::array<std::string, 1>{
     "texture"
 };
@@ -50,6 +86,26 @@ void ProcessOptions(nc::convert::GlobalManifestOptions& options,
     }
 }
 
+auto GetDefaultTargetOptions(const nc::convert::GlobalManifestOptions& options,
+                             nc::asset::AssetType type,
+                             std::string_view subtypeName = "") -> nc::convert::TargetOptions
+{
+    using enum nc::asset::AssetType;
+    switch (type)
+    {
+        case Mesh:                            return options.defaultMeshOptions;
+        case Texture:
+        {
+            if (subtypeName == key::diffuse)  return options.defaultDiffuseTextureOptions;
+            if (subtypeName == key::normal)   return options.defaultNormalTextureOptions;
+            if (subtypeName == key::particle) return options.defaultParticleTextureOptions;
+            if (subtypeName == key::effect)   return options.defaultEffectTextureOptions;
+            [[fallthrough]];
+        }
+        default:                              return nc::convert::TargetOptions{};
+    }
+}
+
 auto IsUpToDate(const nc::convert::Target& target) -> bool
 {
     if (!std::filesystem::exists(target.destinationPath))
@@ -63,10 +119,10 @@ auto IsUpToDate(const nc::convert::Target& target) -> bool
 auto ToAssetSubtype(std::string_view str) -> nc::asset::AssetSubtype
 {
     using enum nc::asset::AssetSubtype;
-    if (str == "normal")   return NormalTexture;
-    if (str == "diffuse")  return ColorTexture;
-    if (str == "particle") return ColorTexture;
-    if (str == "effect")   return ColorTexture;
+    if (str == key::normal)   return NormalTexture;
+    if (str == key::diffuse)  return ColorTexture;
+    if (str == key::particle) return ColorTexture;
+    if (str == key::effect)   return ColorTexture;
     return None;
 }
 
@@ -150,15 +206,26 @@ auto ReflectDefaults(nc::asset::AssetType type) -> std::vector<nc::convert::Refl
 
 namespace nc::convert
 {
-void from_json(const nlohmann::json& json, GlobalManifestOptions& options)
-{
-    options.outputDirectory = json.value("outputDirectory", "./");
-    options.workingDirectory = json.value("workingDirectory", "./");
-}
-
 void from_json(const nlohmann::json& json, nc::convert::TargetOptions& options)
 {
-    options.optimizeMesh = json.value("optimizeMesh", false);
+    if (json.contains(key::textureFormat))
+    {
+        options.textureFormat = ToTextureFormat(json.at(key::textureFormat));
+    }
+
+    options.generateMips = json.value(key::generateMips, false);
+    options.optimizeMesh = json.value(key::optimizeMesh, false);
+}
+
+void from_json(const nlohmann::json& json, GlobalManifestOptions& options)
+{
+    options.outputDirectory = json.value(key::outputDirectory, "./");
+    options.workingDirectory = json.value(key::workingDirectory, "./");
+    options.defaultMeshOptions = json.value(key::defaultMeshOptions, TargetOptions{});
+    options.defaultDiffuseTextureOptions = json.value(key::defaultDiffuseTextureOptions, TargetOptions{});
+    options.defaultNormalTextureOptions = json.value(key::defaultNormalTextureOptions, TargetOptions{});
+    options.defaultParticleTextureOptions = json.value(key::defaultParticleTextureOptions, TargetOptions{});
+    options.defaultEffectTextureOptions = json.value(key::defaultEffectTextureOptions, TargetOptions{});
 }
 
 Manifest::Manifest(std::filesystem::path path)
@@ -243,7 +310,7 @@ void Manifest::ReadManifest(const std::filesystem::path& path)
     }
 
     auto json = nlohmann::json::parse(file);
-    m_options = json.value("globalOptions", GlobalManifestOptions{});
+    m_options = json.value(key::globalOptions, GlobalManifestOptions{});
 
     for (const auto& typeTag : ::jsonAssetObjectTags)
     {
@@ -255,15 +322,17 @@ void Manifest::ReadManifest(const std::filesystem::path& path)
         const auto type = ToAssetType(typeTag);
         for (const auto& [subtypeName, assets] : json.at(typeTag).items())
         {
+            const auto defaultOptions = GetDefaultTargetOptions(m_options, type, subtypeName);
+            const auto subType = ToAssetSubtype(subtypeName);
             for (const auto& asset : assets)
             {
+                auto targetOptions = asset.value(key::options, defaultOptions);
+                targetOptions.subtype = subType;
                 m_targets.at(type).emplace_back(
-                    asset.at("sourcePath"),
-                    asset.at("assetName"),
+                    asset.at(key::sourcePath),
+                    asset.at(key::assetName),
                     std::nullopt,
-                    TargetOptions{
-                        .subtype = ToAssetSubtype(subtypeName)
-                    }
+                    targetOptions
                 );
             }
         }
@@ -277,21 +346,22 @@ void Manifest::ReadManifest(const std::filesystem::path& path)
         }
 
         const auto type = ToAssetType(typeTag);
+        const auto defaultOptions = GetDefaultTargetOptions(m_options, type);
         for (const auto& asset : json.at(typeTag))
         {
-            const auto targetOptions = asset.value("options", TargetOptions{});
+            const auto targetOptions = asset.value(key::options, defaultOptions);
             // Types that CanOutputMany support both single target (legacy) mode and multiple output mode.
             if (CanOutputMany(type))
             {
                 // Multiple output mode
-                if (asset.contains("assetNames"))
+                if (asset.contains(key::assetNames))
                 {
-                    for (const auto& subResource : asset.at("assetNames"))
+                    for (const auto& subResource : asset.at(key::assetNames))
                     {
                         m_targets.at(type).emplace_back(
-                            asset.at("sourcePath"),
-                            subResource.at("assetName"),
-                            subResource.at("subResourceName"),
+                            asset.at(key::sourcePath),
+                            subResource.at(key::assetName),
+                            subResource.at(key::subResourceName),
                             targetOptions
                         );
                     }
@@ -302,8 +372,8 @@ void Manifest::ReadManifest(const std::filesystem::path& path)
 
             // Single target mode
             m_targets.at(type).emplace_back(
-                asset.at("sourcePath"),
-                asset.at("assetName"),
+                asset.at(key::sourcePath),
+                asset.at(key::assetName),
                 std::nullopt,
                 targetOptions
             );

@@ -10,6 +10,8 @@ class TextureConverter
 {
     public:
         auto ImportCubeMap(const std::filesystem::path& path) -> asset::CubeMap;
-        auto ImportTexture(const std::filesystem::path& path) -> asset::Texture;
+        auto ImportTexture(const std::filesystem::path& path,
+                           asset::TextureFormat format,
+                           bool generateMips) -> asset::Texture;
 };
 } // namespace nc::convert

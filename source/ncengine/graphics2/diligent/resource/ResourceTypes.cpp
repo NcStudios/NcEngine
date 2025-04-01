@@ -4,6 +4,8 @@
 
 #include "TextureLoader.h"
 
+#include <utility>
+
 namespace
 {
 /* The PipelineResourceDesc needs to specify all used shader stages, but when we get the variable by name you must specify only one of the stages. */
@@ -96,14 +98,32 @@ auto GetVariable(Diligent::SHADER_TYPE shaderType, const char* name, Diligent::I
     return *var;
 }
 
-auto ToTextureFormat(nc::asset::AssetSubtype subtype) -> Diligent::TEXTURE_FORMAT
+auto ToTextureFormat(nc::asset::TextureFormat format) -> Diligent::TEXTURE_FORMAT
 {
-    return subtype == nc::asset::AssetSubtype::NormalTexture
-        ? Diligent::TEX_FORMAT_RGBA8_UNORM
-        : Diligent::TEX_FORMAT_RGBA8_UNORM_SRGB;
+    using enum nc::asset::TextureFormat;
+    switch (format)
+    {
+        case RGBA8_UNORM_SRGB: return Diligent::TEX_FORMAT_RGBA8_UNORM_SRGB;
+        case RGBA8_UNORM:      return Diligent::TEX_FORMAT_RGBA8_UNORM;
+        case BC1_UNORM_SRGB:   return Diligent::TEX_FORMAT_BC1_UNORM_SRGB;
+        case BC1_UNORM:        return Diligent::TEX_FORMAT_BC1_UNORM;
+        case BC3_UNORM_SRGB:   return Diligent::TEX_FORMAT_BC3_UNORM_SRGB;
+        case BC3_UNORM:        return Diligent::TEX_FORMAT_BC3_UNORM;
+        case UNKNOWN:          break;
+    }
+
+    NC_ASSERT(false, fmt::format("Unknown TextureFormat '{}'", std::to_underlying(format)));
+    std::unreachable();
 }
 
-auto ToTextureDesc(const nc::asset::Texture& texture, Diligent::TEXTURE_FORMAT format) -> Diligent::TextureDesc
+// auto ToTextureFormat(nc::asset::AssetSubtype subtype) -> Diligent::TEXTURE_FORMAT
+// {
+//     return subtype == nc::asset::AssetSubtype::NormalTexture
+//         ? Diligent::TEX_FORMAT_RGBA8_UNORM
+//         : Diligent::TEX_FORMAT_RGBA8_UNORM_SRGB;
+// }
+
+auto ToTextureDesc(const nc::asset::Texture& texture) -> Diligent::TextureDesc
 {
     auto texDesc = Diligent::TextureDesc{
         "",
@@ -111,7 +131,7 @@ auto ToTextureDesc(const nc::asset::Texture& texture, Diligent::TEXTURE_FORMAT f
         texture.width,
         texture.height,
         1,
-        format
+        ToTextureFormat(texture.format)
     };
 
     texDesc.MipLevels = static_cast<uint32_t>(texture.mipmaps.size() + 1);
@@ -145,8 +165,8 @@ void SetArrayRegion(Diligent::IShaderResourceVariable* variable, std::span<Dilig
 
 void InitializeArray(Diligent::IDeviceContext& context, Diligent::IRenderDevice& device, Diligent::IShaderResourceVariable* variable, uint32_t arraySize, bool transition)
 {
-    const auto dummySubType = asset::AssetSubtype::None;
     const auto dummyTexture = asset::Texture{
+        .format = asset::TextureFormat::RGBA8_UNORM_SRGB,
         .width = 1u,
         .height = 1u,
         .pixelData = std::vector<unsigned char>{0x1A, 0x2A, 0x3A, 0x4A}
@@ -154,7 +174,7 @@ void InitializeArray(Diligent::IDeviceContext& context, Diligent::IRenderDevice&
 
     auto subResource = Diligent::TextureSubResData{dummyTexture.pixelData.data(), dummyTexture.width * asset::Texture::numChannels};
     const auto texData = Diligent::TextureData{&subResource, 1, &context};
-    const auto desc = ToTextureDesc(dummyTexture, ToTextureFormat(dummySubType));
+    const auto desc = ToTextureDesc(dummyTexture);
 
     auto textureHandle = Diligent::RefCntAutoPtr<Diligent::ITexture>{};
     device.CreateTexture(desc, &texData, &textureHandle);

@@ -119,6 +119,22 @@ auto GetMinimumDimension(asset::TextureFormat format) -> uint32_t
     };
 }
 
+auto ToTextureFormat(const std::string& type) -> asset::TextureFormat
+{
+    using enum asset::TextureFormat;
+    if      (type == "UNKNOWN")          return UNKNOWN;
+    else if (type == "RGBA8_UNORM_SRGB") return RGBA8_UNORM_SRGB;
+    else if (type == "RGBA8_UNORM")      return RGBA8_UNORM;
+    else if (type == "BC1_UNORM_SRGB")   return BC1_UNORM_SRGB;
+    else if (type == "BC1_UNORM")        return BC1_UNORM;
+    else if (type == "BC3_UNORM_SRGB")   return BC3_UNORM_SRGB;
+    else if (type == "BC3_UNORM")        return BC3_UNORM;
+
+    throw NcError{
+        fmt::format("Unknown TextureFormat: {}", type)
+    };
+}
+
 auto ToString(asset::TextureFormat format) -> std::string_view
 {
     using enum asset::TextureFormat;

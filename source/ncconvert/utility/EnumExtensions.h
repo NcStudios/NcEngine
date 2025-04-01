@@ -14,5 +14,6 @@ auto ToString(asset::AssetType type) -> std::string_view;
 auto IsCompressedTextureFormat(asset::TextureFormat format) -> bool;
 auto TextureFormatHasAlpha(asset::TextureFormat format) -> bool;
 auto GetMinimumDimension(asset::TextureFormat format) -> uint32_t;
+auto ToTextureFormat(const std::string& type) -> asset::TextureFormat;
 auto ToString(asset::TextureFormat format) -> std::string_view;
 }

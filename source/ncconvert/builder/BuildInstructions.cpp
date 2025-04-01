@@ -21,6 +21,22 @@ auto BuildTargetMap() -> std::unordered_map<nc::asset::AssetType, std::vector<nc
     out.emplace(nc::asset::AssetType::Texture, std::vector<nc::convert::Target>{});
     return out;
 }
+
+auto BuildTargetOptions(const nc::convert::Config& config) -> nc::convert::TargetOptions
+{
+    auto options = nc::convert::TargetOptions{};
+    if (config.targetType == nc::asset::AssetType::Mesh)
+    {
+        options.optimizeMesh = config.optimizeMesh;
+    }
+    else if (config.targetType == nc::asset::AssetType::Texture)
+    {
+        options.textureFormat = config.textureFormat;
+        options.generateMips = config.generateMips;
+    }
+
+    return options;
+}
 } // anonymous namespace
 
 namespace nc::convert
@@ -48,7 +64,12 @@ void BuildInstructions::ReadTargets(const Config& config)
             auto sourcePath = config.targetPath.value();
             auto destinationPath = AssetNameToNcaPath(config.assetName.value(), config.outputDirectory);
             LOG("Adding build target: {} -> {}", sourcePath.string(), destinationPath.string());
-            collection.emplace_back(std::move(sourcePath), std::move(destinationPath));
+            collection.emplace_back(
+                std::move(sourcePath),
+                std::move(destinationPath),
+                std::nullopt,
+                BuildTargetOptions(config)
+            );
             break;
         }
         case OperationMode::Manifest:
