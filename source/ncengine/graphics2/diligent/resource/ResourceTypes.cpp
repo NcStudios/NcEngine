@@ -103,9 +103,8 @@ auto ToTextureFormat(nc::asset::AssetSubtype subtype) -> Diligent::TEXTURE_FORMA
         : Diligent::TEX_FORMAT_RGBA8_UNORM_SRGB;
 }
 
-auto ToTextureDesc(const nc::asset::Texture& texture, Diligent::TEXTURE_FORMAT format, uint32_t mipLevels) -> Diligent::TextureDesc
+auto ToTextureDesc(const nc::asset::Texture& texture, Diligent::TEXTURE_FORMAT format) -> Diligent::TextureDesc
 {
-    /** @todo 750 Add mipmaps */
     auto texDesc = Diligent::TextureDesc{
         "",
         Diligent::RESOURCE_DIMENSION::RESOURCE_DIM_TEX_2D,
@@ -115,18 +114,23 @@ auto ToTextureDesc(const nc::asset::Texture& texture, Diligent::TEXTURE_FORMAT f
         format
     };
 
-    texDesc.MipLevels = mipLevels;
+    texDesc.MipLevels = static_cast<uint32_t>(texture.mipmaps.size() + 1);
     texDesc.BindFlags = Diligent::BIND_FLAGS::BIND_SHADER_RESOURCE;
-    if (mipLevels > 1) 
-    {
-        texDesc.MiscFlags = Diligent::MISC_TEXTURE_FLAG_GENERATE_MIPS;
-    }
     return texDesc;
 }
 
-auto ToTextureSubResData(const nc::asset::Texture& texture) -> Diligent::TextureSubResData
+auto ToTextureSubResData(const nc::asset::Texture& texture) -> std::vector<Diligent::TextureSubResData>
 {
-    return Diligent::TextureSubResData{texture.pixelData.data(), texture.width * 4u};
+    const auto mipLevels = static_cast<uint32_t>(1 + texture.mipmaps.size());
+    auto subResources = std::vector<Diligent::TextureSubResData>{};
+    subResources.reserve(mipLevels);
+    subResources.emplace_back(texture.pixelData.data(), texture.width * asset::Texture::numChannels);
+    for (const auto& subResource : texture.mipmaps)
+    {
+        subResources.emplace_back(subResource.pixelData.data(), subResource.width * asset::Texture::numChannels);
+    }
+
+    return subResources;
 }
 
 void SetArrayRegion(Diligent::IShaderResourceVariable* variable, std::span<Diligent::IDeviceObject*> views, size_t offset, size_t count)
@@ -141,54 +145,39 @@ void SetArrayRegion(Diligent::IShaderResourceVariable* variable, std::span<Dilig
 
 void InitializeArray(Diligent::IDeviceContext& context, Diligent::IRenderDevice& device, Diligent::IShaderResourceVariable* variable, uint32_t arraySize, bool transition)
 {
-    auto dummyTexture = asset::TextureWithId
-    {
-        asset::Texture
-        {
-            .width = 1u,
-            .height = 1u,
-            .pixelData = std::vector<unsigned char>{0x1A, 0x2A, 0x3A, 0x4A}
-        },
-        1,
-        asset::AssetSubtype::None
+    const auto dummySubType = asset::AssetSubtype::None;
+    const auto dummyTexture = asset::Texture{
+        .width = 1u,
+        .height = 1u,
+        .pixelData = std::vector<unsigned char>{0x1A, 0x2A, 0x3A, 0x4A}
     };
 
-    auto barriers = std::vector<Diligent::StateTransitionDesc>();
-    barriers.reserve(arraySize);
+    auto subResource = Diligent::TextureSubResData{dummyTexture.pixelData.data(), dummyTexture.width * asset::Texture::numChannels};
+    const auto texData = Diligent::TextureData{&subResource, 1, &context};
+    const auto desc = ToTextureDesc(dummyTexture, ToTextureFormat(dummySubType));
 
-    auto dummyTextures = std::vector<Diligent::RefCntAutoPtr<Diligent::ITexture>>();
-    auto dummyViews = std::vector<Diligent::IDeviceObject*>();
-
-    dummyTextures.reserve(arraySize);
-    dummyViews.reserve(arraySize);
-
-    auto tempDummyVec = std::vector<asset::TextureWithId>(arraySize, dummyTexture);
-
-    for (const auto& [texture, id, flags] : tempDummyVec)
+    auto textureHandle = Diligent::RefCntAutoPtr<Diligent::ITexture>{};
+    device.CreateTexture(desc, &texData, &textureHandle);
+    if (!textureHandle)
     {
-        auto subResource = ToTextureSubResData(texture);
-        auto texData = Diligent::TextureData{&subResource, 1, &context};
-        auto desc = ToTextureDesc(texture, ToTextureFormat(flags));
-        auto& textureHandle = dummyTextures.emplace_back();
-        device.CreateTexture(desc, &texData, &textureHandle);
-        if (!textureHandle)
-        {
-            throw NcError("Failed to create texture");
-        }
-
-        dummyViews.push_back(textureHandle->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE));
-        barriers.emplace_back(
-            textureHandle.RawPtr(),
-            Diligent::RESOURCE_STATE_UNKNOWN,
-            Diligent::RESOURCE_STATE_SHADER_RESOURCE,
-            Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE
-        );
+        throw NcError("Failed to create texture");
     }
 
     if (transition)
     {
+        const auto barrier = Diligent::StateTransitionDesc{
+            textureHandle.RawPtr(),
+            Diligent::RESOURCE_STATE_UNKNOWN,
+            Diligent::RESOURCE_STATE_SHADER_RESOURCE,
+            Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE
+        };
+
+        const auto barriers = std::vector<Diligent::StateTransitionDesc>(arraySize, barrier);
         context.TransitionResourceStates(static_cast<uint32_t>(barriers.size()), barriers.data());
     }
+
+    const auto textureView = textureHandle->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE);
+    auto dummyViews = std::vector<Diligent::IDeviceObject*>(arraySize, textureView);
     SetArrayRegion(variable, std::span<Diligent::IDeviceObject*>(dummyViews), 0u, arraySize);
 }
 } // namespace nc::graphics

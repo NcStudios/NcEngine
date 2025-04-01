@@ -43,6 +43,7 @@ enum class AssetSubtype : uint8_t
  */
 enum class TextureFormat : uint8_t
 {
+    UNKNOWN,          ///< uninitialized value
     RGBA8_UNORM_SRGB, ///< 32-bit unorm sRGB
     RGBA8_UNORM,      ///< 32-bit unorm
     BC1_UNORM_SRGB,   ///< 32-bit unorm sRGB compressed with BC1 (DXT1)

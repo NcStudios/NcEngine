@@ -94,7 +94,14 @@ auto GetBlobSize(const asset::SkeletalAnimation& asset) -> size_t
 
 auto GetBlobSize(const asset::Texture& asset) -> size_t
 {
-    constexpr auto baseSize = sizeof(asset::Texture::width) + sizeof(asset::Texture::height);
-    return baseSize + asset.pixelData.size();
+    constexpr auto baseSize = sizeof(asset::Texture::format) + sizeof(asset::Texture::width) + sizeof(asset::Texture::height) + sizeof(size_t);
+    constexpr auto baseSubResourceSize = sizeof(asset::TextureSubResource::width) + sizeof(asset::TextureSubResource::height);
+    auto size = baseSize + asset.pixelData.size();
+    for (const auto& subResource : asset.mipmaps)
+    {
+        size += baseSubResourceSize + subResource.pixelData.size();
+    }
+
+    return size;
 }
 } // namsepace nc::asset

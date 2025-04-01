@@ -1,5 +1,6 @@
 #include "TextureConverter.h"
 #include "analysis/TextureAnalysis.h"
+#include "utility/EnumExtensions.h"
 #include "utility/Image.h"
 #include "utility/Path.h"
 
@@ -61,12 +62,35 @@ auto TextureConverter::ImportTexture(const std::filesystem::path& path) -> asset
         throw NcError("Invalid input file: ", path.string());
     }
 
+    /** @todo 751 Currently, texture format in the asset is not used and mips are always generated. Should:
+     *            - generate mips only when specified
+     *            - embed actual format in the asset
+     *            - compress if required by format
+     */
     auto image = Image{path};
     auto subresource = image.MakeTextureSubResource();
-    return asset::Texture{
-        subresource.width,
-        subresource.height,
-        std::move(subresource.pixelData)
+    auto texture = asset::Texture{
+        .format = asset::TextureFormat::RGBA8_UNORM_SRGB,
+        .width = subresource.width,
+        .height = subresource.height,
+        .pixelData = std::move(subresource.pixelData),
+        .mipmaps = {},
     };
+
+    const auto minDimension = GetMinimumDimension(texture.format);
+    const auto mipLevels = GetMipLevels(texture.width, texture.height, minDimension);
+    NC_ASSERT(mipLevels >= 1, "Unexpected mipLevels");
+    texture.mipmaps.reserve(mipLevels - 1);
+    auto halfWidth = texture.width;
+    auto halfHeight = texture.height;
+    for (auto i = 1u; i < mipLevels; ++i)
+    {
+        halfWidth = std::max(halfWidth / 2, minDimension);
+        halfHeight = std::max(halfHeight / 2, minDimension);
+        image.Resize(halfWidth, halfHeight);
+        texture.mipmaps.push_back(image.MakeTextureSubResource());
+    }
+
+    return texture;
 }
 } // namespace nc::covnert

@@ -4,6 +4,8 @@
  */
 #pragma once
 
+#include "AssetType.h"
+
 #include "ncmath/Geometry.h"
 #include "DirectXMath.h"
 
@@ -133,9 +135,11 @@ struct Texture
 {
     static constexpr uint32_t numChannels = 4u;
 
-    uint32_t width;
-    uint32_t height;
-    std::vector<unsigned char> pixelData;
+    TextureFormat format = TextureFormat::UNKNOWN;
+    uint32_t width = 0u;
+    uint32_t height = 0u;
+    std::vector<unsigned char> pixelData = {};
+    std::vector<TextureSubResource> mipmaps = {};
 };
 
 struct CubeMap
