@@ -14,8 +14,7 @@ struct PSInput
     float3 UVW;
 };
 
-
-static float4x4 modelMatrix = float4x4(
+static float4x4 localModelMatrix = float4x4(
     100.0f, 0.0f,   0.0f,   0.0f,
     0.0f,   100.0f, 0.0f,   0.0f,
     0.0f,   0.0f,   100.0f, 0.0f,
@@ -24,7 +23,8 @@ static float4x4 modelMatrix = float4x4(
 
 void main(in  VSInput VSIn, uint InstanceID : SV_InstanceID,  out PSInput PSIn)
 {
-    float4 TransformedPos = mul(float4(VSIn.Pos, 1.0), modelMatrix);
+    float4 TransformedPos = mul(float4(VSIn.Pos, 1.0), localModelMatrix);
+    TransformedPos += float4(cameraPosition, 0.0);
     PSIn.Pos = mul(TransformedPos, cameraViewProjection);
     PSIn.UVW  = VSIn.Pos;
 }
