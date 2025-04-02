@@ -69,7 +69,7 @@ auto Builder::Build(asset::AssetType type, const Target& target) -> bool
         }
         case asset::AssetType::CubeMap:
         {
-            const auto asset = m_textureConverter->ImportCubeMap(target.sourcePath);
+            const auto asset = m_textureConverter->ImportCubeMap(target.sourcePath, target.options.textureFormat);
             convert::Serialize(outFile, asset, asset::currentVersion);
             return true;
         }

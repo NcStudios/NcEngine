@@ -69,10 +69,10 @@ auto GetBlobSize(const asset::MeshCollider& asset) -> size_t
     return baseSize + asset.blob.size() * sizeof(uint8_t);
 }
 
-auto GetBlobSize(const asset::CubeMap& asset) -> size_t
+auto GetBlobSize(const asset::CubeMap&) -> size_t
 {
-    constexpr auto baseSize = sizeof(asset::CubeMap::faceSideLength);
-    return baseSize + asset.pixelData.size();
+    return 0;
+    // return baseSize + asset.pixelData.size();
 }
 
 auto GetBlobSize(const asset::ConvexHull& asset) -> size_t

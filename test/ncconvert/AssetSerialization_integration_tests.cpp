@@ -404,14 +404,15 @@ TEST(AssetSerializationTest, CubeMap_roundTrip_succeeds)
 {
     constexpr auto version = nc::asset::currentVersion;
     const auto expectedAsset = nc::asset::CubeMap{
+        .format = nc::asset::TextureFormat::BC3_UNORM_SRGB,
         .faceSideLength = 1,
-        .pixelData = std::vector<unsigned char>{
-            0xA1, 0xA2, 0xA3, 0xA4, // front
-            0xB1, 0xB2, 0xB3, 0xB4, // back
-            0xC1, 0xC2, 0xC3, 0xC4, // up
-            0xD1, 0xD2, 0xD3, 0xD4, // down
-            0xE1, 0xE2, 0xE3, 0xE4, // right
-            0xF1, 0xF2, 0xF3, 0xF4,  // left
+        .faces = {
+            std::vector<unsigned char>{ 0xA1, 0xA2, 0xA3, 0xA4 }, // front
+            std::vector<unsigned char>{ 0xB1, 0xB2, 0xB3, 0xB4 }, // back
+            std::vector<unsigned char>{ 0xC1, 0xC2, 0xC3, 0xC4 }, // up
+            std::vector<unsigned char>{ 0xD1, 0xD2, 0xD3, 0xD4 }, // down
+            std::vector<unsigned char>{ 0xE1, 0xE2, 0xE3, 0xE4 }, // right
+            std::vector<unsigned char>{ 0xF1, 0xF2, 0xF3, 0xF4 }  // left
         }
     };
 
@@ -424,12 +425,13 @@ TEST(AssetSerializationTest, CubeMap_roundTrip_succeeds)
     EXPECT_EQ(nc::convert::GetBlobSize(expectedAsset), actualHeader.size);
     EXPECT_STREQ("NONE", actualHeader.compressionAlgorithm);
 
+    EXPECT_EQ(expectedAsset.format, actualAsset.format);
     EXPECT_EQ(expectedAsset.faceSideLength, actualAsset.faceSideLength);
-    ASSERT_EQ(expectedAsset.pixelData.size(), actualAsset.pixelData.size());
 
-    EXPECT_TRUE(std::equal(expectedAsset.pixelData.cbegin(),
-                           expectedAsset.pixelData.cend(),
-                           actualAsset.pixelData.cbegin()));
+    for (const auto [expectedFace, actualFace] : std::views::zip(expectedAsset.faces, actualAsset.faces))
+    {
+        EXPECT_TRUE(std::ranges::equal(expectedFace, actualFace));
+    }
 }
 
 TEST(AssetSerializationTest, SkeletalAnimation_roundTrip_succeeds)

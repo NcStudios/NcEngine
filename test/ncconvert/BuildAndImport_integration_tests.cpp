@@ -220,19 +220,32 @@ TEST_F(BuildAndImportTest, CubeMap_from_png)
     namespace test_data = collateral::cube_map;
     const auto inFile = test_data::horizontalCrossFilePath;
     const auto outFile = ncaTestOutDirectory / "cube_map.nca";
-    const auto target = nc::convert::Target{inFile, outFile};
+    const auto format = nc::asset::TextureFormat::RGBA8_UNORM_SRGB;
+    const auto target = nc::convert::Target{
+        inFile,
+        outFile,
+        std::nullopt,
+        nc::convert::TargetOptions{
+            .textureFormat = format
+        }
+    };
+
     auto builder = nc::convert::Builder{};
     ASSERT_TRUE(builder.Build(nc::asset::AssetType::CubeMap, target));
 
     const auto asset = nc::asset::ImportCubeMap(outFile);
 
+    EXPECT_EQ(asset.format, format);
     EXPECT_EQ(asset.faceSideLength, test_data::faceSideLength);
-    ASSERT_EQ(asset.pixelData.size(), test_data::numBytes);
 
-    for (auto pixelIndex = 0u; pixelIndex < test_data::numPixels; ++pixelIndex)
+    for (const auto [expectedFace, actualFace] : std::views::zip(test_data::faces, asset.faces))
     {
-        const auto expectedPixel = test_data::pixels[pixelIndex];
-        const auto actualPixel = ReadPixel(asset.pixelData.data(), pixelIndex * 4);
-        EXPECT_EQ(expectedPixel, actualPixel);
+        ASSERT_EQ(expectedFace.size() * 4, actualFace.size());
+        for (auto pixelIndex = 0u; pixelIndex < expectedFace.size(); ++pixelIndex)
+        {
+            const auto expectedPixel = expectedFace.at(pixelIndex);
+            const auto actualPixel = ReadPixel(actualFace.data(), pixelIndex * 4);
+            EXPECT_EQ(expectedPixel, actualPixel);
+        }
     }
 }
