@@ -131,4 +131,4 @@ auto TextureConverter::ImportTexture(const std::filesystem::path& path,
 
     return texture;
 }
-} // namespace nc::covnert
+} // namespace nc::convert
