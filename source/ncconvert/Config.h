@@ -66,5 +66,21 @@ struct Config
      * @note Specific to generate mode.
      */
     std::string rootNamespace = "nc";
+
+    /**
+     * @brief Texture format
+     * @note Specific to single target mode with textures.
+     */
+    asset::TextureFormat textureFormat = asset::TextureFormat::RGBA8_UNORM_SRGB;
+
+    /**
+     * @brief Processing flags
+     * @note Specific to single target mode with meshes or textures.
+     */
+    union
+    {
+        bool optimizeMesh = false;
+        bool generateMips;
+    };
 };
 } // namespace nc::convert

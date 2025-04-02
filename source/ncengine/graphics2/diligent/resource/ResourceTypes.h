@@ -85,10 +85,10 @@ auto GetVariable(const ResourceDesc& desc, Diligent::IShaderResourceBinding* srb
     return GetVariable(desc.shaderType, desc.resourceKey.data(), srb);
 }
 
-auto ToTextureFormat(nc::asset::AssetSubtype subtype) -> Diligent::TEXTURE_FORMAT;
+auto ToTextureFormat(nc::asset::TextureFormat format) -> Diligent::TEXTURE_FORMAT;
+auto ToTextureDesc(const nc::asset::Texture& texture) -> Diligent::TextureDesc;
 auto ToTextureCubeDesc(const nc::asset::CubeMap& desc) -> Diligent::TextureDesc;
 auto ToTextureCubeDesc(const nc::graphics::CubeSinkBufferResourceDesc& desc, uint32_t width, uint32_t height) -> Diligent::TextureDesc;
-auto ToTextureDesc(const nc::asset::Texture& texture, Diligent::TEXTURE_FORMAT format) -> Diligent::TextureDesc;
 auto ToTextureSubResData(const nc::asset::Texture& texture) -> std::vector<Diligent::TextureSubResData>;
 void SetArrayRegion(Diligent::IShaderResourceVariable* variable, std::span<Diligent::IDeviceObject*> views, size_t offset, size_t count);
 void InitializeCubeArray(Diligent::IDeviceContext& context, Diligent::IRenderDevice& device, Diligent::IShaderResourceVariable* variable, uint32_t arraySize, bool transition);

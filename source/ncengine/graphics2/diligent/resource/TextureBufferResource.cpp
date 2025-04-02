@@ -28,8 +28,8 @@ auto TextureBufferResource::MakeSamplerDesc(std::string_view variableName) -> Di
 }
 
 void TextureBufferResource::Load(std::span<const asset::TextureWithId> textures,
-                                       Diligent::IDeviceContext& context,
-                                       Diligent::IRenderDevice& device)
+                                 Diligent::IDeviceContext& context,
+                                 Diligent::IRenderDevice& device)
 {
     if (!m_initialLoadComplete)
     {
@@ -58,7 +58,7 @@ void TextureBufferResource::Load(std::span<const asset::TextureWithId> textures,
         auto mipSubResources = ToTextureSubResData(texture);
         const auto mipLevels = static_cast<uint32_t>(mipSubResources.size());
         auto texData = Diligent::TextureData{mipSubResources.data(), mipLevels, &context};
-        auto desc = ToTextureDesc(texture, ToTextureFormat(flags));
+        auto desc = ToTextureDesc(texture);
         auto& textureHandle = m_textures.emplace_back();
         device.CreateTexture(desc, &texData, &textureHandle);
         if (!textureHandle)

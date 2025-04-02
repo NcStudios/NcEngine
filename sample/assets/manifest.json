@@ -1,6 +1,25 @@
 {
     "globalOptions": {
-        "outputDirectory": "./nca"
+        "outputDirectory": "./nca",
+        "defaultMeshOptions": {
+            "optimizeMesh": true
+        },
+        "defaultDiffuseTextureOptions": {
+            "textureFormat": "BC3_UNORM_SRGB",
+            "generateMips": true
+        },
+        "defaultNormalTextureOptions": {
+            "textureFormat": "BC3_UNORM",
+            "generateMips": true
+        },
+        "defaultParticleTextureOptions": {
+            "textureFormat": "BC3_UNORM_SRGB",
+            "generateMips": false
+        },
+        "defaultEffectTextureOptions": {
+            "textureFormat": "BC3_UNORM_SRGB",
+            "generateMips": false
+        }
     },
     "audio-clip": [
         {
@@ -27,45 +46,27 @@
     "mesh": [
         {
             "sourcePath": "raw/model/cave.fbx",
-            "assetName": "mesh/cave",
-            "options": {
-                "optimizeMesh": true
-            }
+            "assetName": "mesh/cave"
         },
         {
             "sourcePath": "raw/model/guy2.fbx",
-            "assetName": "mesh/guy2",
-            "options": {
-                "optimizeMesh": true
-            }
+            "assetName": "mesh/guy2"
         },
         {
             "sourcePath": "raw/model/halfpipe.fbx",
-            "assetName": "mesh/halfpipe",
-            "options": {
-                "optimizeMesh": true
-            }
+            "assetName": "mesh/halfpipe"
         },
         {
             "sourcePath": "raw/model/ogre.fbx",
-            "assetName": "mesh/ogre",
-            "options": {
-                "optimizeMesh": true
-            }
+            "assetName": "mesh/ogre"
         },
         {
             "sourcePath": "raw/model/ramp.fbx",
-            "assetName": "mesh/ramp",
-            "options": {
-                "optimizeMesh": true
-            }
+            "assetName": "mesh/ramp"
         },
         {
             "sourcePath": "raw/model/skeleton.fbx",
-            "assetName": "mesh/skeleton",
-            "options": {
-                "optimizeMesh": true
-            }
+            "assetName": "mesh/skeleton"
         }
     ],
     "mesh-collider": [
@@ -189,7 +190,10 @@
         "effect" : [
             {
                 "sourcePath": "raw/image/effect/linear_hatch.png",
-                "assetName": "texture/effect/linear_hatch.nca"
+                "assetName": "texture/effect/linear_hatch.nca",
+                "options": {
+                    "generateMips": true
+                }
             },
             {
                 "sourcePath": "raw/image/effect/noise.png",

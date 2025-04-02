@@ -4,6 +4,8 @@
 
 #include "TextureLoader.h"
 
+#include <utility>
+
 namespace
 {
 /* The PipelineResourceDesc needs to specify all used shader stages, but when we get the variable by name you must specify only one of the stages. */
@@ -108,11 +110,38 @@ auto GetVariable(Diligent::SHADER_TYPE shaderType, const char* name, Diligent::I
     return *var;
 }
 
-auto ToTextureFormat(nc::asset::AssetSubtype subtype) -> Diligent::TEXTURE_FORMAT
+auto ToTextureFormat(nc::asset::TextureFormat format) -> Diligent::TEXTURE_FORMAT
 {
-    return subtype == nc::asset::AssetSubtype::NormalTexture
-        ? Diligent::TEX_FORMAT_RGBA8_UNORM
-        : Diligent::TEX_FORMAT_RGBA8_UNORM_SRGB;
+    using enum nc::asset::TextureFormat;
+    switch (format)
+    {
+        case RGBA8_UNORM_SRGB: return Diligent::TEX_FORMAT_RGBA8_UNORM_SRGB;
+        case RGBA8_UNORM:      return Diligent::TEX_FORMAT_RGBA8_UNORM;
+        case BC1_UNORM_SRGB:   return Diligent::TEX_FORMAT_BC1_UNORM_SRGB;
+        case BC1_UNORM:        return Diligent::TEX_FORMAT_BC1_UNORM;
+        case BC3_UNORM_SRGB:   return Diligent::TEX_FORMAT_BC3_UNORM_SRGB;
+        case BC3_UNORM:        return Diligent::TEX_FORMAT_BC3_UNORM;
+        case UNKNOWN:          break;
+    }
+
+    NC_ASSERT(false, fmt::format("Unknown TextureFormat '{}'", std::to_underlying(format)));
+    std::unreachable();
+}
+
+auto ToTextureDesc(const nc::asset::Texture& texture) -> Diligent::TextureDesc
+{
+    auto texDesc = Diligent::TextureDesc{
+        "",
+        Diligent::RESOURCE_DIMENSION::RESOURCE_DIM_TEX_2D,
+        texture.width,
+        texture.height,
+        1,
+        ToTextureFormat(texture.format)
+    };
+
+    texDesc.MipLevels = static_cast<uint32_t>(texture.mipmaps.size() + 1);
+    texDesc.BindFlags = Diligent::BIND_FLAGS::BIND_SHADER_RESOURCE;
+    return texDesc;
 }
 
 auto ToTextureCubeDesc(const nc::asset::CubeMap& desc) -> Diligent::TextureDesc
@@ -130,8 +159,8 @@ auto ToTextureCubeDesc(const nc::asset::CubeMap& desc) -> Diligent::TextureDesc
 }
 
 auto ToTextureCubeDesc(const nc::graphics::CubeSinkBufferResourceDesc& desc,
-    uint32_t width,
-    uint32_t height) -> Diligent::TextureDesc
+                       uint32_t width,
+                       uint32_t height) -> Diligent::TextureDesc
 {
     Diligent::TextureDesc textureDesc{};
     textureDesc.Type = Diligent::RESOURCE_DIM_TEX_CUBE;
@@ -144,22 +173,6 @@ auto ToTextureCubeDesc(const nc::graphics::CubeSinkBufferResourceDesc& desc,
     textureDesc.ClearValue = desc.clearValue;
     textureDesc.SampleCount = 1;
     return textureDesc;
-}
-
-auto ToTextureDesc(const nc::asset::Texture& texture, Diligent::TEXTURE_FORMAT format) -> Diligent::TextureDesc
-{
-    auto texDesc = Diligent::TextureDesc{
-        "",
-        Diligent::RESOURCE_DIMENSION::RESOURCE_DIM_TEX_2D,
-        texture.width,
-        texture.height,
-        1,
-        format
-    };
-
-    texDesc.MipLevels = static_cast<uint32_t>(texture.mipmaps.size() + 1);
-    texDesc.BindFlags = Diligent::BIND_FLAGS::BIND_SHADER_RESOURCE;
-    return texDesc;
 }
 
 auto ToTextureSubResData(const nc::asset::Texture& texture) -> std::vector<Diligent::TextureSubResData>
@@ -188,26 +201,16 @@ void SetArrayRegion(Diligent::IShaderResourceVariable* variable, std::span<Dilig
 
 void InitializeCubeArray(Diligent::IDeviceContext& context, Diligent::IRenderDevice& device, Diligent::IShaderResourceVariable* variable, uint32_t arraySize, bool transition)
 {
-    auto dummyCubeMap = asset::CubeMapWithId
-    {
-        asset::CubeMap
-        {
-            .faceSideLength = 1u,
-            .pixelData = std::vector<unsigned char> {0x1A, 0x2A, 0x3A, 0x4A}
-        },
-        1
+    const auto dummyCubeMap = asset::CubeMap{
+        .faceSideLength = 1u,
+        .pixelData = std::vector<unsigned char> {0x1A, 0x2A, 0x3A, 0x4A}
     };
 
-    auto faceSubResources = std::vector<Diligent::TextureSubResData>{6};
+    auto face = Diligent::TextureSubResData{dummyCubeMap.pixelData.data(), dummyCubeMap.faceSideLength * asset::CubeMap::numChannels};
+    auto faceSubResources = std::array{face, face, face, face, face, face};
+    const auto dummyCubeMapTexData = Diligent::TextureData{faceSubResources.data(), 6, &context};
+    const auto dummyCubeMapDesc = ToTextureCubeDesc(dummyCubeMap);
     auto dummyCubeMapTex = Diligent::RefCntAutoPtr<Diligent::ITexture>();
-
-    for (auto& face : faceSubResources)
-    {
-        face = Diligent::TextureSubResData{dummyCubeMap.cubeMap.pixelData.data(), dummyCubeMap.cubeMap.faceSideLength * asset::CubeMap::numChannels};
-    }
-
-    auto dummyCubeMapTexData = Diligent::TextureData{faceSubResources.data(), 6, &context};
-    auto dummyCubeMapDesc = ToTextureCubeDesc(dummyCubeMap.cubeMap);
     device.CreateTexture(dummyCubeMapDesc, &dummyCubeMapTexData, &dummyCubeMapTex);
 
     if (!dummyCubeMapTex)
@@ -224,20 +227,18 @@ void InitializeCubeArray(Diligent::IDeviceContext& context, Diligent::IRenderDev
             Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE
         };
 
-        const auto barriers = std::vector<Diligent::StateTransitionDesc>(arraySize, barrier);
-        context.TransitionResourceStates(static_cast<uint32_t>(barriers.size()), barriers.data());
+        context.TransitionResourceStates(1u, &barrier);
     }
 
-    auto dummyCubeMapView = dummyCubeMapTex->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE);
+    const auto dummyCubeMapView = dummyCubeMapTex->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE);
     auto dummyViews = std::vector<Diligent::IDeviceObject*>(arraySize, dummyCubeMapView);
-
     SetArrayRegion(variable, std::span<Diligent::IDeviceObject*>(dummyViews), 0u, arraySize);
 }
 
 void InitializeArray(Diligent::IDeviceContext& context, Diligent::IRenderDevice& device, Diligent::IShaderResourceVariable* variable, uint32_t arraySize, bool transition)
 {
-    const auto dummySubType = asset::AssetSubtype::None;
     const auto dummyTexture = asset::Texture{
+        .format = asset::TextureFormat::RGBA8_UNORM_SRGB,
         .width = 1u,
         .height = 1u,
         .pixelData = std::vector<unsigned char>{0x1A, 0x2A, 0x3A, 0x4A}
@@ -245,7 +246,7 @@ void InitializeArray(Diligent::IDeviceContext& context, Diligent::IRenderDevice&
 
     auto subResource = Diligent::TextureSubResData{dummyTexture.pixelData.data(), dummyTexture.width * asset::Texture::numChannels};
     const auto texData = Diligent::TextureData{&subResource, 1, &context};
-    const auto desc = ToTextureDesc(dummyTexture, ToTextureFormat(dummySubType));
+    const auto desc = ToTextureDesc(dummyTexture);
 
     auto textureHandle = Diligent::RefCntAutoPtr<Diligent::ITexture>{};
     device.CreateTexture(desc, &texData, &textureHandle);
@@ -263,8 +264,7 @@ void InitializeArray(Diligent::IDeviceContext& context, Diligent::IRenderDevice&
             Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE
         };
 
-        const auto barriers = std::vector<Diligent::StateTransitionDesc>(arraySize, barrier);
-        context.TransitionResourceStates(static_cast<uint32_t>(barriers.size()), barriers.data());
+        context.TransitionResourceStates(1u, &barrier);
     }
 
     const auto textureView = textureHandle->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE);

@@ -97,7 +97,7 @@ auto Builder::Build(asset::AssetType type, const Target& target) -> bool
         }
         case asset::AssetType::Texture:
         {
-            const auto asset = m_textureConverter->ImportTexture(target.sourcePath);
+            const auto asset = m_textureConverter->ImportTexture(target.sourcePath, target.options.textureFormat, target.options.generateMips);
             convert::Serialize(outFile, asset, asset::currentVersion);
             return true;
         }

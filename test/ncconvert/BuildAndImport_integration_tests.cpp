@@ -40,15 +40,27 @@ TEST_F(BuildAndImportTest, Texture_from_png)
     namespace test_data = collateral::rgb_corners;
     const auto inFile = test_data::pngFilePath;
     const auto outFile = ncaTestOutDirectory / "rgb_png.nca";
-    const auto target = nc::convert::Target{inFile, outFile};
+    const auto format = nc::asset::TextureFormat::RGBA8_UNORM;
+    const auto target = nc::convert::Target{
+        inFile,
+        outFile,
+        std::nullopt,
+        nc::convert::TargetOptions{
+            .textureFormat = format,
+            .generateMips = true
+        }
+    };
+
     auto builder = nc::convert::Builder{};
     ASSERT_TRUE(builder.Build(nc::asset::AssetType::Texture, target));
 
     const auto asset = nc::asset::ImportTexture(outFile);
 
+    EXPECT_EQ(format, asset.format);
     EXPECT_EQ(test_data::width, asset.width);
     EXPECT_EQ(test_data::height, asset.height);
     ASSERT_EQ(test_data::numBytes, asset.pixelData.size());
+    EXPECT_FALSE(asset.mipmaps.empty());
 
     for (auto pixelIndex = 0u; pixelIndex < test_data::numPixels; ++pixelIndex)
     {

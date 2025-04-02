@@ -123,6 +123,26 @@ auto ParseArgs(int argc, char** argv, nc::convert::Config* out, const char** usa
         {
             out->rootNamespace = std::string{argv[current++]};
         }
+        else if (option == "-f")
+        {
+            out->textureFormat = nc::convert::ToTextureFormat(argv[current++]);
+        }
+        else if (option == "-p")
+        {
+            const auto processingOption = std::string_view{argv[current++]};
+            if (processingOption == "optimize")
+            {
+                out->optimizeMesh = true;
+            }
+            else if (processingOption == "generateMips")
+            {
+                out->generateMips = true;
+            }
+            else
+            {
+                return false;
+            }
+        }
         else
         {
             return false;
