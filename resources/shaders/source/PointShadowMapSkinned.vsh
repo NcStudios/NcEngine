@@ -20,8 +20,6 @@ struct PSInput
 };
 
 StructuredBuffer<TransformData> Transforms;
-StructuredBuffer<LightData> Lights;
-StructuredBuffer<LightMatrix> LightMatrices;
 
 // todo: #802 Define this at compile time
 #define ENABLE_SKINNING 1

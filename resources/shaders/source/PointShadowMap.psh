@@ -22,7 +22,6 @@ struct PSOutput
 };
 
 StructuredBuffer<TransformData> Transforms;
-StructuredBuffer<LightData> Lights;
 StructuredBuffer<StaticMeshInstanceData> StaticInstances;
 
 void main(in PSInput PSIn, out PSOutput PSOut)
