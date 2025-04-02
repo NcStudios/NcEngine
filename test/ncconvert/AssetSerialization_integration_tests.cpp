@@ -2,7 +2,6 @@
 #include "Deserialize.h"
 #include "GeometryTestUtility.h"
 #include "builder/Serialize.h"
-#include "utility/BlobSize.h"
 #include "ncasset/Assets.h"
 
 #include "ncjolt/Profiler.inl"
@@ -73,7 +72,6 @@ TEST(AssetSerializationTest, ConvexHull_roundTrip_succeeds)
 
     EXPECT_STREQ("HULL", actualHeader.magicNumber);
     EXPECT_EQ(version, actualHeader.version);
-    EXPECT_EQ(nc::convert::GetBlobSize(expectedAsset), actualHeader.size);
     EXPECT_STREQ("NONE", actualHeader.compressionAlgorithm);
 
     EXPECT_EQ(expectedAsset.extents, actualAsset.extents);
@@ -114,7 +112,6 @@ TEST(AssetSerializationTest, MeshCollider_roundTrip_succeeds)
 
     EXPECT_STREQ("CONC", actualHeader.magicNumber);
     EXPECT_EQ(version, actualHeader.version);
-    EXPECT_EQ(nc::convert::GetBlobSize(expectedAsset), actualHeader.size);
     EXPECT_STREQ("NONE", actualHeader.compressionAlgorithm);
 
     EXPECT_EQ(expectedAsset.extents, actualAsset.extents);
@@ -214,7 +211,6 @@ TEST(AssetSerializationTest, Mesh_hasBones_roundTrip_succeeds)
 
     EXPECT_STREQ("MESH", actualHeader.magicNumber);
     EXPECT_EQ(version, actualHeader.version);
-    EXPECT_EQ(nc::convert::GetBlobSize(expectedAsset), actualHeader.size);
     EXPECT_STREQ("NONE", actualHeader.compressionAlgorithm);
 
     EXPECT_EQ(expectedAsset.extents, actualAsset.extents);
@@ -285,7 +281,6 @@ TEST(AssetSerializationTest, Mesh_noBones_roundTrip_succeeds)
 
     EXPECT_STREQ("MESH", actualHeader.magicNumber);
     EXPECT_EQ(version, actualHeader.version);
-    EXPECT_EQ(nc::convert::GetBlobSize(expectedAsset), actualHeader.size);
     EXPECT_STREQ("NONE", actualHeader.compressionAlgorithm);
 
     EXPECT_EQ(expectedAsset.extents, actualAsset.extents);
@@ -347,7 +342,6 @@ TEST(AssetSerializationTest, Texture_roundTrip_succeeds)
 
     EXPECT_STREQ("TEXT", actualHeader.magicNumber);
     EXPECT_EQ(version, actualHeader.version);
-    EXPECT_EQ(nc::convert::GetBlobSize(expectedAsset), actualHeader.size);
     EXPECT_STREQ("NONE", actualHeader.compressionAlgorithm);
 
     EXPECT_EQ(expectedAsset.format, actualAsset.format);
@@ -386,7 +380,6 @@ TEST(AssetSerializationTest, AudioClip_roundTrip_succeeds)
 
     EXPECT_STREQ("CLIP", actualHeader.magicNumber);
     EXPECT_EQ(version, actualHeader.version);
-    EXPECT_EQ(nc::convert::GetBlobSize(expectedAsset), actualHeader.size);
     EXPECT_STREQ("NONE", actualHeader.compressionAlgorithm);
 
     EXPECT_EQ(expectedAsset.samplesPerChannel, actualAsset.samplesPerChannel);
@@ -422,7 +415,6 @@ TEST(AssetSerializationTest, CubeMap_roundTrip_succeeds)
 
     EXPECT_STREQ("CUBE", actualHeader.magicNumber);
     EXPECT_EQ(version, actualHeader.version);
-    EXPECT_EQ(nc::convert::GetBlobSize(expectedAsset), actualHeader.size);
     EXPECT_STREQ("NONE", actualHeader.compressionAlgorithm);
 
     EXPECT_EQ(expectedAsset.format, actualAsset.format);

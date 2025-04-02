@@ -201,30 +201,23 @@ void SetArrayRegion(Diligent::IShaderResourceVariable* variable, std::span<Dilig
 
 void InitializeCubeArray(Diligent::IDeviceContext& context, Diligent::IRenderDevice& device, Diligent::IShaderResourceVariable* variable, uint32_t arraySize, bool transition)
 {
-    auto faceSideLength = 1u;
-    auto pixelData = std::vector<unsigned char> {0x1A, 0x2A, 0x3A, 0x4A};
+    const auto dummyCubeMap = asset::CubeMap{
+        .format = asset::TextureFormat::RGBA8_UNORM_SRGB,
+        .faceSideLength = 1u,
+        .faces = {
+            std::vector<unsigned char> {0x1A, 0x2A, 0x3A, 0x4A}, // just reuse same face below
+            {}, {}, {}, {}, {},
+        }
+    };
 
-    auto face = Diligent::TextureSubResData{pixelData.data(), faceSideLength * asset::CubeMap::numChannels};
+    auto face = Diligent::TextureSubResData{
+        dummyCubeMap.faces.at(0).data(),
+        dummyCubeMap.faceSideLength * asset::CubeMap::numChannels
+    };
+
     auto faceSubResources = std::array{face, face, face, face, face, face};
     const auto dummyCubeMapTexData = Diligent::TextureData{faceSubResources.data(), 6, &context};
-    
-    
-    
-    // TODO: could clean
-    // const auto dummyCubeMapDesc = ToTextureCubeDesc(dummyCubeMap);
-    Diligent::TextureDesc dummyCubeMapDesc{};
-    dummyCubeMapDesc.Type = Diligent::RESOURCE_DIM_TEX_CUBE;
-    dummyCubeMapDesc.ArraySize = 6; // ArrayLayers
-    dummyCubeMapDesc.Width = faceSideLength;
-    dummyCubeMapDesc.Height = faceSideLength;
-    dummyCubeMapDesc.MipLevels = 1;
-    dummyCubeMapDesc.Format = Diligent::TEX_FORMAT_RGBA8_UNORM_SRGB;
-    dummyCubeMapDesc.BindFlags = Diligent::BIND_SHADER_RESOURCE;
-    dummyCubeMapDesc.SampleCount = 1;
-    
-    
-    
-    
+    const auto dummyCubeMapDesc = ToTextureCubeDesc(dummyCubeMap);
     auto dummyCubeMapTex = Diligent::RefCntAutoPtr<Diligent::ITexture>();
     device.CreateTexture(dummyCubeMapDesc, &dummyCubeMapTexData, &dummyCubeMapTex);
 

@@ -47,15 +47,6 @@ const auto verticalCrossFilePath = collateralDirectory / "cube_map_vertical_cros
 constexpr auto faceSideLength = 2u;
 constexpr auto numPixels = faceSideLength * faceSideLength * 6u;
 constexpr auto numBytes = numPixels * 4u;
-// This is the final CubeMap representation, not what is appears in the file
-// constexpr auto faces = std::array<std::array<uint32_t, 4>, 6>{
-//     { white, white, white, white },
-//     { black, black, black, black },
-//     { blue,  blue,  blue,  blue  },
-//     { clear, clear, clear, clear },
-//     { red,   red,   red,   red   },
-//     { green, green, green, green }
-// };
 constexpr auto frontFacePixels = std::array<uint32_t, 4>{white, white, white, white};
 constexpr auto backFacePixels = std::array<uint32_t, 4>{black, black, black, black};
 constexpr auto topFacePixels = std::array<uint32_t, 4>{blue, blue, blue, blue};
