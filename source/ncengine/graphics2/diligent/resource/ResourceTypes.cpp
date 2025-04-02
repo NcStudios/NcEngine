@@ -198,47 +198,39 @@ void InitializeCubeArray(Diligent::IDeviceContext& context, Diligent::IRenderDev
         1
     };
 
-    auto barriers = std::vector<Diligent::StateTransitionDesc>();
-    barriers.reserve(arraySize);
+    auto faceSubResources = std::vector<Diligent::TextureSubResData>{6};
+    auto dummyCubeMapTex = Diligent::RefCntAutoPtr<Diligent::ITexture>();
 
-    auto dummyCubeMaps = std::vector<Diligent::RefCntAutoPtr<Diligent::ITexture>>();
-    auto dummyViews = std::vector<Diligent::IDeviceObject*>();
-
-    dummyCubeMaps.reserve(arraySize);
-    dummyViews.reserve(arraySize);
-
-    auto tempDummyVec = std::vector<asset::CubeMapWithId>(arraySize, dummyCubeMap);
-
-    for (const auto& [cubeMap, id] : tempDummyVec)
+    for (auto& face : faceSubResources)
     {
-        auto faceSubResources = std::vector<Diligent::TextureSubResData>{6};
-        for (auto& face : faceSubResources)
-        {
-            face = Diligent::TextureSubResData{cubeMap.pixelData.data(), cubeMap.faceSideLength * 4u};
-        }
-        auto texData = Diligent::TextureData{faceSubResources.data(), 6, &context};
-        auto desc = ToTextureCubeDesc(cubeMap);
-        auto& cubeMapTextureHandle = dummyCubeMaps.emplace_back();
-        device.CreateTexture(desc, &texData, &cubeMapTextureHandle);
+        face = Diligent::TextureSubResData{dummyCubeMap.cubeMap.pixelData.data(), dummyCubeMap.cubeMap.faceSideLength * asset::CubeMap::numChannels};
+    }
 
-        if (!cubeMapTextureHandle)
-        {
-            throw NcError("Failed to create texture");
-        }
+    auto dummyCubeMapTexData = Diligent::TextureData{faceSubResources.data(), 6, &context};
+    auto dummyCubeMapDesc = ToTextureCubeDesc(dummyCubeMap.cubeMap);
+    device.CreateTexture(dummyCubeMapDesc, &dummyCubeMapTexData, &dummyCubeMapTex);
 
-        dummyViews.push_back(cubeMapTextureHandle->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE));
-        barriers.emplace_back(
-            cubeMapTextureHandle.RawPtr(),
-            Diligent::RESOURCE_STATE_UNKNOWN,
-            Diligent::RESOURCE_STATE_SHADER_RESOURCE,
-            Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE
-        );
+    if (!dummyCubeMapTex)
+    {
+        throw NcError("Failed to create texture");
     }
 
     if (transition)
     {
+        const auto barrier = Diligent::StateTransitionDesc{
+            dummyCubeMapTex.RawPtr(),
+            Diligent::RESOURCE_STATE_UNKNOWN,
+            Diligent::RESOURCE_STATE_SHADER_RESOURCE,
+            Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE
+        };
+
+        const auto barriers = std::vector<Diligent::StateTransitionDesc>(arraySize, barrier);
         context.TransitionResourceStates(static_cast<uint32_t>(barriers.size()), barriers.data());
     }
+
+    auto dummyCubeMapView = dummyCubeMapTex->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE);
+    auto dummyViews = std::vector<Diligent::IDeviceObject*>(arraySize, dummyCubeMapView);
+
     SetArrayRegion(variable, std::span<Diligent::IDeviceObject*>(dummyViews), 0u, arraySize);
 }
 

@@ -418,11 +418,11 @@ void NcGraphicsImpl2::SetPostProcessEffectProperties(PostProcessEffectId effectI
 void NcGraphicsImpl2::OnBeforeSceneLoad()
 {
     m_frontend.OnBeforeSceneLoad();
-    ClearEnvironment();
 }
 
 void NcGraphicsImpl2::Clear() noexcept
 {
+    ClearEnvironment();
     m_frontend.Clear();
 }
 

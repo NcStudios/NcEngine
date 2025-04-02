@@ -281,20 +281,21 @@ void PassBackend::RenderSkybox(Diligent::IDeviceContext& context,
     auto* colorTargetTexture = perPassResourceSignature.GetColorSinksResource().GetTexture(m_skyboxPass->sinks.color);
     auto* depthTargetTexture = perPassResourceSignature.GetDepthSinksResource().GetTexture(m_skyboxPass->sinks.depth);
 
-    auto barriers = std::vector<Diligent::StateTransitionDesc>();
-    barriers.reserve(2);
-    barriers.emplace_back(
-        colorTargetTexture,
-        Diligent::RESOURCE_STATE_UNKNOWN,
-        Diligent::RESOURCE_STATE_RENDER_TARGET,
-        Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE
-    );
-    barriers.emplace_back(
-        depthTargetTexture,
-        Diligent::RESOURCE_STATE_UNKNOWN,
-        Diligent::RESOURCE_STATE_DEPTH_WRITE,
-        Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE
-    );
+    auto barriers = std::array<Diligent::StateTransitionDesc, 2>
+    {
+        Diligent::StateTransitionDesc(
+            colorTargetTexture,
+            Diligent::RESOURCE_STATE_UNKNOWN,
+            Diligent::RESOURCE_STATE_RENDER_TARGET,
+            Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE
+        ),
+        Diligent::StateTransitionDesc(
+            depthTargetTexture,
+            Diligent::RESOURCE_STATE_UNKNOWN,
+            Diligent::RESOURCE_STATE_DEPTH_WRITE,
+            Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE
+        )
+    };
     context.TransitionResourceStates(static_cast<uint32_t>(barriers.size()), barriers.data());
 
     colorTargetTexture->SetState(Diligent::RESOURCE_STATE_UNKNOWN); // Disables automatic resource state management for just this texture.
