@@ -6,6 +6,8 @@ cbuffer EnvironmentProperties
     uint lightCount;
     float nearClip;
     float farClip;
+    uint skyboxIndex;
+    uint useSkybox;
 };
 
 struct StaticMeshInstanceData

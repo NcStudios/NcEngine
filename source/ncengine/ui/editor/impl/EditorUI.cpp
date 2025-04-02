@@ -41,7 +41,8 @@ EditorUI::EditorUI(EditorContext& ctx)
       m_newSceneDialog{ctx.modules.Get<NcScene>()},
       m_saveSceneDialog{ctx.world},
       m_loadSceneDialog{ctx.world, ctx.modules.Get<NcScene>()},
-      m_postProcessDialog{}
+      m_postProcessDialog{},
+      m_environmentDialog{}
 {
 }
 
@@ -127,6 +128,8 @@ void EditorUI::DrawDialogs(EditorContext& ctx)
         m_loadSceneDialog.Draw(ctx);
     else if (m_postProcessDialog.IsOpen())
         m_postProcessDialog.Draw(ctx.dimensions);
+    else if (m_environmentDialog.IsOpen())
+        m_environmentDialog.Draw(ctx.dimensions);
 }
 
 void EditorUI::DrawMenu(EditorContext& ctx)
@@ -163,6 +166,10 @@ void EditorUI::DrawMenu(EditorContext& ctx)
                 if (ImGui::MenuItem("Post Process FX"))
                 {
                     m_postProcessDialog.Open(ctx.modules.Get<NcGraphics>(), ctx.modules.Get<asset::NcAsset>());
+                }
+                if (ImGui::MenuItem("Environment Properties"))
+                {
+                    m_environmentDialog.Open(ctx.modules.Get<NcGraphics>(), ctx.modules.Get<asset::NcAsset>());
                 }
 
                 ImGui::EndMenu();

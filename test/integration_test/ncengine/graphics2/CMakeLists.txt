@@ -156,6 +156,16 @@ target_sources(StructuredBuffer_tests
         ${NC_SOURCE_DIR}/graphics2/diligent/resource/ResourceTypes.cpp
 )
 
+### CubeMapBufferResource Tests ###
+add_graphics_test(CubeMapBufferResource_tests)
+
+target_sources(CubeMapBufferResource_tests
+    PRIVATE
+    CubeMapBufferResource_tests.cpp
+        ${NC_SOURCE_DIR}/graphics2/diligent/resource/CubeMapBufferResource.cpp
+        ${NC_SOURCE_DIR}/graphics2/diligent/resource/ResourceTypes.cpp
+)
+
 ### TextureBufferResource Tests ###
 add_graphics_test(TextureBufferResource_tests)
 

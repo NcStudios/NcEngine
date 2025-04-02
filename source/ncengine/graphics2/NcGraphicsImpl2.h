@@ -37,6 +37,7 @@ class NcGraphicsImpl2 : public NcGraphics
         void SetUi(ui::IUI* ui) noexcept override;
         bool IsUiHovered() const noexcept override;
         void SetSkybox(const std::string& path) override;
+        auto GetSkybox() const -> nc::asset::AssetId override;
         void ClearEnvironment() override;
         auto IsPostProcessEffectEnabled(PostProcessEffectId effectId) const -> bool override;
         void SetPostProcessEffectEnabled(PostProcessEffectId effectId, bool enabled) override;
