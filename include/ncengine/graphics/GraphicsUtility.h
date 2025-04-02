@@ -25,6 +25,7 @@ struct MiscPassFlag
 
     static constexpr auto Wireframe = type{1 << 0};
     static constexpr auto Particle  = type{1 << 1};
+    static constexpr auto Skybox    = type{1 << 2};
 };
 
 /** @brief Returns a view of all material pass names, ordered by ascending flag value. */

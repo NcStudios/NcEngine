@@ -7,6 +7,7 @@
 
 namespace nc::graphics
 {
+struct EnvironmentRenderState;
 struct CameraRenderState;
 struct LightRenderState;
 
@@ -21,7 +22,8 @@ class EnvironmentBufferResource
 
         void Update(Diligent::IDeviceContext& context,
                     const CameraRenderState& cameraState,
-                    const LightRenderState& lightRenderState);
+                    const LightRenderState& lightRenderState,
+                    const EnvironmentRenderState& environmentRenderState);
 
         auto GetShaderVariable() -> Diligent::IShaderResourceVariable&
         {

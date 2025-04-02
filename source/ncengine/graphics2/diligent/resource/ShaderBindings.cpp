@@ -13,7 +13,7 @@ void ShaderBindings::Update(Diligent::IDeviceContext& context,
                             const FrontendRenderState& renderState)
 {
     NC_PROFILE_SCOPE("ShaderBindings::Update()", ProfileCategory::Rendering);
-    m_perFrameSignature.GetEnvironmentBuffer().Update(context, renderState.cameraState, renderState.lightRenderState);
+    m_perFrameSignature.GetEnvironmentBuffer().Update(context, renderState.cameraState, renderState.lightRenderState, renderState.environmentRenderState);
 
     const auto& transformData = renderState.meshRenderState.transformData;
     if (!transformData.instances.empty())

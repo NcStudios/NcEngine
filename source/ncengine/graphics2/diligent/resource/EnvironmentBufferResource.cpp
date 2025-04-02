@@ -1,5 +1,6 @@
 #include "EnvironmentBufferResource.h"
 #include "graphics2/frontend/subsystem/CameraRenderState.h"
+#include "graphics2/frontend/subsystem/EnvironmentRenderState.h"
 #include "graphics2/frontend/subsystem/LightRenderState.h"
 
 namespace nc::graphics
@@ -20,7 +21,8 @@ EnvironmentBufferResource::EnvironmentBufferResource(Diligent::IDeviceContext& c
 
 void EnvironmentBufferResource::Update(Diligent::IDeviceContext& context,
                                        const CameraRenderState& cameraState,
-                                       const LightRenderState& lightRenderState)
+                                       const LightRenderState& lightRenderState,
+                                       const EnvironmentRenderState& environmentRenderState)
 {
     const auto data = GlobalEnvironmentData{
         .cameraViewProjection = cameraState.viewProjection,
@@ -28,7 +30,9 @@ void EnvironmentBufferResource::Update(Diligent::IDeviceContext& context,
         .cameraPosition = cameraState.position,
         .lightCount = static_cast<uint32_t>(lightRenderState.lights.size()),
         .nearClip = cameraState.nearClip,
-        .farClip = cameraState.farClip
+        .farClip = cameraState.farClip,
+        .skyboxIndex = environmentRenderState.skyboxIndex,
+        .useSkybox = environmentRenderState.useSkybox
     };
 
     m_buffer.Write(context, data);

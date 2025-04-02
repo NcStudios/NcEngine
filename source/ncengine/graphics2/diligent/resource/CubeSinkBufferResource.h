@@ -1,5 +1,7 @@
 #pragma once
 
+#include "ResourceTypes.h"
+
 #include "Common/interface/RefCntAutoPtr.hpp"
 #include "Graphics/GraphicsEngine/interface/DeviceContext.h"
 #include "Graphics/GraphicsEngine/interface/RenderDevice.h"
@@ -8,16 +10,6 @@
 
 namespace nc::graphics
 {
-struct CubeSinkBufferResourceDesc
-{
-    std::string name = "";
-    Diligent::TEXTURE_VIEW_TYPE viewType = Diligent::TEXTURE_VIEW_UNDEFINED;
-    Diligent::TEXTURE_FORMAT format = Diligent::TEX_FORMAT_UNKNOWN;
-    Diligent::BIND_FLAGS bindFlags = Diligent::BIND_NONE;
-    Diligent::OptimizedClearValue clearValue = Diligent::OptimizedClearValue{};
-    uint32_t maxTextures = 0;
-};
-
 auto MakeCubeDepthSinkBufferDesc(uint32_t maxTextures) -> CubeSinkBufferResourceDesc;
 auto MakeCubeShadowSinkBufferDesc(uint32_t maxTextures) -> CubeSinkBufferResourceDesc;
 

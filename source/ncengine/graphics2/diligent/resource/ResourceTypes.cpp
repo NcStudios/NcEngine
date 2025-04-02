@@ -75,6 +75,18 @@ auto ToPipelineResourceDesc(const StructuredBufferDesc& resourceDesc) -> Diligen
     };
 }
 
+auto ToPipelineResourceDesc(const CubeMapBufferDesc& resourceDesc) -> Diligent::PipelineResourceDesc
+{
+    return Diligent::PipelineResourceDesc{
+        resourceDesc.shaderType,
+        resourceDesc.resourceKey.data(),
+        resourceDesc.maxElementCount,
+        Diligent::SHADER_RESOURCE_TYPE_TEXTURE_SRV,
+        Diligent::SHADER_RESOURCE_VARIABLE_TYPE_MUTABLE,
+        Diligent::PIPELINE_RESOURCE_FLAG_RUNTIME_ARRAY
+    };
+}
+
 auto ToPipelineResourceDesc(const TextureBufferDesc& resourceDesc) -> Diligent::PipelineResourceDesc
 {
     return Diligent::PipelineResourceDesc{
@@ -132,6 +144,37 @@ auto ToTextureDesc(const nc::asset::Texture& texture) -> Diligent::TextureDesc
     return texDesc;
 }
 
+auto ToTextureCubeDesc(const nc::asset::CubeMap& desc) -> Diligent::TextureDesc
+{
+    Diligent::TextureDesc textureDesc{};
+    textureDesc.Type = Diligent::RESOURCE_DIM_TEX_CUBE;
+    textureDesc.ArraySize = 6; // ArrayLayers
+    textureDesc.Width = desc.faceSideLength;
+    textureDesc.Height = desc.faceSideLength;
+    textureDesc.MipLevels = 1;
+    textureDesc.Format = Diligent::TEX_FORMAT_RGBA8_UNORM_SRGB;
+    textureDesc.BindFlags = Diligent::BIND_SHADER_RESOURCE;
+    textureDesc.SampleCount = 1;
+    return textureDesc;
+}
+
+auto ToTextureCubeDesc(const nc::graphics::CubeSinkBufferResourceDesc& desc,
+    uint32_t width,
+    uint32_t height) -> Diligent::TextureDesc
+{
+    Diligent::TextureDesc textureDesc{};
+    textureDesc.Type = Diligent::RESOURCE_DIM_TEX_CUBE;
+    textureDesc.ArraySize = 6; // ArrayLayers
+    textureDesc.Width = width;
+    textureDesc.Height = height;
+    textureDesc.MipLevels = 1;
+    textureDesc.Format = desc.format;
+    textureDesc.BindFlags = desc.bindFlags;
+    textureDesc.ClearValue = desc.clearValue;
+    textureDesc.SampleCount = 1;
+    return textureDesc;
+}
+
 auto ToTextureSubResData(const nc::asset::Texture& texture) -> std::vector<Diligent::TextureSubResData>
 {
     const auto mipLevels = static_cast<uint32_t>(1 + texture.mipmaps.size());
@@ -154,6 +197,54 @@ void SetArrayRegion(Diligent::IShaderResourceVariable* variable, std::span<Dilig
         static_cast<uint32_t>(count),
         Diligent::SET_SHADER_RESOURCE_FLAG_ALLOW_OVERWRITE
     );
+}
+
+void InitializeCubeArray(Diligent::IDeviceContext& context, Diligent::IRenderDevice& device, Diligent::IShaderResourceVariable* variable, uint32_t arraySize, bool transition)
+{
+    auto dummyCubeMap = asset::CubeMapWithId
+    {
+        asset::CubeMap
+        {
+            .faceSideLength = 1u,
+            .pixelData = std::vector<unsigned char> {0x1A, 0x2A, 0x3A, 0x4A}
+        },
+        1
+    };
+
+    auto faceSubResources = std::vector<Diligent::TextureSubResData>{6};
+    auto dummyCubeMapTex = Diligent::RefCntAutoPtr<Diligent::ITexture>();
+
+    for (auto& face : faceSubResources)
+    {
+        face = Diligent::TextureSubResData{dummyCubeMap.cubeMap.pixelData.data(), dummyCubeMap.cubeMap.faceSideLength * asset::CubeMap::numChannels};
+    }
+
+    auto dummyCubeMapTexData = Diligent::TextureData{faceSubResources.data(), 6, &context};
+    auto dummyCubeMapDesc = ToTextureCubeDesc(dummyCubeMap.cubeMap);
+    device.CreateTexture(dummyCubeMapDesc, &dummyCubeMapTexData, &dummyCubeMapTex);
+
+    if (!dummyCubeMapTex)
+    {
+        throw NcError("Failed to create texture");
+    }
+
+    if (transition)
+    {
+        const auto barrier = Diligent::StateTransitionDesc{
+            dummyCubeMapTex.RawPtr(),
+            Diligent::RESOURCE_STATE_UNKNOWN,
+            Diligent::RESOURCE_STATE_SHADER_RESOURCE,
+            Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE
+        };
+
+        const auto barriers = std::vector<Diligent::StateTransitionDesc>(arraySize, barrier);
+        context.TransitionResourceStates(static_cast<uint32_t>(barriers.size()), barriers.data());
+    }
+
+    auto dummyCubeMapView = dummyCubeMapTex->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE);
+    auto dummyViews = std::vector<Diligent::IDeviceObject*>(arraySize, dummyCubeMapView);
+
+    SetArrayRegion(variable, std::span<Diligent::IDeviceObject*>(dummyViews), 0u, arraySize);
 }
 
 void InitializeArray(Diligent::IDeviceContext& context, Diligent::IRenderDevice& device, Diligent::IShaderResourceVariable* variable, uint32_t arraySize, bool transition)
