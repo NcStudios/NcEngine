@@ -35,10 +35,8 @@ class FontAssetManager : public IAssetService<FontView, FontInfo>
     public:
         explicit FontAssetManager(const std::string& assetDirectory);
 
-        auto Load(const FontInfo& font,
-                  AssetSubtype = AssetSubtype::None) -> bool                          override;
-        auto Load(std::span<const FontInfo> fonts,
-                  AssetSubtype = AssetSubtype::None) -> bool                          override;
+        auto Load(const FontInfo& font)              -> bool                          override;
+        auto Load(std::span<const FontInfo> fonts)   -> bool                          override;
         auto Unload(const FontInfo& font)            -> bool                          override;
         void UnloadAll()                                                              override;
         auto Acquire(const FontInfo& font)     const -> FontView                      override;

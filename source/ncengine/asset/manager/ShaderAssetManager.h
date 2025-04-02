@@ -20,10 +20,8 @@ class ShaderAssetManager final : public IAssetService<ShaderView, std::string>
     public:
         explicit ShaderAssetManager(const std::string& assetDirectory);
 
-        auto Load(const std::string& path,
-                  AssetSubtype = AssetSubtype::None)       -> bool                          override;
-        auto Load(std::span<const std::string> paths,
-                  AssetSubtype = AssetSubtype::None)       -> bool                          override;
+        auto Load(const std::string& path)                 -> bool                          override;
+        auto Load(std::span<const std::string> paths)      -> bool                          override;
         auto Unload(const std::string& path)               -> bool                          override;
         void UnloadAll()                                                                    override;
         auto Acquire(const std::string& path)        const -> ShaderView                    override;

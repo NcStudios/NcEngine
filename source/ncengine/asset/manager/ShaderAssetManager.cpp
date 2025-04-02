@@ -139,7 +139,7 @@ ShaderAssetManager::ShaderAssetManager(const std::string& assetDirectory)
 {
 }
 
-auto ShaderAssetManager::Load(const std::string& path, AssetSubtype) -> bool
+auto ShaderAssetManager::Load(const std::string& path) -> bool
 {
     const auto fullPath = m_assetDirectory + path;
 
@@ -160,7 +160,7 @@ auto ShaderAssetManager::Load(const std::string& path, AssetSubtype) -> bool
     return true;
 }
 
-auto ShaderAssetManager::Load(std::span<const std::string> paths, AssetSubtype) -> bool
+auto ShaderAssetManager::Load(std::span<const std::string> paths) -> bool
 {
     auto atLeastOneFailure = false;
     for (const auto& path : paths)

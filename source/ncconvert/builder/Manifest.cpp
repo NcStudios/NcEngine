@@ -88,7 +88,7 @@ void ProcessOptions(nc::convert::GlobalManifestOptions& options,
 
 auto GetDefaultTargetOptions(const nc::convert::GlobalManifestOptions& options,
                              nc::asset::AssetType type,
-                             std::string_view subtypeName = "") -> nc::convert::TargetOptions
+                             std::string_view subGroupName = "") -> nc::convert::TargetOptions
 {
     using enum nc::asset::AssetType;
     switch (type)
@@ -96,10 +96,10 @@ auto GetDefaultTargetOptions(const nc::convert::GlobalManifestOptions& options,
         case Mesh:                            return options.defaultMeshOptions;
         case Texture:
         {
-            if (subtypeName == key::diffuse)  return options.defaultDiffuseTextureOptions;
-            if (subtypeName == key::normal)   return options.defaultNormalTextureOptions;
-            if (subtypeName == key::particle) return options.defaultParticleTextureOptions;
-            if (subtypeName == key::effect)   return options.defaultEffectTextureOptions;
+            if (subGroupName == key::diffuse)  return options.defaultDiffuseTextureOptions;
+            if (subGroupName == key::normal)   return options.defaultNormalTextureOptions;
+            if (subGroupName == key::particle) return options.defaultParticleTextureOptions;
+            if (subGroupName == key::effect)   return options.defaultEffectTextureOptions;
             [[fallthrough]];
         }
         default:                              return nc::convert::TargetOptions{};
@@ -114,16 +114,6 @@ auto IsUpToDate(const nc::convert::Target& target) -> bool
     }
 
     return std::filesystem::last_write_time(target.destinationPath) > std::filesystem::last_write_time(target.sourcePath);
-}
-
-auto ToAssetSubtype(std::string_view str) -> nc::asset::AssetSubtype
-{
-    using enum nc::asset::AssetSubtype;
-    if (str == key::normal)   return NormalTexture;
-    if (str == key::diffuse)  return ColorTexture;
-    if (str == key::particle) return ColorTexture;
-    if (str == key::effect)   return ColorTexture;
-    return None;
 }
 
 auto AssetNameToRelativePath(const std::filesystem::path& name) -> std::filesystem::path
@@ -162,25 +152,7 @@ auto ReflectDefaults(std::span<const std::string_view> defaultPaths) -> std::vec
     {
         targets.emplace_back(
             RelativePathToIdentifier(path),
-            std::string{path},
-            nc::asset::AssetSubtype::None
-        );
-    }
-
-    return targets;
-}
-
-auto ReflectDefaults(std::span<const std::string_view> defaultPaths,
-                     std::span<const nc::asset::AssetSubtype> subtypes) -> std::vector<nc::convert::ReflectedTarget>
-{
-    auto targets = std::vector<nc::convert::ReflectedTarget>{};
-    targets.reserve(defaultPaths.size());
-    for (const auto [path, subtype] : std::views::zip(defaultPaths, subtypes))
-    {
-        targets.emplace_back(
-            RelativePathToIdentifier(path),
-            std::string{path},
-            subtype
+            std::string{path}
         );
     }
 
@@ -198,7 +170,7 @@ auto ReflectDefaults(nc::asset::AssetType type) -> std::vector<nc::convert::Refl
         case AssetType::Mesh:              return ReflectDefaults(GetDefaultMeshPaths());
         case AssetType::MeshCollider:      return ReflectDefaults(GetDefaultMeshColliderPaths());
         case AssetType::SkeletalAnimation: return ReflectDefaults(GetDefaultSkeletalAnimationPaths());
-        case AssetType::Texture:           return ReflectDefaults(GetDefaultTexturePaths(), GetDefaultTextureSubtypes());
+        case AssetType::Texture:           return ReflectDefaults(GetDefaultTexturePaths());
         default:                           return {};
     }
 }
@@ -290,8 +262,7 @@ auto Manifest::GetTargetsForSourceGeneration() -> ReflectedTargetMap
             auto name = RelativePathToIdentifier(path);
             reflectedTargets.emplace_back(
                 std::move(name),
-                path.generic_string(), // normalize directory separators to '/'
-                target.options.subtype
+                path.generic_string() // normalize directory separators to '/'
             );
         }
 
@@ -320,14 +291,12 @@ void Manifest::ReadManifest(const std::filesystem::path& path)
         }
 
         const auto type = ToAssetType(typeTag);
-        for (const auto& [subtypeName, assets] : json.at(typeTag).items())
+        for (const auto& [subGroup, assets] : json.at(typeTag).items())
         {
-            const auto defaultOptions = GetDefaultTargetOptions(m_options, type, subtypeName);
-            const auto subType = ToAssetSubtype(subtypeName);
+            const auto defaultOptions = GetDefaultTargetOptions(m_options, type, subGroup);
             for (const auto& asset : assets)
             {
                 auto targetOptions = asset.value(key::options, defaultOptions);
-                targetOptions.subtype = subType;
                 m_targets.at(type).emplace_back(
                     asset.at(key::sourcePath),
                     asset.at(key::assetName),

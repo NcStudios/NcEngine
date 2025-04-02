@@ -214,32 +214,9 @@ const auto g_paths = std::array{
     std::string{path::normal_skeleton},
 };
 
-const auto g_subtypes = std::array{
-    nc::asset::AssetSubtype::ColorTexture,
-    nc::asset::AssetSubtype::ColorTexture,
-    nc::asset::AssetSubtype::NormalTexture,
-    nc::asset::AssetSubtype::ColorTexture,
-    nc::asset::AssetSubtype::ColorTexture,
-    nc::asset::AssetSubtype::ColorTexture,
-    nc::asset::AssetSubtype::ColorTexture,
-    nc::asset::AssetSubtype::ColorTexture,
-    nc::asset::AssetSubtype::ColorTexture,
-    nc::asset::AssetSubtype::ColorTexture,
-    nc::asset::AssetSubtype::ColorTexture,
-    nc::asset::AssetSubtype::ColorTexture,
-    nc::asset::AssetSubtype::ColorTexture,
-    nc::asset::AssetSubtype::ColorTexture,
-    nc::asset::AssetSubtype::ColorTexture,
-    nc::asset::AssetSubtype::ColorTexture,
-    nc::asset::AssetSubtype::NormalTexture,
-    nc::asset::AssetSubtype::NormalTexture,
-    nc::asset::AssetSubtype::NormalTexture,
-    nc::asset::AssetSubtype::NormalTexture,
-};
-
 void Load()
 {
-    nc::asset::LoadTextureAssets(g_paths, g_subtypes);
+    nc::asset::LoadTextureAssets(g_paths);
 }
 
 void Acquire()

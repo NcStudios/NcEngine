@@ -44,7 +44,7 @@ FontAssetManager::FontAssetManager(const std::string& assetDirectory)
 {
 }
 
-auto FontAssetManager::Load(const FontInfo& font, AssetSubtype) -> bool
+auto FontAssetManager::Load(const FontInfo& font) -> bool
 {
     if (IsLoaded(font))
         return false;
@@ -59,7 +59,7 @@ auto FontAssetManager::Load(const FontInfo& font, AssetSubtype) -> bool
     return true;
 }
 
-auto FontAssetManager::Load(std::span<const FontInfo> fonts, AssetSubtype) -> bool
+auto FontAssetManager::Load(std::span<const FontInfo> fonts) -> bool
 {
     const auto scale = ::GetFontScaling();
     auto anyLoaded = false;

@@ -20,6 +20,5 @@ struct Texture;
 struct TextureSubResource;
 
 enum class AssetType : int;
-enum class AssetSubtype : uint8_t;
 enum class TextureFormat : uint8_t;
 } // namespace nc::asset
