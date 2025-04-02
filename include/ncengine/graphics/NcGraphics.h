@@ -1,6 +1,6 @@
 /**
  * @file NcGraphics.h
- * @copyright Jaremie Romer and McCallister Romer 2024
+ * @copyright Jaremie Romer and McCallister Romer 2025
  */
 #pragma once
 
@@ -79,6 +79,12 @@ struct NcGraphics : public Module
      * @param path A path to a skybox asset file.
      */
     virtual void SetSkybox(const std::string& path) = 0;
+
+    /**
+     * @brief Gets the current skybox.
+     * @return The AssetID of the current skybox, or NullAssetID if none set.
+     */
+    virtual auto GetSkybox() const -> nc::asset::AssetId = 0;
 
     /**
      * @brief Clear all environment data (currently only the skybox).

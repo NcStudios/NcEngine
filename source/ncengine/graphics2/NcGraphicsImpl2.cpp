@@ -48,6 +48,7 @@ struct NcGraphicsStub2 : nc::NcGraphics
     void SetUi(nc::ui::IUI*) noexcept override {}
     bool IsUiHovered() const noexcept override { return false; }
     void SetSkybox(const std::string&) override {}
+    auto GetSkybox() const -> nc::asset::AssetId override { return nc::asset::NullAssetId; }
     void ClearEnvironment() override {}
     auto IsPostProcessEffectEnabled(nc::PostProcessEffectId) const -> bool override { return false; }
     void SetPostProcessEffectEnabled(nc::PostProcessEffectId, bool) override {}
@@ -162,6 +163,15 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
             std::vector<PassDesc>
             {
                 PassDesc{
+                    .flag = MiscPassFlag::Skybox,
+                    .name = "Skybox",
+                    .type = PassType::Skybox,
+                    .shaderPaths = ShaderPaths{shader::SkyboxPixel, shader::SkyboxVertex},
+                    .colorSink = ColorTarget::Main,
+                    .depthSink = DepthTarget::Main,
+                    .useDepthTest = true
+                },
+                PassDesc{
                     .flag = MaterialPassFlag::UniShadow,
                     .name = "UniShadow",
                     .type = PassType::Material,
@@ -223,7 +233,6 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .colorSink = ColorTarget::Main,
                     .depthSink = DepthTarget::Main,
                     .useDepthTest = true
-                    
                 },
                 PassDesc{
                     .flag = MaterialPassFlag::Toon,
@@ -320,6 +329,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
           m_frontend{
             m_engine.GetContext(),
             m_engine.GetDevice(),
+            m_shaderBindings.GetPerFrameSignature().GetCubeMapBuffer(),
             m_shaderBindings.GetPerFrameSignature().GetTextureBuffer(),
             m_shaderBindings.GetMeshBuffer(),
             m_world,
@@ -330,6 +340,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
             memorySettings.maxBones,
             memorySettings.maxParticles,
             graphicsSettings.initialBatchSize,
+            modules.Get<asset::NcAsset>()->OnCubeMapUpdate(),
             modules.Get<asset::NcAsset>()->OnTextureUpdate(),
             modules.Get<asset::NcAsset>()->OnMeshUpdate(),
             modules.Get<asset::NcAsset>()->OnSkeletalAnimationUpdate(),
@@ -368,11 +379,17 @@ bool NcGraphicsImpl2::IsUiHovered() const noexcept
 
 void NcGraphicsImpl2::SetSkybox(const std::string& path)
 {
-    (void)path;
+    m_frontend.GetEnvironmentSubsystem().SetSkybox(path);
+}
+
+auto NcGraphicsImpl2::GetSkybox() const -> nc::asset::AssetId
+{
+    return m_frontend.GetEnvironmentSubsystem().GetSkybox();
 }
 
 void NcGraphicsImpl2::ClearEnvironment()
 {
+    m_frontend.GetEnvironmentSubsystem().ClearSkybox();
 }
 
 auto NcGraphicsImpl2::IsPostProcessEffectEnabled(PostProcessEffectId effectId) const -> bool
@@ -405,6 +422,7 @@ void NcGraphicsImpl2::OnBeforeSceneLoad()
 
 void NcGraphicsImpl2::Clear() noexcept
 {
+    ClearEnvironment();
     m_frontend.Clear();
 }
 
@@ -473,6 +491,13 @@ void NcGraphicsImpl2::Run()
         renderState.meshRenderState.staticMeshBatches,
         renderState.meshRenderState.skinnedMeshBatches,
         renderState.lightRenderState.lights
+    );
+
+    m_passBackend.RenderSkybox(
+        context,
+        swapChain,
+        m_shaderBindings.GetPerPassSignature(),
+        renderState.environmentRenderState
     );
 
     m_passBackend.RenderWireframe(

@@ -2,6 +2,7 @@
 #include "graphics2/diligent/resource/EnvironmentBufferResource.h"
 #include "graphics2/diligent/resource/ResourceTypes.h"
 #include "graphics2/frontend/subsystem/CameraRenderState.h"
+#include "graphics2/frontend/subsystem/EnvironmentRenderState.h"
 #include "graphics2/frontend/subsystem/LightRenderState.h"
 
 #include "ncmath/Vector.h"
@@ -68,9 +69,11 @@ TEST_F(EnvironmentBufferResourceTest, Update_succeeds)
 
     auto lightRenderState = nc::graphics::LightRenderState{};
 
+    auto environmentRenderState = nc::graphics::EnvironmentRenderState{};
+
     // Buffer is dynamic/cpu write only, so we don't have a way of inspecting actual contents.
     // Just expect no error output.
-    EXPECT_NO_THROW(uut->Update(engine->GetContext(), cameraState, lightRenderState));
+    EXPECT_NO_THROW(uut->Update(engine->GetContext(), cameraState, lightRenderState, environmentRenderState));
     cameraState.viewProjection = DirectX::XMMatrixIdentity();
-    EXPECT_NO_THROW(uut->Update(engine->GetContext(), cameraState, lightRenderState));
+    EXPECT_NO_THROW(uut->Update(engine->GetContext(), cameraState, lightRenderState, environmentRenderState));
 }

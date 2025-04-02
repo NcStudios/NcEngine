@@ -16,7 +16,7 @@ Options
     -i <assetPath>             Print details about an existing asset file.
     -r <namespace>             Specify root namespace to use for generated source code.
     -f <texture format>        For textures built in single target mode, specify texture
-                               format (default RGB8_UNORM_SRGB).
+                               format (default RGBA8_UNORM_SRGB).
     -p optimize | generateMips In single target mode, enable additional processing options.
                                For meshes, 'optimize' enables a mesh optimization pass. For
                                textures, 'generateMips' creates a mipmap chain instead of

@@ -13,6 +13,7 @@
 
 namespace nc::graphics
 {
+class CubeMapBufferResource;
 class TextureBufferResource;
 class EnvironmentBufferResource;
 class PostProcessPropertyBufferResource;
@@ -33,6 +34,7 @@ class PerFrameResourceSignature
                                            const StructuredBufferDesc& boneResourceDesc,
                                            const StructuredBufferDesc& particleResourceDesc,
                                            const StructuredBufferDesc& lightMatrixResourceDesc,
+                                           const CubeMapBufferDesc& cubeResourceDesc,
                                            const TextureBufferDesc& textureResourceDesc,
                                            const UniformBufferDesc& environmentResourceDesc,
                                            const UniformBufferDesc& wireframeResourceDesc);
@@ -50,6 +52,7 @@ class PerFrameResourceSignature
         auto GetBoneDataResource()          -> StructuredBuffer<BoneData>&                { return *m_boneDataResource; }
         auto GetParticleDataBuffer()        -> StructuredBuffer<ParticleData>&            { return *m_particleDataResource; }
         auto GetLightMatrixDataBuffer()     -> StructuredBuffer<LightMatrixData>&         { return *m_lightMatrixDataResource; }
+        auto GetCubeMapBuffer()             -> CubeMapBufferResource&                     { return *m_cubeMapResource; }
         auto GetTextureBuffer()             -> TextureBufferResource&                     { return *m_textureResource; }
         auto GetEnvironmentBuffer()         -> EnvironmentBufferResource&                 { return *m_environmentResource; }
         auto GetWireframeBuffer()           -> WireframeBufferResource&                   { return *m_wireframeBufferResource; }
@@ -66,6 +69,7 @@ class PerFrameResourceSignature
         std::unique_ptr<StructuredBuffer<ParticleData>> m_particleDataResource;
         std::unique_ptr<StructuredBuffer<LightMatrixData>> m_lightMatrixDataResource;
         std::unique_ptr<TextureBufferResource> m_textureResource;
+        std::unique_ptr<CubeMapBufferResource> m_cubeMapResource;
         std::unique_ptr<EnvironmentBufferResource> m_environmentResource;
         std::unique_ptr<WireframeBufferResource> m_wireframeBufferResource;
 };

@@ -23,6 +23,7 @@ class PassManifest
         auto StaticMaterialPassDescs() const -> std::span<const PassDesc> { return m_staticMaterialPassDescs; }
         auto SkinnedMaterialPassDescs() const -> std::span<const PassDesc> { return m_skinnedMaterialPassDescs; }
         auto PostProcessPassDescs() const -> std::span<const PassDesc> { return m_postProcessPassDescs; }
+        auto SkyboxPassDesc() const -> const PassDesc& { return m_skyboxPassDesc; }
         auto WireframePassDesc() const -> const PassDesc& { return m_wireframePassDesc; }
         auto ParticlePassDesc() const -> const PassDesc& { return m_particlePassDesc; }
 
@@ -43,6 +44,7 @@ class PassManifest
         std::vector<PassDesc> m_staticMaterialPassDescs;
         std::vector<PassDesc> m_skinnedMaterialPassDescs;
         std::vector<PassDesc> m_postProcessPassDescs;
+        PassDesc m_skyboxPassDesc;
         PassDesc m_wireframePassDesc;
         PassDesc m_particlePassDesc;
         std::vector<ColorTarget> m_colorSinkIndices;

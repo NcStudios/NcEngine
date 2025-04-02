@@ -1,6 +1,5 @@
 #include "CubeSinkBufferResource.h"
 #include "graphics2/diligent/pass/PassTypes.h"
-#include "ResourceTypes.h"
 
 #include "ncutility/NcError.h"
 
@@ -14,23 +13,6 @@ auto MakeTextureDesc(const nc::graphics::CubeSinkBufferResourceDesc& desc,
 {
     TextureDesc textureDesc{};
     textureDesc.Type = RESOURCE_DIM_TEX_2D;
-    textureDesc.Width = width;
-    textureDesc.Height = height;
-    textureDesc.MipLevels = 1;
-    textureDesc.Format = desc.format;
-    textureDesc.BindFlags = desc.bindFlags;
-    textureDesc.ClearValue = desc.clearValue;
-    textureDesc.SampleCount = 1;
-    return textureDesc;
-}
-
-auto MakeTextureCubeDesc(const nc::graphics::CubeSinkBufferResourceDesc& desc,
-                         uint32_t width,
-                         uint32_t height) -> TextureDesc
-{
-    TextureDesc textureDesc{};
-    textureDesc.Type = RESOURCE_DIM_TEX_CUBE;
-    textureDesc.ArraySize = 6; // ArrayLayers
     textureDesc.Width = width;
     textureDesc.Height = height;
     textureDesc.MipLevels = 1;
@@ -136,7 +118,7 @@ void CubeSinkBufferResource::Add(IRenderDevice& device,
     m_renderTargetViews.reserve(m_renderTargetViews.size() + numRenderTargetViews);
     m_shaderResourceViews.reserve(m_shaderResourceViews.size() + numCubeMaps);
 
-    auto renderTargetDesc = MakeTextureCubeDesc(m_desc, renderTargetWidth, renderTargetHeight);
+    auto renderTargetDesc = ToTextureCubeDesc(m_desc, renderTargetWidth, renderTargetHeight);
     auto depthTargetDesc = MakeTextureDesc(MakeCubeDepthSinkBufferDesc(m_desc.maxTextures), renderTargetWidth, renderTargetHeight);
 
     for (auto i = 0u; i < numCubeMaps; i++)
