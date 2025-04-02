@@ -2,6 +2,25 @@
     "globalOptions": {
         "outputDirectory": "./nca"
     },
+    "defaultMeshOptions": {
+        "optimizeMesh": true
+    },
+    "defaultDiffuseTextureOptions": {
+        "textureFormat": "RGBA8_UNORM_SRGB",
+        "generateMips": false
+    },
+    "defaultNormalTextureOptions": {
+        "textureFormat": "RGBA8_UNORM",
+        "generateMips": false
+    },
+    "defaultParticleTextureOptions": {
+        "textureFormat": "RGBA8_UNORM_SRGB",
+        "generateMips": false
+    },
+    "defaultEffectTextureOptions": {
+        "textureFormat": "RGBA8_UNORM_SRGB",
+        "generateMips": false
+    },
     "audio-clip": [
         {
             "sourcePath": "raw/sound/DefaultAudioClip.wav",
@@ -23,45 +42,27 @@
     "mesh": [
         {
             "sourcePath": "raw/model/DefaultCapsule.fbx",
-            "assetName": "mesh/default/capsule",
-            "options": {
-                "optimizeMesh": true
-            }
+            "assetName": "mesh/default/capsule"
         },
         {
             "sourcePath": "raw/model/DefaultCube.fbx",
-            "assetName": "mesh/default/cube",
-            "options": {
-                "optimizeMesh": true
-            }
+            "assetName": "mesh/default/cube"
         },
         {
             "sourcePath": "raw/model/DefaultPlane.fbx",
-            "assetName": "mesh/default/plane",
-            "options": {
-                "optimizeMesh": true
-            }
+            "assetName": "mesh/default/plane"
         },
         {
             "sourcePath": "raw/model/DefaultSphere.fbx",
-            "assetName": "mesh/default/sphere",
-            "options": {
-                "optimizeMesh": true
-            }
+            "assetName": "mesh/default/sphere"
         },
         {
             "sourcePath": "raw/model/DefaultSkybox.fbx",
-            "assetName": "mesh/default/skybox",
-            "options": {
-                "optimizeMesh": true
-            }
+            "assetName": "mesh/default/skybox"
         },
         {
             "sourcePath": "raw/model/DefaultWheel.fbx",
-            "assetName": "mesh/default/wheel",
-            "options": {
-                "optimizeMesh": true
-            }
+            "assetName": "mesh/default/wheel"
         }
     ],
     "mesh-collider": [

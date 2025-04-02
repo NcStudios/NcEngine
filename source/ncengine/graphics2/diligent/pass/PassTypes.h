@@ -72,7 +72,8 @@ enum class PassType : uint8_t
     SkinnedMaterial = 1 << 1,
     Wireframe       = 1 << 2,
     Particle        = 1 << 3,
-    PostProcess     = 1 << 4
+    PostProcess     = 1 << 4,
+    Skybox          = 1 << 5
 }; DEFINE_BITWISE_OPERATORS(PassType);
 
 struct PassDesc

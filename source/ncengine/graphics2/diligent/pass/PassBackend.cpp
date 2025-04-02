@@ -1,4 +1,5 @@
 #include "PassBackend.h"
+#include "asset/AssetService.h"
 #include "PassUtilities.h"
 #include "graphics2/ShaderTypes.h"
 #include "graphics2/diligent/resource/PerPassResourceSignature.h"
@@ -7,10 +8,12 @@
 #include "graphics2/diligent/resource/ShaderBindings.h"
 #include "graphics2/diligent/resource/SinkIndexBufferResource.h"
 #include "graphics2/diligent/resource/WireframeBufferResource.h"
+#include "graphics2/frontend/subsystem/EnvironmentRenderState.h"
 #include "graphics2/frontend/subsystem/PostProcessState.h"
 #include "ncengine/config/Config.h"
 #include "ncengine/debug/Profile.h"
 
+#include "ncasset/DefaultAssets.h"
 #include "ncutility/NcError.h"
 
 #include <ranges>
@@ -263,6 +266,63 @@ void PassBackend::RenderShadowPass(IDeviceContext& context,
     context.TransitionShaderResources(&perPassResourceSignature.GetResourceBinding());
 }
 
+void PassBackend::RenderSkybox(Diligent::IDeviceContext& context,
+                               Diligent::ISwapChain& swapChain,
+                               PerPassResourceSignature& perPassResourceSignature,
+                               const nc::graphics::EnvironmentRenderState& environmentRenderState)
+{
+    NC_PROFILE_SCOPE("PassBackend::RenderSkybox()", ProfileCategory::Rendering);
+    if (!environmentRenderState.useSkybox || !m_skyboxPass)
+    {
+        return;
+    }
+
+    // We need to transition resource state manually for the color and depth target here.
+    auto* colorTargetTexture = perPassResourceSignature.GetColorSinksResource().GetTexture(m_skyboxPass->sinks.color);
+    auto* depthTargetTexture = perPassResourceSignature.GetDepthSinksResource().GetTexture(m_skyboxPass->sinks.depth);
+
+    auto barriers = std::array<Diligent::StateTransitionDesc, 2>
+    {
+        Diligent::StateTransitionDesc(
+            colorTargetTexture,
+            Diligent::RESOURCE_STATE_UNKNOWN,
+            Diligent::RESOURCE_STATE_RENDER_TARGET,
+            Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE
+        ),
+        Diligent::StateTransitionDesc(
+            depthTargetTexture,
+            Diligent::RESOURCE_STATE_UNKNOWN,
+            Diligent::RESOURCE_STATE_DEPTH_WRITE,
+            Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE
+        )
+    };
+    context.TransitionResourceStates(static_cast<uint32_t>(barriers.size()), barriers.data());
+
+    colorTargetTexture->SetState(Diligent::RESOURCE_STATE_UNKNOWN); // Disables automatic resource state management for just this texture.
+    depthTargetTexture->SetState(Diligent::RESOURCE_STATE_UNKNOWN); // Disables automatic resource state management for just this texture.
+
+    m_finalColorTarget = m_skyboxPass->sinks.color;
+    BindRenderTarget(context, swapChain, perPassResourceSignature, m_skyboxPass->sinks.color, m_skyboxPass->sinks.depth, false);
+    context.SetPipelineState(m_skyboxPass->pso);
+
+    perPassResourceSignature.Commit(context);
+    colorTargetTexture->SetState(Diligent::RESOURCE_STATE_RENDER_TARGET); // Enables automatic resource state management for just this texture.
+    depthTargetTexture->SetState(Diligent::RESOURCE_STATE_DEPTH_WRITE); // Enables automatic resource state management for just this texture.
+
+    const auto meshAccessor = asset::AssetService<asset::MeshView>::Get()->Acquire(nc::asset::SkyboxMesh);
+    const auto attribs = DrawIndexedAttribs{
+        meshAccessor.indexCount,
+        VT_UINT32,
+        DRAW_FLAG_VERIFY_ALL,
+        1,
+        meshAccessor.firstIndex,
+        meshAccessor.firstVertex,
+        0
+    };
+
+    context.DrawIndexed(attribs);
+}
+
 void PassBackend::RenderMaterial(IDeviceContext& context,
                                  ISwapChain& swapChain,
                                  PerPassResourceSignature& perPassResourceSignature,
@@ -469,6 +529,12 @@ void PassBackend::MakePassesAndPipelines(IRenderDevice& device,
     for (const auto& passDesc : passManifest.SkinnedMaterialPassDescs())
     {
         m_skinnedMaterialPasses.emplace_back(device, shaderCache.Get(passDesc.shaderPaths), shaderBindings, passManifest, passDesc, m_numSamples);
+    }
+
+    // Create the sky box pass
+    {
+        const auto& passDesc = passManifest.SkyboxPassDesc();
+        m_skyboxPass = std::make_unique<SkyboxPass>(device, shaderCache.Get(passDesc.shaderPaths), shaderBindings, passManifest, passDesc);
     }
 
     // Create the wireframe pass
