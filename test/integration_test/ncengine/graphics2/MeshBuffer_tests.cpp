@@ -26,8 +26,6 @@ R"(struct PSInput
     float4 Pos         : SV_POSITION;
     float3 Normal      : NORMAL;
     float2 UV          : TEXCOORD0;
-    float3 Tangent     : TANGENT;
-    float3 Bitangent   : BINORMAL;
     float4 BoneWeights : BONE_WEIGHTS;
     uint4  BoneIds     : BONE_IDS;
 };
@@ -45,8 +43,6 @@ void main(in PSInput PSIn, out PSOutput PSOut)
     float dummy = 0.0;
     dummy += PSIn.Normal.x;
     dummy += PSIn.UV.x;
-    dummy += PSIn.Tangent.x;
-    dummy += PSIn.Bitangent.x;
     dummy += PSIn.BoneWeights.x;
     dummy += float(PSIn.BoneIds.x);
 }
@@ -58,10 +54,8 @@ R"(struct VSInput
     float3 Pos         : ATTRIB0;
     float3 Normal      : ATTRIB1;
     float2 UV          : ATTRIB2;
-    float3 Tangent     : ATTRIB3;
-    float3 Bitangent   : ATTRIB4;
-    float4 BoneWeights : ATTRIB5;
-    uint4  BoneIds     : ATTRIB6;
+    float4 BoneWeights : ATTRIB3;
+    uint4  BoneIds     : ATTRIB4;
 };
 
 struct PSInput
@@ -69,8 +63,6 @@ struct PSInput
     float4 Pos         : SV_POSITION;
     float3 Normal      : NORMAL;
     float2 UV          : TEXCOORD0;
-    float3 Tangent     : TANGENT;
-    float3 Bitangent   : BINORMAL;
     float4 BoneWeights : BONE_WEIGHTS;
     uint4  BoneIds     : BONE_IDS;
 };
@@ -80,8 +72,6 @@ void main(in VSInput VSIn, out PSInput PSIn)
     PSIn.Pos = float4(VSIn.Pos, 1);
     PSIn.Normal = VSIn.Normal;
     PSIn.UV = VSIn.UV;
-    PSIn.Tangent = VSIn.Tangent;
-    PSIn.Bitangent = VSIn.Bitangent;
     PSIn.BoneWeights = VSIn.BoneWeights;
     PSIn.BoneIds = VSIn.BoneIds;
 }
@@ -103,7 +93,11 @@ TEST(MeshBufferUtilityTest, GetMeshVertexLayoutElements_elementsPositionedCorrec
 {
     const auto expectedSlot = 1u;
     const auto expectedOffset = 3u;
-    const auto actual = nc::graphics::GetMeshVertexLayoutElements(expectedSlot, expectedOffset);
+    const auto actual = nc::graphics::GetMeshVertexLayoutElements(
+        nc::graphics::VertexAttribute::All,
+        expectedSlot,
+        expectedOffset
+    );
 
     for (const auto& [i, actualElement] : std::views::enumerate(actual))
     {
@@ -111,6 +105,60 @@ TEST(MeshBufferUtilityTest, GetMeshVertexLayoutElements_elementsPositionedCorrec
         EXPECT_EQ(i + expectedOffset, actualElement.InputIndex);
     }
 }
+
+TEST(MeshBufferUtilityTest, GetMeshVertexLayoutElements_setsRelativeOffsets)
+{
+    constexpr auto attributeSizes = std::array{
+        sizeof(nc::asset::MeshVertex::position),
+        sizeof(nc::asset::MeshVertex::normal),
+        sizeof(nc::asset::MeshVertex::uv),
+        sizeof(nc::asset::MeshVertex::tangent),
+        sizeof(nc::asset::MeshVertex::bitangent),
+        sizeof(nc::asset::MeshVertex::boneWeights),
+        sizeof(nc::asset::MeshVertex::boneIds)
+    };
+
+    const auto actual = nc::graphics::GetMeshVertexLayoutElements(
+        nc::graphics::VertexAttribute::Pos         |
+        nc::graphics::VertexAttribute::Normal      |
+        nc::graphics::VertexAttribute::UV          |
+        nc::graphics::VertexAttribute::Tangent     |
+        nc::graphics::VertexAttribute::Bitangent   |
+        nc::graphics::VertexAttribute::BoneWeights |
+        nc::graphics::VertexAttribute::BoneIds
+    );
+
+    ASSERT_EQ(7, actual.size());
+
+    constexpr auto expectedStride = sizeof(nc::asset::MeshVertex);
+    auto relativeOffset = 0ull;
+    for (const auto [size, layoutElement] : std::views::zip(attributeSizes, actual))
+    {
+        EXPECT_EQ(expectedStride, layoutElement.Stride);
+        EXPECT_EQ(relativeOffset, layoutElement.RelativeOffset);
+        relativeOffset += size;
+    }
+}
+
+TEST(MeshBufferUtilityTest, GetMeshVertexLayoutElements_nonContiguousAttributes_setsOffsets)
+{
+    const auto expectedOffset = static_cast<uint32_t>(
+        sizeof(nc::asset::MeshVertex::position) +
+        sizeof(nc::asset::MeshVertex::normal)
+    );
+
+    const auto actual = nc::graphics::GetMeshVertexLayoutElements(
+        nc::graphics::VertexAttribute::Pos |
+        nc::graphics::VertexAttribute::UV
+    );
+
+    ASSERT_EQ(2, actual.size());
+    const auto& actualPos = actual.at(0);
+    const auto& actualUV = actual.at(1);
+    EXPECT_EQ(0, actualPos.RelativeOffset);
+    EXPECT_EQ(expectedOffset, actualUV.RelativeOffset);
+}
+
 
 TEST_F(MeshBufferTest, Load_initialCall_succeeds)
 {
@@ -165,10 +213,11 @@ TEST_F(MeshBufferTest, Load_and_SetBuffers_subsequentDrawCallsSucceed)
     auto& device = engine->GetDevice();
     auto& swapChain = engine->GetSwapChain();
 
+    auto layout = nc::graphics::GetMeshVertexLayoutElements(nc::graphics::VertexAttribute::All);
     auto pso = CreateTestGraphicsPipelineState(
         std::span{g_vertexShader},
         std::span{g_pixelShader},
-        nc::graphics::GetMeshVertexLayoutElements(0)
+        layout
     );
 
     auto* pRTV = swapChain.GetCurrentBackBufferRTV();

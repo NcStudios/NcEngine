@@ -41,8 +41,6 @@ auto CreatePipeline(Diligent::IRenderDevice& device,
                     ShaderBindings& shaderBindings,
                     const PassDesc& passDesc) -> Diligent::RefCntAutoPtr<Diligent::IPipelineState>
 {
-    auto layoutElements = GetMeshVertexLayoutElements(0);
-
     auto ci = GraphicsPipelineStateCreateInfo{};
     ci.PSODesc.PipelineType = PIPELINE_TYPE_GRAPHICS;
     ci.PSODesc.Name = passDesc.name.data();
@@ -84,8 +82,8 @@ auto CreatePipeline(Diligent::IRenderDevice& device,
     ci.GraphicsPipeline.RasterizerDesc.CullMode           = CULL_MODE_BACK;
     ci.GraphicsPipeline.DepthStencilDesc.DepthEnable      = passDesc.useDepthTest;
     ci.GraphicsPipeline.DepthStencilDesc.DepthWriteEnable = passDesc.depthSink != DepthTarget::None;
-    ci.GraphicsPipeline.InputLayout.LayoutElements        = layoutElements.data();
-    ci.GraphicsPipeline.InputLayout.NumElements           = static_cast<uint32_t>(layoutElements.size());
+    ci.GraphicsPipeline.InputLayout.LayoutElements        = nullptr;
+    ci.GraphicsPipeline.InputLayout.NumElements           = 0;
 
     auto signatures = std::array{&shaderBindings.GetPerFrameSignature().GetResourceSignature(), &shaderBindings.GetPerPassSignature().GetResourceSignature()};
     ci.ppResourceSignatures = signatures.data();
