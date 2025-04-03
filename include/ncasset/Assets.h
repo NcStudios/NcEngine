@@ -146,7 +146,8 @@ struct CubeMap
 {
     static constexpr uint32_t numChannels = 4u;
 
-    uint32_t faceSideLength;
-    std::vector<unsigned char> pixelData;
+    TextureFormat format = TextureFormat::UNKNOWN;
+    uint32_t faceSideLength = 0u;
+    std::array<std::vector<unsigned char>, 6> faces = {};
 };
 } // namespace nc::asset

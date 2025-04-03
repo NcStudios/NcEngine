@@ -1,5 +1,4 @@
 #include "Serialize.h"
-#include "utility/BlobSize.h"
 #include "ncasset/Assets.h"
 #include "ncasset/NcaHeader.h"
 
@@ -13,7 +12,8 @@ namespace
 template<class T>
 void SerializeImpl(std::ostream& stream, const T& data, std::string_view magicNumber, uint64_t version)
 {
-    auto header = nc::asset::NcaHeader{"", "NONE", version, nc::convert::GetBlobSize(data)};
+    constexpr auto dummySize = uint64_t{0}; // explicit size no longer needed, can reuse value in the future
+    auto header = nc::asset::NcaHeader{"", "NONE", version, dummySize};
     std::memcpy(header.magicNumber, magicNumber.data(), 5);
     nc::serialize::Serialize(stream, header);
     nc::serialize::Serialize(stream, data);

@@ -56,16 +56,33 @@ class CubeMapBufferResourceTest : public DiligentEngineFixture
         }
 };
 
+const auto face1x1 = std::vector<unsigned char>{
+    0, 1, 2, 3
+};
+
+const auto face2x2 = std::vector<unsigned char>{
+    0, 1, 2, 3,  0, 1, 2, 3,
+    0, 1, 2, 3,  0, 1, 2, 3
+};
+
+const auto face4x4 = std::vector<unsigned char>{
+    0, 1, 2, 3,  0, 1, 2, 3,  0, 1, 2, 3,  0, 1, 2, 3,
+    0, 1, 2, 3,  0, 1, 2, 3,  0, 1, 2, 3,  0, 1, 2, 3,
+    0, 1, 2, 3,  0, 1, 2, 3,  0, 1, 2, 3,  0, 1, 2, 3,
+    0, 1, 2, 3,  0, 1, 2, 3,  0, 1, 2, 3,  0, 1, 2, 3
+};
+
 const auto imageCubeMap1 = nc::asset::CubeMapWithId{
     .cubeMap = nc::asset::CubeMap{
+        .format = nc::asset::TextureFormat::RGBA8_UNORM_SRGB,
         .faceSideLength = 2,
-        .pixelData = {
-            0, 1, 2, 3,  0, 1, 2, 3,  0, 1, 2, 3,  0, 1, 2, 3,
-            0, 1, 2, 3,  0, 1, 2, 3,  0, 1, 2, 3,  0, 1, 2, 3,
-            0, 1, 2, 3,  0, 1, 2, 3,  0, 1, 2, 3,  0, 1, 2, 3,
-            0, 1, 2, 3,  0, 1, 2, 3,  0, 1, 2, 3,  0, 1, 2, 3,
-            0, 1, 2, 3,  0, 1, 2, 3,  0, 1, 2, 3,  0, 1, 2, 3,
-            0, 1, 2, 3,  0, 1, 2, 3,  0, 1, 2, 3,  0, 1, 2, 3
+        .faces = {
+            face2x2,
+            face2x2,
+            face2x2,
+            face2x2,
+            face2x2,
+            face2x2
         }
     },
     .id = 0,
@@ -73,29 +90,31 @@ const auto imageCubeMap1 = nc::asset::CubeMapWithId{
 
 const auto imageCubeMap2 = nc::asset::CubeMapWithId{
     .cubeMap = nc::asset::CubeMap{
+        .format = nc::asset::TextureFormat::RGBA8_UNORM_SRGB,
         .faceSideLength = 4,
-        .pixelData = {
-            0, 1, 2, 3,  0, 1, 2, 3,  0, 1, 2, 3,  0, 1, 2, 3,  0, 1, 2, 3,  0, 1, 2, 3,  0, 1, 2, 3,  0, 1, 2, 3,  0, 1, 2, 3,  0, 1, 2, 3,  0, 1, 2, 3,  0, 1, 2, 3,  0, 1, 2, 3,  0, 1, 2, 3,  0, 1, 2, 3,  0, 1, 2, 3,
-            0, 1, 2, 3,  0, 1, 2, 3,  0, 1, 2, 3,  0, 1, 2, 3,  0, 1, 2, 3,  0, 1, 2, 3,  0, 1, 2, 3,  0, 1, 2, 3,  0, 1, 2, 3,  0, 1, 2, 3,  0, 1, 2, 3,  0, 1, 2, 3,  0, 1, 2, 3,  0, 1, 2, 3,  0, 1, 2, 3,  0, 1, 2, 3,
-            0, 1, 2, 3,  0, 1, 2, 3,  0, 1, 2, 3,  0, 1, 2, 3,  0, 1, 2, 3,  0, 1, 2, 3,  0, 1, 2, 3,  0, 1, 2, 3,  0, 1, 2, 3,  0, 1, 2, 3,  0, 1, 2, 3,  0, 1, 2, 3,  0, 1, 2, 3,  0, 1, 2, 3,  0, 1, 2, 3,  0, 1, 2, 3,
-            0, 1, 2, 3,  0, 1, 2, 3,  0, 1, 2, 3,  0, 1, 2, 3,  0, 1, 2, 3,  0, 1, 2, 3,  0, 1, 2, 3,  0, 1, 2, 3,  0, 1, 2, 3,  0, 1, 2, 3,  0, 1, 2, 3,  0, 1, 2, 3,  0, 1, 2, 3,  0, 1, 2, 3,  0, 1, 2, 3,  0, 1, 2, 3,
-            0, 1, 2, 3,  0, 1, 2, 3,  0, 1, 2, 3,  0, 1, 2, 3,  0, 1, 2, 3,  0, 1, 2, 3,  0, 1, 2, 3,  0, 1, 2, 3,  0, 1, 2, 3,  0, 1, 2, 3,  0, 1, 2, 3,  0, 1, 2, 3,  0, 1, 2, 3,  0, 1, 2, 3,  0, 1, 2, 3,  0, 1, 2, 3,
-            0, 1, 2, 3,  0, 1, 2, 3,  0, 1, 2, 3,  0, 1, 2, 3,  0, 1, 2, 3,  0, 1, 2, 3,  0, 1, 2, 3,  0, 1, 2, 3,  0, 1, 2, 3,  0, 1, 2, 3,  0, 1, 2, 3,  0, 1, 2, 3,  0, 1, 2, 3,  0, 1, 2, 3,  0, 1, 2, 3,  0, 1, 2, 3 
+        .faces = {
+            face4x4,
+            face4x4,
+            face4x4,
+            face4x4,
+            face4x4,
+            face4x4
         }
     },
     .id = 1,
 };
 
-const auto normalCubeMap = nc::asset::CubeMapWithId{
+const auto imageCubeMap3 = nc::asset::CubeMapWithId{
     .cubeMap = nc::asset::CubeMap{
+        .format = nc::asset::TextureFormat::RGBA8_UNORM_SRGB,
         .faceSideLength = 1,
-        .pixelData = {
-            0, 1, 2, 3,
-            0, 1, 2, 3,
-            0, 1, 2, 3,
-            0, 1, 2, 3,
-            0, 1, 2, 3,
-            0, 1, 2, 3
+        .faces = {
+            face1x1,
+            face1x1,
+            face1x1,
+            face1x1,
+            face1x1,
+            face1x1
         }
     },
     .id = 2,
@@ -135,7 +154,7 @@ TEST_F(CubeMapBufferResourceTest, Load_existingcubeMaps_appendsToArray)
 
 TEST_F(CubeMapBufferResourceTest, Load_exceedsmaxCubeMaps_throws)
 {
-    const auto cubeMaps = std::array{imageCubeMap1, imageCubeMap2, normalCubeMap};
+    const auto cubeMaps = std::array{imageCubeMap1, imageCubeMap2, imageCubeMap3};
     uut->Load(cubeMaps, engine->GetContext(), engine->GetDevice());
     EXPECT_THROW(uut->Load(cubeMaps, engine->GetContext(), engine->GetDevice()), std::exception);
 }
@@ -143,7 +162,7 @@ TEST_F(CubeMapBufferResourceTest, Load_exceedsmaxCubeMaps_throws)
 TEST_F(CubeMapBufferResourceTest, Load_afterUnload_overwritesExisting)
 {
     auto initialCubeMaps = std::array{imageCubeMap1, imageCubeMap2};
-    auto overwriteCubeMaps = std::array{normalCubeMap};
+    auto overwriteCubeMaps = std::array{imageCubeMap3};
     uut->Load(initialCubeMaps, engine->GetContext(), engine->GetDevice());
     uut->Unload();
     uut->Load(overwriteCubeMaps, engine->GetContext(), engine->GetDevice());
@@ -154,5 +173,5 @@ TEST_F(CubeMapBufferResourceTest, Load_afterUnload_overwritesExisting)
     const auto overwrittenCubeMap = overwrittenView->GetTexture();
     const auto overwrittenDesc = overwrittenCubeMap->GetDesc();
     EXPECT_EQ(Diligent::RESOURCE_STATE_SHADER_RESOURCE, overwrittenCubeMap->GetState());
-    EXPECT_EQ(normalCubeMap.cubeMap.faceSideLength, overwrittenDesc.GetWidth());
+    EXPECT_EQ(imageCubeMap3.cubeMap.faceSideLength, overwrittenDesc.GetWidth());
 }

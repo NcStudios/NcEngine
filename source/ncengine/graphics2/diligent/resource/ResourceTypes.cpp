@@ -152,7 +152,7 @@ auto ToTextureCubeDesc(const nc::asset::CubeMap& desc) -> Diligent::TextureDesc
     textureDesc.Width = desc.faceSideLength;
     textureDesc.Height = desc.faceSideLength;
     textureDesc.MipLevels = 1;
-    textureDesc.Format = Diligent::TEX_FORMAT_RGBA8_UNORM_SRGB;
+    textureDesc.Format = ToTextureFormat(desc.format);
     textureDesc.BindFlags = Diligent::BIND_SHADER_RESOURCE;
     textureDesc.SampleCount = 1;
     return textureDesc;
@@ -202,11 +202,19 @@ void SetArrayRegion(Diligent::IShaderResourceVariable* variable, std::span<Dilig
 void InitializeCubeArray(Diligent::IDeviceContext& context, Diligent::IRenderDevice& device, Diligent::IShaderResourceVariable* variable, uint32_t arraySize, bool transition)
 {
     const auto dummyCubeMap = asset::CubeMap{
+        .format = asset::TextureFormat::RGBA8_UNORM_SRGB,
         .faceSideLength = 1u,
-        .pixelData = std::vector<unsigned char> {0x1A, 0x2A, 0x3A, 0x4A}
+        .faces = {
+            std::vector<unsigned char> {0x1A, 0x2A, 0x3A, 0x4A}, // just reuse same face below
+            {}, {}, {}, {}, {},
+        }
     };
 
-    auto face = Diligent::TextureSubResData{dummyCubeMap.pixelData.data(), dummyCubeMap.faceSideLength * asset::CubeMap::numChannels};
+    auto face = Diligent::TextureSubResData{
+        dummyCubeMap.faces.at(0).data(),
+        dummyCubeMap.faceSideLength * asset::CubeMap::numChannels
+    };
+
     auto faceSubResources = std::array{face, face, face, face, face, face};
     const auto dummyCubeMapTexData = Diligent::TextureData{faceSubResources.data(), 6, &context};
     const auto dummyCubeMapDesc = ToTextureCubeDesc(dummyCubeMap);

@@ -10,6 +10,7 @@
 
 #include <algorithm>
 #include <array>
+#include <ranges>
 
 namespace
 {
@@ -90,26 +91,36 @@ auto GenerateMips(nc::convert::Image& image,
 
 namespace nc::convert
 {
-auto TextureConverter::ImportCubeMap(const std::filesystem::path& path) -> asset::CubeMap
+auto TextureConverter::ImportCubeMap(const std::filesystem::path& path,
+                                     asset::TextureFormat format) -> asset::CubeMap
 {
-    // TODO: what to do here?
-    auto atlas = ImportTexture(path, asset::TextureFormat::RGBA8_UNORM_SRGB, false);
+    const auto atlas = ImportTexture(path, asset::TextureFormat::RGBA8_UNORM_SRGB, false);
     const auto atlasInfo = GetSubTextureInfo(atlas);
     const auto sideLen = atlasInfo.sideLength;
-    const auto nBytesPerFace = sideLen * sideLen * asset::Texture::numChannels;
-    auto pixels = std::vector<unsigned char>(nBytesPerFace * 6u);
-    auto curPos = 0ull;
-    curPos += ::ReadTextureFromAtlas(atlas, pixels.data() + curPos, atlasInfo.frontPosition, sideLen);
-    curPos += ::ReadTextureFromAtlas(atlas, pixels.data() + curPos, atlasInfo.backPosition, sideLen);
-    curPos += ::ReadTextureFromAtlas(atlas, pixels.data() + curPos, atlasInfo.topPosition, sideLen);
-    curPos += ::ReadTextureFromAtlas(atlas, pixels.data() + curPos, atlasInfo.bottomPosition, sideLen);
-    curPos += ::ReadTextureFromAtlas(atlas, pixels.data() + curPos, atlasInfo.rightPosition, sideLen);
-    curPos += ::ReadTextureFromAtlas(atlas, pixels.data() + curPos, atlasInfo.leftPosition, sideLen);
-
-    return nc::asset::CubeMap{
-        sideLen,
-        std::move(pixels)
+    const auto positions = std::array{
+        atlasInfo.frontPosition,
+        atlasInfo.backPosition,
+        atlasInfo.topPosition,
+        atlasInfo.bottomPosition,
+        atlasInfo.rightPosition,
+        atlasInfo.leftPosition
     };
+
+    auto cubeMap = asset::CubeMap{
+        .format = format,
+        .faceSideLength = sideLen
+    };
+
+    auto faceImage = Image{static_cast<int>(sideLen), static_cast<int>(sideLen)};
+    const auto useCompression = IsCompressedTextureFormat(format);
+    for (auto [face, position] : std::views::zip(cubeMap.faces, positions))
+    {
+        ReadTextureFromAtlas(atlas, faceImage.GetData(), position, sideLen);
+        auto subResource = useCompression ? faceImage.Compress(format) : faceImage.MakeTextureSubResource();
+        face = std::move(subResource.pixelData);
+    }
+
+    return cubeMap;
 }
 
 auto TextureConverter::ImportTexture(const std::filesystem::path& path,
