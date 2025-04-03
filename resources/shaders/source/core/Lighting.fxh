@@ -113,8 +113,13 @@ static const float4x4 biasMat = float4x4(
     0.5, 0.5, 0.0, 1.0
 );
 
-float UniShadowCalculation(float4 fragPosLightSpace, Texture2D depthTex)
+float UniShadowCalculation(float4 fragPosLightSpace, float lightIntensity, Texture2D depthTex)
 {
+    if (lightIntensity <= 0.0f)
+    {
+        return 1.0f;
+    }
+
     // Perform perspective divide
     float3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
 
@@ -164,17 +169,17 @@ float UniShadowCalculation(float4 fragPosLightSpace, Texture2D depthTex)
     return shadow;
 }
 
-float PointShadowCalculation(float4 fragPosWorldSpace, float3 lightPosWorldSpace, float lightRadius, TextureCube depthTex)
+float PointShadowCalculation(float4 fragPosWorldSpace, float3 lightPosWorldSpace, float lightIntensity, TextureCube depthTex)
 {
+    if (lightIntensity <= 0.0f)
+    {
+        return 1.0f;
+    }
+
     // Get the direction to sample the cubemap
     float3 lightToFrag = lightPosWorldSpace - fragPosWorldSpace.xyz;
     float distance = length(lightToFrag) / 150.0f;
     float3 sampleDir = -normalize(lightToFrag);
-
-    if (length(lightToFrag) > lightRadius)
-    {
-        return 0.0f;
-    }
 
     // Set up params for the blur
     float shadow = 0.0;
@@ -196,7 +201,6 @@ float PointShadowCalculation(float4 fragPosWorldSpace, float3 lightPosWorldSpace
     {
         float3 perturbedDir = normalize(sampleDir + offsets[i]);
         float closestDepth = depthTex.Sample(PointShadowMapSinks_sampler, perturbedDir).r;
-
         float gradientAmt = 0.0001f; // Adjust softness
         shadow += smoothstep(closestDepth - gradientAmt, closestDepth + gradientAmt, distance);
     }
@@ -205,34 +209,34 @@ float PointShadowCalculation(float4 fragPosWorldSpace, float3 lightPosWorldSpace
     return shadow;
 }
 
-float GetShadowFactor(float4 worldPos)
-{
-    uint uniShadowMapIndex = 0u;
-    uint pointShadowMapIndex = 0u;
-    uint shadowCasterCount = 0u;
-    float shadowFactor = 1.0f;
-    for (int i = 0; i < lightCount; i++)
-    {
-        // Calculate shadows
-        if (Lights[i].castsShadows)
-        {
-            if (Lights[i].type == 1)
-            {
-                TextureCube depthTex = PointShadowMapSinks[pointShadowMapIndex];
-                float rawShadow = PointShadowCalculation(worldPos, Lights[i].position, Lights[i].radius, depthTex);
-                shadowFactor += (rawShadow);
-                pointShadowMapIndex++;
-            }
-            else
-            {
-                Texture2D depthTex = UniShadowMapSinks[uniShadowMapIndex];
-                float rawShadow = UniShadowCalculation(mul(mul(worldPos, LightMatrices[Lights[i].lightMatrixIndex].viewProjection), biasMat), depthTex);
-                shadowFactor += (rawShadow); 
-                uniShadowMapIndex++;
-            }
-            shadowCasterCount++;
-        }
-    }
-    shadowFactor /= max(float(shadowCasterCount), 1);
-    return (1-shadowFactor) + 1.0f;
-}
+// float GetShadowFactor(float4 worldPos)
+// {
+//     uint uniShadowMapIndex = 0u;
+//     uint pointShadowMapIndex = 0u;
+//     uint shadowCasterCount = 0u;
+//     float shadowFactor = 1.0f;
+//     for (int i = 0; i < lightCount; i++)
+//     {
+//         // Calculate shadows
+//         if (Lights[i].castsShadows)
+//         {
+//             if (Lights[i].type == 1)
+//             {
+//                 TextureCube depthTex = PointShadowMapSinks[pointShadowMapIndex];
+//                 float rawShadow = PointShadowCalculation(worldPos, Lights[i].position, Lights[i].radius, depthTex);
+//                 shadowFactor += (rawShadow);
+//                 pointShadowMapIndex++;
+//             }
+//             else
+//             {
+//                 Texture2D depthTex = UniShadowMapSinks[uniShadowMapIndex];
+//                 float rawShadow = UniShadowCalculation(mul(mul(worldPos, LightMatrices[Lights[i].lightMatrixIndex].viewProjection), biasMat), depthTex);
+//                 shadowFactor += (rawShadow); 
+//                 uniShadowMapIndex++;
+//             }
+//             shadowCasterCount++;
+//         }
+//     }
+//     shadowFactor /= max(float(shadowCasterCount), 1);
+//     return min((1-shadowFactor) + 1.0f, 1.0f);
+// }
