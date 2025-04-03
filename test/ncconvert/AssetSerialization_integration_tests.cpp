@@ -17,9 +17,7 @@ bool operator==(const nc::asset::MeshVertex& lhs, const nc::asset::MeshVertex& r
 {
     return lhs.position == rhs.position &&
            lhs.normal == rhs.normal &&
-           lhs.uv == rhs.uv &&
-           lhs.tangent == rhs.tangent &&
-           lhs.bitangent == rhs.bitangent;
+           lhs.uv == rhs.uv;
 }
 
 bool Equals(const DirectX::XMMATRIX& lhs, const DirectX::XMMATRIX& rhs)
@@ -143,22 +141,16 @@ TEST(AssetSerializationTest, Mesh_hasBones_roundTrip_succeeds)
             nc::asset::MeshVertex{nc::Vector3::Splat(0.0f),
                                   nc::Vector3::Splat(1.0f),
                                   nc::Vector2::Splat(2.0f),
-                                  nc::Vector3::Splat(3.0f),
-                                  nc::Vector3::Splat(4.0f),
                                   nc::Vector4::Splat(5.0f),
                                   std::array<uint32_t, 4>{6, 6, 6, 6}},
             nc::asset::MeshVertex{nc::Vector3::Splat(7.0f),
                                   nc::Vector3::Splat(8.0f),
                                   nc::Vector2::Splat(9.0f),
-                                  nc::Vector3::Splat(10.0f),
-                                  nc::Vector3::Splat(11.0f),
                                   nc::Vector4::Splat(12.0f),
                                   std::array<uint32_t, 4>{13, 13, 13, 13}},
             nc::asset::MeshVertex{nc::Vector3::Splat(14.0f),
                                   nc::Vector3::Splat(15.0f),
                                   nc::Vector2::Splat(16.0f),
-                                  nc::Vector3::Splat(17.0f),
-                                  nc::Vector3::Splat(18.0f),
                                   nc::Vector4::Splat(19.0f),
                                   std::array<uint32_t, 4>{20, 20, 20, 20}}
         },
@@ -250,22 +242,16 @@ TEST(AssetSerializationTest, Mesh_noBones_roundTrip_succeeds)
             nc::asset::MeshVertex{nc::Vector3::Splat(0.0f),
                                   nc::Vector3::Splat(1.0f),
                                   nc::Vector2::Splat(2.0f),
-                                  nc::Vector3::Splat(3.0f),
-                                  nc::Vector3::Splat(4.0f),
                                   nc::Vector4::Splat(5.0f),
                                   std::array<uint32_t, 4>{6, 6, 6, 6}},
             nc::asset::MeshVertex{nc::Vector3::Splat(7.0f),
                                   nc::Vector3::Splat(8.0f),
                                   nc::Vector2::Splat(9.0f),
-                                  nc::Vector3::Splat(10.0f),
-                                  nc::Vector3::Splat(11.0f),
                                   nc::Vector4::Splat(12.0f),
                                   std::array<uint32_t, 4>{13, 13, 13, 13}},
             nc::asset::MeshVertex{nc::Vector3::Splat(14.0f),
                                   nc::Vector3::Splat(15.0f),
                                   nc::Vector2::Splat(16.0f),
-                                  nc::Vector3::Splat(17.0f),
-                                  nc::Vector3::Splat(18.0f),
                                   nc::Vector4::Splat(19.0f),
                                   std::array<uint32_t, 4>{20, 20, 20, 20}}
         },

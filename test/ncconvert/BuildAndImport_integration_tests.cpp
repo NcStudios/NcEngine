@@ -144,12 +144,8 @@ TEST_F(BuildAndImportTest, Mesh_from_fbx)
         // TODO: uvs
         const auto foundVertex = std::ranges::find(test_data::possibleVertices, vertex.position);
         const auto foundNormal = std::ranges::find(test_data::possibleNormals, vertex.normal);
-        const auto foundTangent = std::ranges::find(test_data::possibleTangents, vertex.tangent);
-        const auto foundBitangent = std::ranges::find(test_data::possibleBitangents, vertex.bitangent);
         EXPECT_NE(foundVertex, test_data::possibleVertices.cend());
         EXPECT_NE(foundNormal, test_data::possibleNormals.cend());
-        EXPECT_NE(foundTangent, test_data::possibleTangents.cend());
-        EXPECT_NE(foundBitangent, test_data::possibleBitangents.cend());
     }
 
     // should have triangular faces

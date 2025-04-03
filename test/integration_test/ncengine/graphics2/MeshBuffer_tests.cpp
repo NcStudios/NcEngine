@@ -112,8 +112,6 @@ TEST(MeshBufferUtilityTest, GetMeshVertexLayoutElements_setsRelativeOffsets)
         sizeof(nc::asset::MeshVertex::position),
         sizeof(nc::asset::MeshVertex::normal),
         sizeof(nc::asset::MeshVertex::uv),
-        sizeof(nc::asset::MeshVertex::tangent),
-        sizeof(nc::asset::MeshVertex::bitangent),
         sizeof(nc::asset::MeshVertex::boneWeights),
         sizeof(nc::asset::MeshVertex::boneIds)
     };
@@ -122,13 +120,11 @@ TEST(MeshBufferUtilityTest, GetMeshVertexLayoutElements_setsRelativeOffsets)
         nc::graphics::VertexAttribute::Pos         |
         nc::graphics::VertexAttribute::Normal      |
         nc::graphics::VertexAttribute::UV          |
-        nc::graphics::VertexAttribute::Tangent     |
-        nc::graphics::VertexAttribute::Bitangent   |
         nc::graphics::VertexAttribute::BoneWeights |
         nc::graphics::VertexAttribute::BoneIds
     );
 
-    ASSERT_EQ(7, actual.size());
+    ASSERT_EQ(attributeSizes.size(), actual.size());
 
     constexpr auto expectedStride = sizeof(nc::asset::MeshVertex);
     auto relativeOffset = 0ull;

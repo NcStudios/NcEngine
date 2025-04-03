@@ -30,7 +30,7 @@ namespace
 {
 constexpr auto concaveColliderFlags = aiProcess_Triangulate | aiProcess_ConvertToLeftHanded;
 constexpr auto hullColliderFlags = concaveColliderFlags | aiProcess_JoinIdenticalVertices;
-constexpr auto meshFlags = hullColliderFlags | aiProcess_GenNormals | aiProcess_CalcTangentSpace;
+constexpr auto meshFlags = hullColliderFlags | aiProcess_GenNormals;
 constexpr auto skeletalAnimationFlags = meshFlags | aiProcess_LimitBoneWeights;
 const auto supportedFileExtensions = std::array<std::string, 2> {".fbx", ".obj"};
 
@@ -322,9 +322,7 @@ auto GetBonesData(const aiMesh* mesh, const aiNode* rootNode) -> nc::asset::Bone
 auto ConvertToMeshVertices(const aiMesh* mesh) -> std::vector<nc::asset::MeshVertex>
 {
     NC_ASSERT(static_cast<bool>(mesh->mNormals) &&
-              static_cast<bool>(mesh->mTextureCoords) &&
-              static_cast<bool>(mesh->mTangents) &&
-              static_cast<bool>(mesh->mBitangents),
+              static_cast<bool>(mesh->mTextureCoords),
               "Not all required data was generated for mesh conversion");
     auto out = std::vector<nc::asset::MeshVertex>{};
     const auto nVertices = mesh->mNumVertices;
@@ -335,14 +333,21 @@ auto ConvertToMeshVertices(const aiMesh* mesh) -> std::vector<nc::asset::MeshVer
         const auto perVertexBones = GetBoneWeights(mesh);
         for (auto i = 0u; i < nVertices; ++i)
         {
-            const auto uv = mesh->mTextureCoords[0][i];
-            auto boneWeights = nc::Vector4(perVertexBones.at(i).boneWeights[0],
-                                        perVertexBones.at(i).boneWeights[1],
-                                        perVertexBones.at(i).boneWeights[2],
-                                        perVertexBones.at(i).boneWeights[3]);
+            const auto& uv = mesh->mTextureCoords[0][i];
+            const auto& boneData = perVertexBones.at(i);
+            const auto boneWeights = nc::Vector4(
+                boneData.boneWeights[0],
+                boneData.boneWeights[1],
+                boneData.boneWeights[2],
+                boneData.boneWeights[3]
+            );
+
             out.emplace_back(
-                ToVector3(mesh->mVertices[i]), ToVector3(mesh->mNormals[i]), nc::Vector2{uv.x, uv.y},
-                ToVector3(mesh->mTangents[i]), ToVector3(mesh->mBitangents[i]), boneWeights, perVertexBones.at(i).boneIds
+                ToVector3(mesh->mVertices[i]),
+                ToVector3(mesh->mNormals[i]),
+                nc::Vector2{uv.x, uv.y},
+                boneWeights,
+                boneData.boneIds
             );
         }
         return out;
@@ -350,10 +355,13 @@ auto ConvertToMeshVertices(const aiMesh* mesh) -> std::vector<nc::asset::MeshVer
 
     for (auto i = 0u; i < nVertices; ++i)
     {
-        const auto uv = mesh->mTextureCoords[0][i];
+        const auto& uv = mesh->mTextureCoords[0][i];
         out.emplace_back(
-            ToVector3(mesh->mVertices[i]), ToVector3(mesh->mNormals[i]), nc::Vector2{uv.x, uv.y},
-            ToVector3(mesh->mTangents[i]), ToVector3(mesh->mBitangents[i]), nc::Vector4{-1, -1, -1, -1}, std::array<uint32_t, 4>{UINT32_MAX, UINT32_MAX, UINT32_MAX, UINT32_MAX}
+            ToVector3(mesh->mVertices[i]),
+            ToVector3(mesh->mNormals[i]),
+            nc::Vector2{uv.x, uv.y},
+            nc::Vector4{-1, -1, -1, -1},
+            std::array<uint32_t, 4>{UINT32_MAX, UINT32_MAX, UINT32_MAX, UINT32_MAX}
         );
     }
     return out;

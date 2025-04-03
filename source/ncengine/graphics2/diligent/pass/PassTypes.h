@@ -82,10 +82,8 @@ enum class VertexAttribute : uint8_t
     Pos         = 1 << 0,
     Normal      = 1 << 1,
     UV          = 1 << 2,
-    Tangent     = 1 << 3,
-    Bitangent   = 1 << 4,
-    BoneWeights = 1 << 5,
-    BoneIds     = 1 << 6,
+    BoneWeights = 1 << 3,
+    BoneIds     = 1 << 4,
 
     Texturing   = Pos | Normal | UV,
     Skinning    = Pos | BoneWeights | BoneIds,

@@ -21,10 +21,8 @@ constexpr auto g_vertexAttributeInfos = std::array{
     AttributeInfo{3, 0,  Diligent::VT_FLOAT32, nc::graphics::VertexAttribute::Pos},
     AttributeInfo{3, 12, Diligent::VT_FLOAT32, nc::graphics::VertexAttribute::Normal},
     AttributeInfo{2, 24, Diligent::VT_FLOAT32, nc::graphics::VertexAttribute::UV},
-    AttributeInfo{3, 32, Diligent::VT_FLOAT32, nc::graphics::VertexAttribute::Tangent},
-    AttributeInfo{3, 44, Diligent::VT_FLOAT32, nc::graphics::VertexAttribute::Bitangent},
-    AttributeInfo{4, 56, Diligent::VT_FLOAT32, nc::graphics::VertexAttribute::BoneWeights},
-    AttributeInfo{4, 72, Diligent::VT_UINT32,  nc::graphics::VertexAttribute::BoneIds}
+    AttributeInfo{4, 32, Diligent::VT_FLOAT32, nc::graphics::VertexAttribute::BoneWeights},
+    AttributeInfo{4, 48, Diligent::VT_UINT32,  nc::graphics::VertexAttribute::BoneIds}
 };
 
 auto MakeVertexBufferDesc(std::span<const nc::asset::MeshVertex> vertices) -> Diligent::BufferDesc
