@@ -19,6 +19,7 @@ constexpr auto globalOptions = "globalOptions"sv;
 constexpr auto outputDirectory = "outputDirectory"sv;
 constexpr auto workingDirectory = "workingDirectory"sv;
 constexpr auto defaultMeshOptions = "defaultMeshOptions"sv;
+constexpr auto defaultCubeMapOptions = "defaultCubeMapOptions"sv;
 constexpr auto defaultDiffuseTextureOptions = "defaultDiffuseTextureOptions"sv;
 constexpr auto defaultNormalTextureOptions = "defaultNormalTextureOptions"sv;
 constexpr auto defaultParticleTextureOptions = "defaultParticleTextureOptions"sv;
@@ -93,6 +94,7 @@ auto GetDefaultTargetOptions(const nc::convert::GlobalManifestOptions& options,
     using enum nc::asset::AssetType;
     switch (type)
     {
+        case CubeMap:                         return options.defaultCubeMapOptions;
         case Mesh:                            return options.defaultMeshOptions;
         case Texture:
         {
@@ -194,6 +196,7 @@ void from_json(const nlohmann::json& json, GlobalManifestOptions& options)
     options.outputDirectory = json.value(key::outputDirectory, "./");
     options.workingDirectory = json.value(key::workingDirectory, "./");
     options.defaultMeshOptions = json.value(key::defaultMeshOptions, TargetOptions{});
+    options.defaultCubeMapOptions = json.value(key::defaultCubeMapOptions, TargetOptions{});
     options.defaultDiffuseTextureOptions = json.value(key::defaultDiffuseTextureOptions, TargetOptions{});
     options.defaultNormalTextureOptions = json.value(key::defaultNormalTextureOptions, TargetOptions{});
     options.defaultParticleTextureOptions = json.value(key::defaultParticleTextureOptions, TargetOptions{});

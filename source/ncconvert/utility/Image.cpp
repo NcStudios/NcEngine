@@ -115,7 +115,7 @@ auto Image::Compress(asset::TextureFormat format) const -> asset::TextureSubReso
         fmt::format(
             "Invalid parameters for compression. Resize image or use an appropriate format.\n"
             "\tTextureFormat '{}', Width '{}', Height '{}'",
-            std::to_underlying(format),
+            ToString(format),
             m_width,
             m_height
         )

@@ -25,7 +25,6 @@ target_sources(AssetSerialization_integration_tests
         ${PROJECT_SOURCE_DIR}/source/ncasset/Deserialize.cpp
         ${PROJECT_SOURCE_DIR}/source/ncasset/NcaHeader.cpp
         ${PROJECT_SOURCE_DIR}/source/ncconvert/builder/Serialize.cpp
-        ${PROJECT_SOURCE_DIR}/source/ncconvert/utility/BlobSize.cpp
 )
 
 target_link_libraries(AssetSerialization_integration_tests
@@ -127,7 +126,6 @@ if(NC_BUILD_NCCONVERT)
             ${PROJECT_SOURCE_DIR}/source/ncconvert/converters/GeometryConverter.cpp
             ${PROJECT_SOURCE_DIR}/source/ncconvert/converters/TextureConverter.cpp
             ${PROJECT_SOURCE_DIR}/source/ncconvert/optimizer/MeshOptimization.cpp
-            ${PROJECT_SOURCE_DIR}/source/ncconvert/utility/BlobSize.cpp
             ${PROJECT_SOURCE_DIR}/source/ncconvert/utility/EnumExtensions.cpp
             ${PROJECT_SOURCE_DIR}/source/ncconvert/utility/Image.cpp
             ${PROJECT_SOURCE_DIR}/source/ncconvert/utility/Path.cpp

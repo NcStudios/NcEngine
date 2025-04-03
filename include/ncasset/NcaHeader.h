@@ -46,7 +46,10 @@ struct NcaHeader
     /** @brief The Fnv1a hash of the asset's friendly name. */
     uint64_t version = currentVersion;
 
-    /** @brief Size in bytes of the asset blob following this header. */
+    /**
+     * @brief Size in bytes of the asset blob following this header.
+     * @deprecated This will always be zero. May be repurposed in the future.
+     */
     uint64_t size = 0;
 };
 

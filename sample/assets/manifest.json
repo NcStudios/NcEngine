@@ -4,6 +4,9 @@
         "defaultMeshOptions": {
             "optimizeMesh": true
         },
+        "defaultCubeMapOptions": {
+            "textureFormat": "BC3_UNORM_SRGB"
+        },
         "defaultDiffuseTextureOptions": {
             "textureFormat": "BC3_UNORM_SRGB",
             "generateMips": true

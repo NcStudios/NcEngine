@@ -31,6 +31,7 @@ R"(Data
 
 constexpr auto cubeMapTemplate =
 R"(Data
+  format           {}
   face side length {})";
 
 constexpr auto convexHullTemplate =
@@ -102,7 +103,7 @@ void Inspect(const std::filesystem::path& ncaPath)
         case asset::AssetType::CubeMap:
         {
             const auto asset = asset::ImportCubeMap(ncaPath);
-            LOG(cubeMapTemplate, asset.faceSideLength);
+            LOG(cubeMapTemplate, ToString(asset.format), asset.faceSideLength);
             break;
         }
         case asset::AssetType::Mesh:

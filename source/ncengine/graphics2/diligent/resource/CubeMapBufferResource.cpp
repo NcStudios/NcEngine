@@ -4,6 +4,9 @@
 #include "TextureLoader.h"
 #include "ncutility/NcError.h"
 
+#include <algorithm>
+#include <ranges>
+
 namespace nc::graphics
 {
 using namespace Diligent;
@@ -57,17 +60,15 @@ void CubeMapBufferResource::Load(std::span<const asset::CubeMapWithId> cubeMaps,
 
     for (const auto& [cubeMap, id] : cubeMaps)
     {
+        const auto stride = cubeMap.faceSideLength * asset::CubeMap::numChannels;
         auto faceSubResources = std::array<Diligent::TextureSubResData, 6>{};
-        const uint32_t faceSizeInBytes = cubeMap.faceSideLength * cubeMap.faceSideLength * asset::CubeMap::numChannels;
-        
-        for (uint32_t face = 0; face < 6; ++face)
-        {
-            const void* faceData = static_cast<const uint8_t*>(cubeMap.pixelData.data()) + (face * faceSizeInBytes);
-            faceSubResources[face] = TextureSubResData{
-                faceData,
-                cubeMap.faceSideLength * asset::CubeMap::numChannels 
-            };
-        }
+        std::ranges::transform(
+            cubeMap.faces,
+            faceSubResources.begin(),
+            [stride](const std::vector<unsigned char>& face) {
+                return TextureSubResData{face.data(), stride};
+            }
+        );
 
         auto texData = TextureData{faceSubResources.data(), 6, &context};
         auto desc = ToTextureCubeDesc(cubeMap);
