@@ -41,7 +41,7 @@ auto CreatePipeline(Diligent::IRenderDevice& device,
     ci.GraphicsPipeline.RasterizerDesc.CullMode           = CULL_MODE_BACK;
     ci.GraphicsPipeline.DepthStencilDesc.DepthEnable      = passDesc.useDepthTest;
     ci.GraphicsPipeline.DepthStencilDesc.DepthWriteEnable = false;
-    ci.GraphicsPipeline.DepthStencilDesc.DepthFunc        = COMPARISON_FUNC_LESS_EQUAL;
+    ci.GraphicsPipeline.DepthStencilDesc.DepthFunc        = COMPARISON_FUNC_LESS_EQUAL; // Forces everything less than 1.0 (depth set in vertex shader) to render in front of the skybox
     ci.GraphicsPipeline.InputLayout.LayoutElements        = layoutElements.data();
     ci.GraphicsPipeline.InputLayout.NumElements           = static_cast<uint32_t>(layoutElements.size());
 
