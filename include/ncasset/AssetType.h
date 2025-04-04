@@ -22,14 +22,6 @@ enum class AssetType
     Font
 };
 
-/** @brief Indicates special properties of asset. */
-enum class AssetSubtype : uint8_t
-{
-    None,
-    ColorTexture,
-    NormalTexture
-};
-
 /**
  * @brief Texture formats
  * 

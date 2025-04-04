@@ -63,8 +63,7 @@ const auto imageTexture1 = nc::asset::TextureWithId{
         .height = 1,
         .pixelData = {0, 1, 2, 3}
     },
-    .id = 0,
-    .subtype = nc::asset::AssetSubtype::ColorTexture
+    .id = 0
 };
 
 const auto imageTexture2 = nc::asset::TextureWithId{
@@ -77,8 +76,7 @@ const auto imageTexture2 = nc::asset::TextureWithId{
             0, 1, 2, 3,  0, 1, 2, 3
         }
     },
-    .id = 1,
-    .subtype = nc::asset::AssetSubtype::ColorTexture
+    .id = 1
 };
 
 const auto normalTexture = nc::asset::TextureWithId{
@@ -91,8 +89,7 @@ const auto normalTexture = nc::asset::TextureWithId{
             0, 1, 2, 3
         }
     },
-    .id = 2,
-    .subtype = nc::asset::AssetSubtype::NormalTexture
+    .id = 2
 };
 
 TEST_F(TextureBufferResourceTest, Load_singleTexture_succeeds)

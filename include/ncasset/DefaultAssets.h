@@ -64,5 +64,4 @@ auto GetDefaultMeshPaths() -> std::span<const std::string_view>;
 auto GetDefaultMeshColliderPaths() -> std::span<const std::string_view>;
 auto GetDefaultSkeletalAnimationPaths() -> std::span<const std::string_view>;
 auto GetDefaultTexturePaths() -> std::span<const std::string_view>;
-auto GetDefaultTextureSubtypes() -> std::span<const AssetSubtype>;
 } // namespace nc::asset

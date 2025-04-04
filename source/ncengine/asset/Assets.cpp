@@ -183,19 +183,14 @@ auto AcquireSkeletalAnimationAsset(AssetId id) -> SkeletalAnimationView
     return AssetService<SkeletalAnimationView>::Get()->Acquire(id);
 }
 
-bool LoadTextureAsset(const std::string& path, AssetSubtype subtype)
+bool LoadTextureAsset(const std::string& path)
 {
-    return AssetService<TextureView>::Get()->Load(path, subtype);
+    return AssetService<TextureView>::Get()->Load(path);
 }
 
-bool LoadTextureAssets(std::span<const std::string> paths, AssetSubtype subtype)
+bool LoadTextureAssets(std::span<const std::string> paths)
 {
-    return AssetService<TextureView>::Get()->Load(paths, subtype);
-}
-
-bool LoadTextureAssets(std::span<const std::string> paths, std::span<const AssetSubtype> subtypes)
-{
-    return AssetService<TextureView>::Get()->Load(paths, subtypes);
+    return AssetService<TextureView>::Get()->Load(paths);
 }
 
 bool UnloadTextureAsset(const std::string& path)

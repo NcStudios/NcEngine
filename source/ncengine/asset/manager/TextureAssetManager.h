@@ -17,12 +17,8 @@ class TextureAssetManager : public IAssetService<TextureView, std::string>
         explicit TextureAssetManager(const std::string& texturesAssetDirectory,
                                      uint32_t maxTextures);
 
-        auto Load(const std::string& path,
-                  AssetSubtype = AssetSubtype::None)      -> bool                          override;
-        auto Load(std::span<const std::string> paths,
-                  AssetSubtype = AssetSubtype::None)      -> bool                          override;
-        auto Load(std::span<const std::string> paths,
-                  std::span<const AssetSubtype> subtypes) -> bool                          override;
+        auto Load(const std::string& path)                -> bool                          override;
+        auto Load(std::span<const std::string> paths)     -> bool                          override;
         auto Unload(const std::string& path)              -> bool                          override;
         void UnloadAll()                                                                   override;
         auto Acquire(const std::string& path)       const -> TextureView                   override;

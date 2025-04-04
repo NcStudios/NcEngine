@@ -11,7 +11,7 @@ AudioClipAssetManager::AudioClipAssetManager(const std::string& assetDirectory)
 {
 }
 
-auto AudioClipAssetManager::Load(const std::string& path, AssetSubtype) -> bool
+auto AudioClipAssetManager::Load(const std::string& path) -> bool
 {
     if (IsLoaded(path))
     {
@@ -23,7 +23,7 @@ auto AudioClipAssetManager::Load(const std::string& path, AssetSubtype) -> bool
     return true;
 }
 
-auto AudioClipAssetManager::Load(std::span<const std::string> paths, AssetSubtype) -> bool
+auto AudioClipAssetManager::Load(std::span<const std::string> paths) -> bool
 {
     bool anyLoaded = false;
 

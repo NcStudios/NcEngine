@@ -19,6 +19,7 @@ struct GlobalManifestOptions
     std::filesystem::path outputDirectory = "./";
     std::filesystem::path workingDirectory = "./";
     TargetOptions defaultMeshOptions = TargetOptions{};
+    TargetOptions defaultCubeMapOptions = TargetOptions{};
     TargetOptions defaultDiffuseTextureOptions = TargetOptions{};
     TargetOptions defaultNormalTextureOptions = TargetOptions{};
     TargetOptions defaultParticleTextureOptions = TargetOptions{};

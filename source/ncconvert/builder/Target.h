@@ -10,7 +10,6 @@ namespace nc::convert
 /** @brief Target-specific options */
 struct TargetOptions
 {
-    asset::AssetSubtype subtype = asset::AssetSubtype::None; /** @todo 923 replace w/ format, remove */
     asset::TextureFormat textureFormat = asset::TextureFormat::RGBA8_UNORM_SRGB;
     bool generateMips = false;
     bool optimizeMesh = false;
@@ -41,6 +40,5 @@ struct ReflectedTarget
 {
     std::string name;
     std::string path;
-    asset::AssetSubtype subtype = asset::AssetSubtype::None;
 };
 }
