@@ -1,11 +1,16 @@
 #pragma once
 
+#include "graphics2/diligent/pass/PassTypes.h"
+
 #include "Common/interface/RefCntAutoPtr.hpp"
 #include "Graphics/GraphicsEngine/interface/RenderDevice.h"
 #include "Graphics/GraphicsEngine/interface/DeviceContext.h"
 
+#include "ncengine/utility/EnumUtilities.h"
+
 #include <array>
 #include <span>
+#include <vector>
 
 namespace nc
 {
@@ -16,7 +21,9 @@ struct MeshVertex;
 
 namespace graphics
 {
-auto GetMeshVertexLayoutElements(uint32_t slot = 0u, uint32_t indexOffset = 0u) -> std::array<Diligent::LayoutElement, 7>;
+auto GetMeshVertexLayoutElements(VertexAttribute attributes,
+                                 uint32_t slot = 0u,
+                                 uint32_t indexOffset = 0u) -> std::vector<Diligent::LayoutElement>;
 
 class MeshBuffer
 {

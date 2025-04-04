@@ -64,8 +64,6 @@ struct MeshVertex
     Vector3 position = Vector3::Zero();
     Vector3 normal = Vector3::Zero();
     Vector2 uv = Vector2::Zero();
-    Vector3 tangent = Vector3::Zero();
-    Vector3 bitangent = Vector3::Zero();
     Vector4 boneWeights = Vector4::Zero();
     std::array<uint32_t, 4> boneIds = {0, 0, 0, 0};
 };

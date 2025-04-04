@@ -5,10 +5,8 @@ struct VSInput
     float3 Pos         : ATTRIB0;
     float3 Normal      : ATTRIB1;
     float2 UV          : ATTRIB2;
-    float3 Tangent     : ATTRIB3;
-    float3 Bitangent   : ATTRIB4;
-    float4 BoneWeights : ATTRIB5;
-    uint4  BoneIds     : ATTRIB6;
+    float4 BoneWeights : ATTRIB3;
+    uint4  BoneIds     : ATTRIB4;
 };
 
 struct PSInput

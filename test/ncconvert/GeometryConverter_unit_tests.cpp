@@ -70,12 +70,8 @@ TEST(GeometryConverterTest, ImportedMesh_convertsToNca)
         // TODO: uvs
         const auto vertexPos = std::ranges::find(test_data::possibleVertices, vertex.position);
         const auto normalPos = std::ranges::find(test_data::possibleNormals, vertex.normal);
-        const auto tangentPos = std::ranges::find(test_data::possibleTangents, vertex.tangent);
-        const auto bitangentPos = std::ranges::find(test_data::possibleBitangents, vertex.bitangent);
         EXPECT_NE(vertexPos, test_data::possibleVertices.cend());
         EXPECT_NE(normalPos, test_data::possibleNormals.cend());
-        EXPECT_NE(tangentPos, test_data::possibleTangents.cend());
-        EXPECT_NE(bitangentPos, test_data::possibleBitangents.cend());
     }
 
     const auto nVertices = actual.vertices.size();
@@ -96,12 +92,8 @@ TEST(GeometryConverterTest, ImportedMesh_optimizeMesh_convertsToNca)
     {
         const auto vertexPos = std::ranges::find(test_data::possibleVertices, vertex.position);
         const auto normalPos = std::ranges::find(test_data::possibleNormals, vertex.normal);
-        const auto tangentPos = std::ranges::find(test_data::possibleTangents, vertex.tangent);
-        const auto bitangentPos = std::ranges::find(test_data::possibleBitangents, vertex.bitangent);
         EXPECT_NE(vertexPos, test_data::possibleVertices.cend());
         EXPECT_NE(normalPos, test_data::possibleNormals.cend());
-        EXPECT_NE(tangentPos, test_data::possibleTangents.cend());
-        EXPECT_NE(bitangentPos, test_data::possibleBitangents.cend());
     }
 
     const auto nVertices = actual.vertices.size();
