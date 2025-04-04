@@ -44,7 +44,7 @@ FetchContent_Declare(glfw
 # Dear ImGui
 FetchContent_Declare(imgui
                      GIT_REPOSITORY https://github.com/NcStudios/imgui.git
-                     GIT_TAG        v1.91.5+nc.1
+                     GIT_TAG        v1.91.5+nc.2
                      GIT_SHALLOW    TRUE
 )
 
@@ -118,16 +118,18 @@ set(DILIGENT_LIBRARIES Diligent-GraphicsEngineVk-static
                        Diligent-Imgui
 )
 
+set(DILIGENT_TAG API256008) # require patch from #666, can update to official release once available
+
 FetchContent_Declare(DiligentCore
                      GIT_REPOSITORY https://github.com/DiligentGraphics/DiligentCore.git
-                     GIT_TAG        v2.5.6
+                     GIT_TAG        ${DILIGENT_TAG}
                      GIT_SHALLOW    TRUE
                      SOURCE_DIR     _deps/DiligentCore
 )
 
 FetchContent_Declare(DiligentTools
                      GIT_REPOSITORY https://github.com/DiligentGraphics/DiligentTools.git
-                     GIT_TAG        v2.5.6
+                     GIT_TAG        ${DILIGENT_TAG}
                      GIT_SHALLOW    TRUE
                      SOURCE_DIR     _deps/DiligentTools
 )
