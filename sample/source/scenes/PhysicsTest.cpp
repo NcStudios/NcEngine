@@ -1283,12 +1283,12 @@ void PhysicsTest::Load(ecs::Ecs world, ModuleProvider modules)
     world.Emplace<DirectionalLight>(
         world.Emplace<Entity>({
             .position = Vector3{0.0f, 40.0f, 0.0f},
-            .rotation = nc::Quaternion::FromEulerAngles(1.5f, 0.809f, 0.0f),
+            .rotation = nc::Quaternion::FromEulerAngles(0.2f, 0.0f, 0.0f),
             .tag = "Directional Light"
         }),
         Vector3{1.0f, 1.0f, 1.0f},
         Vector3{1.0f, 1.0f, 1.0f},
-        1.0f
+        5.0f
     );
 }
 
