@@ -49,7 +49,7 @@ jobs:
 
       - name: Setup VulkanCI (Windows)
         if: ${{ matrix.shortName == 'Windows' }}
-        uses: NcStudios/VulkanCI@v1.1
+        uses: NcStudios/VulkanCI@v1.2
         with:
           sdkVersion: 1.4.309.0
 
