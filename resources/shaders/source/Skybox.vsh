@@ -2,10 +2,7 @@
 
 struct VSInput
 {
-    // Vertex attributes
-    float3 Pos         : ATTRIB0;
-    float3 Normal      : ATTRIB1;
-    float2 UV          : ATTRIB2;
+    float3 Pos : ATTRIB0;
 };
 
 struct PSInput 

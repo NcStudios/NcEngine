@@ -76,11 +76,26 @@ enum class PassType : uint8_t
     Skybox          = 1 << 5
 }; DEFINE_BITWISE_OPERATORS(PassType);
 
+enum class VertexAttribute : uint8_t
+{
+    None        = 0,
+    Pos         = 1 << 0,
+    Normal      = 1 << 1,
+    UV          = 1 << 2,
+    BoneWeights = 1 << 3,
+    BoneIds     = 1 << 4,
+
+    Texturing   = Pos | Normal | UV,
+    Skinning    = Pos | BoneWeights | BoneIds,
+    All         = Texturing | Skinning
+}; DEFINE_BITWISE_OPERATORS(VertexAttribute);
+
 struct PassDesc
 {
     uint64_t flag = 0;
     std::string_view name  = "";
     PassType type = PassType::None;
+    VertexAttribute layoutElements = VertexAttribute::None;
     ShaderPaths shaderPaths = ShaderPaths{};
     std::vector<ColorTarget> colorSources = std::vector<ColorTarget>{};
     std::vector<DepthTarget> depthSources = std::vector<DepthTarget>{};

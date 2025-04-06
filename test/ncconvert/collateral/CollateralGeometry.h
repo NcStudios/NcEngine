@@ -27,15 +27,6 @@ constexpr auto possibleNormals = std::array<nc::Vector3, 6>{
     nc::Vector3::Down(), nc::Vector3::Front(), nc::Vector3::Back()
 };
 
-constexpr auto possibleTangents = std::array<nc::Vector3, 3>{
-    nc::Vector3::Left(), nc::Vector3::Right(), nc::Vector3::Back()
-};
-
-constexpr auto possibleBitangents = std::array<nc::Vector3, 4>{
-    nc::Vector3::Left(), nc::Vector3::Right(), nc::Vector3::Up(),
-    nc::Vector3::Down()
-};
-
 constexpr auto meshVertexExtents = nc::Vector3::One();
 const auto furthestDistanceFromOrigin = std::sqrt(0.75f);
 } // namespace cube_fbx

@@ -7,6 +7,24 @@
 
 namespace
 {
+constexpr auto g_vertexStride = static_cast<uint32_t>(sizeof(nc::asset::MeshVertex));
+
+struct AttributeInfo
+{
+    uint32_t componentCount = 0;
+    uint32_t offset = 0;
+    Diligent::VALUE_TYPE type = Diligent::VALUE_TYPE::VT_UNDEFINED;
+    nc::graphics::VertexAttribute id = nc::graphics::VertexAttribute::None;
+};
+
+constexpr auto g_vertexAttributeInfos = std::array{
+    AttributeInfo{3, 0,  Diligent::VT_FLOAT32, nc::graphics::VertexAttribute::Pos},
+    AttributeInfo{3, 12, Diligent::VT_FLOAT32, nc::graphics::VertexAttribute::Normal},
+    AttributeInfo{2, 24, Diligent::VT_FLOAT32, nc::graphics::VertexAttribute::UV},
+    AttributeInfo{4, 32, Diligent::VT_FLOAT32, nc::graphics::VertexAttribute::BoneWeights},
+    AttributeInfo{4, 48, Diligent::VT_UINT32,  nc::graphics::VertexAttribute::BoneIds}
+};
+
 auto MakeVertexBufferDesc(std::span<const nc::asset::MeshVertex> vertices) -> Diligent::BufferDesc
 {
     return Diligent::BufferDesc{
@@ -74,17 +92,30 @@ void TransitionBufferStates(Diligent::IDeviceContext& context,
 
 namespace nc::graphics
 {
-auto GetMeshVertexLayoutElements(uint32_t slot, uint32_t indexOffset) -> std::array<Diligent::LayoutElement, 7>
+auto GetMeshVertexLayoutElements(VertexAttribute attributes,
+                                 uint32_t slot,
+                                 uint32_t indexOffset) -> std::vector<Diligent::LayoutElement>
 {
-    return std::array{
-        Diligent::LayoutElement{indexOffset,     slot, 3, Diligent::VT_FLOAT32, false},
-        Diligent::LayoutElement{indexOffset + 1, slot, 3, Diligent::VT_FLOAT32, false},
-        Diligent::LayoutElement{indexOffset + 2, slot, 2, Diligent::VT_FLOAT32, false},
-        Diligent::LayoutElement{indexOffset + 3, slot, 3, Diligent::VT_FLOAT32, false},
-        Diligent::LayoutElement{indexOffset + 4, slot, 3, Diligent::VT_FLOAT32, false},
-        Diligent::LayoutElement{indexOffset + 5, slot, 4, Diligent::VT_FLOAT32, false},
-        Diligent::LayoutElement{indexOffset + 6, slot, 4, Diligent::VT_UINT32,  false},
-    };
+    auto elements = std::vector<Diligent::LayoutElement>{};
+
+    for (const auto& info : g_vertexAttributeInfos)
+    {
+        const auto requested = static_cast<bool>(info.id & attributes);
+        if (requested)
+        {
+            elements.emplace_back(
+                indexOffset++,
+                slot,
+                info.componentCount,
+                info.type,
+                false,
+                info.offset,
+                g_vertexStride
+            );
+        }
+    }
+
+    return elements;
 }
 
 void MeshBuffer::Load(std::span<const asset::MeshVertex> vertices,

@@ -27,8 +27,7 @@ auto Sanitize(Vector3* in) -> size_t
 
 auto Sanitize(asset::MeshVertex* in) -> size_t
 {
-    return Sanitize(&in->position) + Sanitize(&in->normal) + Sanitize(&in->uv)
-         + Sanitize(&in->tangent) + Sanitize(&in->bitangent);
+    return Sanitize(&in->position) + Sanitize(&in->normal) + Sanitize(&in->uv);
 }
 
 auto Sanitize(std::span<Vector2> in) -> size_t

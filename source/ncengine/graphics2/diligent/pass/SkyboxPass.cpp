@@ -17,7 +17,7 @@ auto CreatePipeline(Diligent::IRenderDevice& device,
                     ShaderBindings& shaderBindings,
                     const PassDesc& passDesc) -> Diligent::RefCntAutoPtr<Diligent::IPipelineState>
 {
-    auto layoutElements = GetMeshVertexLayoutElements(0);
+    const auto layoutElements = GetMeshVertexLayoutElements(passDesc.layoutElements);
 
     auto ci = GraphicsPipelineStateCreateInfo{};
     ci.PSODesc.PipelineType = PIPELINE_TYPE_GRAPHICS;

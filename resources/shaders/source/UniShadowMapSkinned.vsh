@@ -5,12 +5,8 @@
 struct VSInput
 {
     float3 Pos         : ATTRIB0;
-    float3 Normal      : ATTRIB1;
-    float2 UV          : ATTRIB2;
-    float3 Tangent     : ATTRIB3;
-    float3 Bitangent   : ATTRIB4;
-    float4 BoneWeights : ATTRIB5;
-    uint4  BoneIds     : ATTRIB6;
+    float4 BoneWeights : ATTRIB1;
+    uint4  BoneIds     : ATTRIB2;
 };
 
 struct PSInput
@@ -47,7 +43,6 @@ void main(in VSInput VSIn, uint InstanceID : SV_InstanceID, out PSInput PSIn)
 {
     INSTANCE_DATA instance = INSTANCE_BUFFER[InstanceID];
     float4 pos = float4(VSIn.Pos, 1.0);
-    float4 normal = float4(VSIn.Normal, 0.0);
 
 #ifdef ENABLE_SKINNING
     if (IsValidBoneIndex(instance.boneIndex))
@@ -56,7 +51,6 @@ void main(in VSInput VSIn, uint InstanceID : SV_InstanceID, out PSInput PSIn)
         if (IsValidAnimationTransform(animatedTransform))
         {
             pos = mul(pos, animatedTransform);
-            normal = mul(animatedTransform, normal);
         }
     }
 #endif // ENABLE_SKINNING
