@@ -84,7 +84,7 @@ auto CubeSinkBufferResource::MakeShadowSamplerDesc(std::string_view variableName
     samplerDesc.MinFilter = FILTER_TYPE::FILTER_TYPE_COMPARISON_LINEAR;
     samplerDesc.MipFilter = FILTER_TYPE::FILTER_TYPE_COMPARISON_LINEAR;
     samplerDesc.ComparisonFunc = COMPARISON_FUNC_LESS;
-    
+
     return ImmutableSamplerDesc{
         SHADER_TYPE_VS_PS,
         variableName.data(),

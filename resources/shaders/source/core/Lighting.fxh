@@ -1,4 +1,4 @@
-SamplerState  UniShadowMapSinks_sampler; // By convention, texture samplers must use the '_sampler' suffix
+SamplerComparisonState  UniShadowMapSinks_sampler; // By convention, texture samplers must use the '_sampler' suffix
 SamplerComparisonState  PointShadowMapSinks_sampler; // By convention, texture samplers must use the '_sampler' suffix
 Texture2D     UniShadowMapSinks[];
 TextureCube   PointShadowMapSinks[];
@@ -128,29 +128,7 @@ float UniShadowCalculation(bool isDirectional, float4 fragPosLightSpace, Texture
 
     // Get depth of current fragment from light's perspective
     float distance = projCoords.z;
-    float shadow = 0.0;
-
-   // Get shadow map sampling radius for soft edges
-    uint2 shadowMapSize;
-    depthTex.GetDimensions(shadowMapSize.x, shadowMapSize.y);
-    float2 texelSize = float2(1.0f / shadowMapSize);
-
-    [unroll]
-    for(int x = -2; x <= 2; x++)
-    {
-        [unroll]
-        for(int y = -2; y <= 2; y++)
-        {
-            // Get closest depth value from light's perspective
-            float closestDepth = depthTex.Sample(UniShadowMapSinks_sampler, projCoords.xy + float2(x, y) * texelSize).r;
-            if (distance > closestDepth)
-            {
-                shadow += 1.0;
-            }
-        }
-    }
-
-    shadow /= 36.0f;
+    float shadow = 1-depthTex.SampleCmpLevelZero(UniShadowMapSinks_sampler, projCoords.xy, distance);
 
     // Falloff as edge of UV Shadow Map is reached
     float2 center = float2(0.5, 0.5);

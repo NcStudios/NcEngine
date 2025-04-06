@@ -118,9 +118,9 @@ auto SinkBufferResource::MakeShadowSamplerDesc(std::string_view variableName) ->
     samplerDesc.BorderColor[2] = 1.0f;
     samplerDesc.BorderColor[3] = 1.0f;
     samplerDesc.ComparisonFunc = Diligent::COMPARISON_FUNC_LESS;
-    samplerDesc.MagFilter = Diligent::FILTER_TYPE::FILTER_TYPE_LINEAR;
-    samplerDesc.MinFilter = Diligent::FILTER_TYPE::FILTER_TYPE_LINEAR;
-    samplerDesc.MipFilter = Diligent::FILTER_TYPE::FILTER_TYPE_LINEAR;
+    samplerDesc.MagFilter = Diligent::FILTER_TYPE::FILTER_TYPE_COMPARISON_LINEAR;
+    samplerDesc.MinFilter = Diligent::FILTER_TYPE::FILTER_TYPE_COMPARISON_LINEAR;
+    samplerDesc.MipFilter = Diligent::FILTER_TYPE::FILTER_TYPE_COMPARISON_LINEAR;
 
     return Diligent::ImmutableSamplerDesc{
         Diligent::SHADER_TYPE_VS_PS,
