@@ -1,5 +1,5 @@
 SamplerState  UniShadowMapSinks_sampler; // By convention, texture samplers must use the '_sampler' suffix
-SamplerState  PointShadowMapSinks_sampler; // By convention, texture samplers must use the '_sampler' suffix
+SamplerComparisonState  PointShadowMapSinks_sampler; // By convention, texture samplers must use the '_sampler' suffix
 Texture2D     UniShadowMapSinks[];
 TextureCube   PointShadowMapSinks[];
 
@@ -131,9 +131,9 @@ float UniShadowCalculation(bool isDirectional, float4 fragPosLightSpace, Texture
     float shadow = 0.0;
 
    // Get shadow map sampling radius for soft edges
-    uint shadowMapWidth, shadowMapHeight;
-    depthTex.GetDimensions(shadowMapWidth, shadowMapHeight);
-    float2 texelSize = float2(1.0 / shadowMapWidth, 1.0 / shadowMapHeight);
+    uint2 shadowMapSize;
+    depthTex.GetDimensions(shadowMapSize.x, shadowMapSize.y);
+    float2 texelSize = float2(1.0f / shadowMapSize);
 
     [unroll]
     for(int x = -2; x <= 2; x++)
@@ -168,30 +168,11 @@ float PointShadowCalculation(float4 fragPosWorldSpace, float3 lightPosWorldSpace
     float distance = length(lightToFrag) / 150.0f;
     float3 sampleDir = -normalize(lightToFrag);
 
+    uint2 shadowMapSize;
+    depthTex.GetDimensions(shadowMapSize.x, shadowMapSize.y);
+    float2 texelSize = float2(1.0f / shadowMapSize);
+
     float shadow = 0.0;
-
-    // PCF sampled filtering
-    const float sampleCount = 3.0f;
-    const float offset = 0.01f;
-
-    [unroll]
-    for (float x = -offset; x < offset; x += offset / (sampleCount * 0.5f)) 
-    {
-        [unroll]
-        for (float y = -offset; y < offset; y += offset / (sampleCount * 0.5f)) 
-        {
-            [unroll]
-            for (float z = -offset; z < offset; z += offset / (sampleCount * 0.5f))
-            {
-                float closestDepth = depthTex.Sample(PointShadowMapSinks_sampler, sampleDir + float3(x, y, z)).r;
-                if (distance - 0.001f > closestDepth)
-                {
-                    shadow += 1.0f;
-                }
-            }
-        }
-    }
-
-    shadow /= (sampleCount * sampleCount * sampleCount);
-    return shadow;
+    float closestDepth = depthTex.SampleCmpLevelZero(PointShadowMapSinks_sampler, sampleDir, distance - 0.001f);
+    return (1-(closestDepth));
 }
