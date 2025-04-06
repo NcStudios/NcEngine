@@ -8,10 +8,10 @@
 
 namespace directionallight
 {
-constexpr float g_nearClip = 1.0f;
-constexpr float g_farClip = 150.0f;
+constexpr float g_nearClip = 7.5f;
+constexpr float g_farClip = 75.0f;
 const auto g_sceneCenter = DirectX::g_XMZero;
-const auto g_lightProjectionMatrix = DirectX::XMMatrixOrthographicRH(150.0f, 150.0f, g_nearClip, g_farClip);
+const auto g_lightProjectionMatrix = DirectX::XMMatrixOrthographicRH(50.0f, 50.0f, g_nearClip, g_farClip);
 
 auto CalculateLightViewProjectionMatrix(DirectX::FXMMATRIX transformMatrix) -> DirectX::XMMATRIX
 {
@@ -19,7 +19,7 @@ auto CalculateLightViewProjectionMatrix(DirectX::FXMMATRIX transformMatrix) -> D
     rotationMatrix.r[3] = DirectX::g_XMIdentityR3; // Directional lights have no position component
 
     const auto look = DirectX::XMVector3TransformNormal(DirectX::g_XMIdentityR2, rotationMatrix);
-    auto eye = DirectX::XMVectorSubtract(g_sceneCenter, DirectX::XMVectorScale(look, 100.0));
+    auto eye = DirectX::XMVectorSubtract(g_sceneCenter, DirectX::XMVectorScale(look, 10.0));
     return DirectX::XMMatrixLookAtRH(eye, DirectX::XMVectorZero(), DirectX::g_XMIdentityR1) * g_lightProjectionMatrix;
 }
 } // namespace directionallight

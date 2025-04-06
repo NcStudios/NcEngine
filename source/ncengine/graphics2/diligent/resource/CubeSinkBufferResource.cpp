@@ -80,11 +80,11 @@ auto CubeSinkBufferResource::MakeShadowSamplerDesc(std::string_view variableName
     samplerDesc.BorderColor[1] = 1.0f;
     samplerDesc.BorderColor[2] = 1.0f;
     samplerDesc.BorderColor[3] = 1.0f;
-    samplerDesc.MagFilter = FILTER_TYPE::FILTER_TYPE_LINEAR;
-    samplerDesc.MinFilter = FILTER_TYPE::FILTER_TYPE_LINEAR;
-    samplerDesc.MipFilter = FILTER_TYPE::FILTER_TYPE_LINEAR;
-    samplerDesc.ComparisonFunc = COMPARISON_FUNC_LESS_EQUAL;
-    
+    samplerDesc.MagFilter = FILTER_TYPE::FILTER_TYPE_COMPARISON_LINEAR;
+    samplerDesc.MinFilter = FILTER_TYPE::FILTER_TYPE_COMPARISON_LINEAR;
+    samplerDesc.MipFilter = FILTER_TYPE::FILTER_TYPE_COMPARISON_LINEAR;
+    samplerDesc.ComparisonFunc = COMPARISON_FUNC_LESS;
+
     return ImmutableSamplerDesc{
         SHADER_TYPE_VS_PS,
         variableName.data(),

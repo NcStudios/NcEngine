@@ -14,8 +14,6 @@ struct PSInput
 };
 
 StructuredBuffer<TransformData> Transforms;
-StructuredBuffer<LightData> Lights;
-StructuredBuffer<LightMatrix> LightMatrices;
 StructuredBuffer<StaticMeshInstanceData> StaticInstances;
 
 void main(in  VSInput VSIn, uint InstanceID : SV_InstanceID,  out PSInput PSIn)

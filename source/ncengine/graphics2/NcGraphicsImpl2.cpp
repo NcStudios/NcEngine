@@ -516,18 +516,18 @@ void NcGraphicsImpl2::Run()
         renderState.wireframeRenderState
     );
 
-    m_passBackend.RenderParticle(
-        context,
-        swapChain,
-        m_shaderBindings.GetPerPassSignature(),
-        renderState.particleRenderState
-    );
-
     m_passBackend.RenderSkybox(
         context,
         swapChain,
         m_shaderBindings.GetPerPassSignature(),
         renderState.environmentRenderState
+    );
+
+    m_passBackend.RenderParticle(
+        context,
+        swapChain,
+        m_shaderBindings.GetPerPassSignature(),
+        renderState.particleRenderState
     );
 
     m_passBackend.RenderPostProcess(
