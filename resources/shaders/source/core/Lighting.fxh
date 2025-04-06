@@ -1,5 +1,5 @@
 SamplerComparisonState  UniShadowMapSinks_sampler; // By convention, texture samplers must use the '_sampler' suffix
-SamplerComparisonState  PointShadowMapSinks_sampler; // By convention, texture samplers must use the '_sampler' suffix
+SamplerState  PointShadowMapSinks_sampler; // By convention, texture samplers must use the '_sampler' suffix
 Texture2D     UniShadowMapSinks[];
 TextureCube   PointShadowMapSinks[];
 
@@ -139,18 +139,45 @@ float UniShadowCalculation(bool isDirectional, float4 fragPosLightSpace, Texture
     return shadow;
 }
 
-float PointShadowCalculation(float4 fragPosWorldSpace, float3 lightPosWorldSpace, TextureCube depthTex)
+float PointShadowCalculation(float4 fragPosWorldSpace, float3 lightPosWorldSpace, TextureCube depthTex, float3 normal)
 {
-    // Get the direction to sample the cubemap
+    // Get sample vector (light to frag dir)
     float3 lightToFrag = lightPosWorldSpace - fragPosWorldSpace.xyz;
-    float distance = length(lightToFrag) / 150.0f;
+    float distance = length(lightToFrag);
+
+    // Normalize the distance based on the far plane (Keep in sync with LightSubsystem.cpp)
+    float farPlane = 150.0f; 
+    distance = distance / farPlane;
     float3 sampleDir = -normalize(lightToFrag);
 
-    uint2 shadowMapSize;
-    depthTex.GetDimensions(shadowMapSize.x, shadowMapSize.y);
-    float2 texelSize = float2(1.0f / shadowMapSize);
+    // PCF and bias
+    float shadow = 0.0f;
+    const float sampleCount = 4.0f;
+    const float offset = 0.005f;
+    float bias = 0.005f * (1.0f - dot(normal, -sampleDir));
+    bias = clamp(bias, 0.001f, 0.01f);
 
-    float shadow = 0.0;
-    float closestDepth = depthTex.SampleCmpLevelZero(PointShadowMapSinks_sampler, sampleDir, distance - 0.001f);
-    return (1-(closestDepth));
+    float totalSamples = 0.0f;
+    [unroll]
+    for (float x = -offset; x <= offset; x += offset / (sampleCount * 0.5f)) 
+    {
+        [unroll]
+        for (float y = -offset; y <= offset; y += offset / (sampleCount * 0.5f)) 
+        {
+            [unroll]
+            for (float z = -offset; z <= offset; z += offset / (sampleCount * 0.5f))
+            {
+                float closestDepth = depthTex.Sample(PointShadowMapSinks_sampler, sampleDir + float3(x, y, z)).r;
+                if (distance - bias > closestDepth)
+                {
+                    shadow += 1.0f;
+                }
+                totalSamples += 1.0f;
+            }
+        }
+    }
+
+    // Normalize the shadow value
+    shadow /= totalSamples;
+    return shadow;
 }
