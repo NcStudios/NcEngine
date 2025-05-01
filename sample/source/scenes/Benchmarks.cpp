@@ -27,6 +27,7 @@ auto g_maxMeshes = 0u;
 auto g_maxParticleEmitters = 0u;
 auto g_maxPointLights = 0u;
 auto g_maxSpotLights = 0u;
+auto g_maxDirLights = 0u;
 auto g_maxHierarchies = 0u;
 auto g_currentEntities = 0u;
 auto g_currentRigidBodies = 0u;
@@ -35,6 +36,7 @@ auto g_currentSkinnedMeshes = 0u;
 auto g_currentParticleEmitters = 0u;
 auto g_currentPointLights = 0u;
 auto g_currentSpotLights = 0u;
+auto g_currentDirLights = 0u;
 auto g_currentHierarchies = 0u;
 
 constexpr auto g_assets = std::array{
@@ -187,6 +189,18 @@ struct spot_light
     static constexpr auto name = "Spot Light";
     static inline const auto& maxCount = g_maxSpotLights;
     static inline auto& currentCount = g_currentSpotLights;
+    static inline std::function<int()> GetObjectCountCallback = nullptr;
+    static inline std::function<void(unsigned)> SpawnCallback = nullptr;
+    static inline std::function<void(unsigned)> DestroyCallback = nullptr;
+    static inline unsigned SpawnCount = 1;
+    static inline unsigned DestroyCount = 1;
+};
+
+struct directional_light
+{
+    static constexpr auto name = "Directional Light";
+    static inline const auto& maxCount = g_maxDirLights;
+    static inline auto& currentCount = g_currentDirLights;
     static inline std::function<int()> GetObjectCountCallback = nullptr;
     static inline std::function<void(unsigned)> SpawnCallback = nullptr;
     static inline std::function<void(unsigned)> DestroyCallback = nullptr;
@@ -384,6 +398,10 @@ void Widget()
 
             ImGui::TableNextRow();
             ImGui::TableNextColumn();
+
+            InnerWidget<directional_light>{}(halfCellWidth, [](){});
+            ImGui::TableNextColumn();
+
             InnerWidget<entity_hierarchy>{}(halfCellWidth, [halfCellWidth](){
                 ImGui::SetNextItemWidth(halfCellWidth);
                 nc::ui::InputU32(entity_hierarchy::HierarchySize, "Hierarchy Size");
@@ -418,6 +436,7 @@ void Benchmarks::Load(ecs::Ecs world, ModuleProvider modules)
         ::g_maxParticleEmitters = config.maxParticleEmitters;
         ::g_maxPointLights = config.maxPointLights - 1;
         ::g_maxSpotLights = config.maxSpotLights;
+        ::g_maxDirLights = config.maxDirectionalLights;
         ::g_maxHierarchies = ::g_maxEntities / (entity_hierarchy::SpawnCount + 1);
     }
 
@@ -594,6 +613,24 @@ void Benchmarks::Load(ecs::Ecs world, ModuleProvider modules)
         ::spot_light::DestroyCallback = std::bind_front(&Spawner::StageDestroy, &spawner);
     }
 
+    // Directional Light
+    {
+        const auto handle = world.Emplace<Entity>({.tag = "DirectionalLight Spawner"});
+        auto& spawner = world.Emplace<Spawner>(
+            handle,
+            ncRandom,
+            spawnBehavior,
+            [world](Entity entity) mutable {
+                world.Emplace<DirectionalLight>(entity);
+            }
+        );
+
+        world.Emplace<FrameLogic>(handle, InvokeFreeComponent<Spawner>{});
+        ::directional_light::GetObjectCountCallback = std::bind_front(&Spawner::GetObjectCount, &spawner);
+        ::directional_light::SpawnCallback = std::bind_front(&Spawner::StageSpawn, &spawner);
+        ::directional_light::DestroyCallback = std::bind_front(&Spawner::StageDestroy, &spawner);
+    }
+
     // Particle Emitter
     {
         const auto handle = world.Emplace<Entity>({.tag = "ParticleEmitter Spawner"});
@@ -671,6 +708,7 @@ void Benchmarks::Unload()
     g_currentParticleEmitters = 0u;
     g_currentPointLights = 0u;
     g_currentSpotLights = 0u;
+    g_currentDirLights = 0u;
     g_currentHierarchies = 0u;
     m_sampleUI->SetWidgetCallback(nullptr);
 }
