@@ -75,7 +75,7 @@ TEST(SkeletalAnimationStorageTest, LoadOperations_acquireExclusiveLock)
     {
         std::thread reader([&]() {
             auto lock = uut.AcquireReadLock();
-            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            std::this_thread::sleep_for(std::chrono::milliseconds(200));
         });
 
         std::this_thread::sleep_for(std::chrono::milliseconds(5));
