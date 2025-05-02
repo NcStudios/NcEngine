@@ -1,6 +1,6 @@
 /**
  * @file NcScene.h
- * @copyright Jaremie Romer and McCallister Romer 2024
+ * @copyright Jaremie Romer and McCallister Romer 2025
  */
 #pragma once
 
@@ -8,6 +8,7 @@
 #include "ncengine/module/ModuleRegistry.h"
 #include "ncengine/scene/Scene.h"
 #include "ncengine/type/EngineId.h"
+#include "ncmath/Vector.h"
 
 #include <functional>
 
@@ -66,6 +67,14 @@ class NcScene : public Module
          * @note Loading is automatically handled internally when ScheduleTransition() is used.
          */
         virtual auto LoadQueuedScene(ecs::Ecs world, ModuleRegistry& modules) -> bool = 0;
+
+        /**
+         * @brief Get the scene extents of the first scene in the queue which are used to determine lighting bounds.
+         * @throw NcError if there is no scene queued.
+         * @return a Vector3 representing the x, y, and z extents of the scene.
+         * @note GetExtents returns the extents of the queued scene, not the active scene.
+         */
+        virtual auto GetExtents() -> const Vector3& = 0;
 };
 
 /** @brief Build an NcScene instance. */

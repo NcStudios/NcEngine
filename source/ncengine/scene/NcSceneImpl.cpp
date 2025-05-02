@@ -80,4 +80,10 @@ auto SceneManager::LoadQueuedScene(ecs::Ecs world, ModuleRegistry& modules)-> bo
     m_activeScene->Load(world, ModuleProvider{&modules});
     return true;
 }
+
+auto SceneManager::GetExtents() -> const Vector3&
+{
+    NC_ASSERT(!m_sceneQueue.empty(), "Cannot get scene extents when no scenes are queued.");
+    return m_sceneQueue.front()->GetExtents();
+}
 } // namespace nc::scene

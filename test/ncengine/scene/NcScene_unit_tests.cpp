@@ -18,6 +18,22 @@ struct TestScene : public nc::Scene
     }
 };
 
+struct TestSceneWithExtents : public nc::Scene
+{
+    TestSceneWithExtents(nc::Vector3 extents)
+    : Scene{extents} {}
+
+    void Load(nc::ecs::Ecs, nc::ModuleProvider) override
+    {
+        ++loadCalls;
+    }
+
+    void Unload() override
+    {
+        ++unloadCalls;
+    }
+};
+
 class NcSceneTests : public testing::Test
 {
     public:
@@ -118,4 +134,50 @@ TEST_F(NcSceneTests, LoadUnload_multipleCalls_succeed)
     EXPECT_EQ(0, uut->GetNumberOfScenesInQueue());
     EXPECT_EQ(3, loadCalls);
     EXPECT_EQ(3, unloadCalls);
+}
+
+TEST_F(NcSceneTests, GetExtents_hasExtents_extentsReturned)
+{
+    const auto& expectedExtents = nc::Vector3{10.0f, 10.0f, 10.0f};
+    uut->Queue(std::make_unique<TestSceneWithExtents>(expectedExtents));
+
+    const auto& actualExtents = uut->GetExtents();
+
+    EXPECT_FLOAT_EQ(actualExtents.x, expectedExtents.x);
+    EXPECT_FLOAT_EQ(actualExtents.y, expectedExtents.y);
+    EXPECT_FLOAT_EQ(actualExtents.z, expectedExtents.z);
+}
+
+TEST_F(NcSceneTests, GetExtents_noScenesInQueue_extentsGetterThrows)
+{
+    const auto& expectedExtents = nc::Vector3{10.0f, 10.0f, 10.0f};
+    uut->Queue(std::make_unique<TestSceneWithExtents>(expectedExtents));
+    uut->LoadQueuedScene(world, modules);
+
+    EXPECT_THROW(uut->GetExtents(), nc::NcError);
+}
+
+TEST_F(NcSceneTests, GetExtents_twoScenesInQueue_extentsGetterReturnsFirst)
+{
+    const auto& expectedExtents = nc::Vector3{10.0f, 10.0f, 10.0f};
+    uut->Queue(std::make_unique<TestSceneWithExtents>(expectedExtents));
+    uut->Queue(std::make_unique<TestScene>());
+
+    const auto& actualExtents = uut->GetExtents();
+
+    EXPECT_FLOAT_EQ(actualExtents.x, expectedExtents.x);
+    EXPECT_FLOAT_EQ(actualExtents.y, expectedExtents.y);
+    EXPECT_FLOAT_EQ(actualExtents.z, expectedExtents.z);
+}
+
+TEST_F(NcSceneTests, GetExtents_noneSet_returnsDefault)
+{
+    const auto& expectedExtents = nc::Vector3{150.0f, 150.0f, 150.0f};
+    uut->Queue(std::make_unique<TestScene>());
+
+    const auto& actualExtents = uut->GetExtents();
+
+    EXPECT_FLOAT_EQ(actualExtents.x, expectedExtents.x);
+    EXPECT_FLOAT_EQ(actualExtents.y, expectedExtents.y);
+    EXPECT_FLOAT_EQ(actualExtents.z, expectedExtents.z);
 }

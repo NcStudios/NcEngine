@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ncengine/scene/NcScene.h"
 #include "subsystem/animation/SkeletalAnimationSubsystem.h"
 #include "subsystem/AssetDispatch.h"
 #include "subsystem/CameraSubsystem.h"
@@ -68,7 +69,8 @@ class GraphicsFrontend
               m_particleSystem{
                 world,
                 maxParticles
-              }
+              },
+              m_modules{modules}
         {
         }
 
@@ -78,6 +80,8 @@ class GraphicsFrontend
         {
             m_animationSystem.OnBeforeSceneLoad();
             m_meshSystem.OnBeforeSceneLoad();
+            auto* sceneManager = m_modules.Get<NcScene>();
+            m_lightSubsystem.OnBeforeSceneLoad(sceneManager->GetExtents());
         }
 
         void Clear() noexcept
@@ -111,5 +115,6 @@ class GraphicsFrontend
         LightSubsystem m_lightSubsystem;
         PostProcessSubsystem m_postProcessSystem;
         WireframeRendererSubsystem m_wireframeSystem;
+        ModuleProvider m_modules;
 };
 } // namespace nc::graphics

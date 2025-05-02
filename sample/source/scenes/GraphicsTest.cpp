@@ -18,8 +18,9 @@
 
 namespace nc::sample
 {
-GraphicsTest::GraphicsTest(SampleUI* ui)
-    : m_sampleUI{ui}
+GraphicsTest::GraphicsTest(SampleUI* ui, Vector3 extents)
+    : Scene{extents},
+      m_sampleUI{ui}
 {
 }
 
