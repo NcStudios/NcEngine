@@ -38,7 +38,7 @@ class Scene
          * @brief Get the scene extents, which are used to determine lighting bounds.
          * @return a Vector3 representing the x, y, and z extents of the scene.
          */
-        auto GetExtents() noexcept -> const Vector3& { return m_extents; };
+        auto GetExtents() const noexcept -> const Vector3& { return m_extents; };
 
     private:
         Vector3 m_extents;

@@ -32,7 +32,7 @@ class NcAssetImpl : public NcAsset
                     AssetMap defaults);
         ~NcAssetImpl() noexcept;
 
-        void OnBeforeSceneLoad() override;
+        void OnBeforeSceneLoad(const Scene& sceneToLoad) override;
 
         auto OnBoneUpdate() noexcept -> Signal<const BoneUpdateEventData&>& override;
         auto OnCubeMapUpdate() noexcept -> Signal<const CubeMapUpdateEventData&>& override;

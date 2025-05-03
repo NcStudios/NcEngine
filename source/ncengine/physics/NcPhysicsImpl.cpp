@@ -279,7 +279,7 @@ void NcPhysicsImpl::OnBuildTaskGraph(task::UpdateTasks& update, task::RenderTask
     );
 }
 
-void NcPhysicsImpl::OnBeforeSceneLoad()
+void NcPhysicsImpl::OnBeforeSceneLoad(const Scene&)
 {
     m_bodyManager.DeferCleanup(false);
 }

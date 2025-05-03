@@ -2,8 +2,22 @@
 #include "ncengine/config/Config.h"
 #include "gtest/gtest.h"
 #include "ncmath/Vector.h"
+#include "ncengine/ecs/Ecs.h"
+#include "ncengine/scene/Scene.h"
+#include "ncengine/scene/NcScene.h"
 
 #include <ranges>
+
+struct TestScene : public nc::Scene
+{
+    void Load(nc::ecs::Ecs, nc::ModuleProvider) override
+    {
+    }
+
+    void Unload() override
+    {
+    }
+};
 
 namespace nc::window
 {
@@ -40,8 +54,9 @@ const auto g_defaultAssets = nc::asset::AssetMap
 
 TEST(NcAssetTests, GetLoadedAssets_returnsCompleteCollection)
 {
+    auto scene = std::make_unique<TestScene>();
     auto uut = nc::asset::BuildAssetModule(g_assetSettings, g_memorySettings, g_defaultAssets);
-    uut->OnBeforeSceneLoad();
+    uut->OnBeforeSceneLoad(*scene.get());
     const auto actualAssets = uut->GetLoadedAssets();
     EXPECT_EQ(g_defaultAssets.size(), actualAssets.size());
     for (const auto& [type, assets] : uut->GetLoadedAssets())

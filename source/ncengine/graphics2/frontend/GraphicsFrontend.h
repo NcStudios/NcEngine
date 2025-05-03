@@ -76,12 +76,11 @@ class GraphicsFrontend
 
         auto BuildRenderState(ecs::Ecs world) -> FrontendRenderState;
 
-        void OnBeforeSceneLoad()
+        void OnBeforeSceneLoad(const Scene& sceneToLoad)
         {
             m_animationSystem.OnBeforeSceneLoad();
             m_meshSystem.OnBeforeSceneLoad();
-            auto* sceneManager = m_modules.Get<NcScene>();
-            m_lightSubsystem.OnBeforeSceneLoad(sceneManager->GetExtents());
+            m_lightSubsystem.OnBeforeSceneLoad(sceneToLoad.GetExtents());
         }
 
         void Clear() noexcept

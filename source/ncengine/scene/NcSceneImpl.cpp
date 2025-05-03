@@ -69,21 +69,16 @@ auto SceneManager::LoadQueuedScene(ecs::Ecs world, ModuleRegistry& modules)-> bo
     }
 
     NC_LOG_TRACE("Notifying OnBeforeSceneLoad()");
+    m_activeScene = std::move(m_sceneQueue.front());
+    m_sceneQueue.erase(m_sceneQueue.begin());
+
     for (auto& module : modules.GetAllModules())
     {
-        module->OnBeforeSceneLoad();
+        module->OnBeforeSceneLoad(*m_activeScene.get());
     }
 
     NC_LOG_TRACE("Loading scene");
-    m_activeScene = std::move(m_sceneQueue.front());
-    m_sceneQueue.erase(m_sceneQueue.begin());
     m_activeScene->Load(world, ModuleProvider{&modules});
     return true;
-}
-
-auto SceneManager::GetExtents() -> const Vector3&
-{
-    NC_ASSERT(!m_sceneQueue.empty(), "Cannot get scene extents when no scenes are queued.");
-    return m_sceneQueue.front()->GetExtents();
 }
 } // namespace nc::scene

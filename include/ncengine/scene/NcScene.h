@@ -24,7 +24,7 @@ namespace nc
  *   - The active Scene's destructor is called.
  *   - Clear() is called on all registered Modules.
  *   - ClearSceneData() is called on the ComponentRegistry.
- *   - OnBeforeSceneLoad() is called on each Module.
+ *   - OnBeforeSceneLoad(const Scene& sceneToLoad) is called on each Module.
  *   - Dequeue the next queued Scene and call Load().
 */
 class NcScene : public Module
@@ -67,14 +67,6 @@ class NcScene : public Module
          * @note Loading is automatically handled internally when ScheduleTransition() is used.
          */
         virtual auto LoadQueuedScene(ecs::Ecs world, ModuleRegistry& modules) -> bool = 0;
-
-        /**
-         * @brief Get the scene extents of the first scene in the queue which are used to determine lighting bounds.
-         * @throw NcError if there is no scene queued.
-         * @return a Vector3 representing the x, y, and z extents of the scene.
-         * @note GetExtents returns the extents of the queued scene, not the active scene.
-         */
-        virtual auto GetExtents() -> const Vector3& = 0;
 };
 
 /** @brief Build an NcScene instance. */
