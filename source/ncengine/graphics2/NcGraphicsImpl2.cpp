@@ -432,9 +432,9 @@ void NcGraphicsImpl2::SetPostProcessEffectProperties(PostProcessEffectId effectI
     m_frontend.GetPostProcessSubsystem().SetProperties(effectId, pass, properties);
 }
 
-void NcGraphicsImpl2::OnBeforeSceneLoad()
+void NcGraphicsImpl2::OnBeforeSceneLoad(const Scene& sceneToLoad)
 {
-    m_frontend.OnBeforeSceneLoad();
+    m_frontend.OnBeforeSceneLoad(sceneToLoad);
 }
 
 void NcGraphicsImpl2::Clear() noexcept

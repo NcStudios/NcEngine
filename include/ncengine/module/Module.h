@@ -1,6 +1,6 @@
 /**
  * @file Module.h
- * @copyright Jaremie Romer and McCallister Romer 2024
+ * @copyright Jaremie Romer and McCallister Romer 2025
  */
 #pragma once
 
@@ -12,6 +12,7 @@ namespace nc
 {
 class ModuleRegistry;
 class Registry;
+class Scene;
 
 /** @brief Modules are extensions that provide functionality to the engine. */
 class Module
@@ -36,7 +37,7 @@ class Module
         virtual void OnBuildTaskGraph(task::UpdateTasks&, task::RenderTasks&) {}
 
         /** @brief Called on registered modules prior to loading a new scene. */
-        virtual void OnBeforeSceneLoad() {}
+        virtual void OnBeforeSceneLoad(const Scene&) {}
 
         /** @brief Called on registered modules immediately before loading a SceneFragment file. */
         virtual void OnBeforeSceneFragmentLoad() {}

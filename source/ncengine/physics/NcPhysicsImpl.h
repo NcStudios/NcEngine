@@ -39,7 +39,7 @@ class NcPhysicsImpl final : public NcPhysics
 
         // Module Interface
         void OnBuildTaskGraph(task::UpdateTasks& update, task::RenderTasks&) override;
-        void OnBeforeSceneLoad() override;
+        void OnBeforeSceneLoad(const Scene& sceneToLoad) override;
         void OnBeforeSceneFragmentLoad() override;
         void OnAfterSceneFragmentLoad() override;
         void Clear() noexcept override;

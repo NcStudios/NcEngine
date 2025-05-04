@@ -39,7 +39,7 @@ NcAssetImpl::NcAssetImpl(const config::AssetSettings& assetSettings,
 
 NcAssetImpl::~NcAssetImpl() noexcept = default;
 
-void NcAssetImpl::OnBeforeSceneLoad()
+void NcAssetImpl::OnBeforeSceneLoad(const Scene&)
 {
     LoadAssets(m_defaults);
 }

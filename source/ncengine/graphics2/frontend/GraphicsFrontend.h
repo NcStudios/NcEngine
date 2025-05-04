@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ncengine/scene/NcScene.h"
 #include "subsystem/animation/SkeletalAnimationSubsystem.h"
 #include "subsystem/AssetDispatch.h"
 #include "subsystem/CameraSubsystem.h"
@@ -74,10 +75,11 @@ class GraphicsFrontend
 
         auto BuildRenderState(ecs::Ecs world) -> FrontendRenderState;
 
-        void OnBeforeSceneLoad()
+        void OnBeforeSceneLoad(const Scene& sceneToLoad)
         {
             m_animationSystem.OnBeforeSceneLoad();
             m_meshSystem.OnBeforeSceneLoad();
+            m_lightSubsystem.OnBeforeSceneLoad(sceneToLoad.GetExtents());
         }
 
         void Clear() noexcept

@@ -1,6 +1,6 @@
 /**
  * @file NcScene.h
- * @copyright Jaremie Romer and McCallister Romer 2024
+ * @copyright Jaremie Romer and McCallister Romer 2025
  */
 #pragma once
 
@@ -8,6 +8,7 @@
 #include "ncengine/module/ModuleRegistry.h"
 #include "ncengine/scene/Scene.h"
 #include "ncengine/type/EngineId.h"
+#include "ncmath/Vector.h"
 
 #include <functional>
 
@@ -23,7 +24,7 @@ namespace nc
  *   - The active Scene's destructor is called.
  *   - Clear() is called on all registered Modules.
  *   - ClearSceneData() is called on the ComponentRegistry.
- *   - OnBeforeSceneLoad() is called on each Module.
+ *   - OnBeforeSceneLoad(const Scene& sceneToLoad) is called on each Module.
  *   - Dequeue the next queued Scene and call Load().
 */
 class NcScene : public Module

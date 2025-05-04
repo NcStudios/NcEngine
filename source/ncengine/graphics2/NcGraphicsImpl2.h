@@ -47,7 +47,7 @@ class NcGraphicsImpl2 : public NcGraphics
                                             PostProcessPassFlag::type pass,
                                             const PostProcessPassProperties& properties) override;
         void OnBuildTaskGraph(task::UpdateTasks& update, task::RenderTasks& render) override;
-        void OnBeforeSceneLoad() override;
+        void OnBeforeSceneLoad(const Scene& sceneToLoad) override;
         void Clear() noexcept override;
         void Run();
         void OnResize(const Vector2& dimensions, bool isMinimized);
