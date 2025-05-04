@@ -15,11 +15,12 @@ namespace nc
 {
 class Registry;
 
+constexpr float MinExtentDimension = 1.0f;
 class Scene
 {
     public:
         Scene(Vector3 extents = Vector3{150.0f, 150.0f, 150.0f})
-        : m_extents{Vector3{std::max(1.0f, extents.x), std::max(1.0f, extents.y), std::max(1.0f, extents.z)}}
+        : m_extents{Vector3{std::max(MinExtentDimension, extents.x), std::max(MinExtentDimension, extents.y), std::max(MinExtentDimension, extents.z)}}
         {}
 
         virtual ~Scene() = default;

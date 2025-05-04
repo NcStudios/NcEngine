@@ -69,8 +69,7 @@ class GraphicsFrontend
               m_particleSystem{
                 world,
                 maxParticles
-              },
-              m_modules{modules}
+              }
         {
         }
 
@@ -114,6 +113,5 @@ class GraphicsFrontend
         LightSubsystem m_lightSubsystem;
         PostProcessSubsystem m_postProcessSystem;
         WireframeRendererSubsystem m_wireframeSystem;
-        ModuleProvider m_modules;
 };
 } // namespace nc::graphics

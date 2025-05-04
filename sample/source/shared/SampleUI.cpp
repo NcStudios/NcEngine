@@ -126,7 +126,7 @@ namespace nc::sample
 
             if (ImGui::Button("GraphicsTest", buttonSize))
             {
-                m_ncScene->Queue(std::make_unique<GraphicsTest>(this, nc::Vector3{20.0f, 20.0f, 40.0f}));
+                m_ncScene->Queue(std::make_unique<GraphicsTest>(this, GraphicsTest::Extents));
                 m_ncScene->ScheduleTransition();
             }
 

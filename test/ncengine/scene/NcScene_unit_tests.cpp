@@ -18,22 +18,6 @@ struct TestScene : public nc::Scene
     }
 };
 
-struct TestSceneWithExtents : public nc::Scene
-{
-    TestSceneWithExtents(nc::Vector3 extents)
-    : Scene{extents} {}
-
-    void Load(nc::ecs::Ecs, nc::ModuleProvider) override
-    {
-        ++loadCalls;
-    }
-
-    void Unload() override
-    {
-        ++unloadCalls;
-    }
-};
-
 class NcSceneTests : public testing::Test
 {
     public:
