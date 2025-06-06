@@ -13,6 +13,7 @@
 #include "ncengine/input/Input.h"
 #include "ncengine/physics/CollisionListener.h"
 #include "ncengine/physics/RigidBody.h"
+#include "shared/GeneratedAssets.h"
 
 #include <string>
 
@@ -42,6 +43,42 @@ void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
         .tag = "guy2"
     });
     world.Emplace<StaticMesh>(guy2, mesh::guy2, material::guy2);
+
+    // Twirl
+    {
+        const auto body = world.Emplace<Entity>({
+            .position = Vector3{0.0f, 0.0f, 10.0f},
+            .rotation = Quaternion::FromEulerAngles(0.0f, 0.0f, 0.0f),
+            .scale = Vector3{10.0f, 10.0f, 10.0f},
+            .tag = "body"
+        });
+
+        const auto dress = world.Emplace<Entity>({
+            .position = Vector3{0.0f, 0.0f, 10.0f},
+            .rotation = Quaternion::FromEulerAngles(0.0f, 0.0f, 0.0f),
+            .scale = Vector3{10.0f, 10.0f, 10.0f},
+            .parent = body,
+            .tag = "dress"
+        });
+
+        auto& animator = world.Emplace<SkinnedMesh>(
+            body,
+            mesh::girl_body,
+            material::blue,
+            animation::girl_twirl
+        ).GetAnimationController();
+
+        world.Emplace<StaticMesh>(
+            dress,
+            mesh::girl_dress,
+            material::blue
+        );
+
+        animator.AddState(PlayOnceAnimation{
+            .animId = animation::girl_twirl,
+            .enterWhen = [](){ return input::KeyDown(input::KeyCode::Space);}
+        });
+    }
 
     // Ogre
     {

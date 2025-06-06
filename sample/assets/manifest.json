@@ -70,6 +70,19 @@
         {
             "sourcePath": "raw/model/skeleton.fbx",
             "assetName": "mesh/skeleton"
+        },
+        {
+            "sourcePath": "raw/model/twirl.fbx",
+            "assetNames": [
+                {
+                    "subResourceName": "dress_mesh",
+                    "assetName": "mesh\\girl\\dress"
+                },
+                {
+                    "subResourceName": "body.001",
+                    "assetName": "mesh\\girl\\body"
+                }
+            ]
         }
     ],
     "mesh-collider": [
@@ -118,6 +131,15 @@
                 {
                     "subResourceName": "Armature|WalkRight",
                     "assetName": "skeletal_animation\\skeleton\\walk_right"
+                }
+            ]
+        },
+        {
+            "sourcePath": "raw/skeletal_animation/twirl.fbx",
+            "assetNames": [
+                {
+                    "subResourceName": "metarig|Spin",
+                    "assetName": "skeletal_animation\\girl\\twirl"
                 }
             ]
         }

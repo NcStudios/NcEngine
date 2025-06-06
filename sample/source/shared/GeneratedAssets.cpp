@@ -82,6 +82,8 @@ const auto g_paths = std::array{
     std::string{path::ogre},
     std::string{path::ramp},
     std::string{path::skeleton},
+    std::string{path::girl_dress},
+    std::string{path::girl_body},
 };
 
 nc::asset::MeshView default_plane{};
@@ -96,6 +98,8 @@ nc::asset::MeshView halfpipe{};
 nc::asset::MeshView ogre{};
 nc::asset::MeshView ramp{};
 nc::asset::MeshView skeleton{};
+nc::asset::MeshView girl_dress{};
+nc::asset::MeshView girl_body{};
 
 void Load()
 {
@@ -116,6 +120,8 @@ void Acquire()
     ogre = nc::asset::AcquireMeshAsset(path::ogre);
     ramp = nc::asset::AcquireMeshAsset(path::ramp);
     skeleton = nc::asset::AcquireMeshAsset(path::skeleton);
+    girl_dress = nc::asset::AcquireMeshAsset(path::girl_dress);
+    girl_body = nc::asset::AcquireMeshAsset(path::girl_body);
 }
 
 } // namespace mesh
@@ -149,6 +155,7 @@ const auto g_paths = std::array{
     std::string{path::skeleton_walk_forward},
     std::string{path::skeleton_walk_left},
     std::string{path::skeleton_walk_right},
+    std::string{path::girl_twirl},
 };
 
 nc::asset::AssetId default_cube{nc::utility::Fnv1a(path::default_cube)};
@@ -160,6 +167,7 @@ nc::asset::AssetId skeleton_walk_back{nc::utility::Fnv1a(path::skeleton_walk_bac
 nc::asset::AssetId skeleton_walk_forward{nc::utility::Fnv1a(path::skeleton_walk_forward)};
 nc::asset::AssetId skeleton_walk_left{nc::utility::Fnv1a(path::skeleton_walk_left)};
 nc::asset::AssetId skeleton_walk_right{nc::utility::Fnv1a(path::skeleton_walk_right)};
+nc::asset::AssetId girl_twirl{nc::utility::Fnv1a(path::girl_twirl)};
 
 void Load()
 {

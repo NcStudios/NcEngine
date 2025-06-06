@@ -122,6 +122,14 @@ struct SkeletalAnimation
     std::unordered_map<std::string, SkeletalAnimationFrames> framesPerBone;
 };
 
+struct ShapeKeyAnimation
+{
+    std::string name;
+    uint32_t durationInTicks;
+    float ticksPerSecond;
+    std::unordered_map<std::string, SkeletalAnimationFrames> framesPerBone;
+};
+
 struct TextureSubResource
 {
     uint32_t width = 0u;

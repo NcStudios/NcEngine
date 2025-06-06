@@ -64,6 +64,8 @@ constexpr auto halfpipe = "halfpipe.nca";
 constexpr auto ogre = "ogre.nca";
 constexpr auto ramp = "ramp.nca";
 constexpr auto skeleton = "skeleton.nca";
+constexpr auto girl_dress = "girl/dress.nca";
+constexpr auto girl_body = "girl/body.nca";
 } // namespace path
 
 extern nc::asset::MeshView default_plane;
@@ -78,6 +80,8 @@ extern nc::asset::MeshView halfpipe;
 extern nc::asset::MeshView ogre;
 extern nc::asset::MeshView ramp;
 extern nc::asset::MeshView skeleton;
+extern nc::asset::MeshView girl_dress;
+extern nc::asset::MeshView girl_body;
 
 void Load();
 void Acquire();
@@ -110,6 +114,7 @@ constexpr auto skeleton_walk_back = "skeleton/walk_back.nca";
 constexpr auto skeleton_walk_forward = "skeleton/walk_forward.nca";
 constexpr auto skeleton_walk_left = "skeleton/walk_left.nca";
 constexpr auto skeleton_walk_right = "skeleton/walk_right.nca";
+constexpr auto girl_twirl = "girl/twirl.nca";
 } // namespace path
 
 extern nc::asset::AssetId default_cube;
@@ -121,6 +126,7 @@ extern nc::asset::AssetId skeleton_walk_back;
 extern nc::asset::AssetId skeleton_walk_forward;
 extern nc::asset::AssetId skeleton_walk_left;
 extern nc::asset::AssetId skeleton_walk_right;
+extern nc::asset::AssetId girl_twirl;
 
 void Load();
 } // namespace animation
