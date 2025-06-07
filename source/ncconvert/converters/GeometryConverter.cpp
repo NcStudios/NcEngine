@@ -412,26 +412,49 @@ struct ShapeKeyAnimation
     std::vector<std::vector<PositionFrame>> positionFrames;
 };*/
 
-auto ConvertToShapeKeyAnimation(const aiAnimation* animationClip) -> nc::asset::ShapeKeyAnimation
+// / ---------------------------------------------------------------------------
+// /** Describes vertex-based animations for a single mesh or a group of
+//  *  meshes. Meshes carry the animation data for each frame in their
+//  *  aiMesh::mAnimMeshes array. The purpose of aiMeshAnim is to
+//  *  define keyframes linking each mesh attachment to a particular
+//  *  point in time. */
+// struct aiMeshAnim {
+//     /** Name of the mesh to be animated. An empty string is not allowed,
+//      *  animated meshes need to be named (not necessarily uniquely,
+//      *  the name can basically serve as wild-card to select a group
+//      *  of meshes with similar animation setup)*/
+//     C_STRUCT aiString mName;
+
+//     /** Size of the #mKeys array. Must be 1, at least. */
+//     unsigned int mNumKeys;
+
+//     /** Key frames of the animation. May not be nullptr. */
+//     C_STRUCT aiMeshKey *mKeys;
+
+// #ifdef __cplusplus
+
+//     aiMeshAnim() AI_NO_EXCEPT
+//             : mNumKeys(),
+//               mKeys() {}
+
+//     ~aiMeshAnim() {
+//         delete[] mKeys;
+//     }
+
+// #endif
+// };
+
+
+auto ConvertToShapeKeyAnimation(const aiAnimation* ) -> nc::asset::ShapeKeyAnimation
 {
     auto shapeKeyAnimation = nc::asset::ShapeKeyAnimation{};
-    shapeKeyAnimation.name = std::string(animationClip->mName.C_Str());
-    shapeKeyAnimation.ticksPerSecond = animationClip->mTicksPerSecond == 0 ? 25.0f : static_cast<float>(animationClip->mTicksPerSecond);
-    shapeKeyAnimation.durationInTicks = static_cast<uint32_t>(animationClip->mDuration);
-    shapeKeyAnimation.positionFrames.reserve(animationClip->mNumMeshChannels);
+    // shapeKeyAnimation.name = std::string(animationClip->mName.C_Str());
+    // shapeKeyAnimation.ticksPerSecond = animationClip->mTicksPerSecond == 0 ? 25.0f : static_cast<float>(animationClip->mTicksPerSecond);
+    // shapeKeyAnimation.durationInTicks = static_cast<uint32_t>(animationClip->mDuration);
+    // shapeKeyAnimation.positionFrames.reserve(animationClip->mNumMeshChannels);
 
-
-
-
-
-    // auto skeletalAnimation = nc::asset::SkeletalAnimation{};
-    // skeletalAnimation.name = std::string(animationClip->mName.C_Str());
-    // skeletalAnimation.ticksPerSecond = animationClip->mTicksPerSecond == 0 ? 25.0f : static_cast<float>(animationClip->mTicksPerSecond); // Ticks per second is not required to be set in animation software.
-    // skeletalAnimation.durationInTicks = static_cast<uint32_t>(animationClip->mDuration);
-    // skeletalAnimation.framesPerBone.reserve(animationClip->mNumChannels);
-
-    // // A single channel represents one bone and all of its transformations for the animation clip.
-    // for (const auto* channel : std::span(animationClip->mChannels, animationClip->mNumChannels))
+    // // A single channel represents one vertex and all of its transformations for the animation clip.
+    // for (const auto* channel : std::span(animationClip->mMeshChannels, animationClip->mNumMeshChannels))
     // {
     //     auto frames = nc::asset::SkeletalAnimationFrames{};
     //     frames.positionFrames.reserve(channel->mNumPositionKeys);

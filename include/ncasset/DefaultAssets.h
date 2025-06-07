@@ -65,6 +65,7 @@ auto GetDefaultConvexHullPaths() -> std::span<const std::string_view>;
 auto GetDefaultCubeMapPaths() -> std::span<const std::string_view>;
 auto GetDefaultMeshPaths() -> std::span<const std::string_view>;
 auto GetDefaultMeshColliderPaths() -> std::span<const std::string_view>;
+auto GetDefaultShapeKeyAnimationPaths() -> std::span<const std::string_view>;
 auto GetDefaultSkeletalAnimationPaths() -> std::span<const std::string_view>;
 auto GetDefaultTexturePaths() -> std::span<const std::string_view>;
 } // namespace nc::asset
