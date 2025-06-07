@@ -41,6 +41,9 @@ constexpr auto DefaultNormal = "default/normal.nca";
 /** @brief Name of the default particle texture asset. */
 constexpr auto DefaultParticle = "default/particle.nca";
 
+/** @brief Name of the default shape key animation asset; a blowing flag. */
+constexpr auto DefaultShapeKeyAnimation = "default/shapeKey.nca";
+
 /** @brief Name of the default skeletal animation asset; a spinning cube. */
 constexpr auto DefaultSkeletalAnimation = "default/cube.nca";
 

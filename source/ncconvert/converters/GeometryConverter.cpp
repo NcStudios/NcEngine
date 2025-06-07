@@ -401,6 +401,62 @@ auto ConvertToSkeletalAnimation(const aiAnimation* animationClip) -> nc::asset::
     }
     return skeletalAnimation;
 }
+
+
+/*
+struct ShapeKeyAnimation
+{
+    std::string name;
+    uint32_t durationInTicks;
+    float ticksPerSecond;
+    std::vector<std::vector<PositionFrame>> positionFrames;
+};*/
+
+auto ConvertToShapeKeyAnimation(const aiAnimation* animationClip) -> nc::asset::ShapeKeyAnimation
+{
+    auto shapeKeyAnimation = nc::asset::ShapeKeyAnimation{};
+    shapeKeyAnimation.name = std::string(animationClip->mName.C_Str());
+    shapeKeyAnimation.ticksPerSecond = animationClip->mTicksPerSecond == 0 ? 25.0f : static_cast<float>(animationClip->mTicksPerSecond);
+    shapeKeyAnimation.durationInTicks = static_cast<uint32_t>(animationClip->mDuration);
+    shapeKeyAnimation.positionFrames.reserve(animationClip->mNumMeshChannels);
+
+
+
+
+
+    // auto skeletalAnimation = nc::asset::SkeletalAnimation{};
+    // skeletalAnimation.name = std::string(animationClip->mName.C_Str());
+    // skeletalAnimation.ticksPerSecond = animationClip->mTicksPerSecond == 0 ? 25.0f : static_cast<float>(animationClip->mTicksPerSecond); // Ticks per second is not required to be set in animation software.
+    // skeletalAnimation.durationInTicks = static_cast<uint32_t>(animationClip->mDuration);
+    // skeletalAnimation.framesPerBone.reserve(animationClip->mNumChannels);
+
+    // // A single channel represents one bone and all of its transformations for the animation clip.
+    // for (const auto* channel : std::span(animationClip->mChannels, animationClip->mNumChannels))
+    // {
+    //     auto frames = nc::asset::SkeletalAnimationFrames{};
+    //     frames.positionFrames.reserve(channel->mNumPositionKeys);
+    //     frames.rotationFrames.reserve(channel->mNumRotationKeys);
+    //     frames.scaleFrames.reserve(channel->mNumScalingKeys);
+        
+    //     for (const auto& positionKey : std::span(channel->mPositionKeys, channel->mNumPositionKeys))
+    //     {
+    //         frames.positionFrames.emplace_back(static_cast<float>(positionKey.mTime), nc::Vector3(positionKey.mValue.x, positionKey.mValue.y, positionKey.mValue.z));
+    //     }
+
+    //     for (const auto& rotationKey : std::span(channel->mRotationKeys, channel->mNumRotationKeys))
+    //     {
+    //         frames.rotationFrames.emplace_back(static_cast<float>(rotationKey.mTime), nc::Quaternion(rotationKey.mValue.x, rotationKey.mValue.y, rotationKey.mValue.z, rotationKey.mValue.w));
+    //     }
+
+    //     for (const auto& scaleKey : std::span(channel->mScalingKeys, channel->mNumScalingKeys))
+    //     {
+    //         frames.scaleFrames.emplace_back(static_cast<float>(scaleKey.mTime), nc::Vector3(scaleKey.mValue.x, scaleKey.mValue.y, scaleKey.mValue.z));
+    //     }
+    //     skeletalAnimation.framesPerBone.emplace(std::string(channel->mNodeName.C_Str()), std::move(frames));
+    // }
+    // return skeletalAnimation;
+    return shapeKeyAnimation;
+}
 } // anonymous namespace
 
 namespace nc::convert
@@ -491,6 +547,13 @@ class GeometryConverter::impl
             return ::ConvertToSkeletalAnimation(animation);
         }
 
+        auto ImportShapeKeyAnimation(const std::filesystem::path& path, const std::optional<std::string>& subResourceName) -> asset::ShapeKeyAnimation
+        {
+            const auto scene = ::ReadFbx(path, &m_importer, meshFlags);
+            GetAnimationFromMesh(scene, subResourceName);
+            return asset::ShapeKeyAnimation{};
+        }
+
     private:
         Assimp::Importer m_importer;
         jolt::JoltApi m_joltApi;
@@ -521,6 +584,11 @@ auto GeometryConverter::ImportMesh(const std::filesystem::path& path, const std:
 auto GeometryConverter::ImportSkeletalAnimation(const std::filesystem::path& path, const std::optional<std::string>& subResourceName) -> asset::SkeletalAnimation
 {
     return m_impl->ImportSkeletalAnimation(path, subResourceName);
+}
+
+auto GeometryConverter::ImportShapeKeyAnimation(const std::filesystem::path& path, const std::optional<std::string>& subResourceName) -> asset::ShapeKeyAnimation
+{
+    return m_impl->ImportShapeKeyAnimation(path, subResourceName);
 }
 
 } // namespace nc::convert

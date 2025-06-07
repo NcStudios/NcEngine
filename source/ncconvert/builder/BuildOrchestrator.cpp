@@ -15,12 +15,13 @@
 
 namespace
 {
-constexpr auto assetTypes = std::array<nc::asset::AssetType, 7>{
+constexpr auto assetTypes = std::array<nc::asset::AssetType, 8>{
     nc::asset::AssetType::AudioClip,
     nc::asset::AssetType::ConvexHull,
     nc::asset::AssetType::CubeMap,
     nc::asset::AssetType::Mesh,
     nc::asset::AssetType::MeshCollider,
+    nc::asset::AssetType::ShapeKeyAnimation,
     nc::asset::AssetType::SkeletalAnimation,
     nc::asset::AssetType::Texture
 };

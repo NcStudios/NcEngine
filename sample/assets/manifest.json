@@ -91,9 +91,20 @@
             "assetName": "mesh_collider/halfpipe"
         }
     ],
+    "shapekey-animation": [
+        {
+            "sourcePath": "raw/model/twirl.fbx",
+            "assetNames": [
+                {
+                    "subResourceName": "DressKey",
+                    "assetName": "shapekey_animation\\girl\\dress"
+                }
+            ]
+        }
+    ],
     "skeletal-animation": [
         {
-            "sourcePath": "raw/skeletal_animation/ogre.fbx",
+            "sourcePath": "raw/model/ogre.fbx",
             "assetNames": [
                 {
                     "subResourceName": "Attack",
@@ -106,7 +117,7 @@
             ]
         },
         {
-            "sourcePath": "raw/skeletal_animation/skeleton.fbx",
+            "sourcePath": "raw/model/skeleton.fbx",
             "assetNames": [
                 {
                     "subResourceName": "Armature|Idle",
@@ -135,7 +146,7 @@
             ]
         },
         {
-            "sourcePath": "raw/skeletal_animation/twirl.fbx",
+            "sourcePath": "raw/model/twirl.fbx",
             "assetNames": [
                 {
                     "subResourceName": "metarig|Spin",

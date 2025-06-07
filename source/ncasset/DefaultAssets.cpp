@@ -54,6 +54,15 @@ auto GetDefaultMeshColliderPaths() -> std::span<const std::string_view>
     return paths;
 }
 
+auto GetDefaultShapeKeyAnimationPaths() -> std::span<const std::string_view>
+{
+    static constexpr auto paths = std::array{
+        std::string_view{DefaultShapeKeyAnimation}
+    };
+
+    return paths;
+}
+
 auto GetDefaultSkeletalAnimationPaths() -> std::span<const std::string_view>
 {
     static constexpr auto paths = std::array{

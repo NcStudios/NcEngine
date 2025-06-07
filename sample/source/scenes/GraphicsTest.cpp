@@ -49,14 +49,14 @@ void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
         const auto body = world.Emplace<Entity>({
             .position = Vector3{0.0f, 0.0f, 10.0f},
             .rotation = Quaternion::FromEulerAngles(0.0f, 0.0f, 0.0f),
-            .scale = Vector3{10.0f, 10.0f, 10.0f},
+            .scale = Vector3{1.0f, 1.0f, 1.0f},
             .tag = "body"
         });
 
         const auto dress = world.Emplace<Entity>({
             .position = Vector3{0.0f, 0.0f, 10.0f},
             .rotation = Quaternion::FromEulerAngles(0.0f, 0.0f, 0.0f),
-            .scale = Vector3{10.0f, 10.0f, 10.0f},
+            .scale = Vector3{1.0f, 1.0f, 1.0f},
             .parent = body,
             .tag = "dress"
         });

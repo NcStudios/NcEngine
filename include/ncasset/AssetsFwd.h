@@ -15,6 +15,7 @@ struct CubeMap;
 struct Mesh;
 struct MeshCollider;
 struct MeshVertex;
+struct ShapeKeyAnimation;
 struct SkeletalAnimation;
 struct Texture;
 struct TextureSubResource;

@@ -17,6 +17,7 @@ auto BuildTargetMap() -> std::unordered_map<nc::asset::AssetType, std::vector<nc
     out.emplace(nc::asset::AssetType::CubeMap, std::vector<nc::convert::Target>{});
     out.emplace(nc::asset::AssetType::Mesh, std::vector<nc::convert::Target>{});
     out.emplace(nc::asset::AssetType::MeshCollider, std::vector<nc::convert::Target>{});
+    out.emplace(nc::asset::AssetType::ShapeKeyAnimation, std::vector<nc::convert::Target>{});
     out.emplace(nc::asset::AssetType::SkeletalAnimation, std::vector<nc::convert::Target>{});
     out.emplace(nc::asset::AssetType::Texture, std::vector<nc::convert::Target>{});
     return out;

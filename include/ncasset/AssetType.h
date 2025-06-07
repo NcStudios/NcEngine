@@ -17,6 +17,7 @@ enum class AssetType
     Mesh,
     MeshCollider,
     Shader,
+    ShapeKeyAnimation,
     SkeletalAnimation,
     Texture,
     Font

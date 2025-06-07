@@ -30,6 +30,7 @@ constexpr auto convexHull = "convex-hull"sv;
 constexpr auto cubeMap = "cube-map"sv;
 constexpr auto mesh = "mesh"sv;
 constexpr auto meshCollider = "mesh-collider"sv;
+constexpr auto shapeKeyAnimation = "shapekey-animation"sv;
 constexpr auto skeletalAnimation = "skeletal-animation"sv;
 constexpr auto texture = "texture"sv;
 
@@ -54,7 +55,7 @@ const auto jsonAssetObjectTags = std::array<std::string, 1>{
 };
 
 const auto jsonAssetArrayTags = std::array<std::string, 7> {
-    "audio-clip", "convex-hull", "cube-map", "mesh", "mesh-collider", "skeletal-animation"
+    "audio-clip", "convex-hull", "cube-map", "mesh", "mesh-collider", "shapeKey-animation", "skeletal-animation"
 };
 
 void ProcessOptions(nc::convert::GlobalManifestOptions& options,
@@ -171,6 +172,7 @@ auto ReflectDefaults(nc::asset::AssetType type) -> std::vector<nc::convert::Refl
         case AssetType::CubeMap:           return ReflectDefaults(GetDefaultCubeMapPaths());
         case AssetType::Mesh:              return ReflectDefaults(GetDefaultMeshPaths());
         case AssetType::MeshCollider:      return ReflectDefaults(GetDefaultMeshColliderPaths());
+        case AssetType::ShapeKeyAnimation: return ReflectDefaults(GetDefaultShapeKeyAnimationPaths());
         case AssetType::SkeletalAnimation: return ReflectDefaults(GetDefaultSkeletalAnimationPaths());
         case AssetType::Texture:           return ReflectDefaults(GetDefaultTexturePaths());
         default:                           return {};
@@ -211,6 +213,7 @@ Manifest::Manifest(std::filesystem::path path)
     m_targets.emplace(nc::asset::AssetType::CubeMap, std::vector<nc::convert::Target>{});
     m_targets.emplace(nc::asset::AssetType::Mesh, std::vector<nc::convert::Target>{});
     m_targets.emplace(nc::asset::AssetType::MeshCollider, std::vector<nc::convert::Target>{});
+    m_targets.emplace(nc::asset::AssetType::ShapeKeyAnimation, std::vector<nc::convert::Target>{});
     m_targets.emplace(nc::asset::AssetType::SkeletalAnimation, std::vector<nc::convert::Target>{});
     m_targets.emplace(nc::asset::AssetType::Texture, std::vector<nc::convert::Target>{});
     ReadManifest(m_path);
