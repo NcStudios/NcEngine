@@ -25,6 +25,7 @@
 #include <span>
 #include <unordered_map>
 #include <ctime>
+#include <iostream>
 
 namespace
 {
@@ -32,7 +33,7 @@ constexpr auto concaveColliderFlags = aiProcess_Triangulate | aiProcess_ConvertT
 constexpr auto hullColliderFlags = concaveColliderFlags | aiProcess_JoinIdenticalVertices;
 constexpr auto meshFlags = hullColliderFlags | aiProcess_GenNormals;
 constexpr auto skeletalAnimationFlags = meshFlags | aiProcess_LimitBoneWeights;
-const auto supportedFileExtensions = std::array<std::string, 2> {".fbx", ".obj"};
+const auto supportedFileExtensions = std::array<std::string, 3> {".fbx", ".obj", ".glb"};
 
 auto ReadFbx(const std::filesystem::path& path, Assimp::Importer* importer, unsigned flags) -> const aiScene*
 {
@@ -91,7 +92,47 @@ auto GetMeshFromScene(const aiScene* scene, const std::optional<std::string>& su
     SubResourceErrorHandler<aiMesh*>(subResourceName.value(), meshes);
 }
 
-auto GetAnimationFromMesh(const aiScene* scene, const std::optional<std::string>& subResourceName = std::nullopt) -> aiAnimation*
+auto GetAnimationFromScene(const aiScene* scene, const std::optional<std::string>& subResourceName = std::nullopt) -> aiAnimation*
+{
+    NC_ASSERT(scene->mNumAnimations != 0, "No animations found in scene.");
+
+    if (!subResourceName.has_value())
+    {
+        return scene->mAnimations[0];
+    }
+
+    auto target = aiString{subResourceName.value()};
+    auto animations = std::span(scene->mAnimations, scene->mNumAnimations);
+    auto pos = std::ranges::find(animations, target, [](auto&& m) { return m->mName; });
+    if (pos != std::cend(animations))
+    {
+        return *pos;
+    }
+
+    SubResourceErrorHandler<aiAnimation*>(subResourceName.value(), animations);
+}
+
+auto GetMorphMeshesFromScene(const aiScene* scene, const std::optional<std::string>& subResourceName = std::nullopt) -> aiAnimation*
+{
+    NC_ASSERT(scene->mNumAnimations != 0, "No animations found in scene.");
+
+    if (!subResourceName.has_value())
+    {
+        return scene->mAnimations[0];
+    }
+
+    auto target = aiString{subResourceName.value()};
+    auto animations = std::span(scene->mAnimations, scene->mNumAnimations);
+    auto pos = std::ranges::find(animations, target, [](auto&& m) { return m->mName; });
+    if (pos != std::cend(animations))
+    {
+        return *pos;
+    }
+
+    SubResourceErrorHandler<aiAnimation*>(subResourceName.value(), animations);
+}
+
+auto GetFromScene(const aiScene* scene, const std::optional<std::string>& subResourceName = std::nullopt) -> aiAnimation*
 {
     NC_ASSERT(scene->mNumAnimations != 0, "No animations found in scene.");
 
@@ -404,51 +445,463 @@ auto ConvertToSkeletalAnimation(const aiAnimation* animationClip) -> nc::asset::
 
 
 /*
+
+
+// Data Structure of aiAnimation for Blend Shapes:
+
+/*
+aiAnimation:
+    mNumMorphMeshChannels: 1
+    mMorphMeshChannels*: aiMeshMorphAnim []
+
+aiMeshMorphAnim:
+    mName: "Flag" (Name of Mesh)
+    mNumKeys: 241
+    mKeys*: aiMeshMorphKey []
+
+aiMeshMorphKey:
+    mTime: 41.666667
+    mValues: int[]
+    mWeights: double[]
+    mNumValuesAndWeights: 25
+
+*/
+
+// Data Structure of aiAnimMesh for Blend Shapes:
+/*
+aiScene
+    mNumMeshes: 1
+    mMeshes: aiMesh[]
+
+aiMesh
+    mNumAnimMeshes: 25
+    mAnimMeshes: aiAnimMesh[]
+    mMethod: aiMorphingMethod
+        aiMorphingMethod_Unknown
+
+aiAnimMesh
+    mName: ShapeKey.1
+    mNumVertices: 1089
+    mVertices: aiVector3t<float>
+    mWeight: float
+
+
+
+/**
+
+
+Data Structure:
+
 struct ShapeKeyAnimation
 {
     std::string name;
     uint32_t durationInTicks;
     float ticksPerSecond;
-    std::vector<std::vector<PositionFrame>> positionFrames;
-};*/
+    std::vector<std::vector<PositionFrame>> positionFrames; (1089 inner vector) (1 inner vector per second/ or per tick)
+};
 
-// / ---------------------------------------------------------------------------
-// /** Describes vertex-based animations for a single mesh or a group of
-//  *  meshes. Meshes carry the animation data for each frame in their
-//  *  aiMesh::mAnimMeshes array. The purpose of aiMeshAnim is to
-//  *  define keyframes linking each mesh attachment to a particular
-//  *  point in time. */
-// struct aiMeshAnim {
-//     /** Name of the mesh to be animated. An empty string is not allowed,
-//      *  animated meshes need to be named (not necessarily uniquely,
-//      *  the name can basically serve as wild-card to select a group
-//      *  of meshes with similar animation setup)*/
-//     C_STRUCT aiString mName;
+uilding shapekey-animation: C:\Source\NcEngine\sample\assets\.\nca\shapekey_animation\flag.nca ()
+mTime: 41.6667
+mValue: 0, mWeight: 1, 
+mValue: 1, mWeight: 0, 
+mValue: 2, mWeight: 0, 
+mValue: 3, mWeight: 0, 
+mValue: 4, mWeight: 0, 
+mValue: 5, mWeight: 0, 
+mValue: 6, mWeight: 0, 
+mValue: 7, mWeight: 0, 
+mValue: 8, mWeight: 0, 
+mValue: 9, mWeight: 0, 
+mValue: 10, mWeight: 0, 
+mValue: 11, mWeight: 0, 
+mValue: 12, mWeight: 0, 
+mValue: 13, mWeight: 0, 
+mValue: 14, mWeight: 0, 
+mValue: 15, mWeight: 0, 
+mValue: 16, mWeight: 0, 
+mValue: 17, mWeight: 0, 
+mValue: 18, mWeight: 0, 
+mValue: 19, mWeight: 0, 
+mValue: 20, mWeight: 0, 
+mValue: 21, mWeight: 0, 
+mValue: 22, mWeight: 0, 
+mValue: 23, mWeight: 0, 
+mValue: 24, mWeight: 0, 
+2
 
-//     /** Size of the #mKeys array. Must be 1, at least. */
-//     unsigned int mNumKeys;
+mTime: 83.3333
+mValue: 0, mWeight: 0.9, 
+mValue: 1, mWeight: 0.1, 
+mValue: 2, mWeight: 0, 
+mValue: 3, mWeight: 0, 
+mValue: 4, mWeight: 0, 
+mValue: 5, mWeight: 0, 
+mValue: 6, mWeight: 0, 
+mValue: 7, mWeight: 0, 
+mValue: 8, mWeight: 0, 
+mValue: 9, mWeight: 0, 
+mValue: 10, mWeight: 0, 
+mValue: 11, mWeight: 0, 
+mValue: 12, mWeight: 0, 
+mValue: 13, mWeight: 0, 
+mValue: 14, mWeight: 0, 
+mValue: 15, mWeight: 0, 
+mValue: 16, mWeight: 0, 
+mValue: 17, mWeight: 0, 
+mValue: 18, mWeight: 0, 
+mValue: 19, mWeight: 0, 
+mValue: 20, mWeight: 0, 
+mValue: 21, mWeight: 0, 
+mValue: 22, mWeight: 0, 
+mValue: 23, mWeight: 0, 
+mValue: 24, mWeight: 0, 
+2
 
-//     /** Key frames of the animation. May not be nullptr. */
-//     C_STRUCT aiMeshKey *mKeys;
+mTime: 125
+mValue: 0, mWeight: 0.8, 
+mValue: 1, mWeight: 0.2, 
+mValue: 2, mWeight: 0, 
+mValue: 3, mWeight: 0, 
+mValue: 4, mWeight: 0, 
+mValue: 5, mWeight: 0, 
+mValue: 6, mWeight: 0, 
+mValue: 7, mWeight: 0, 
+mValue: 8, mWeight: 0, 
+mValue: 9, mWeight: 0, 
+mValue: 10, mWeight: 0, 
+mValue: 11, mWeight: 0, 
+mValue: 12, mWeight: 0, 
+mValue: 13, mWeight: 0, 
+mValue: 14, mWeight: 0, 
+mValue: 15, mWeight: 0, 
+mValue: 16, mWeight: 0, 
+mValue: 17, mWeight: 0, 
+mValue: 18, mWeight: 0, 
+mValue: 19, mWeight: 0, 
+mValue: 20, mWeight: 0, 
+mValue: 21, mWeight: 0, 
+mValue: 22, mWeight: 0, 
+mValue: 23, mWeight: 0, 
+mValue: 24, mWeight: 0, 
+2
 
-// #ifdef __cplusplus
+mTime: 166.667
+mValue: 0, mWeight: 0.7, 
+mValue: 1, mWeight: 0.3, 
+mValue: 2, mWeight: 0, 
+mValue: 3, mWeight: 0, 
+mValue: 4, mWeight: 0, 
+mValue: 5, mWeight: 0, 
+mValue: 6, mWeight: 0, 
+mValue: 7, mWeight: 0, 
+mValue: 8, mWeight: 0, 
+mValue: 9, mWeight: 0, 
+mValue: 10, mWeight: 0, 
+mValue: 11, mWeight: 0, 
+mValue: 12, mWeight: 0, 
+mValue: 13, mWeight: 0, 
+mValue: 14, mWeight: 0, 
+mValue: 15, mWeight: 0, 
+mValue: 16, mWeight: 0, 
+mValue: 17, mWeight: 0, 
+mValue: 18, mWeight: 0, 
+mValue: 19, mWeight: 0, 
+mValue: 20, mWeight: 0, 
+mValue: 21, mWeight: 0, 
+mValue: 22, mWeight: 0, 
+mValue: 23, mWeight: 0, 
+mValue: 24, mWeight: 0, 
+2
 
-//     aiMeshAnim() AI_NO_EXCEPT
-//             : mNumKeys(),
-//               mKeys() {}
+mTime: 208.333
+mValue: 0, mWeight: 0.6, 
+mValue: 1, mWeight: 0.4, 
+mValue: 2, mWeight: 0, 
+mValue: 3, mWeight: 0, 
+mValue: 4, mWeight: 0, 
+mValue: 5, mWeight: 0, 
+mValue: 6, mWeight: 0, 
+mValue: 7, mWeight: 0, 
+mValue: 8, mWeight: 0, 
+mValue: 9, mWeight: 0, 
+mValue: 10, mWeight: 0, 
+mValue: 11, mWeight: 0, 
+mValue: 12, mWeight: 0, 
+mValue: 13, mWeight: 0, 
+mValue: 14, mWeight: 0, 
+mValue: 15, mWeight: 0, 
+mValue: 16, mWeight: 0, 
+mValue: 17, mWeight: 0, 
+mValue: 18, mWeight: 0, 
+mValue: 19, mWeight: 0, 
+mValue: 20, mWeight: 0, 
+mValue: 21, mWeight: 0, 
+mValue: 22, mWeight: 0, 
+mValue: 23, mWeight: 0, 
+mValue: 24, mWeight: 0, 
+2
 
-//     ~aiMeshAnim() {
-//         delete[] mKeys;
-//     }
+mTime: 250
+mValue: 0, mWeight: 0.5, 
+mValue: 1, mWeight: 0.5, 
+mValue: 2, mWeight: 0, 
+mValue: 3, mWeight: 0, 
+mValue: 4, mWeight: 0, 
+mValue: 5, mWeight: 0, 
+mValue: 6, mWeight: 0, 
+mValue: 7, mWeight: 0, 
+mValue: 8, mWeight: 0, 
+mValue: 9, mWeight: 0, 
+mValue: 10, mWeight: 0, 
+mValue: 11, mWeight: 0, 
+mValue: 12, mWeight: 0, 
+mValue: 13, mWeight: 0, 
+mValue: 14, mWeight: 0, 
+mValue: 15, mWeight: 0, 
+mValue: 16, mWeight: 0, 
+mValue: 17, mWeight: 0, 
+mValue: 18, mWeight: 0, 
+mValue: 19, mWeight: 0, 
+mValue: 20, mWeight: 0, 
+mValue: 21, mWeight: 0, 
+mValue: 22, mWeight: 0, 
+mValue: 23, mWeight: 0, 
+mValue: 24, mWeight: 0, 
+2
 
-// #endif
-// };
+mTime: 291.667
+mValue: 0, mWeight: 0.4, 
+mValue: 1, mWeight: 0.6, 
+mValue: 2, mWeight: 0, 
+mValue: 3, mWeight: 0, 
+mValue: 4, mWeight: 0, 
+mValue: 5, mWeight: 0, 
+mValue: 6, mWeight: 0, 
+mValue: 7, mWeight: 0, 
+mValue: 8, mWeight: 0, 
+mValue: 9, mWeight: 0, 
+mValue: 10, mWeight: 0, 
+mValue: 11, mWeight: 0, 
+mValue: 12, mWeight: 0, 
+mValue: 13, mWeight: 0, 
+mValue: 14, mWeight: 0, 
+mValue: 15, mWeight: 0, 
+mValue: 16, mWeight: 0, 
+mValue: 17, mWeight: 0, 
+mValue: 18, mWeight: 0, 
+mValue: 19, mWeight: 0, 
+mValue: 20, mWeight: 0, 
+mValue: 21, mWeight: 0, 
+mValue: 22, mWeight: 0, 
+mValue: 23, mWeight: 0, 
+mValue: 24, mWeight: 0, 
+2
 
+mTime: 333.333
+mValue: 0, mWeight: 0.3, 
+mValue: 1, mWeight: 0.7, 
+mValue: 2, mWeight: 0, 
+mValue: 3, mWeight: 0, 
+mValue: 4, mWeight: 0, 
+mValue: 5, mWeight: 0, 
+mValue: 6, mWeight: 0, 
+mValue: 7, mWeight: 0, 
+mValue: 8, mWeight: 0, 
+mValue: 9, mWeight: 0, 
+mValue: 10, mWeight: 0, 
+mValue: 11, mWeight: 0, 
+mValue: 12, mWeight: 0, 
+mValue: 13, mWeight: 0, 
+mValue: 14, mWeight: 0, 
+mValue: 15, mWeight: 0, 
+mValue: 16, mWeight: 0, 
+mValue: 17, mWeight: 0, 
+mValue: 18, mWeight: 0, 
+mValue: 19, mWeight: 0, 
+mValue: 20, mWeight: 0, 
+mValue: 21, mWeight: 0, 
+mValue: 22, mWeight: 0, 
+mValue: 23, mWeight: 0, 
+mValue: 24, mWeight: 0, 
+2
+
+mTime: 375
+mValue: 0, mWeight: 0.2, 
+mValue: 1, mWeight: 0.8, 
+mValue: 2, mWeight: 0, 
+mValue: 3, mWeight: 0, 
+mValue: 4, mWeight: 0, 
+mValue: 5, mWeight: 0, 
+mValue: 6, mWeight: 0, 
+mValue: 7, mWeight: 0, 
+mValue: 8, mWeight: 0, 
+mValue: 9, mWeight: 0, 
+mValue: 10, mWeight: 0, 
+mValue: 11, mWeight: 0, 
+mValue: 12, mWeight: 0, 
+mValue: 13, mWeight: 0, 
+mValue: 14, mWeight: 0, 
+mValue: 15, mWeight: 0, 
+mValue: 16, mWeight: 0, 
+mValue: 17, mWeight: 0, 
+mValue: 18, mWeight: 0, 
+mValue: 19, mWeight: 0, 
+mValue: 20, mWeight: 0, 
+mValue: 21, mWeight: 0, 
+mValue: 22, mWeight: 0, 
+mValue: 23, mWeight: 0, 
+mValue: 24, mWeight: 0, 
+2
+
+mTime: 416.667
+mValue: 0, mWeight: 0.1, 
+mValue: 1, mWeight: 0.9, 
+mValue: 2, mWeight: 0, 
+mValue: 3, mWeight: 0, 
+mValue: 4, mWeight: 0, 
+mValue: 5, mWeight: 0, 
+mValue: 6, mWeight: 0, 
+mValue: 7, mWeight: 0, 
+mValue: 8, mWeight: 0, 
+mValue: 9, mWeight: 0, 
+mValue: 10, mWeight: 0, 
+mValue: 11, mWeight: 0, 
+mValue: 12, mWeight: 0, 
+mValue: 13, mWeight: 0, 
+mValue: 14, mWeight: 0, 
+mValue: 15, mWeight: 0, 
+mValue: 16, mWeight: 0, 
+mValue: 17, mWeight: 0, 
+mValue: 18, mWeight: 0, 
+mValue: 19, mWeight: 0, 
+mValue: 20, mWeight: 0, 
+mValue: 21, mWeight: 0, 
+mValue: 22, mWeight: 0, 
+mValue: 23, mWeight: 0, 
+mValue: 24, mWeight: 0, 
+2
+
+mTime: 458.333
+mValue: 0, mWeight: 0, 
+mValue: 1, mWeight: 1, 
+mValue: 2, mWeight: 0, 
+mValue: 3, mWeight: 0, 
+mValue: 4, mWeight: 0, 
+mValue: 5, mWeight: 0, 
+mValue: 6, mWeight: 0, 
+mValue: 7, mWeight: 0, 
+mValue: 8, mWeight: 0, 
+mValue: 9, mWeight: 0, 
+mValue: 10, mWeight: 0, 
+mValue: 11, mWeight: 0, 
+mValue: 12, mWeight: 0, 
+mValue: 13, mWeight: 0, 
+mValue: 14, mWeight: 0, 
+mValue: 15, mWeight: 0, 
+mValue: 16, mWeight: 0, 
+mValue: 17, mWeight: 0, 
+mValue: 18, mWeight: 0, 
+mValue: 19, mWeight: 0, 
+mValue: 20, mWeight: 0, 
+mValue: 21, mWeight: 0, 
+mValue: 22, mWeight: 0, 
+mValue: 23, mWeight: 0, 
+mValue: 24, mWeight: 0, 
+2
+
+mTime: 500
+mValue: 0, mWeight: 0, 
+mValue: 1, mWeight: 0.9, 
+mValue: 2, mWeight: 0.1, 
+mValue: 3, mWeight: 0, 
+mValue: 4, mWeight: 0, 
+mValue: 5, mWeight: 0, 
+mValue: 6, mWeight: 0, 
+mValue: 7, mWeight: 0, 
+mValue: 8, mWeight: 0, 
+mValue: 9, mWeight: 0, 
+mValue: 10, mWeight: 0, 
+mValue: 11, mWeight: 0, 
+mValue: 12, mWeight: 0, 
+mValue: 13, mWeight: 0, 
+mValue: 14, mWeight: 0, 
+mValue: 15, mWeight: 0, 
+mValue: 16, mWeight: 0, 
+mValue: 17, mWeight: 0, 
+mValue: 18, mWeight: 0, 
+mValue: 19, mWeight: 0, 
+mValue: 20, mWeight: 0, 
+mValue: 21, mWeight: 0, 
+mValue: 22, mWeight: 0, 
+mValue: 23, mWeight: 0, 
+mValue: 24, mWeight: 0, 
+2
+
+mTime: 541.667
+mValue: 0, mWeight: 0, 
+mValue: 1, mWeight: 0.8, 
+mValue: 2, mWeight: 0.2, 
+mValue: 3, mWeight: 0, 
+mValue: 4, mWeight: 0, 
+mValue: 5, mWeight: 0, 
+mValue: 6, mWeight: 0, 
+mValue: 7, mWeight: 0, 
+mValue: 8, mWeight: 0, 
+mValue: 9, mWeight: 0, 
+mValue: 10, mWeight: 0, 
+mValue: 11, mWeight: 0, 
+mValue: 12, mWeight: 0, 
+mValue: 13, mWeight: 0, 
+mValue: 14, mWeight: 0, 
+mValue: 15, mWeight: 0, 
+mValue: 16, mWeight: 0, 
+mValue: 17, mWeight: 0, 
+mValue: 18, mWeight: 0, 
+mValue: 19, mWeight: 0, 
+mValue: 20, mWeight: 0, 
+mValue: 21, mWeight: 0, 
+mValue: 22, mWeight: 0, 
+mValue: 23, mWeight: 0, 
+mValue: 24, mWeight: 0, 
+2
+
+
+
+
+
+*/
+
+std::vector<nc::Vector3> vertexOffsets
+
+In Vertex Shader
+    Get my vertex offset from vector
+    Add my vertex offset to my position
+ */
+
+*/
 
 auto ConvertToShapeKeyAnimation(const aiAnimation* animationClip) -> nc::asset::ShapeKeyAnimation
 {
     auto shapeKeyAnimation = nc::asset::ShapeKeyAnimation{};
     shapeKeyAnimation.name = std::string(animationClip->mName.C_Str());
+
+    for (const auto channel : std::span(animationClip->mMorphMeshChannels, animationClip->mNumMorphMeshChannels))
+    {
+        for (const auto& key : std::span(channel->mKeys, channel->mNumKeys))
+        {
+            std::cout << "mTime: " << key.mTime << std::endl;
+
+            for (auto i = 0u; i < key.mNumValuesAndWeights; i++)
+            {
+                std::cout << "mValue: " << key.mValues[i] << ", ";
+                std::cout << "mWeight: " << key.mWeights[i] << ", ";
+                std::cout << std::endl;
+            }
+            std::cout << std::endl;
+            std::cout << std::endl;
+        }
+    }
+    // 
     // shapeKeyAnimation.ticksPerSecond = animationClip->mTicksPerSecond == 0 ? 25.0f : static_cast<float>(animationClip->mTicksPerSecond);
     // shapeKeyAnimation.durationInTicks = static_cast<uint32_t>(animationClip->mDuration);
     // shapeKeyAnimation.positionFrames.reserve(animationClip->mNumMeshChannels);
@@ -566,15 +1019,20 @@ class GeometryConverter::impl
         auto ImportSkeletalAnimation(const std::filesystem::path& path, const std::optional<std::string>& subResourceName) -> asset::SkeletalAnimation
         {
             const auto scene = ::ReadFbx(path, &m_importer, skeletalAnimationFlags);
-            auto animation = GetAnimationFromMesh(scene, subResourceName);
+            auto animation = GetAnimationFromScene(scene, subResourceName);
             return ::ConvertToSkeletalAnimation(animation);
         }
+
+
 
         auto ImportShapeKeyAnimation(const std::filesystem::path& path, const std::optional<std::string>& subResourceName) -> asset::ShapeKeyAnimation
         {
             const auto scene = ::ReadFbx(path, &m_importer, meshFlags);
-            auto animation = GetAnimationFromMesh(scene, subResourceName);
+            auto animation = GetAnimationFromScene(scene, subResourceName);
+            GetMorphMeshesFromScene(scene, subResourceName);
+            
             return ::ConvertToShapeKeyAnimation(animation);
+            // return ::ConvertToShapeKeyAnimation(animation, meshMorphs);
         }
 
     private:

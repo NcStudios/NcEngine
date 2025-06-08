@@ -93,19 +93,10 @@
     ],
     "shapekey-animation": [
         {
-            "sourcePath": "raw/model/twirl.fbx",
+            "sourcePath": "raw/model/flag.glb",
             "assetNames": [
                 {
-                    "subResourceName": "dress|simply_clothAction.001",
-                    "assetName": "shapekey_animation\\girl\\dress"
-                }
-            ]
-        },
-        {
-            "sourcePath": "raw/model/flag.fbx",
-            "assetNames": [
-                {
-                    "subResourceName": "flag|Blowing",
+                    "subResourceName": "Blowing",
                     "assetName": "shapekey_animation\\flag"
                 }
             ]

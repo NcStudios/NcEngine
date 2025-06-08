@@ -116,6 +116,11 @@ auto IsUpToDate(const nc::convert::Target& target) -> bool
         return false;
     }
 
+    if (std::filesystem::file_size(target.destinationPath) <= 0)
+    {
+        return false;
+    }
+
     return std::filesystem::last_write_time(target.destinationPath) > std::filesystem::last_write_time(target.sourcePath);
 }
 
