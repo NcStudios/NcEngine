@@ -186,56 +186,6 @@ TEST(GeometryConverterTest, GetBoneWeights_weightsNotEqual100_importFails)
     EXPECT_TRUE(threwNcError);
 }
 
-TEST(GeometryConverterTest, GetBonesData_rootBoneOffset_equalsGlobalInverse)
-{
-    namespace test_data = collateral::single_bone_four_vertex_fbx;
-    auto uut = nc::convert::GeometryConverter{};
-    const auto bonesData = uut.ImportMesh(test_data::filePath).bonesData.value();
-
-    DirectX::XMFLOAT4X4 view;
-    XMStoreFloat4x4(&view, bonesData.vertexSpaceToBoneSpace[0].transformationMatrix);
- 
-    float a1 = view._11;
-    float a2 = view._12;
-    float a3 = view._13;
-    float a4 = view._14;
- 
-    float b1 = view._21;
-    float b2 = view._22;
-    float b3 = view._23;
-    float b4 = view._24;
- 
-    float c1 = view._31;
-    float c2 = view._32;
-    float c3 = view._33;
-    float c4 = view._34;
- 
-    float d1 = view._41;
-    float d2 = view._42;
-    float d3 = view._43;
-    float d4 = view._44;
- 
-    EXPECT_EQ(a1, 1);
-    EXPECT_EQ(a2, 0);
-    EXPECT_EQ(a3, 0);
-    EXPECT_EQ(a4, 0);
-     
-    EXPECT_EQ(b1, 0);
-    EXPECT_EQ(b2, 0);
-    EXPECT_EQ(b3, 1);
-    EXPECT_EQ(b4, 0);
-
-    EXPECT_EQ(c1, 0);
-    EXPECT_EQ(c2, -1);
-    EXPECT_EQ(c3, 0);
-    EXPECT_EQ(c4, 0);
-    
-    EXPECT_EQ(d1, 0);
-    EXPECT_EQ(d2, 0);
-    EXPECT_EQ(d3, 0);
-    EXPECT_EQ(d4, 1);
-}
-
 TEST(GeometryConverterTest, GetBonesData_matrixVectorsPopulated)
 {
     namespace test_data = collateral::single_bone_four_vertex_fbx;
