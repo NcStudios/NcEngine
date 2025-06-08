@@ -93,6 +93,15 @@
     ],
     "shapekey-animation": [
         {
+            "sourcePath": "raw/model/twirl.fbx",
+            "assetNames": [
+                {
+                    "subResourceName": "dress|simply_clothAction.001",
+                    "assetName": "shapekey_animation\\girl\\dress"
+                }
+            ]
+        },
+        {
             "sourcePath": "raw/model/flag.fbx",
             "assetNames": [
                 {
