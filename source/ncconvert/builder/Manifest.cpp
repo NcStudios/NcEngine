@@ -55,7 +55,7 @@ const auto jsonAssetObjectTags = std::array<std::string, 1>{
 };
 
 const auto jsonAssetArrayTags = std::array<std::string, 7> {
-    "audio-clip", "convex-hull", "cube-map", "mesh", "mesh-collider", "shapeKey-animation", "skeletal-animation"
+    "audio-clip", "convex-hull", "cube-map", "mesh", "mesh-collider", "shapekey-animation", "skeletal-animation"
 };
 
 void ProcessOptions(nc::convert::GlobalManifestOptions& options,

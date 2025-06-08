@@ -445,10 +445,10 @@ struct ShapeKeyAnimation
 // };
 
 
-auto ConvertToShapeKeyAnimation(const aiAnimation* ) -> nc::asset::ShapeKeyAnimation
+auto ConvertToShapeKeyAnimation(const aiAnimation* animationClip) -> nc::asset::ShapeKeyAnimation
 {
     auto shapeKeyAnimation = nc::asset::ShapeKeyAnimation{};
-    // shapeKeyAnimation.name = std::string(animationClip->mName.C_Str());
+    shapeKeyAnimation.name = std::string(animationClip->mName.C_Str());
     // shapeKeyAnimation.ticksPerSecond = animationClip->mTicksPerSecond == 0 ? 25.0f : static_cast<float>(animationClip->mTicksPerSecond);
     // shapeKeyAnimation.durationInTicks = static_cast<uint32_t>(animationClip->mDuration);
     // shapeKeyAnimation.positionFrames.reserve(animationClip->mNumMeshChannels);
@@ -573,8 +573,8 @@ class GeometryConverter::impl
         auto ImportShapeKeyAnimation(const std::filesystem::path& path, const std::optional<std::string>& subResourceName) -> asset::ShapeKeyAnimation
         {
             const auto scene = ::ReadFbx(path, &m_importer, meshFlags);
-            GetAnimationFromMesh(scene, subResourceName);
-            return asset::ShapeKeyAnimation{};
+            auto animation = GetAnimationFromMesh(scene, subResourceName);
+            return ::ConvertToShapeKeyAnimation(animation);
         }
 
     private:
