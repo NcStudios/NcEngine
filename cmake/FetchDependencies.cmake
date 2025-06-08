@@ -187,8 +187,8 @@ if(NC_BUILD_NCCONVERT)
     set(ASSIMP_INSTALL_PDB OFF CACHE BOOL "" FORCE)
 
     FetchContent_Declare(assimp
-                        GIT_REPOSITORY https://github.com/NcStudios/assimp.git
-                        GIT_TAG        v5.3.0+nc.1
+                        GIT_REPOSITORY https://github.com/assimp/assimp
+                        GIT_TAG        master
                         GIT_SHALLOW    TRUE
     )
 
