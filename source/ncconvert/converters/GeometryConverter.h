@@ -28,7 +28,7 @@ class GeometryConverter
         auto ImportSkeletalAnimation(const std::filesystem::path& path, const std::optional<std::string>& subResourceName = std::nullopt) -> asset::SkeletalAnimation;
 
         /** Process an fbx file into a shape key clip. Supply a subResourceName of the clip to extract if there are multiple clips in the fbx file. */
-        auto ImportShapeKeyAnimation(const std::filesystem::path& path, const std::optional<std::string>& subResourceName = std::nullopt) -> asset::ShapeKeyAnimation;
+        auto ImportShapeKeyAnimation(const std::filesystem::path& path, const std::string_view subResourceName) -> asset::ShapeKeyAnimation;
 
     private:
         class impl;

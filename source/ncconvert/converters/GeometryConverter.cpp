@@ -92,16 +92,9 @@ auto GetMeshFromScene(const aiScene* scene, const std::optional<std::string>& su
     SubResourceErrorHandler<aiMesh*>(subResourceName.value(), meshes);
 }
 
-auto GetAnimationFromScene(const aiScene* scene, const std::optional<std::string>& subResourceName = std::nullopt) -> aiAnimation*
+auto GetAnimationFromScene(const aiScene* scene, const std::string_view subResourceName) -> aiAnimation*
 {
-    NC_ASSERT(scene->mNumAnimations != 0, "No animations found in scene.");
-
-    if (!subResourceName.has_value())
-    {
-        return scene->mAnimations[0];
-    }
-
-    auto target = aiString{subResourceName.value()};
+    auto target = aiString{subResourceName.data()};
     auto animations = std::span(scene->mAnimations, scene->mNumAnimations);
     auto pos = std::ranges::find(animations, target, [](auto&& m) { return m->mName; });
     if (pos != std::cend(animations))
@@ -109,27 +102,50 @@ auto GetAnimationFromScene(const aiScene* scene, const std::optional<std::string
         return *pos;
     }
 
-    SubResourceErrorHandler<aiAnimation*>(subResourceName.value(), animations);
+    SubResourceErrorHandler<aiAnimation*>(subResourceName.data(), animations);
 }
 
-auto GetMorphMeshesFromScene(const aiScene* scene, const std::optional<std::string>& subResourceName = std::nullopt) -> aiAnimation*
+auto GetMeshNameFromAnimation(const aiAnimation* animation) -> std::string_view
 {
-    NC_ASSERT(scene->mNumAnimations != 0, "No animations found in scene.");
+    NC_ASSERT(animation != nullptr, "Animation cannot be nullptr.");
+    NC_ASSERT(animation->mNumMorphMeshChannels != 0, "No morph meshes found in scene.");
 
-    if (!subResourceName.has_value())
+    return std::string_view(animation->mMorphMeshChannels[0]->mName.C_Str());
+}
+
+// Data Structure of aiAnimMesh for Blend Shapes:
+/*
+aiScene
+    mNumMeshes: 1
+    mMeshes: aiMesh[]
+
+aiMesh
+    mNumAnimMeshes: 25
+    mAnimMeshes: aiAnimMesh[]
+    mMethod: aiMorphingMethod
+        aiMorphingMethod_Unknown
+
+aiAnimMesh
+    mName: ShapeKey.1
+    mNumVertices: 1089
+    mVertices: aiVector3t<float>
+    mWeight: float
+*/
+
+auto GetAnimMeshesFromScene(const aiScene* scene, const std::string_view subResourceName) -> aiAnimMesh*
+{
+    NC_ASSERT(scene->mNumMeshes != 0, "No meshes found in scene.");
+
+    auto target = aiString{subResourceName.data()};
+    auto meshes = std::span(scene->mMeshes, scene->mNumMeshes);
+    auto pos = std::ranges::find(meshes, target, [](auto&& m) { return m->mName; });
+
+    if (pos == std::cend(meshes))
     {
-        return scene->mAnimations[0];
+        SubResourceErrorHandler<aiMesh*>(subResourceName.data(), meshes);
     }
 
-    auto target = aiString{subResourceName.value()};
-    auto animations = std::span(scene->mAnimations, scene->mNumAnimations);
-    auto pos = std::ranges::find(animations, target, [](auto&& m) { return m->mName; });
-    if (pos != std::cend(animations))
-    {
-        return *pos;
-    }
-
-    SubResourceErrorHandler<aiAnimation*>(subResourceName.value(), animations);
+    return pos->mAnimMeshes;
 }
 
 auto GetFromScene(const aiScene* scene, const std::optional<std::string>& subResourceName = std::nullopt) -> aiAnimation*
@@ -557,319 +573,6 @@ mValue: 23, mWeight: 0,
 mValue: 24, mWeight: 0, 
 2
 
-mTime: 125
-mValue: 0, mWeight: 0.8, 
-mValue: 1, mWeight: 0.2, 
-mValue: 2, mWeight: 0, 
-mValue: 3, mWeight: 0, 
-mValue: 4, mWeight: 0, 
-mValue: 5, mWeight: 0, 
-mValue: 6, mWeight: 0, 
-mValue: 7, mWeight: 0, 
-mValue: 8, mWeight: 0, 
-mValue: 9, mWeight: 0, 
-mValue: 10, mWeight: 0, 
-mValue: 11, mWeight: 0, 
-mValue: 12, mWeight: 0, 
-mValue: 13, mWeight: 0, 
-mValue: 14, mWeight: 0, 
-mValue: 15, mWeight: 0, 
-mValue: 16, mWeight: 0, 
-mValue: 17, mWeight: 0, 
-mValue: 18, mWeight: 0, 
-mValue: 19, mWeight: 0, 
-mValue: 20, mWeight: 0, 
-mValue: 21, mWeight: 0, 
-mValue: 22, mWeight: 0, 
-mValue: 23, mWeight: 0, 
-mValue: 24, mWeight: 0, 
-2
-
-mTime: 166.667
-mValue: 0, mWeight: 0.7, 
-mValue: 1, mWeight: 0.3, 
-mValue: 2, mWeight: 0, 
-mValue: 3, mWeight: 0, 
-mValue: 4, mWeight: 0, 
-mValue: 5, mWeight: 0, 
-mValue: 6, mWeight: 0, 
-mValue: 7, mWeight: 0, 
-mValue: 8, mWeight: 0, 
-mValue: 9, mWeight: 0, 
-mValue: 10, mWeight: 0, 
-mValue: 11, mWeight: 0, 
-mValue: 12, mWeight: 0, 
-mValue: 13, mWeight: 0, 
-mValue: 14, mWeight: 0, 
-mValue: 15, mWeight: 0, 
-mValue: 16, mWeight: 0, 
-mValue: 17, mWeight: 0, 
-mValue: 18, mWeight: 0, 
-mValue: 19, mWeight: 0, 
-mValue: 20, mWeight: 0, 
-mValue: 21, mWeight: 0, 
-mValue: 22, mWeight: 0, 
-mValue: 23, mWeight: 0, 
-mValue: 24, mWeight: 0, 
-2
-
-mTime: 208.333
-mValue: 0, mWeight: 0.6, 
-mValue: 1, mWeight: 0.4, 
-mValue: 2, mWeight: 0, 
-mValue: 3, mWeight: 0, 
-mValue: 4, mWeight: 0, 
-mValue: 5, mWeight: 0, 
-mValue: 6, mWeight: 0, 
-mValue: 7, mWeight: 0, 
-mValue: 8, mWeight: 0, 
-mValue: 9, mWeight: 0, 
-mValue: 10, mWeight: 0, 
-mValue: 11, mWeight: 0, 
-mValue: 12, mWeight: 0, 
-mValue: 13, mWeight: 0, 
-mValue: 14, mWeight: 0, 
-mValue: 15, mWeight: 0, 
-mValue: 16, mWeight: 0, 
-mValue: 17, mWeight: 0, 
-mValue: 18, mWeight: 0, 
-mValue: 19, mWeight: 0, 
-mValue: 20, mWeight: 0, 
-mValue: 21, mWeight: 0, 
-mValue: 22, mWeight: 0, 
-mValue: 23, mWeight: 0, 
-mValue: 24, mWeight: 0, 
-2
-
-mTime: 250
-mValue: 0, mWeight: 0.5, 
-mValue: 1, mWeight: 0.5, 
-mValue: 2, mWeight: 0, 
-mValue: 3, mWeight: 0, 
-mValue: 4, mWeight: 0, 
-mValue: 5, mWeight: 0, 
-mValue: 6, mWeight: 0, 
-mValue: 7, mWeight: 0, 
-mValue: 8, mWeight: 0, 
-mValue: 9, mWeight: 0, 
-mValue: 10, mWeight: 0, 
-mValue: 11, mWeight: 0, 
-mValue: 12, mWeight: 0, 
-mValue: 13, mWeight: 0, 
-mValue: 14, mWeight: 0, 
-mValue: 15, mWeight: 0, 
-mValue: 16, mWeight: 0, 
-mValue: 17, mWeight: 0, 
-mValue: 18, mWeight: 0, 
-mValue: 19, mWeight: 0, 
-mValue: 20, mWeight: 0, 
-mValue: 21, mWeight: 0, 
-mValue: 22, mWeight: 0, 
-mValue: 23, mWeight: 0, 
-mValue: 24, mWeight: 0, 
-2
-
-mTime: 291.667
-mValue: 0, mWeight: 0.4, 
-mValue: 1, mWeight: 0.6, 
-mValue: 2, mWeight: 0, 
-mValue: 3, mWeight: 0, 
-mValue: 4, mWeight: 0, 
-mValue: 5, mWeight: 0, 
-mValue: 6, mWeight: 0, 
-mValue: 7, mWeight: 0, 
-mValue: 8, mWeight: 0, 
-mValue: 9, mWeight: 0, 
-mValue: 10, mWeight: 0, 
-mValue: 11, mWeight: 0, 
-mValue: 12, mWeight: 0, 
-mValue: 13, mWeight: 0, 
-mValue: 14, mWeight: 0, 
-mValue: 15, mWeight: 0, 
-mValue: 16, mWeight: 0, 
-mValue: 17, mWeight: 0, 
-mValue: 18, mWeight: 0, 
-mValue: 19, mWeight: 0, 
-mValue: 20, mWeight: 0, 
-mValue: 21, mWeight: 0, 
-mValue: 22, mWeight: 0, 
-mValue: 23, mWeight: 0, 
-mValue: 24, mWeight: 0, 
-2
-
-mTime: 333.333
-mValue: 0, mWeight: 0.3, 
-mValue: 1, mWeight: 0.7, 
-mValue: 2, mWeight: 0, 
-mValue: 3, mWeight: 0, 
-mValue: 4, mWeight: 0, 
-mValue: 5, mWeight: 0, 
-mValue: 6, mWeight: 0, 
-mValue: 7, mWeight: 0, 
-mValue: 8, mWeight: 0, 
-mValue: 9, mWeight: 0, 
-mValue: 10, mWeight: 0, 
-mValue: 11, mWeight: 0, 
-mValue: 12, mWeight: 0, 
-mValue: 13, mWeight: 0, 
-mValue: 14, mWeight: 0, 
-mValue: 15, mWeight: 0, 
-mValue: 16, mWeight: 0, 
-mValue: 17, mWeight: 0, 
-mValue: 18, mWeight: 0, 
-mValue: 19, mWeight: 0, 
-mValue: 20, mWeight: 0, 
-mValue: 21, mWeight: 0, 
-mValue: 22, mWeight: 0, 
-mValue: 23, mWeight: 0, 
-mValue: 24, mWeight: 0, 
-2
-
-mTime: 375
-mValue: 0, mWeight: 0.2, 
-mValue: 1, mWeight: 0.8, 
-mValue: 2, mWeight: 0, 
-mValue: 3, mWeight: 0, 
-mValue: 4, mWeight: 0, 
-mValue: 5, mWeight: 0, 
-mValue: 6, mWeight: 0, 
-mValue: 7, mWeight: 0, 
-mValue: 8, mWeight: 0, 
-mValue: 9, mWeight: 0, 
-mValue: 10, mWeight: 0, 
-mValue: 11, mWeight: 0, 
-mValue: 12, mWeight: 0, 
-mValue: 13, mWeight: 0, 
-mValue: 14, mWeight: 0, 
-mValue: 15, mWeight: 0, 
-mValue: 16, mWeight: 0, 
-mValue: 17, mWeight: 0, 
-mValue: 18, mWeight: 0, 
-mValue: 19, mWeight: 0, 
-mValue: 20, mWeight: 0, 
-mValue: 21, mWeight: 0, 
-mValue: 22, mWeight: 0, 
-mValue: 23, mWeight: 0, 
-mValue: 24, mWeight: 0, 
-2
-
-mTime: 416.667
-mValue: 0, mWeight: 0.1, 
-mValue: 1, mWeight: 0.9, 
-mValue: 2, mWeight: 0, 
-mValue: 3, mWeight: 0, 
-mValue: 4, mWeight: 0, 
-mValue: 5, mWeight: 0, 
-mValue: 6, mWeight: 0, 
-mValue: 7, mWeight: 0, 
-mValue: 8, mWeight: 0, 
-mValue: 9, mWeight: 0, 
-mValue: 10, mWeight: 0, 
-mValue: 11, mWeight: 0, 
-mValue: 12, mWeight: 0, 
-mValue: 13, mWeight: 0, 
-mValue: 14, mWeight: 0, 
-mValue: 15, mWeight: 0, 
-mValue: 16, mWeight: 0, 
-mValue: 17, mWeight: 0, 
-mValue: 18, mWeight: 0, 
-mValue: 19, mWeight: 0, 
-mValue: 20, mWeight: 0, 
-mValue: 21, mWeight: 0, 
-mValue: 22, mWeight: 0, 
-mValue: 23, mWeight: 0, 
-mValue: 24, mWeight: 0, 
-2
-
-mTime: 458.333
-mValue: 0, mWeight: 0, 
-mValue: 1, mWeight: 1, 
-mValue: 2, mWeight: 0, 
-mValue: 3, mWeight: 0, 
-mValue: 4, mWeight: 0, 
-mValue: 5, mWeight: 0, 
-mValue: 6, mWeight: 0, 
-mValue: 7, mWeight: 0, 
-mValue: 8, mWeight: 0, 
-mValue: 9, mWeight: 0, 
-mValue: 10, mWeight: 0, 
-mValue: 11, mWeight: 0, 
-mValue: 12, mWeight: 0, 
-mValue: 13, mWeight: 0, 
-mValue: 14, mWeight: 0, 
-mValue: 15, mWeight: 0, 
-mValue: 16, mWeight: 0, 
-mValue: 17, mWeight: 0, 
-mValue: 18, mWeight: 0, 
-mValue: 19, mWeight: 0, 
-mValue: 20, mWeight: 0, 
-mValue: 21, mWeight: 0, 
-mValue: 22, mWeight: 0, 
-mValue: 23, mWeight: 0, 
-mValue: 24, mWeight: 0, 
-2
-
-mTime: 500
-mValue: 0, mWeight: 0, 
-mValue: 1, mWeight: 0.9, 
-mValue: 2, mWeight: 0.1, 
-mValue: 3, mWeight: 0, 
-mValue: 4, mWeight: 0, 
-mValue: 5, mWeight: 0, 
-mValue: 6, mWeight: 0, 
-mValue: 7, mWeight: 0, 
-mValue: 8, mWeight: 0, 
-mValue: 9, mWeight: 0, 
-mValue: 10, mWeight: 0, 
-mValue: 11, mWeight: 0, 
-mValue: 12, mWeight: 0, 
-mValue: 13, mWeight: 0, 
-mValue: 14, mWeight: 0, 
-mValue: 15, mWeight: 0, 
-mValue: 16, mWeight: 0, 
-mValue: 17, mWeight: 0, 
-mValue: 18, mWeight: 0, 
-mValue: 19, mWeight: 0, 
-mValue: 20, mWeight: 0, 
-mValue: 21, mWeight: 0, 
-mValue: 22, mWeight: 0, 
-mValue: 23, mWeight: 0, 
-mValue: 24, mWeight: 0, 
-2
-
-mTime: 541.667
-mValue: 0, mWeight: 0, 
-mValue: 1, mWeight: 0.8, 
-mValue: 2, mWeight: 0.2, 
-mValue: 3, mWeight: 0, 
-mValue: 4, mWeight: 0, 
-mValue: 5, mWeight: 0, 
-mValue: 6, mWeight: 0, 
-mValue: 7, mWeight: 0, 
-mValue: 8, mWeight: 0, 
-mValue: 9, mWeight: 0, 
-mValue: 10, mWeight: 0, 
-mValue: 11, mWeight: 0, 
-mValue: 12, mWeight: 0, 
-mValue: 13, mWeight: 0, 
-mValue: 14, mWeight: 0, 
-mValue: 15, mWeight: 0, 
-mValue: 16, mWeight: 0, 
-mValue: 17, mWeight: 0, 
-mValue: 18, mWeight: 0, 
-mValue: 19, mWeight: 0, 
-mValue: 20, mWeight: 0, 
-mValue: 21, mWeight: 0, 
-mValue: 22, mWeight: 0, 
-mValue: 23, mWeight: 0, 
-mValue: 24, mWeight: 0, 
-2
-
-
-
-
-
-*/
 
 std::vector<nc::Vector3> vertexOffsets
 
@@ -877,8 +580,6 @@ In Vertex Shader
     Get my vertex offset from vector
     Add my vertex offset to my position
  */
-
-*/
 
 auto ConvertToShapeKeyAnimation(const aiAnimation* animationClip) -> nc::asset::ShapeKeyAnimation
 {
@@ -1019,17 +720,28 @@ class GeometryConverter::impl
         auto ImportSkeletalAnimation(const std::filesystem::path& path, const std::optional<std::string>& subResourceName) -> asset::SkeletalAnimation
         {
             const auto scene = ::ReadFbx(path, &m_importer, skeletalAnimationFlags);
-            auto animation = GetAnimationFromScene(scene, subResourceName);
+
+            NC_ASSERT(scene->mNumAnimations != 0, "No animations found in scene.");
+
+            if (!subResourceName.has_value())
+            {
+                return ::ConvertToSkeletalAnimation(scene->mAnimations[0]);
+            }
+
+            auto animation = GetAnimationFromScene(scene, subResourceName.value());
             return ::ConvertToSkeletalAnimation(animation);
         }
 
-
-
-        auto ImportShapeKeyAnimation(const std::filesystem::path& path, const std::optional<std::string>& subResourceName) -> asset::ShapeKeyAnimation
+        auto ImportShapeKeyAnimation(const std::filesystem::path& path, const std::string_view subResourceName) -> asset::ShapeKeyAnimation
         {
             const auto scene = ::ReadFbx(path, &m_importer, meshFlags);
+
+            NC_ASSERT(scene->mNumAnimations != 0, "No animations found in scene.");
+
             auto animation = GetAnimationFromScene(scene, subResourceName);
-            GetMorphMeshesFromScene(scene, subResourceName);
+
+            const auto meshName = GetMeshNameFromAnimation(animation);
+            auto* animMeshes = GetAnimMeshesFromScene(scene, meshName);
             
             return ::ConvertToShapeKeyAnimation(animation);
             // return ::ConvertToShapeKeyAnimation(animation, meshMorphs);
@@ -1067,7 +779,7 @@ auto GeometryConverter::ImportSkeletalAnimation(const std::filesystem::path& pat
     return m_impl->ImportSkeletalAnimation(path, subResourceName);
 }
 
-auto GeometryConverter::ImportShapeKeyAnimation(const std::filesystem::path& path, const std::optional<std::string>& subResourceName) -> asset::ShapeKeyAnimation
+auto GeometryConverter::ImportShapeKeyAnimation(const std::filesystem::path& path, const std::string_view subResourceName) -> asset::ShapeKeyAnimation
 {
     return m_impl->ImportShapeKeyAnimation(path, subResourceName);
 }
