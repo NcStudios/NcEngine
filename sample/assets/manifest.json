@@ -93,11 +93,11 @@
     ],
     "shapekey-animation": [
         {
-            "sourcePath": "raw/model/flag.glb",
+            "sourcePath": "raw/model/cube.glb",
             "assetNames": [
                 {
-                    "subResourceName": "Blowing",
-                    "assetName": "shapekey_animation\\flag"
+                    "subResourceName": "Move",
+                    "assetName": "shapekey_animation\\cube"
                 }
             ]
         }

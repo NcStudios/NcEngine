@@ -35,7 +35,7 @@ constexpr auto meshFlags = hullColliderFlags | aiProcess_GenNormals;
 constexpr auto skeletalAnimationFlags = meshFlags | aiProcess_LimitBoneWeights;
 const auto supportedFileExtensions = std::array<std::string, 3> {".fbx", ".obj", ".glb"};
 
-auto ReadFbx(const std::filesystem::path& path, Assimp::Importer* importer, unsigned flags) -> const aiScene*
+auto ReadScene(const std::filesystem::path& path, Assimp::Importer* importer, unsigned flags) -> const aiScene*
 {
     if (!nc::convert::ValidateInputFileExtension(path, supportedFileExtensions))
     {
@@ -57,7 +57,7 @@ auto ReadFbx(const std::filesystem::path& path, Assimp::Importer* importer, unsi
 
     if (scene->mNumMeshes == 0)
     {
-        throw nc::NcError("Fbx contains no mesh data\n    file: ", path.string());
+        throw nc::NcError("Scene contains no mesh data\n    file: ", path.string());
     }
 
     return scene;
@@ -72,16 +72,9 @@ template<class T>
     throw nc::NcError(ss.str());
 }
 
-auto GetMeshFromScene(const aiScene* scene, const std::optional<std::string>& subResourceName = std::nullopt) -> aiMesh*
+auto GetMeshFromScene(const aiScene* scene, const std::string_view subResourceName) -> aiMesh*
 {
-    NC_ASSERT(scene->mNumMeshes != 0, "No meshes found in scene.");
-
-    if (!subResourceName.has_value())
-    {
-        return scene->mMeshes[0];
-    }
-
-    auto target = aiString{subResourceName.value()};
+    auto target = aiString{subResourceName.data()};
     auto meshes = std::span(scene->mMeshes, scene->mNumMeshes);
     auto pos = std::ranges::find(meshes, target, [](auto&& m) { return m->mName; });
     if (pos != std::cend(meshes))
@@ -89,7 +82,7 @@ auto GetMeshFromScene(const aiScene* scene, const std::optional<std::string>& su
         return *pos;
     }
 
-    SubResourceErrorHandler<aiMesh*>(subResourceName.value(), meshes);
+    SubResourceErrorHandler<aiMesh*>(subResourceName.data(), meshes);
 }
 
 auto GetAnimationFromScene(const aiScene* scene, const std::string_view subResourceName) -> aiAnimation*
@@ -105,12 +98,14 @@ auto GetAnimationFromScene(const aiScene* scene, const std::string_view subResou
     SubResourceErrorHandler<aiAnimation*>(subResourceName.data(), animations);
 }
 
-auto GetMeshNameFromAnimation(const aiAnimation* animation) -> std::string_view
+auto GetAnimMeshMeshFromAnimation(const aiScene* scene, const aiAnimation* animation) -> aiMesh*
 {
     NC_ASSERT(animation != nullptr, "Animation cannot be nullptr.");
-    NC_ASSERT(animation->mNumMorphMeshChannels != 0, "No morph meshes found in scene.");
+    NC_ASSERT(animation->mNumMorphMeshChannels != 0, "No shape keys found in scene.");
+    NC_ASSERT(scene->mNumMeshes != 0, "No meshes found in scene.");
 
-    return std::string_view(animation->mMorphMeshChannels[0]->mName.C_Str());
+    auto animationName = std::string_view(animation->mMorphMeshChannels[0]->mName.C_Str());
+    return GetMeshFromScene(scene, animationName);
 }
 
 // Data Structure of aiAnimMesh for Blend Shapes:
@@ -132,7 +127,7 @@ aiAnimMesh
     mWeight: float
 */
 
-auto GetAnimMeshesFromScene(const aiScene* scene, const std::string_view subResourceName) -> aiAnimMesh*
+auto GetAnimMeshesFromScene(const aiScene* scene, const std::string_view subResourceName) -> aiAnimMesh**
 {
     NC_ASSERT(scene->mNumMeshes != 0, "No meshes found in scene.");
 
@@ -145,7 +140,11 @@ auto GetAnimMeshesFromScene(const aiScene* scene, const std::string_view subReso
         SubResourceErrorHandler<aiMesh*>(subResourceName.data(), meshes);
     }
 
-    return pos->mAnimMeshes;
+    auto* mesh = *pos;
+
+    NC_ASSERT(mesh->mNumAnimMeshes != 0, "No anim meshes found associated with the mesh.");
+
+    return mesh->mAnimMeshes;
 }
 
 auto GetFromScene(const aiScene* scene, const std::optional<std::string>& subResourceName = std::nullopt) -> aiAnimation*
@@ -176,6 +175,11 @@ auto ToVector3(const aiVector3D& in) -> nc::Vector3
 auto ViewVertices(const aiMesh* mesh) -> std::span<const aiVector3D>
 {
     return {mesh->mVertices, mesh->mNumVertices};
+}
+
+auto ViewVertices(const aiAnimMesh* animMesh) -> std::span<const aiVector3D>
+{
+    return {animMesh->mVertices, animMesh->mNumVertices};
 }
 
 auto ViewFaces(const aiMesh* mesh) -> std::span<const aiFace>
@@ -581,57 +585,40 @@ In Vertex Shader
     Add my vertex offset to my position
  */
 
-auto ConvertToShapeKeyAnimation(const aiAnimation* animationClip) -> nc::asset::ShapeKeyAnimation
+ /*
+
+ struct ShapeKeyAnimation
 {
+    std::string name;
+    uint32_t durationInTicks;
+    float ticksPerSecond;
+    uint32_t shapeKeyCount;
+    std::vector<std::vector<Vector3>> positionFrames;
+};
+ */
+
+auto ConvertToShapeKeyAnimation(const aiAnimation* animationClip, const aiMesh* mesh) -> nc::asset::ShapeKeyAnimation
+{
+    NC_ASSERT(mesh, "Mesh cannot be null.");
+    NC_ASSERT(animationClip, "Animation clip cannot be null.");
+
+    auto numShapeKeys = mesh->mNumAnimMeshes;
+    NC_ASSERT(numShapeKeys != 0, "No shape keys detected in the mesh.");
+
     auto shapeKeyAnimation = nc::asset::ShapeKeyAnimation{};
     shapeKeyAnimation.name = std::string(animationClip->mName.C_Str());
+    shapeKeyAnimation.durationInTicks = static_cast<uint32_t>(animationClip->mDuration);
+    shapeKeyAnimation.ticksPerSecond = animationClip->mTicksPerSecond == 0 ? 25.0f : static_cast<float>(animationClip->mTicksPerSecond); // Ticks per second is not required to be set in animation software.
+    shapeKeyAnimation.shapeKeyCount = numShapeKeys;
+    shapeKeyAnimation.positionFrames.reserve(numShapeKeys);
 
-    for (const auto channel : std::span(animationClip->mMorphMeshChannels, animationClip->mNumMorphMeshChannels))
+    for (const auto& animMesh : std::span(mesh->mAnimMeshes, mesh->mNumAnimMeshes))
     {
-        for (const auto& key : std::span(channel->mKeys, channel->mNumKeys))
-        {
-            std::cout << "mTime: " << key.mTime << std::endl;
-
-            for (auto i = 0u; i < key.mNumValuesAndWeights; i++)
-            {
-                std::cout << "mValue: " << key.mValues[i] << ", ";
-                std::cout << "mWeight: " << key.mWeights[i] << ", ";
-                std::cout << std::endl;
-            }
-            std::cout << std::endl;
-            std::cout << std::endl;
-        }
+        auto shapeKey = std::vector<nc::Vector3>{};
+        shapeKey.reserve(animMesh->mNumVertices);
+        shapeKeyAnimation.positionFrames.push_back(std::move(::ConvertToVertices(::ViewVertices(animMesh))));
     }
-    // 
-    // shapeKeyAnimation.ticksPerSecond = animationClip->mTicksPerSecond == 0 ? 25.0f : static_cast<float>(animationClip->mTicksPerSecond);
-    // shapeKeyAnimation.durationInTicks = static_cast<uint32_t>(animationClip->mDuration);
-    // shapeKeyAnimation.positionFrames.reserve(animationClip->mNumMeshChannels);
 
-    // // A single channel represents one vertex and all of its transformations for the animation clip.
-    // for (const auto* channel : std::span(animationClip->mMeshChannels, animationClip->mNumMeshChannels))
-    // {
-    //     auto frames = nc::asset::SkeletalAnimationFrames{};
-    //     frames.positionFrames.reserve(channel->mNumPositionKeys);
-    //     frames.rotationFrames.reserve(channel->mNumRotationKeys);
-    //     frames.scaleFrames.reserve(channel->mNumScalingKeys);
-        
-    //     for (const auto& positionKey : std::span(channel->mPositionKeys, channel->mNumPositionKeys))
-    //     {
-    //         frames.positionFrames.emplace_back(static_cast<float>(positionKey.mTime), nc::Vector3(positionKey.mValue.x, positionKey.mValue.y, positionKey.mValue.z));
-    //     }
-
-    //     for (const auto& rotationKey : std::span(channel->mRotationKeys, channel->mNumRotationKeys))
-    //     {
-    //         frames.rotationFrames.emplace_back(static_cast<float>(rotationKey.mTime), nc::Quaternion(rotationKey.mValue.x, rotationKey.mValue.y, rotationKey.mValue.z, rotationKey.mValue.w));
-    //     }
-
-    //     for (const auto& scaleKey : std::span(channel->mScalingKeys, channel->mNumScalingKeys))
-    //     {
-    //         frames.scaleFrames.emplace_back(static_cast<float>(scaleKey.mTime), nc::Vector3(scaleKey.mValue.x, scaleKey.mValue.y, scaleKey.mValue.z));
-    //     }
-    //     skeletalAnimation.framesPerBone.emplace(std::string(channel->mNodeName.C_Str()), std::move(frames));
-    // }
-    // return skeletalAnimation;
     return shapeKeyAnimation;
 }
 } // anonymous namespace
@@ -643,7 +630,7 @@ class GeometryConverter::impl
     public:
         auto ImportMeshCollider(const std::filesystem::path& path) -> asset::MeshCollider
         {
-            const auto mesh = ::ReadFbx(path, &m_importer, concaveColliderFlags)->mMeshes[0];
+            const auto mesh = ::ReadScene(path, &m_importer, concaveColliderFlags)->mMeshes[0];
 
             if (mesh->mNumVertices == 0)
             {
@@ -666,7 +653,7 @@ class GeometryConverter::impl
 
         auto ImportConvexHull(const std::filesystem::path& path) -> asset::ConvexHull
         {
-            const auto mesh = ::ReadFbx(path, &m_importer, hullColliderFlags)->mMeshes[0];
+            const auto mesh = ::ReadScene(path, &m_importer, hullColliderFlags)->mMeshes[0];
 
             if (mesh->mNumVertices == 0)
             {
@@ -689,8 +676,18 @@ class GeometryConverter::impl
 
         auto ImportMesh(const std::filesystem::path& path, const std::optional<std::string>& subResourceName, bool optimize) -> asset::Mesh
         {
-            const auto scene = ::ReadFbx(path, &m_importer, meshFlags);
-            auto mesh = GetMeshFromScene(scene, subResourceName);
+            const auto scene = ::ReadScene(path, &m_importer, meshFlags);
+
+            NC_ASSERT(scene->mNumMeshes != 0, "No meshes found in scene.");
+
+            aiMesh* mesh = nullptr;
+            if (!subResourceName.has_value())
+            {
+                mesh = scene->mMeshes[0];
+            }
+
+            mesh = GetMeshFromScene(scene, subResourceName.value());
+            NC_ASSERT(mesh, "No meshes found in scene.");
 
             if (mesh->mNumVertices == 0)
             {
@@ -719,7 +716,7 @@ class GeometryConverter::impl
 
         auto ImportSkeletalAnimation(const std::filesystem::path& path, const std::optional<std::string>& subResourceName) -> asset::SkeletalAnimation
         {
-            const auto scene = ::ReadFbx(path, &m_importer, skeletalAnimationFlags);
+            const auto scene = ::ReadScene(path, &m_importer, skeletalAnimationFlags);
 
             NC_ASSERT(scene->mNumAnimations != 0, "No animations found in scene.");
 
@@ -734,16 +731,14 @@ class GeometryConverter::impl
 
         auto ImportShapeKeyAnimation(const std::filesystem::path& path, const std::string_view subResourceName) -> asset::ShapeKeyAnimation
         {
-            const auto scene = ::ReadFbx(path, &m_importer, meshFlags);
+            const auto scene = ::ReadScene(path, &m_importer, meshFlags);
 
             NC_ASSERT(scene->mNumAnimations != 0, "No animations found in scene.");
 
-            auto animation = GetAnimationFromScene(scene, subResourceName);
-
-            const auto meshName = GetMeshNameFromAnimation(animation);
-            auto* animMeshes = GetAnimMeshesFromScene(scene, meshName);
+            const auto* animation = GetAnimationFromScene(scene, subResourceName);
+            const auto* mesh = GetAnimMeshMeshFromAnimation(scene, animation);
             
-            return ::ConvertToShapeKeyAnimation(animation);
+            return ::ConvertToShapeKeyAnimation(animation, mesh);
             // return ::ConvertToShapeKeyAnimation(animation, meshMorphs);
         }
 
