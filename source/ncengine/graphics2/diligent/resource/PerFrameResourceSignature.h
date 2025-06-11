@@ -36,6 +36,7 @@ class PerFrameResourceSignature
                                            const StructuredBufferDesc& lightMatrixResourceDesc,
                                            const CubeMapBufferDesc& cubeResourceDesc,
                                            const TextureBufferDesc& textureResourceDesc,
+                                           const TextureBufferDesc& shapeKeyClipResourceDesc,
                                            const UniformBufferDesc& environmentResourceDesc,
                                            const UniformBufferDesc& wireframeResourceDesc);
         ~PerFrameResourceSignature() noexcept;
@@ -54,6 +55,7 @@ class PerFrameResourceSignature
         auto GetLightMatrixDataBuffer()     -> StructuredBuffer<LightMatrixData>&         { return *m_lightMatrixDataResource; }
         auto GetCubeMapBuffer()             -> CubeMapBufferResource&                     { return *m_cubeMapResource; }
         auto GetTextureBuffer()             -> TextureBufferResource&                     { return *m_textureResource; }
+        auto GetShapeKeyClipBuffer()        -> TextureBufferResource&                     { return *m_shapeKeyClipResource; }
         auto GetEnvironmentBuffer()         -> EnvironmentBufferResource&                 { return *m_environmentResource; }
         auto GetWireframeBuffer()           -> WireframeBufferResource&                   { return *m_wireframeBufferResource; }
 
@@ -69,6 +71,7 @@ class PerFrameResourceSignature
         std::unique_ptr<StructuredBuffer<ParticleData>> m_particleDataResource;
         std::unique_ptr<StructuredBuffer<LightMatrixData>> m_lightMatrixDataResource;
         std::unique_ptr<TextureBufferResource> m_textureResource;
+        std::unique_ptr<TextureBufferResource> m_shapeKeyClipResource;
         std::unique_ptr<CubeMapBufferResource> m_cubeMapResource;
         std::unique_ptr<EnvironmentBufferResource> m_environmentResource;
         std::unique_ptr<WireframeBufferResource> m_wireframeBufferResource;

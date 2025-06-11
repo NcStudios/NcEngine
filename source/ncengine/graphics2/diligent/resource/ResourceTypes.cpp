@@ -180,10 +180,10 @@ auto ToTextureSubResData(const nc::asset::Texture& texture) -> std::vector<Dilig
     const auto mipLevels = static_cast<uint32_t>(1 + texture.mipmaps.size());
     auto subResources = std::vector<Diligent::TextureSubResData>{};
     subResources.reserve(mipLevels);
-    subResources.emplace_back(texture.pixelData.data(), texture.width * asset::Texture::numChannels);
+    subResources.emplace_back(texture.pixelData.data(), texture.width * texture.numChannels);
     for (const auto& subResource : texture.mipmaps)
     {
-        subResources.emplace_back(subResource.pixelData.data(), subResource.width * asset::Texture::numChannels);
+        subResources.emplace_back(subResource.pixelData.data(), subResource.width * texture.numChannels);
     }
 
     return subResources;
@@ -252,7 +252,7 @@ void InitializeArray(Diligent::IDeviceContext& context, Diligent::IRenderDevice&
         .pixelData = std::vector<unsigned char>{0x1A, 0x2A, 0x3A, 0x4A}
     };
 
-    auto subResource = Diligent::TextureSubResData{dummyTexture.pixelData.data(), dummyTexture.width * asset::Texture::numChannels};
+    auto subResource = Diligent::TextureSubResData{dummyTexture.pixelData.data(), dummyTexture.width * dummyTexture.numChannels};
     const auto texData = Diligent::TextureData{&subResource, 1, &context};
     const auto desc = ToTextureDesc(dummyTexture);
 

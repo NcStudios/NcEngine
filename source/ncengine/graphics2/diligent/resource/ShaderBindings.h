@@ -34,6 +34,7 @@ class ShaderBindings
                 StructuredBufferDesc{"LightMatrices",      Diligent::SHADER_TYPE_VS_PS,  GetTotalLightMatricesCount(memorySettings), GetTotalLightMatricesCount(memorySettings)},
                 CubeMapBufferDesc{"Skyboxes",              Diligent::SHADER_TYPE_PIXEL,  memorySettings.maxCubeMaps},
                 TextureBufferDesc{"Textures",              Diligent::SHADER_TYPE_PIXEL,  memorySettings.maxTextures},
+                TextureBufferDesc{"ShapeKeyClips",         Diligent::SHADER_TYPE_PIXEL,  5},
                 UniformBufferDesc{"EnvironmentProperties", Diligent::SHADER_TYPE_VS_PS},
                 UniformBufferDesc{"WireframeProperties",   Diligent::SHADER_TYPE_VS_PS}
               },

@@ -1,0 +1,22 @@
+Engine Steps:
+
+1. Create a new storage buffer
+2. Upload all (memory permitting) loaded shape key animations to buffer
+3. Create a new Subsystem
+    a. Get currently playing animation by asset key
+    b. Get current time in ticks
+    c. Get current index in shapeKeyAnimation.positionFrames based on current time in ticks
+    d. Pass index from c. to GPU (int), 
+4. In Vertex Shader
+    Use index into buffer to get current frame's position offset for self 
+    Add position offset to self.
+
+
+struct ShapeKeyAnimation
+{
+    std::string name;
+    uint32_t durationInTicks;
+    float ticksPerSecond;
+    uint32_t shapeKeyCount;
+    std::vector<std::vector<Vector3>> positionFrames;
+};

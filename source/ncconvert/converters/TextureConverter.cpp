@@ -19,9 +19,9 @@ const auto supportedFileExtensions = std::array<std::string, 4>{".png", ".jpg", 
 auto ReadTextureFromAtlas(const nc::asset::Texture& atlas, unsigned char* dest, nc::convert::SubTexturePos pos, uint32_t sideLength) -> size_t
 {
     const auto source = atlas.pixelData.data();
-    const auto xByteOffset = pos.x * nc::asset::Texture::numChannels;
-    const auto scanLineByteSize = atlas.width * nc::asset::Texture::numChannels;
-    const auto readSize = sideLength * nc::asset::Texture::numChannels;
+    const auto xByteOffset = pos.x * atlas.numChannels;
+    const auto scanLineByteSize = atlas.width * atlas.numChannels;
+    const auto readSize = sideLength * atlas.numChannels;
     auto bytesRead = 0ull;
     for (auto scanLine = pos.y; scanLine < pos.y + sideLength; ++scanLine)
     {

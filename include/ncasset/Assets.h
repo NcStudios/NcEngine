@@ -146,11 +146,11 @@ struct TextureSubResource
 
 struct Texture
 {
-    static constexpr uint32_t numChannels = 4u;
 
     TextureFormat format = TextureFormat::UNKNOWN;
     uint32_t width = 0u;
     uint32_t height = 0u;
+    uint32_t numChannels = 4u;
     std::vector<unsigned char> pixelData = {};
     std::vector<TextureSubResource> mipmaps = {};
 };

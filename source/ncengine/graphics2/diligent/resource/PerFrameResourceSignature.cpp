@@ -25,6 +25,7 @@ PerFrameResourceSignature::PerFrameResourceSignature(Diligent::IDeviceContext& c
                                                      const StructuredBufferDesc& lightMatrixResourceDesc,
                                                      const CubeMapBufferDesc& cubeMapResourceDesc,
                                                      const TextureBufferDesc& textureResourceDesc,
+                                                     const TextureBufferDesc& shapeKeyClipResourceDesc,
                                                      const UniformBufferDesc& environmentResourceDesc,
                                                      const UniformBufferDesc& wireframeResourceDesc)
 {
@@ -39,6 +40,7 @@ PerFrameResourceSignature::PerFrameResourceSignature(Diligent::IDeviceContext& c
         ToPipelineResourceDesc(lightMatrixResourceDesc),
         ToPipelineResourceDesc(cubeMapResourceDesc),
         ToPipelineResourceDesc(textureResourceDesc),
+        ToPipelineResourceDesc(shapeKeyClipResourceDesc),
         ToPipelineResourceDesc(environmentResourceDesc),
         ToPipelineResourceDesc(wireframeResourceDesc),
     };
@@ -133,6 +135,11 @@ PerFrameResourceSignature::PerFrameResourceSignature(Diligent::IDeviceContext& c
     m_textureResource = std::make_unique<TextureBufferResource>(
         GetVariable(textureResourceDesc, m_srb),
         textureResourceDesc.maxElementCount
+    );
+
+    m_shapeKeyClipResource = std::make_unique<TextureBufferResource>(
+        GetVariable(shapeKeyClipResourceDesc, m_srb),
+        shapeKeyClipResourceDesc.maxElementCount
     );
 
     m_environmentResource = std::make_unique<EnvironmentBufferResource>(

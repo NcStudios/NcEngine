@@ -94,7 +94,7 @@ TEST(TextureConverterTest, ImportTexture_bc1Compression_convertsToNca)
     {
         EXPECT_EQ(halfWidth, mipmap.width);
         EXPECT_EQ(halfHeight, mipmap.height);
-        const auto uncompressedSize = halfWidth * halfHeight * nc::asset::Texture::numChannels;
+        const auto uncompressedSize = halfWidth * halfHeight * 4u;
         EXPECT_GT(uncompressedSize, mipmap.pixelData.size());
         halfWidth = std::max(halfWidth / 2, minDimension);
         halfHeight = std::max(halfHeight / 2, minDimension);
@@ -125,7 +125,7 @@ TEST(TextureConverterTest, ImportTexture_bc3Compression_convertsToNca)
     {
         EXPECT_EQ(halfWidth, mipmap.width);
         EXPECT_EQ(halfHeight, mipmap.height);
-        const auto uncompressedSize = halfWidth * halfHeight * nc::asset::Texture::numChannels;
+        const auto uncompressedSize = halfWidth * halfHeight * 4u;
         EXPECT_GT(uncompressedSize, mipmap.pixelData.size());
         halfWidth = std::max(halfWidth / 2, minDimension);
         halfHeight = std::max(halfHeight / 2, minDimension);
@@ -162,7 +162,7 @@ TEST(TextureConverterTest, ImportTexture_requestMips_generatesMips)
     {
         EXPECT_EQ(halfWidth, mipmap.width);
         EXPECT_EQ(halfHeight, mipmap.height);
-        const auto expectedSize = halfWidth * halfHeight * nc::asset::Texture::numChannels;
+        const auto expectedSize = halfWidth * halfHeight * 4u;
         EXPECT_EQ(expectedSize, mipmap.pixelData.size());
         halfWidth = std::max(halfWidth / 2, minDimension);
         halfHeight = std::max(halfHeight / 2, minDimension);
