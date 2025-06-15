@@ -21,7 +21,7 @@ struct PSInput
 StructuredBuffer<TransformData> Transforms;
 StructuredBuffer<StaticMeshInstanceData> StaticInstances;
 
-void main(in  VSInput VSIn, uint InstanceID : SV_InstanceID,  out PSInput PSIn)
+void main(in  VSInput VSIn, uint InstanceID : SV_InstanceID, uint VertexID : SV_VertexID, out PSInput PSIn)
 {
     uint transformIndex = StaticInstances[InstanceID].transformIndex;
     uint materialIndex = StaticInstances[InstanceID].materialIndex;

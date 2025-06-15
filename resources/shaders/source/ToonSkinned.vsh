@@ -39,7 +39,7 @@ StructuredBuffer<StaticMeshInstanceData> StaticInstances;
 #define INSTANCE_BUFFER StaticInstances
 #endif // ENABLE_SKINNING
 
-void main(in VSInput VSIn, uint InstanceID : SV_InstanceID, out PSInput PSIn)
+void main(in VSInput VSIn, uint InstanceID : SV_InstanceID,  uint VertexID : SV_VertexID, out PSInput PSIn)
 {
     INSTANCE_DATA instance = INSTANCE_BUFFER[InstanceID];
     float4 pos = float4(VSIn.Pos, 1.0);

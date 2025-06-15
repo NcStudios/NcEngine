@@ -83,7 +83,17 @@
                     "assetName": "mesh\\girl\\body"
                 }
             ]
+        },
+        {
+            "sourcePath": "raw/model/cube.glb",
+            "assetNames": [
+                {
+                    "subResourceName": "Cube",
+                    "assetName": "mesh\\cube"
+                }
+            ]
         }
+        
     ],
     "mesh-collider": [
         {

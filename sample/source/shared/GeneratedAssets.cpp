@@ -36,146 +36,6 @@ void Acquire()
 
 } // namespace audio_clip
 
-namespace convex_hull
-{
-const auto g_paths = std::array{
-    std::string{path::default_cube},
-    std::string{path::ramp},
-};
-
-nc::asset::AssetId default_cube{nc::utility::Fnv1a(path::default_cube)};
-nc::asset::AssetId ramp{nc::utility::Fnv1a(path::ramp)};
-
-void Load()
-{
-    nc::asset::LoadConvexHullAssets(g_paths);
-}
-
-} // namespace convex_hull
-
-namespace cube_map
-{
-const auto g_paths = std::array{
-    std::string{path::default_skybox},
-    std::string{path::night_sky},
-};
-
-void Load()
-{
-    nc::asset::LoadCubeMapAssets(g_paths);
-}
-
-} // namespace cube_map
-
-namespace mesh
-{
-const auto g_paths = std::array{
-    std::string{path::default_plane},
-    std::string{path::default_cube},
-    std::string{path::default_sphere},
-    std::string{path::default_capsule},
-    std::string{path::default_wheel},
-    std::string{path::default_skybox},
-    std::string{path::cave},
-    std::string{path::guy2},
-    std::string{path::halfpipe},
-    std::string{path::ogre},
-    std::string{path::ramp},
-    std::string{path::skeleton},
-    std::string{path::girl_dress},
-    std::string{path::girl_body},
-};
-
-nc::asset::MeshView default_plane{};
-nc::asset::MeshView default_cube{};
-nc::asset::MeshView default_sphere{};
-nc::asset::MeshView default_capsule{};
-nc::asset::MeshView default_wheel{};
-nc::asset::MeshView default_skybox{};
-nc::asset::MeshView cave{};
-nc::asset::MeshView guy2{};
-nc::asset::MeshView halfpipe{};
-nc::asset::MeshView ogre{};
-nc::asset::MeshView ramp{};
-nc::asset::MeshView skeleton{};
-nc::asset::MeshView girl_dress{};
-nc::asset::MeshView girl_body{};
-
-void Load()
-{
-    nc::asset::LoadMeshAssets(g_paths);
-}
-
-void Acquire()
-{
-    default_plane = nc::asset::AcquireMeshAsset(path::default_plane);
-    default_cube = nc::asset::AcquireMeshAsset(path::default_cube);
-    default_sphere = nc::asset::AcquireMeshAsset(path::default_sphere);
-    default_capsule = nc::asset::AcquireMeshAsset(path::default_capsule);
-    default_wheel = nc::asset::AcquireMeshAsset(path::default_wheel);
-    default_skybox = nc::asset::AcquireMeshAsset(path::default_skybox);
-    cave = nc::asset::AcquireMeshAsset(path::cave);
-    guy2 = nc::asset::AcquireMeshAsset(path::guy2);
-    halfpipe = nc::asset::AcquireMeshAsset(path::halfpipe);
-    ogre = nc::asset::AcquireMeshAsset(path::ogre);
-    ramp = nc::asset::AcquireMeshAsset(path::ramp);
-    skeleton = nc::asset::AcquireMeshAsset(path::skeleton);
-    girl_dress = nc::asset::AcquireMeshAsset(path::girl_dress);
-    girl_body = nc::asset::AcquireMeshAsset(path::girl_body);
-}
-
-} // namespace mesh
-
-namespace mesh_collider
-{
-const auto g_paths = std::array{
-    std::string{path::default_plane},
-    std::string{path::halfpipe},
-};
-
-nc::asset::AssetId default_plane{nc::utility::Fnv1a(path::default_plane)};
-nc::asset::AssetId halfpipe{nc::utility::Fnv1a(path::halfpipe)};
-
-void Load()
-{
-    nc::asset::LoadMeshColliderAssets(g_paths);
-}
-
-} // namespace mesh_collider
-
-namespace animation
-{
-const auto g_paths = std::array{
-    std::string{path::default_cube},
-    std::string{path::ogre_attack},
-    std::string{path::ogre_idle},
-    std::string{path::skeleton_idle},
-    std::string{path::skeleton_jump},
-    std::string{path::skeleton_walk_back},
-    std::string{path::skeleton_walk_forward},
-    std::string{path::skeleton_walk_left},
-    std::string{path::skeleton_walk_right},
-    std::string{path::girl_twirl},
-};
-
-nc::asset::AssetId default_cube{nc::utility::Fnv1a(path::default_cube)};
-nc::asset::AssetId ogre_attack{nc::utility::Fnv1a(path::ogre_attack)};
-nc::asset::AssetId ogre_idle{nc::utility::Fnv1a(path::ogre_idle)};
-nc::asset::AssetId skeleton_idle{nc::utility::Fnv1a(path::skeleton_idle)};
-nc::asset::AssetId skeleton_jump{nc::utility::Fnv1a(path::skeleton_jump)};
-nc::asset::AssetId skeleton_walk_back{nc::utility::Fnv1a(path::skeleton_walk_back)};
-nc::asset::AssetId skeleton_walk_forward{nc::utility::Fnv1a(path::skeleton_walk_forward)};
-nc::asset::AssetId skeleton_walk_left{nc::utility::Fnv1a(path::skeleton_walk_left)};
-nc::asset::AssetId skeleton_walk_right{nc::utility::Fnv1a(path::skeleton_walk_right)};
-nc::asset::AssetId girl_twirl{nc::utility::Fnv1a(path::girl_twirl)};
-
-void Load()
-{
-    nc::asset::LoadSkeletalAnimationAssets(g_paths);
-}
-
-} // namespace animation
-
 namespace texture
 {
 nc::asset::TextureView default_color{};
@@ -252,6 +112,149 @@ void Acquire()
 }
 
 } // namespace texture
+
+namespace convex_hull
+{
+const auto g_paths = std::array{
+    std::string{path::default_cube},
+    std::string{path::ramp},
+};
+
+nc::asset::AssetId default_cube{nc::utility::Fnv1a(path::default_cube)};
+nc::asset::AssetId ramp{nc::utility::Fnv1a(path::ramp)};
+
+void Load()
+{
+    nc::asset::LoadConvexHullAssets(g_paths);
+}
+
+} // namespace convex_hull
+
+namespace cube_map
+{
+const auto g_paths = std::array{
+    std::string{path::default_skybox},
+    std::string{path::night_sky},
+};
+
+void Load()
+{
+    nc::asset::LoadCubeMapAssets(g_paths);
+}
+
+} // namespace cube_map
+
+namespace mesh
+{
+const auto g_paths = std::array{
+    std::string{path::default_plane},
+    std::string{path::default_cube},
+    std::string{path::default_sphere},
+    std::string{path::default_capsule},
+    std::string{path::default_wheel},
+    std::string{path::default_skybox},
+    std::string{path::cave},
+    std::string{path::guy2},
+    std::string{path::halfpipe},
+    std::string{path::ogre},
+    std::string{path::ramp},
+    std::string{path::skeleton},
+    std::string{path::girl_dress},
+    std::string{path::girl_body},
+    std::string{path::cube},
+};
+
+nc::asset::MeshView default_plane{};
+nc::asset::MeshView default_cube{};
+nc::asset::MeshView default_sphere{};
+nc::asset::MeshView default_capsule{};
+nc::asset::MeshView default_wheel{};
+nc::asset::MeshView default_skybox{};
+nc::asset::MeshView cave{};
+nc::asset::MeshView guy2{};
+nc::asset::MeshView halfpipe{};
+nc::asset::MeshView ogre{};
+nc::asset::MeshView ramp{};
+nc::asset::MeshView skeleton{};
+nc::asset::MeshView girl_dress{};
+nc::asset::MeshView girl_body{};
+nc::asset::MeshView cube{};
+
+void Load()
+{
+    nc::asset::LoadMeshAssets(g_paths);
+}
+
+void Acquire()
+{
+    default_plane = nc::asset::AcquireMeshAsset(path::default_plane);
+    default_cube = nc::asset::AcquireMeshAsset(path::default_cube);
+    default_sphere = nc::asset::AcquireMeshAsset(path::default_sphere);
+    default_capsule = nc::asset::AcquireMeshAsset(path::default_capsule);
+    default_wheel = nc::asset::AcquireMeshAsset(path::default_wheel);
+    default_skybox = nc::asset::AcquireMeshAsset(path::default_skybox);
+    cave = nc::asset::AcquireMeshAsset(path::cave);
+    guy2 = nc::asset::AcquireMeshAsset(path::guy2);
+    halfpipe = nc::asset::AcquireMeshAsset(path::halfpipe);
+    ogre = nc::asset::AcquireMeshAsset(path::ogre);
+    ramp = nc::asset::AcquireMeshAsset(path::ramp);
+    skeleton = nc::asset::AcquireMeshAsset(path::skeleton);
+    girl_dress = nc::asset::AcquireMeshAsset(path::girl_dress);
+    girl_body = nc::asset::AcquireMeshAsset(path::girl_body);
+    cube = nc::asset::AcquireMeshAsset(path::cube);
+}
+
+} // namespace mesh
+
+namespace mesh_collider
+{
+const auto g_paths = std::array{
+    std::string{path::default_plane},
+    std::string{path::halfpipe},
+};
+
+nc::asset::AssetId default_plane{nc::utility::Fnv1a(path::default_plane)};
+nc::asset::AssetId halfpipe{nc::utility::Fnv1a(path::halfpipe)};
+
+void Load()
+{
+    nc::asset::LoadMeshColliderAssets(g_paths);
+}
+
+} // namespace mesh_collider
+
+namespace animation
+{
+const auto g_paths = std::array{
+    std::string{path::default_cube},
+    std::string{path::ogre_attack},
+    std::string{path::ogre_idle},
+    std::string{path::skeleton_idle},
+    std::string{path::skeleton_jump},
+    std::string{path::skeleton_walk_back},
+    std::string{path::skeleton_walk_forward},
+    std::string{path::skeleton_walk_left},
+    std::string{path::skeleton_walk_right},
+    std::string{path::girl_twirl},
+};
+
+nc::asset::AssetId default_cube{nc::utility::Fnv1a(path::default_cube)};
+nc::asset::AssetId ogre_attack{nc::utility::Fnv1a(path::ogre_attack)};
+nc::asset::AssetId ogre_idle{nc::utility::Fnv1a(path::ogre_idle)};
+nc::asset::AssetId skeleton_idle{nc::utility::Fnv1a(path::skeleton_idle)};
+nc::asset::AssetId skeleton_jump{nc::utility::Fnv1a(path::skeleton_jump)};
+nc::asset::AssetId skeleton_walk_back{nc::utility::Fnv1a(path::skeleton_walk_back)};
+nc::asset::AssetId skeleton_walk_forward{nc::utility::Fnv1a(path::skeleton_walk_forward)};
+nc::asset::AssetId skeleton_walk_left{nc::utility::Fnv1a(path::skeleton_walk_left)};
+nc::asset::AssetId skeleton_walk_right{nc::utility::Fnv1a(path::skeleton_walk_right)};
+nc::asset::AssetId girl_twirl{nc::utility::Fnv1a(path::girl_twirl)};
+
+void Load()
+{
+    nc::asset::LoadSkeletalAnimationAssets(g_paths);
+}
+
+} // namespace animation
 
 } // namespace nc::sample
 
