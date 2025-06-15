@@ -1,5 +1,5 @@
 /**
- * @file SkeletalAnimationController.h
+ * @file AnimationController.h
  * @copyright Jaremie Romer and McCallister Romer 2024
  */
 #pragma once
@@ -84,16 +84,16 @@ struct AnimationTransition
 /** @endcond internal */
 
 /** @brief State machine that controls animation transitions for a SkinnedMesh. */
-class SkeletalAnimationController
+class AnimationController
 {
     public:
         /**
-         * @brief Construct a SkeletalAnimationController.
+         * @brief Construct a AnimationController.
          * 
          * The controller is initialized with a default state that loops the animation asset specified by animationId.
          * This state is set with the id 'RootState' and cannot not be removed.
          */
-        explicit SkeletalAnimationController(asset::AssetId animationId = asset::NullAssetId,
+        explicit AnimationController(asset::AssetId animationId = asset::NullAssetId,
                                              float defaultTransitionDuration = 0.3f);
 
         /**

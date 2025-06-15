@@ -1,9 +1,9 @@
 #include "gtest/gtest.h"
-#include "ncengine/graphics/SkeletalAnimationController.h"
+#include "ncengine/graphics/AnimationController.h"
 
-TEST(SkeletalAnimationControllerTest, GetCurrentAnimationId_returnsUntransitionedId)
+TEST(AnimationControllerTest, GetCurrentAnimationId_returnsUntransitionedId)
 {
-    auto uut = nc::SkeletalAnimationController{1};
+    auto uut = nc::AnimationController{1};
 
     // null state until first transition
     EXPECT_EQ(nc::asset::NullAssetId, uut.GetCurrentAnimationId());
@@ -39,9 +39,9 @@ TEST(SkeletalAnimationControllerTest, GetCurrentAnimationId_returnsUntransitione
     EXPECT_EQ(4, uut.GetCurrentAnimationId());
 }
 
-TEST(SkeletalAnimationControllerTest, SetRootAnimation_modifyActiveState_retransitions)
+TEST(AnimationControllerTest, SetRootAnimation_modifyActiveState_retransitions)
 {
-    auto uut = nc::SkeletalAnimationController{1};
+    auto uut = nc::AnimationController{1};
     uut.CheckForTransition();
 
     const auto state = uut.AddState(nc::PlayOnceAnimation{
@@ -58,9 +58,9 @@ TEST(SkeletalAnimationControllerTest, SetRootAnimation_modifyActiveState_retrans
     EXPECT_EQ(state, uut.GetActiveState());
 }
 
-TEST(SkeletalAnimationControllerTest, SetDefaultTransitionDuration_reportsNewTimeInTransition)
+TEST(AnimationControllerTest, SetDefaultTransitionDuration_reportsNewTimeInTransition)
 {
-    auto uut = nc::SkeletalAnimationController{1, 0.1f};
+    auto uut = nc::AnimationController{1, 0.1f};
     uut.CheckForTransition();
     const auto state = uut.AddState(nc::LoopAnimation{
         .animId = 2,
@@ -77,9 +77,9 @@ TEST(SkeletalAnimationControllerTest, SetDefaultTransitionDuration_reportsNewTim
     EXPECT_EQ(state, uut.GetActiveState());
 }
 
-TEST(SkeletalAnimationControllerTest, CheckForTransition_afterConstruction_entersRootState)
+TEST(AnimationControllerTest, CheckForTransition_afterConstruction_entersRootState)
 {
-    auto uut = nc::SkeletalAnimationController{1, 0.1f};
+    auto uut = nc::AnimationController{1, 0.1f};
     const auto actual = uut.CheckForTransition();
     EXPECT_EQ(nc::asset::NullAssetId, actual.fromAnimId);
     EXPECT_EQ(1, actual.toAnimId);
@@ -87,9 +87,9 @@ TEST(SkeletalAnimationControllerTest, CheckForTransition_afterConstruction_enter
     EXPECT_EQ(nc::RootAnimationState, uut.GetActiveState());
 }
 
-TEST(SkeletalAnimationControllerTest, CheckForTransition_immediateStateQueued_entersImmediateState)
+TEST(AnimationControllerTest, CheckForTransition_immediateStateQueued_entersImmediateState)
 {
-    auto uut = nc::SkeletalAnimationController{1, 0.1f};
+    auto uut = nc::AnimationController{1, 0.1f};
 
     uut.PlayOnceImmediate(2);
     const auto actual = uut.CheckForTransition();
@@ -99,9 +99,9 @@ TEST(SkeletalAnimationControllerTest, CheckForTransition_immediateStateQueued_en
     EXPECT_EQ(nc::ImmediateAnimationState, uut.GetActiveState());
 }
 
-TEST(SkeletalAnimationControllerTest, CheckForTransition_inImmediateState_transitionsOnCondition)
+TEST(AnimationControllerTest, CheckForTransition_inImmediateState_transitionsOnCondition)
 {
-    auto uut = nc::SkeletalAnimationController{1, 0.1f};
+    auto uut = nc::AnimationController{1, 0.1f};
     uut.CheckForTransition();
 
     uut.LoopImmediate(2, [](){ return true; });
@@ -113,9 +113,9 @@ TEST(SkeletalAnimationControllerTest, CheckForTransition_inImmediateState_transi
     EXPECT_EQ(nc::RootAnimationState, uut.GetActiveState());
 }
 
-TEST(SkeletalAnimationControllerTest, CheckForTransition_inImmediatePlayOnceState_transitionsOnComplete)
+TEST(AnimationControllerTest, CheckForTransition_inImmediatePlayOnceState_transitionsOnComplete)
 {
-    auto uut = nc::SkeletalAnimationController{1, 0.1f};
+    auto uut = nc::AnimationController{1, 0.1f};
     uut.CheckForTransition();
 
     // enter immediate state
@@ -135,9 +135,9 @@ TEST(SkeletalAnimationControllerTest, CheckForTransition_inImmediatePlayOnceStat
     EXPECT_EQ(nc::RootAnimationState, uut.GetActiveState());
 }
 
-TEST(SkeletalAnimationControllerTest, CheckForTransition_inImmediateStopState_transitionsOnExitCondition)
+TEST(AnimationControllerTest, CheckForTransition_inImmediateStopState_transitionsOnExitCondition)
 {
-    auto uut = nc::SkeletalAnimationController{1, 0.1f};
+    auto uut = nc::AnimationController{1, 0.1f};
     uut.CheckForTransition();
 
     // transition to stop state
@@ -162,9 +162,9 @@ TEST(SkeletalAnimationControllerTest, CheckForTransition_inImmediateStopState_tr
     EXPECT_EQ(nc::RootAnimationState, uut.GetActiveState());
 }
 
-TEST(SkeletalAnimationControllerTest, CheckForTransition_inLoopState_transitionsOnExitCondition)
+TEST(AnimationControllerTest, CheckForTransition_inLoopState_transitionsOnExitCondition)
 {
-    auto uut = nc::SkeletalAnimationController{1, 0.1f};
+    auto uut = nc::AnimationController{1, 0.1f};
     uut.CheckForTransition();
 
     // transition to loop state
@@ -194,9 +194,9 @@ TEST(SkeletalAnimationControllerTest, CheckForTransition_inLoopState_transitions
     EXPECT_EQ(nc::RootAnimationState, uut.GetActiveState());
 }
 
-TEST(SkeletalAnimationControllerTest, CheckForTransition_inPlayOnceState_transitionsOnComplete)
+TEST(AnimationControllerTest, CheckForTransition_inPlayOnceState_transitionsOnComplete)
 {
-    auto uut = nc::SkeletalAnimationController{1, 0.1f};
+    auto uut = nc::AnimationController{1, 0.1f};
     uut.CheckForTransition();
 
     // transition to play once state
@@ -224,9 +224,9 @@ TEST(SkeletalAnimationControllerTest, CheckForTransition_inPlayOnceState_transit
     EXPECT_EQ(nc::RootAnimationState, uut.GetActiveState());
 }
 
-TEST(SkeletalAnimationControllerTest, CheckForTransition_successorCycle_transitionsThroughCycle)
+TEST(AnimationControllerTest, CheckForTransition_successorCycle_transitionsThroughCycle)
 {
-    auto uut = nc::SkeletalAnimationController{1, 0.1f};
+    auto uut = nc::AnimationController{1, 0.1f};
     uut.CheckForTransition();
 
     const auto stopState = uut.AddState(nc::StopAnimation{
@@ -268,9 +268,9 @@ TEST(SkeletalAnimationControllerTest, CheckForTransition_successorCycle_transiti
     EXPECT_EQ(stopState, uut.GetActiveState());
 }
 
-TEST(SkeletalAnimationControllerTest, CheckForTransition_afterRefreshState_retransitions)
+TEST(AnimationControllerTest, CheckForTransition_afterRefreshState_retransitions)
 {
-    auto uut = nc::SkeletalAnimationController{1, 0.1f};
+    auto uut = nc::AnimationController{1, 0.1f};
     uut.CheckForTransition();
 
     const auto loopState = uut.AddState(nc::LoopAnimation{

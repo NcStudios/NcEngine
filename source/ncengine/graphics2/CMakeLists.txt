@@ -8,7 +8,7 @@ target_sources(${NC_ENGINE_LIB}
         ParticleEmitter.cpp
         PostProcess.cpp
         SceneNavigationCamera.cpp
-        SkeletalAnimationController.cpp
+        AnimationController.cpp
 )
 
 add_subdirectory(diligent)

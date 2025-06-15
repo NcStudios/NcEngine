@@ -19,19 +19,19 @@ MeshBase::MeshBase(Entity self,
                    const asset::MeshView& mesh,
                    const MaterialDesc&,
                    MeshInstanceType type)
-    : m_ctx{self, mesh.id, 0, 0, type}
+    : m_ctx{self, mesh.id, 0, 0, 0, type}
 {
 }
 
 void MeshBase::Release() noexcept {}
-SkeletalAnimationController::SkeletalAnimationController(uint64_t, float) : m_states{0} {}
+AnimationController::AnimationController(uint64_t, float) : m_states{0} {}
 
-auto SkeletalAnimationController::CheckForTransition() -> AnimationTransition
+auto AnimationController::CheckForTransition() -> AnimationTransition
 {
     return g_nextTransition;
 }
 
-void SkeletalAnimationController::NotifyCompleteState()
+void AnimationController::NotifyCompleteState()
 {
     ++g_completedCount;
 }

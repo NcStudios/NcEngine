@@ -20,3 +20,5 @@ struct ShapeKeyAnimation
     uint32_t shapeKeyCount;
     std::vector<std::vector<Vector3>> positionFrames;
 };
+
+

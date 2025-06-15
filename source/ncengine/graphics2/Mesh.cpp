@@ -7,7 +7,7 @@ MeshBase::MeshBase(Entity self,
                    const asset::MeshView& meshAsset,
                    const MaterialDesc& materialDesc,
                    MeshInstanceType type)
-    : m_ctx{self, meshAsset.id, 0, 0, type},
+    : m_ctx{self, meshAsset.id, 0, 0, 0, type},
       m_material{MaterialInstance{materialDesc}}
 {
     s_subsystem->AddInstance(m_ctx, m_material, meshAsset);

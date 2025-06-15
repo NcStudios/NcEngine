@@ -7,7 +7,7 @@
 #include "ncengine/asset/AssetViews.h"
 #include "ncengine/ecs/Component.h"
 #include "ncengine/graphics/Material.h"
-#include "ncengine/graphics/SkeletalAnimationController.h"
+#include "ncengine/graphics/AnimationController.h"
 
 namespace nc
 {
@@ -20,7 +20,8 @@ class MeshSubsystem;
 enum class MeshInstanceType : uint8_t
 {
     Static,
-    Skinned
+    Skinned,
+    Keyed
 };
 
 /** @brief Mesh component state for tracking internal instance data. */
@@ -30,6 +31,7 @@ struct MeshInstanceContext
     asset::AssetId meshId = std::numeric_limits<uint64_t>::max();
     uint32_t transformDataHandle = std::numeric_limits<uint32_t>::max();
     uint32_t boneDataHandle = std::numeric_limits<uint32_t>::max();
+    uint32_t shapeKeyDataHandle = std::numeric_limits<uint32_t>::max();
     MeshInstanceType type = MeshInstanceType::Static;
 };
 
@@ -126,10 +128,34 @@ class SkinnedMesh : public MeshBase
         void SetMesh(const asset::MeshView& meshAsset);
 
         /** @name Animation Functions */
-        auto GetAnimationController() const -> const SkeletalAnimationController& { return m_controller; }
-        auto GetAnimationController()       ->       SkeletalAnimationController& { return m_controller; }
+        auto GetAnimationController() const -> const AnimationController& { return m_controller; }
+        auto GetAnimationController()       ->       AnimationController& { return m_controller; }
 
     private:
-        SkeletalAnimationController m_controller;
+        AnimationController m_controller;
+};
+
+/** @brief Component enabling rendering of an Entity with a given mesh, material, and shape key animation. */
+class KeyedMesh : public MeshBase
+{
+    public:
+        explicit KeyedMesh(Entity self,
+                           const asset::MeshView& meshAsset,
+                           const MaterialDesc& materialDesc,
+                           asset::AssetId rootAnimationId = asset::NullAssetId)
+            : MeshBase{self, meshAsset, materialDesc, MeshInstanceType::Keyed},
+              m_controller{rootAnimationId}
+        {
+        }
+
+        /** @name Mesh Functions */
+        void SetMesh(const asset::MeshView& meshAsset);
+
+        /** @name Animation Functions */
+        auto GetAnimationController() const -> const AnimationController& { return m_controller; }
+        auto GetAnimationController()       ->       AnimationController& { return m_controller; }
+
+    private:
+        AnimationController m_controller;
 };
 } // namespace nc

@@ -1,4 +1,4 @@
-#include "ncengine/graphics/SkeletalAnimationController.h"
+#include "ncengine/graphics/AnimationController.h"
 
 #include "ncutility/ScopeExit.h"
 
@@ -6,7 +6,7 @@
 
 namespace nc
 {
-SkeletalAnimationController::SkeletalAnimationController(asset::AssetId animationId,
+AnimationController::AnimationController(asset::AssetId animationId,
                                                          float defaultTransitionDuration)
     : m_states{4ull, MaxAnimationStates},
       m_defaultTransitionDuration{defaultTransitionDuration}
@@ -20,7 +20,7 @@ SkeletalAnimationController::SkeletalAnimationController(asset::AssetId animatio
     );
 }
 
-auto SkeletalAnimationController::GetCurrentAnimationId() const -> asset::AssetId
+auto AnimationController::GetCurrentAnimationId() const -> asset::AssetId
 {
     // Id is cached here if queued transition overwrote the current id (e.g. immediate -> immediate)
     if (m_prevAnimId != asset::NullAssetId)
@@ -39,7 +39,7 @@ auto SkeletalAnimationController::GetCurrentAnimationId() const -> asset::AssetI
     }
 }
 
-auto SkeletalAnimationController::AddState(LoopAnimation&& properties) -> AnimationStateId
+auto AnimationController::AddState(LoopAnimation&& properties) -> AnimationStateId
 {
     return AddStateImpl(AnimationState{
         .animId = properties.animId,
@@ -52,7 +52,7 @@ auto SkeletalAnimationController::AddState(LoopAnimation&& properties) -> Animat
     });
 }
 
-auto SkeletalAnimationController::AddState(PlayOnceAnimation&& properties) -> AnimationStateId
+auto AnimationController::AddState(PlayOnceAnimation&& properties) -> AnimationStateId
 {
     return AddStateImpl(AnimationState{
         .animId = properties.animId,
@@ -64,7 +64,7 @@ auto SkeletalAnimationController::AddState(PlayOnceAnimation&& properties) -> An
     });
 }
 
-auto SkeletalAnimationController::AddState(StopAnimation&& properties) -> AnimationStateId
+auto AnimationController::AddState(StopAnimation&& properties) -> AnimationStateId
 {
     return AddStateImpl(AnimationState{
         .enterWhen = std::move(properties.enterWhen),
@@ -74,12 +74,12 @@ auto SkeletalAnimationController::AddState(StopAnimation&& properties) -> Animat
     });
 }
 
-auto SkeletalAnimationController::GetAnimation(AnimationStateId stateId) const -> asset::AssetId
+auto AnimationController::GetAnimation(AnimationStateId stateId) const -> asset::AssetId
 {
     return m_states.at(stateId).animId;
 }
 
-void SkeletalAnimationController::SetAnimation(AnimationStateId stateId, asset::AssetId animationId)
+void AnimationController::SetAnimation(AnimationStateId stateId, asset::AssetId animationId)
 {
     const auto oldId = std::exchange(m_states.at(stateId).animId, animationId);
     if (m_activeState == stateId)
@@ -89,7 +89,7 @@ void SkeletalAnimationController::SetAnimation(AnimationStateId stateId, asset::
     }
 }
 
-void SkeletalAnimationController::LoopImmediate(asset::AssetId animId,
+void AnimationController::LoopImmediate(asset::AssetId animId,
                                                 TransitionCondition&& exitWhen,
                                                 AnimationStateId exitTo,
                                                 float transitionDuration)
@@ -104,7 +104,7 @@ void SkeletalAnimationController::LoopImmediate(asset::AssetId animId,
     });
 }
 
-void SkeletalAnimationController::PlayOnceImmediate(asset::AssetId animId,
+void AnimationController::PlayOnceImmediate(asset::AssetId animId,
                                                     AnimationStateId exitTo,
                                                     float transitionDuration)
 {
@@ -117,7 +117,7 @@ void SkeletalAnimationController::PlayOnceImmediate(asset::AssetId animId,
     });
 }
 
-void SkeletalAnimationController::StopImmediate(TransitionCondition&& exitWhen,
+void AnimationController::StopImmediate(TransitionCondition&& exitWhen,
                                                 AnimationStateId exitTo,
                                                 float transitionDuration)
 {
@@ -130,7 +130,7 @@ void SkeletalAnimationController::StopImmediate(TransitionCondition&& exitWhen,
     });
 }
 
-auto SkeletalAnimationController::CheckForTransition() -> AnimationTransition
+auto AnimationController::CheckForTransition() -> AnimationTransition
 {
     const auto cycleCompleted = std::exchange(m_cycleCompleted, false);
 
@@ -169,18 +169,18 @@ auto SkeletalAnimationController::CheckForTransition() -> AnimationTransition
     return AnimationTransition{};
 }
 
-void SkeletalAnimationController::RefreshAnimation()
+void AnimationController::RefreshAnimation()
 {
     // Redundant transition to force subsystem to rebuild state. Useful if a mesh is updated.
     m_queuedState = m_activeState;
 }
 
-void SkeletalAnimationController::NotifyCompleteState()
+void AnimationController::NotifyCompleteState()
 {
     m_cycleCompleted = true;
 }
 
-auto SkeletalAnimationController::AddStateImpl(AnimationState&& in) -> AnimationStateId
+auto AnimationController::AddStateImpl(AnimationState&& in) -> AnimationStateId
 {
     const auto id = m_nextStateId++;
     m_states.at(in.enterFrom).successors.push_back(id);
@@ -188,14 +188,14 @@ auto SkeletalAnimationController::AddStateImpl(AnimationState&& in) -> Animation
     return id;
 }
 
-auto SkeletalAnimationController::CalculateTransitionDuration(float requestedDuration) const -> float
+auto AnimationController::CalculateTransitionDuration(float requestedDuration) const -> float
 {
     return requestedDuration == UseDefaultTransitionDuration
         ? m_defaultTransitionDuration
         : requestedDuration;
 }
 
-void SkeletalAnimationController::QueueImmediateTransition()
+void AnimationController::QueueImmediateTransition()
 {
     m_queuedState = ImmediateAnimationState;
     if (m_immediateState)
@@ -204,7 +204,7 @@ void SkeletalAnimationController::QueueImmediateTransition()
     }
 }
 
-auto SkeletalAnimationController::TransitionQueuedState() -> AnimationTransition
+auto AnimationController::TransitionQueuedState() -> AnimationTransition
 {
     const auto curAnim = GetCurrentAnimationId();
     m_prevAnimId = asset::NullAssetId;
@@ -221,7 +221,7 @@ auto SkeletalAnimationController::TransitionQueuedState() -> AnimationTransition
     };
 }
 
-auto SkeletalAnimationController::TransitionState(AnimationState& from,
+auto AnimationController::TransitionState(AnimationState& from,
                                                   AnimationState& to,
                                                   AnimationStateId toId) -> AnimationTransition
 {
@@ -234,7 +234,7 @@ auto SkeletalAnimationController::TransitionState(AnimationState& from,
     };
 }
 
-auto SkeletalAnimationController::ShouldExitState(AnimationState& current, bool cycleCompleted) -> bool
+auto AnimationController::ShouldExitState(AnimationState& current, bool cycleCompleted) -> bool
 {
     const auto playOnceComplete = cycleCompleted && current.action == AnimationTransitionType::PlayOnce;
     return playOnceComplete || current.exitWhen();

@@ -685,8 +685,11 @@ class GeometryConverter::impl
             {
                 mesh = scene->mMeshes[0];
             }
+            else
+            {
+                mesh = GetMeshFromScene(scene, subResourceName.value());
+            }
 
-            mesh = GetMeshFromScene(scene, subResourceName.value());
             NC_ASSERT(mesh, "No meshes found in scene.");
 
             if (mesh->mNumVertices == 0)

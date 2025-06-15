@@ -8,7 +8,7 @@ add_executable(ComponentSerialization_integration_tests
     ${NC_SOURCE_DIR}/graphics2/Material.cpp
     ${NC_SOURCE_DIR}/graphics2/Mesh.cpp
     ${NC_SOURCE_DIR}/graphics2/ParticleEmitter.cpp
-    ${NC_SOURCE_DIR}/graphics2/SkeletalAnimationController.cpp
+    ${NC_SOURCE_DIR}/graphics2/AnimationController.cpp
     ${NC_SOURCE_DIR}/graphics2/frontend/subsystem/MaterialRegistry.cpp
     ${NC_SOURCE_DIR}/graphics2/frontend/subsystem/MeshSubsystem.cpp
     ${NC_SOURCE_DIR}/graphics2/frontend/subsystem/TransformCache.cpp
