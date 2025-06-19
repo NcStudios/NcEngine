@@ -65,6 +65,7 @@ target_sources(EnvironmentBufferResource_tests
         ${NC_SOURCE_DIR}/graphics2/diligent/resource/EnvironmentBufferResource.cpp
         ${NC_SOURCE_DIR}/graphics2/diligent/resource/ResourceTypes.cpp
         ${NC_SOURCE_DIR}/graphics2/diligent/resource/base/DynamicUniformBuffer.cpp
+        ${NC_SOURCE_DIR}/time/TimeImpl.cpp
 )
 
 ### MeshBuffer Tests ###

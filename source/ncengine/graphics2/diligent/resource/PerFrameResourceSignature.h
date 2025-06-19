@@ -34,6 +34,7 @@ class PerFrameResourceSignature
                                            const StructuredBufferDesc& boneResourceDesc,
                                            const StructuredBufferDesc& particleResourceDesc,
                                            const StructuredBufferDesc& lightMatrixResourceDesc,
+                                           const StructuredBufferDesc& shapeKeyMetadataResourceDesc,
                                            const CubeMapBufferDesc& cubeResourceDesc,
                                            const TextureBufferDesc& textureResourceDesc,
                                            const TextureBufferDesc& shapeKeyClipResourceDesc,
@@ -53,6 +54,7 @@ class PerFrameResourceSignature
         auto GetBoneDataResource()          -> StructuredBuffer<BoneData>&                { return *m_boneDataResource; }
         auto GetParticleDataBuffer()        -> StructuredBuffer<ParticleData>&            { return *m_particleDataResource; }
         auto GetLightMatrixDataBuffer()     -> StructuredBuffer<LightMatrixData>&         { return *m_lightMatrixDataResource; }
+        auto GetShapeKeyMetadataBuffer()    -> StructuredBuffer<ShapeKeyMetadata>&         { return *m_shapeKeyMetadataResource; }
         auto GetCubeMapBuffer()             -> CubeMapBufferResource&                     { return *m_cubeMapResource; }
         auto GetTextureBuffer()             -> TextureBufferResource&                     { return *m_textureResource; }
         auto GetShapeKeyClipBuffer()        -> TextureBufferResource&                     { return *m_shapeKeyClipResource; }
@@ -70,6 +72,7 @@ class PerFrameResourceSignature
         std::unique_ptr<StructuredBuffer<BoneData>> m_boneDataResource;
         std::unique_ptr<StructuredBuffer<ParticleData>> m_particleDataResource;
         std::unique_ptr<StructuredBuffer<LightMatrixData>> m_lightMatrixDataResource;
+        std::unique_ptr<StructuredBuffer<ShapeKeyMetadata>> m_shapeKeyMetadataResource;
         std::unique_ptr<TextureBufferResource> m_textureResource;
         std::unique_ptr<TextureBufferResource> m_shapeKeyClipResource;
         std::unique_ptr<CubeMapBufferResource> m_cubeMapResource;

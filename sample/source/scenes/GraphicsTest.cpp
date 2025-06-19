@@ -44,6 +44,18 @@ void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
     });
     world.Emplace<StaticMesh>(guy2, mesh::guy2, material::guy2);
 
+    const auto deformableCube = world.Emplace<Entity>({
+        .position = Vector3{4.0f, 2.0f, 4.0f},
+        .rotation = Quaternion::FromEulerAngles(0.0f, 0.0f, 0.0f),
+        .scale = Vector3{1.0f, 1.0f, 1.0f},
+        .tag = "Deformable Cube"
+    });
+    world.Emplace<StaticMesh>(deformableCube, mesh::cube, material::green);
+    // world.Emplace<ShapeKeyAnimation>(deformableCube, shapekey_animation::cube);
+        // CTOR:
+            // Get StaticMesh or SkinnedMesh from entity. Must have one
+            // 
+
     // Twirl
     {
         const auto body = world.Emplace<Entity>({
@@ -73,6 +85,12 @@ void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
             mesh::girl_dress,
             material::blue
         );
+
+        // world.Emplace<ShapeKeyAnimation>(
+        //     dress,
+        //     mesh::girl_dress,
+        //     material::blue
+        // );
 
         animator.AddState(PlayOnceAnimation{
             .animId = animation::girl_twirl,

@@ -32,9 +32,10 @@ class ShaderBindings
                 StructuredBufferDesc{"Bones",              Diligent::SHADER_TYPE_VERTEX, memorySettings.maxBones,            memorySettings.maxBones / 4},
                 StructuredBufferDesc{"Particles",          Diligent::SHADER_TYPE_VS_PS,  memorySettings.maxParticles,        memorySettings.maxParticles / 4},
                 StructuredBufferDesc{"LightMatrices",      Diligent::SHADER_TYPE_VS_PS,  GetTotalLightMatricesCount(memorySettings), GetTotalLightMatricesCount(memorySettings)},
+                StructuredBufferDesc{"ShapeKeyMetadata",   Diligent::SHADER_TYPE_VS_PS,  5},
                 CubeMapBufferDesc{"Skyboxes",              Diligent::SHADER_TYPE_PIXEL,  memorySettings.maxCubeMaps},
                 TextureBufferDesc{"Textures",              Diligent::SHADER_TYPE_PIXEL,  memorySettings.maxTextures},
-                TextureBufferDesc{"ShapeKeyClips",         Diligent::SHADER_TYPE_PIXEL,  5},
+                TextureBufferDesc{"ShapeKeyClips",         Diligent::SHADER_TYPE_VERTEX,  5},
                 UniformBufferDesc{"EnvironmentProperties", Diligent::SHADER_TYPE_VS_PS},
                 UniformBufferDesc{"WireframeProperties",   Diligent::SHADER_TYPE_VS_PS}
               },
@@ -52,6 +53,17 @@ class ShaderBindings
             }
         {
         }
+
+        /*
+        VB/IB (MeshA........ MeshB ....... MeshC...........)
+        MeshView (FirstVertex = 147, )
+
+
+
+        RGB, RGB, RGB ... x24
+        XYZ, XYZ, XYZ .... X24 (Shape Key)
+        RGB, RGB, RGB ... x24
+        */
 
         void Update(Diligent::IDeviceContext& context,
                     Diligent::IRenderDevice& device,

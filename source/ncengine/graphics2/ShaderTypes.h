@@ -13,16 +13,21 @@
 namespace nc::graphics
 {
 // Object model for environment data (type: constant buffer)
-struct GlobalEnvironmentData
+struct alignas(16) GlobalEnvironmentData
 {
     DirectX::XMMATRIX cameraViewProjection = DirectX::XMMatrixIdentity();
     DirectX::XMMATRIX cameraInvProjection = DirectX::XMMatrixIdentity();
-    Vector3 cameraPosition = Vector3::One();
+
+    alignas(16) Vector3 cameraPosition = Vector3::One();
     uint32_t lightCount = 0;
-    float nearClip = 0.1f;
+
+    alignas(16) float nearClip = 0.1f;
     float farClip = 400.0f;
     uint32_t skyboxIndex = 0;
     uint32_t useSkybox = 0;
+
+    alignas(16) double time = 0.0f;
+    float padding[2];
 };
 
 // Object model for outline pass properties used by post processing effects (type: constant buffer)
@@ -59,6 +64,7 @@ struct StaticMeshInstanceData
 {
     uint32_t transformIndex = std::numeric_limits<uint32_t>::max();
     uint32_t materialIndex = std::numeric_limits<uint32_t>::max();
+    uint32_t shapeKeyMetadataIndex = std::numeric_limits<uint32_t>::max();
 };
 
 // Object model for SkinnedMeshes (type: StructuredBuffer element type).
@@ -67,6 +73,7 @@ struct SkinnedMeshInstanceData
     uint32_t transformIndex = std::numeric_limits<uint32_t>::max();
     uint32_t materialIndex = std::numeric_limits<uint32_t>::max();
     uint32_t boneIndex = std::numeric_limits<uint32_t>::max();
+    uint32_t shapeKeyMetadataIndex = std::numeric_limits<uint32_t>::max();
 };
 
 // Object model for Transforms (type: StructuredBuffer element type).
@@ -202,6 +209,13 @@ struct WireframeData
 {
     DirectX::XMMATRIX modelMatrix = DirectX::XMMatrixIdentity();
     Vector4 color = Vector4::One();
+};
+
+// Object model for shape key animation metadata lookup (type: StructuredBuffer element type)
+struct ShapeKeyMetadata
+{
+    int32_t ShapeKeyAnimationIndex = -1;
+    float DurationInSeconds = 0.0f;
 };
 
 // Specifies a subrange within a buffer.

@@ -23,6 +23,7 @@ PerFrameResourceSignature::PerFrameResourceSignature(Diligent::IDeviceContext& c
                                                      const StructuredBufferDesc& boneResourceDesc,
                                                      const StructuredBufferDesc& particleResourceDesc,
                                                      const StructuredBufferDesc& lightMatrixResourceDesc,
+                                                     const StructuredBufferDesc& shapeKeyMetadataResourceDesc,
                                                      const CubeMapBufferDesc& cubeMapResourceDesc,
                                                      const TextureBufferDesc& textureResourceDesc,
                                                      const TextureBufferDesc& shapeKeyClipResourceDesc,
@@ -38,6 +39,7 @@ PerFrameResourceSignature::PerFrameResourceSignature(Diligent::IDeviceContext& c
         ToPipelineResourceDesc(boneResourceDesc),
         ToPipelineResourceDesc(particleResourceDesc),
         ToPipelineResourceDesc(lightMatrixResourceDesc),
+        ToPipelineResourceDesc(shapeKeyMetadataResourceDesc),
         ToPipelineResourceDesc(cubeMapResourceDesc),
         ToPipelineResourceDesc(textureResourceDesc),
         ToPipelineResourceDesc(shapeKeyClipResourceDesc),
@@ -125,6 +127,13 @@ PerFrameResourceSignature::PerFrameResourceSignature(Diligent::IDeviceContext& c
         device,
         GetVariable(lightMatrixResourceDesc, m_srb),
         lightMatrixResourceDesc
+    );
+
+    m_shapeKeyMetadataResource = std::make_unique<StructuredBuffer<ShapeKeyMetadata>>(
+        context,
+        device,
+        GetVariable(shapeKeyMetadataResourceDesc, m_srb),
+        shapeKeyMetadataResourceDesc
     );
 
     m_cubeMapResource = std::make_unique<CubeMapBufferResource>(

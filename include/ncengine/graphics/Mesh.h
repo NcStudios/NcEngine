@@ -20,8 +20,7 @@ class MeshSubsystem;
 enum class MeshInstanceType : uint8_t
 {
     Static,
-    Skinned,
-    Keyed
+    Skinned
 };
 
 /** @brief Mesh component state for tracking internal instance data. */
@@ -120,30 +119,6 @@ class SkinnedMesh : public MeshBase
                              const MaterialDesc& materialDesc,
                              asset::AssetId rootAnimationId = asset::NullAssetId)
             : MeshBase{self, meshAsset, materialDesc, MeshInstanceType::Skinned},
-              m_controller{rootAnimationId}
-        {
-        }
-
-        /** @name Mesh Functions */
-        void SetMesh(const asset::MeshView& meshAsset);
-
-        /** @name Animation Functions */
-        auto GetAnimationController() const -> const AnimationController& { return m_controller; }
-        auto GetAnimationController()       ->       AnimationController& { return m_controller; }
-
-    private:
-        AnimationController m_controller;
-};
-
-/** @brief Component enabling rendering of an Entity with a given mesh, material, and shape key animation. */
-class KeyedMesh : public MeshBase
-{
-    public:
-        explicit KeyedMesh(Entity self,
-                           const asset::MeshView& meshAsset,
-                           const MaterialDesc& materialDesc,
-                           asset::AssetId rootAnimationId = asset::NullAssetId)
-            : MeshBase{self, meshAsset, materialDesc, MeshInstanceType::Keyed},
               m_controller{rootAnimationId}
         {
         }

@@ -2,6 +2,7 @@
 #include "graphics2/frontend/subsystem/CameraRenderState.h"
 #include "graphics2/frontend/subsystem/EnvironmentRenderState.h"
 #include "graphics2/frontend/subsystem/LightRenderState.h"
+#include "ncengine/time/Time.h"
 
 namespace nc::graphics
 {
@@ -14,7 +15,8 @@ EnvironmentBufferResource::EnvironmentBufferResource(Diligent::IDeviceContext& c
         GlobalEnvironmentData{},
         UniformBufferName
       },
-      m_variable{&variable}
+      m_variable{&variable},
+      m_elapsedSeconds{0.0}
 {
     m_variable->Set(&m_buffer.GetBuffer());
 }
@@ -24,6 +26,8 @@ void EnvironmentBufferResource::Update(Diligent::IDeviceContext& context,
                                        const LightRenderState& lightRenderState,
                                        const EnvironmentRenderState& environmentRenderState)
 {
+    m_elapsedSeconds += time::DeltaTime();
+
     const auto data = GlobalEnvironmentData{
         .cameraViewProjection = cameraState.viewProjection,
         .cameraInvProjection = cameraState.invProjection,
@@ -32,7 +36,8 @@ void EnvironmentBufferResource::Update(Diligent::IDeviceContext& context,
         .nearClip = cameraState.nearClip,
         .farClip = cameraState.farClip,
         .skyboxIndex = environmentRenderState.skyboxIndex,
-        .useSkybox = environmentRenderState.useSkybox
+        .useSkybox = environmentRenderState.useSkybox,
+        .time = m_elapsedSeconds
     };
 
     m_buffer.Write(context, data);

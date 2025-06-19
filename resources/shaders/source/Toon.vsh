@@ -18,6 +18,19 @@ struct PSInput
     float3 LocalPos;
 };
 
+/*
+struct ShapeKeyMetadata
+{
+    int ShapeKeyAnimationIndex;
+    float DurationInSeconds;
+    uint NumShapeKeys;
+};
+
+Texture2D     ShapeKeyAnims[];
+SamplerState  ShapeKeyAnims_sampler; // By convention, texture samplers must use the '_sampler' suffix
+
+*/
+
 StructuredBuffer<TransformData> Transforms;
 StructuredBuffer<StaticMeshInstanceData> StaticInstances;
 
@@ -32,4 +45,20 @@ void main(in  VSInput VSIn, uint InstanceID : SV_InstanceID, uint VertexID : SV_
     PSIn.WorldPos = TransformedPos;
     PSIn.LocalPos = VSIn.Pos.xyz;
     PSIn.MaterialIndex = materialIndex;
+
+    /*
+    if (ShapeKeyMetadata.ShapeKeyAnimationIndex > -1)
+    {
+        get time.deltatime
+        Get ShapeKeyMetadata.DurationInSeconds;
+        If TotalT = 10 seconds
+        If T = 3 seconds
+        
+
+
+
+        uint2 shapeKeyUVA = uint2{0, ShapeKeyIndex}
+        float3 shapeKeyA = ShapeKeyAnims[ShapeKeyAnimationIndex].Sample(ShapeKeyAnims_sampler, PSIn.UV * hatchTiling).b;
+    }
+    */
 }

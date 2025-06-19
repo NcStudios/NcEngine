@@ -8,12 +8,14 @@ cbuffer EnvironmentProperties
     float farClip;
     uint skyboxIndex;
     uint useSkybox;
+    double time;
 };
 
 struct StaticMeshInstanceData
 {
     uint transformIndex;
     uint materialIndex;
+    uint shapeKeyMetadataIndex;
 };
 
 struct SkinnedMeshInstanceData
@@ -21,6 +23,7 @@ struct SkinnedMeshInstanceData
     uint transformIndex;
     uint materialIndex;
     uint boneIndex;
+    uint shapeKeyMetadataIndex;
 };
 
 struct TransformData
