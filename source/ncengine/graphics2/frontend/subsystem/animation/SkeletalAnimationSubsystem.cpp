@@ -80,7 +80,7 @@ void SkeletalAnimationSubsystem::Update(ecs::ExplicitEcs<SkinnedMesh> ecs)
 
     auto& pool = ecs.GetPool<SkinnedMesh>();
     CommitPendingChanges();
-    m_stateOrchestrator.Transition(pool, m_storage);
+    m_stateOrchestrator.Transition(pool, &m_storage);
     CalculateBoneMatrices();
     m_stateOrchestrator.NotifyCompleted(pool, m_completedAnimations);
     m_completedAnimations.clear();
@@ -123,7 +123,7 @@ void SkeletalAnimationSubsystem::CalculateBoneMatrices()
             );
         }();
 
-        m_boneCache.UpdateRegion(state.boneIndex, bones);
+        m_boneCache.UpdateRegion(state.dataHandle, bones);
     }
 }
 

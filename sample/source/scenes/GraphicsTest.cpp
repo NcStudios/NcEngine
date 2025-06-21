@@ -50,54 +50,10 @@ void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
         .scale = Vector3{1.0f, 1.0f, 1.0f},
         .tag = "Deformable Cube"
     });
+
     world.Emplace<StaticMesh>(deformableCube, mesh::cube, material::green);
     // world.Emplace<ShapeKeyAnimation>(deformableCube, shapekey_animation::cube);
-        // CTOR:
-            // Get StaticMesh or SkinnedMesh from entity. Must have one
-            // 
-
-    // Twirl
-    {
-        const auto body = world.Emplace<Entity>({
-            .position = Vector3{0.0f, 0.0f, 10.0f},
-            .rotation = Quaternion::FromEulerAngles(0.0f, 0.0f, 0.0f),
-            .scale = Vector3{1.0f, 1.0f, 1.0f},
-            .tag = "body"
-        });
-
-        const auto dress = world.Emplace<Entity>({
-            .position = Vector3{0.0f, 0.0f, 10.0f},
-            .rotation = Quaternion::FromEulerAngles(0.0f, 0.0f, 0.0f),
-            .scale = Vector3{1.0f, 1.0f, 1.0f},
-            .parent = body,
-            .tag = "dress"
-        });
-
-        auto& animator = world.Emplace<SkinnedMesh>(
-            body,
-            mesh::girl_body,
-            material::blue,
-            animation::girl_twirl
-        ).GetAnimationController();
-
-        world.Emplace<StaticMesh>(
-            dress,
-            mesh::girl_dress,
-            material::blue
-        );
-
-        // world.Emplace<ShapeKeyAnimation>(
-        //     dress,
-        //     mesh::girl_dress,
-        //     material::blue
-        // );
-
-        animator.AddState(PlayOnceAnimation{
-            .animId = animation::girl_twirl,
-            .enterWhen = [](){ return input::KeyDown(input::KeyCode::Space);}
-        });
-    }
-
+    
     // Ogre
     {
         const auto ogre = world.Emplace<Entity>({

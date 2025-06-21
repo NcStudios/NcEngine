@@ -1,7 +1,6 @@
 ### AnimationStateOrchestrator Tests ###
 add_executable(AnimationStateOrchestrator_tests
     AnimationStateOrchestrator_tests.cpp
-    ${NC_SOURCE_DIR}/graphics2/frontend/subsystem/animation/AnimationStateOrchestrator.cpp
     ${NC_SOURCE_DIR}/graphics2/frontend/subsystem/animation/Rig.cpp
 )
 
@@ -188,7 +187,6 @@ add_executable(MeshSubsystem_tests
     ${NC_SOURCE_DIR}/graphics2/AnimationController.cpp
     ${NC_SOURCE_DIR}/graphics2/frontend/subsystem/MeshSubsystem.cpp
     ${NC_SOURCE_DIR}/graphics2/frontend/subsystem/TransformCache.cpp
-    ${NC_SOURCE_DIR}/graphics2/frontend/subsystem/animation/AnimationStateOrchestrator.cpp
     ${NC_SOURCE_DIR}/graphics2/frontend/subsystem/animation/BoneCache.cpp
     ${NC_SOURCE_DIR}/graphics2/frontend/subsystem/animation/Rig.cpp
     ${NC_SOURCE_DIR}/graphics2/frontend/subsystem/animation/SkeletalAnimationCalculator.cpp

@@ -48,7 +48,7 @@ class SkeletalAnimationSubsystem : public ISkeletalAnimationSubsystem
         void OnBeforeSceneLoad();
 
     private:
-        AnimationStateOrchestrator m_stateOrchestrator;
+        AnimationStateOrchestrator<SkinnedMesh> m_stateOrchestrator;
         std::vector<Entity> m_completedAnimations;
 
         void CommitPendingChanges();

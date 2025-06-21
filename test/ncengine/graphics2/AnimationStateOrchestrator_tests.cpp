@@ -54,7 +54,7 @@ class AnimationStateOrchestratorTest : public testing::Test
     protected:
         nc::ecs::ComponentPool<nc::SkinnedMesh> pool{10ull, nc::ComponentHandler<nc::SkinnedMesh>{}};
         nc::graphics::SkeletalAnimationStorage storage{};
-        nc::graphics::AnimationStateOrchestrator uut{};
+        nc::graphics::AnimationStateOrchestrator<nc::SkinnedMesh> uut{};
 
         AnimationStateOrchestratorTest()
         {
@@ -79,7 +79,7 @@ TEST_F(AnimationStateOrchestratorTest, Transition_notAnimatable_doesNotAddState)
         .type = nc::AnimationTransitionType::Loop
     };
 
-    uut.Transition(pool, storage);
+    uut.Transition(pool, &storage);
     EXPECT_TRUE(uut.GetEntities().empty());
     EXPECT_TRUE(uut.GetAnimations().empty());
 
@@ -93,7 +93,7 @@ TEST_F(AnimationStateOrchestratorTest, Transition_notAnimatable_doesNotAddState)
         .type = nc::AnimationTransitionType::Loop
     };
 
-    uut.Transition(pool, storage);
+    uut.Transition(pool, &storage);
     EXPECT_TRUE(uut.GetEntities().empty());
     EXPECT_TRUE(uut.GetAnimations().empty());
 }
@@ -110,7 +110,7 @@ TEST_F(AnimationStateOrchestratorTest, Transition_animatable_handlesAllTransitio
         .type = nc::AnimationTransitionType::Continue
     };
 
-    uut.Transition(pool, storage);
+    uut.Transition(pool, &storage);
     EXPECT_TRUE(uut.GetEntities().empty());
     EXPECT_TRUE(uut.GetAnimations().empty());
 
@@ -120,7 +120,7 @@ TEST_F(AnimationStateOrchestratorTest, Transition_animatable_handlesAllTransitio
         .type = nc::AnimationTransitionType::Loop
     };
 
-    uut.Transition(pool, storage);
+    uut.Transition(pool, &storage);
     EXPECT_EQ(1, uut.GetEntities().size());
     EXPECT_EQ(1, uut.GetAnimations().size());
     EXPECT_EQ(2, uut.GetAnimations().at(0).animId);
@@ -131,7 +131,7 @@ TEST_F(AnimationStateOrchestratorTest, Transition_animatable_handlesAllTransitio
         .type = nc::AnimationTransitionType::PlayOnce
     };
 
-    uut.Transition(pool, storage);
+    uut.Transition(pool, &storage);
     EXPECT_EQ(1, uut.GetEntities().size());
     EXPECT_EQ(1, uut.GetAnimations().size());
     EXPECT_EQ(3, uut.GetAnimations().at(0).animId);
@@ -141,7 +141,7 @@ TEST_F(AnimationStateOrchestratorTest, Transition_animatable_handlesAllTransitio
         .type = nc::AnimationTransitionType::Stop
     };
 
-    uut.Transition(pool, storage);
+    uut.Transition(pool, &storage);
     EXPECT_TRUE(uut.GetEntities().empty());
     EXPECT_TRUE(uut.GetAnimations().empty());
 }
@@ -172,7 +172,7 @@ TEST_F(AnimationStateOrchestratorTest, Remove_clearsStates)
         .type = nc::AnimationTransitionType::PlayOnce
     };
 
-    uut.Transition(pool, storage);
+    uut.Transition(pool, &storage);
     ASSERT_EQ(2, uut.GetEntities().size());
     ASSERT_EQ(2, uut.GetAnimations().size());
 
@@ -201,7 +201,7 @@ TEST_F(AnimationStateOrchestratorTest, Purge_preservesPersistentEntities)
         .type = nc::AnimationTransitionType::PlayOnce
     };
 
-    uut.Transition(pool, storage);
+    uut.Transition(pool, &storage);
     ASSERT_EQ(4, uut.GetEntities().size());
     ASSERT_EQ(4, uut.GetAnimations().size());
 
