@@ -17,6 +17,7 @@ namespace nc::graphics
 struct DeviceCapability
 {
     uint32_t msaaSampleCount = 1u;
+    bool shaderFloat64 = true;
 };
 
 class DiligentEngine

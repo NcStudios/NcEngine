@@ -3,7 +3,7 @@
         "outputDirectory": "./nca"
     },
     "defaultMeshOptions": {
-        "optimizeMesh": true
+        "optimizeMesh": false
     },
     "defaultDiffuseTextureOptions": {
         "textureFormat": "RGBA8_UNORM_SRGB",

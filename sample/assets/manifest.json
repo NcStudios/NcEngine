@@ -2,7 +2,7 @@
     "globalOptions": {
         "outputDirectory": "./nca",
         "defaultMeshOptions": {
-            "optimizeMesh": true
+            "optimizeMesh": false
         },
         "defaultCubeMapOptions": {
             "textureFormat": "BC3_UNORM_SRGB"

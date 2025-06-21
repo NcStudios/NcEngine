@@ -33,6 +33,6 @@ class EnvironmentBufferResource
     private:
         DynamicUniformBuffer m_buffer;
         Diligent::IShaderResourceVariable* m_variable;
-        double m_elapsedSeconds;
+        float m_elapsedSeconds;
 };
 } // namespace nc::graphics

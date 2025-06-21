@@ -38,13 +38,27 @@ void main(in  VSInput VSIn, uint InstanceID : SV_InstanceID, uint VertexID : SV_
 {
     uint transformIndex = StaticInstances[InstanceID].transformIndex;
     uint materialIndex = StaticInstances[InstanceID].materialIndex;
+
+    float shapeKeyLerpFactor = frac((time) / .416); // 0,1
+    float3 result = lerp(positions1[VertexID], positions2[VertexID], shapeKeyLerpFactor);
+
+    VSIn.Pos = result;
+
+
     float4 TransformedPos = mul(float4(VSIn.Pos, 1.0), Transforms[transformIndex].model);
+
+
+
+
+
+
     PSIn.Pos = mul(TransformedPos, cameraViewProjection);
     PSIn.UV  = VSIn.UV;
     PSIn.Normal = normalize( mul(float4(VSIn.Normal, 0.0), Transforms[transformIndex].model));
     PSIn.WorldPos = TransformedPos;
     PSIn.LocalPos = VSIn.Pos.xyz;
     PSIn.MaterialIndex = materialIndex;
+
 
     /*
     if (ShapeKeyMetadata.ShapeKeyAnimationIndex > -1)

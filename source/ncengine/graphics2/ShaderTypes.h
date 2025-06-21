@@ -26,8 +26,8 @@ struct alignas(16) GlobalEnvironmentData
     uint32_t skyboxIndex = 0;
     uint32_t useSkybox = 0;
 
-    alignas(16) double time = 0.0f;
-    float padding[2];
+    alignas(16) float time = 0.0f;
+    float padding[3];
 };
 
 // Object model for outline pass properties used by post processing effects (type: constant buffer)

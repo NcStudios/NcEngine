@@ -8,7 +8,7 @@ cbuffer EnvironmentProperties
     float farClip;
     uint skyboxIndex;
     uint useSkybox;
-    double time;
+    float time;
 };
 
 struct StaticMeshInstanceData
@@ -83,4 +83,57 @@ cbuffer WireframeProperties
 {
     float4x4 wireframeModelMatrix;
     float4 wireframeColor;
+};
+static const float3 positions1[] = {
+    float3(-1.0, -1.0, -1.0),
+    float3(-1.0,  1.0, -1.0),
+    float3(-1.0,  1.0,  1.0),
+    float3(-1.0, -1.0,  1.0),
+    float3(-1.0, -1.0,  1.0),
+    float3(-1.0,  1.0,  1.0),
+    float3( 1.0,  1.0,  2.0),
+    float3( 1.0, -1.0,  1.0),
+    float3( 1.0, -1.0,  1.0),
+    float3( 1.0,  1.0,  2.0),
+    float3( 1.0,  1.0, -1.0),
+    float3( 1.0, -1.0, -1.0),
+    float3( 1.0, -1.0, -1.0),
+    float3( 1.0,  1.0, -1.0),
+    float3(-1.0,  1.0, -1.0),
+    float3(-1.0, -1.0, -1.0),
+    float3(-1.0, -1.0,  1.0),
+    float3( 1.0, -1.0,  1.0),
+    float3( 1.0, -1.0, -1.0),
+    float3(-1.0, -1.0, -1.0),
+    float3( 1.0,  1.0,  2.0),
+    float3(-1.0,  1.0,  1.0),
+    float3(-1.0,  1.0, -1.0),
+    float3( 1.0,  1.0, -1.0),
+};
+
+static const float3 positions2[] = {
+    float3(-1.0, -1.0, -1.0),
+    float3(-1.0,  2.0, -1.0),
+    float3(-1.0,  1.0,  1.0),
+    float3(-1.0, -1.0,  1.0),
+    float3(-1.0, -1.0,  1.0),
+    float3(-1.0,  1.0,  1.0),
+    float3( 1.0,  1.0,  1.0),
+    float3( 1.0, -1.0,  1.0),
+    float3( 1.0, -1.0,  1.0),
+    float3( 1.0,  1.0,  1.0),
+    float3( 1.0,  1.0, -1.0),
+    float3( 1.0, -1.0, -1.0),
+    float3( 1.0, -1.0, -1.0),
+    float3( 1.0,  1.0, -1.0),
+    float3(-1.0,  2.0, -1.0),
+    float3(-1.0, -1.0, -1.0),
+    float3(-1.0, -1.0,  1.0),
+    float3( 1.0, -1.0,  1.0),
+    float3( 1.0, -1.0, -1.0),
+    float3(-1.0, -1.0, -1.0),
+    float3( 1.0,  1.0,  1.0),
+    float3(-1.0,  1.0,  1.0),
+    float3(-1.0,  2.0, -1.0),
+    float3( 1.0,  1.0, -1.0)
 };
