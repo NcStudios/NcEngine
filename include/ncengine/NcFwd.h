@@ -44,6 +44,7 @@ class ParticleEmitter;
 class SkinnedMesh;
 struct SpotLight;
 class StaticMesh;
+class ShapeKeyAnimator;
 
 namespace config
 {

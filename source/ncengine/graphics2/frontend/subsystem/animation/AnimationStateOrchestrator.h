@@ -29,7 +29,7 @@ concept AnimatableComponent =
 requires(T t)
 {
     {t.GetAnimationController() } -> std::same_as<AnimationController&>;
-    {t.GetMeshContext()} -> std::same_as<const MeshInstanceContext&>;
+    {t.GetMeshContext()} -> std::same_as<MeshInstanceContext&>;
 };
 
 template<AnimatableComponent T>

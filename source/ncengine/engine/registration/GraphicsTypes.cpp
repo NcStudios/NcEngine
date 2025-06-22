@@ -3,6 +3,7 @@
 #include "ncengine/graphics/Light.h"
 #include "ncengine/graphics/Mesh.h"
 #include "ncengine/graphics/ParticleEmitter.h"
+#include "ncengine/graphics/ShapeKeyAnimator.h"
 #include "ncengine/graphics/WireframeRenderer.h"
 
 namespace nc
@@ -80,6 +81,13 @@ void RegisterGraphicsTypes(ecs::ComponentRegistry& registry, size_t maxEntities)
         maxEntities,
         WireframeRendererId,
         "WireframeRenderer"
+    );
+
+    Register<ShapeKeyAnimator>(
+        registry,
+        maxEntities,
+        ShapeKeyAnimatorId,
+        "ShapeKeyAnimator"
     );
 }
 } // namespace nc

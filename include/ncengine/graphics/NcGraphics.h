@@ -40,7 +40,7 @@ struct ProjectSettings;
  *     Depends On: None
  *     Component Access:
  *       Write: Camera, WireframeRenderer
- *       Read: StaticMesh, SkinnedMesh, DirectionalLight, PointLight, SpotLight, Transform
+ *       Read: StaticMesh, SkinnedMesh, DirectionalLight, PointLight, SpotLight, Transform, ShapeKeyAnimator
 */
 struct NcGraphics : public Module
 {

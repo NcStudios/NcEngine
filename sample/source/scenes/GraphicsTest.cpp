@@ -8,6 +8,7 @@
 #include "ncengine/ecs/InvokeFreeComponent.h"
 #include "ncengine/graphics/Light.h"
 #include "ncengine/graphics/Mesh.h"
+#include "ncengine/graphics/ShapeKeyAnimator.h"
 #include "ncengine/graphics/NcGraphics.h"
 #include "ncengine/graphics/SceneNavigationCamera.h"
 #include "ncengine/input/Input.h"
@@ -50,9 +51,74 @@ void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
         .scale = Vector3{1.0f, 1.0f, 1.0f},
         .tag = "Deformable Cube"
     });
+    
+    std::vector<std::vector<nc::Vector3>> frames(2);
+    frames[0] = {
+        nc::Vector3{-1.0f, -1.0f, -1.0f},
+        nc::Vector3{-1.0f,  1.0f, -1.0f},
+        nc::Vector3{-1.0f,  1.0f,  1.0f},
+        nc::Vector3{-1.0f, -1.0f,  1.0f},
+        nc::Vector3{-1.0f, -1.0f,  1.0f},
+        nc::Vector3{-1.0f,  1.0f,  1.0f},
+        nc::Vector3{ 1.0f,  1.0f,  2.0f},
+        nc::Vector3{ 1.0f, -1.0f,  1.0f},
+        nc::Vector3{ 1.0f, -1.0f,  1.0f},
+        nc::Vector3{ 1.0f,  1.0f,  2.0f},
+        nc::Vector3{ 1.0f,  1.0f, -1.0f},
+        nc::Vector3{ 1.0f, -1.0f, -1.0f},
+        nc::Vector3{ 1.0f, -1.0f, -1.0f},
+        nc::Vector3{ 1.0f,  1.0f, -1.0f},
+        nc::Vector3{-1.0f,  1.0f, -1.0f},
+        nc::Vector3{-1.0f, -1.0f, -1.0f},
+        nc::Vector3{-1.0f, -1.0f,  1.0f},
+        nc::Vector3{ 1.0f, -1.0f,  1.0f},
+        nc::Vector3{ 1.0f, -1.0f, -1.0f},
+        nc::Vector3{-1.0f, -1.0f, -1.0f},
+        nc::Vector3{ 1.0f,  1.0f,  2.0f},
+        nc::Vector3{-1.0f,  1.0f,  1.0f},
+        nc::Vector3{-1.0f,  1.0f, -1.0f},
+        nc::Vector3{ 1.0f,  1.0f, -1.0f}
+    };
 
-    world.Emplace<StaticMesh>(deformableCube, mesh::cube, material::green);
-    // world.Emplace<ShapeKeyAnimation>(deformableCube, shapekey_animation::cube);
+    // Second group of 24 points
+    frames[1] = {
+        nc::Vector3{-1.0f, -1.0f, -1.0f},
+        nc::Vector3{-1.0f,  2.0f, -1.0f},
+        nc::Vector3{-1.0f,  1.0f,  1.0f},
+        nc::Vector3{-1.0f, -1.0f,  1.0f},
+        nc::Vector3{-1.0f, -1.0f,  1.0f},
+        nc::Vector3{-1.0f,  1.0f,  1.0f},
+        nc::Vector3{ 1.0f,  1.0f,  1.0f},
+        nc::Vector3{ 1.0f, -1.0f,  1.0f},
+        nc::Vector3{ 1.0f, -1.0f,  1.0f},
+        nc::Vector3{ 1.0f,  1.0f,  1.0f},
+        nc::Vector3{ 1.0f,  1.0f, -1.0f},
+        nc::Vector3{ 1.0f, -1.0f, -1.0f},
+        nc::Vector3{ 1.0f, -1.0f, -1.0f},
+        nc::Vector3{ 1.0f,  1.0f, -1.0f},
+        nc::Vector3{-1.0f,  2.0f, -1.0f},
+        nc::Vector3{-1.0f, -1.0f, -1.0f},
+        nc::Vector3{-1.0f, -1.0f,  1.0f},
+        nc::Vector3{ 1.0f, -1.0f,  1.0f},
+        nc::Vector3{ 1.0f, -1.0f, -1.0f},
+        nc::Vector3{-1.0f, -1.0f, -1.0f},
+        nc::Vector3{ 1.0f,  1.0f,  1.0f},
+        nc::Vector3{-1.0f,  1.0f,  1.0f},
+        nc::Vector3{-1.0f,  2.0f, -1.0f},
+        nc::Vector3{ 1.0f,  1.0f, -1.0f}
+    };
+
+    auto cubeAnim = asset::ShapeKeyAnimation
+    {
+        .name = "Move",
+        .durationInTicks = 416,
+        .ticksPerSecond = 1000,
+        .shapeKeyCount = 2,
+        .positionFrames = frames
+    };
+
+    auto& cubeMesh = world.Emplace<StaticMesh>(deformableCube, mesh::cube, material::green);
+    world.Emplace<ShapeKeyAnimator>(deformableCube, cubeMesh.GetMeshContext(), cubeAnim);
     
     // Ogre
     {

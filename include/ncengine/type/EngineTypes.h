@@ -11,6 +11,7 @@
 #include "ncengine/graphics/Light.h"
 #include "ncengine/graphics/Mesh.h"
 #include "ncengine/graphics/ParticleEmitter.h"
+#include "ncengine/graphics/ShapeKeyAnimator.h"
 #include "ncengine/physics/CollisionListener.h"
 #include "ncengine/physics/RigidBody.h"
 
@@ -39,4 +40,5 @@ REGISTER_TYPE(CollisionListener);
 REGISTER_TYPE(Constraint);
 REGISTER_TYPE(RigidBody);
 REGISTER_TYPE(Shape);
+REGISTER_TYPE(ShapeKeyAnimator);
 } // namespace nc::type
