@@ -8,7 +8,6 @@
 #include "ncengine/ecs/InvokeFreeComponent.h"
 #include "ncengine/graphics/Light.h"
 #include "ncengine/graphics/Mesh.h"
-#include "ncengine/graphics/ShapeKeyAnimator.h"
 #include "ncengine/graphics/NcGraphics.h"
 #include "ncengine/graphics/SceneNavigationCamera.h"
 #include "ncengine/input/Input.h"
@@ -30,6 +29,8 @@ GraphicsTest::GraphicsTest(SampleUI* ui, Vector3 extents)
 
 void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
 {
+    ReloadPrefabs();
+
     m_sampleUI->SetWidgetCallback(nullptr);
     modules.Get<NcGraphics>()->SetSkybox(cube_map::path::night_sky);
 
@@ -108,17 +109,28 @@ void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
         nc::Vector3{ 1.0f,  1.0f, -1.0f}
     };
 
-    auto cubeAnim = asset::ShapeKeyAnimation
+    // auto cubeAnim = asset::ShapeKeyAnimation
+    // {
+    //     .name = "Move",
+    //     .durationInTicks = 416,
+    //     .ticksPerSecond = 1000,
+    //     .shapeKeyCount = 2,
+    //     .positionFrames = frames
+    // };
+
+//     struct ShapeKeyAnimationView
+// {
+//     AssetId id = NullAssetId;
+//     uint32_t index = NullAssetIndex;
+// };
+
+    auto cubeAnimView = asset::ShapeKeyAnimationView
     {
-        .name = "Move",
-        .durationInTicks = 416,
-        .ticksPerSecond = 1000,
-        .shapeKeyCount = 2,
-        .positionFrames = frames
+        1,
+        0
     };
 
-    auto& cubeMesh = world.Emplace<StaticMesh>(deformableCube, mesh::cube, material::green);
-    world.Emplace<ShapeKeyAnimator>(deformableCube, cubeMesh.GetMeshContext(), cubeAnim);
+    world.Emplace<StaticMesh>(deformableCube, mesh::cube, material::green, cubeAnimView.id);
     
     // Ogre
     {
@@ -142,7 +154,7 @@ void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
             mesh::ogre,
             material::ogre,
             animation::ogre_idle
-        ).GetAnimationController();
+        ).GetSkeletalAnimationController();
 
         const auto stopState = animator.AddState(StopAnimation{
             .enterWhen = [](){ return input::KeyDown(input::KeyCode::One);},
@@ -179,7 +191,7 @@ void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
 
         world.Emplace<CollisionListener>(skeleton)
             .onTriggerEnter = [](Entity, Entity other, ecs::Ecs ecs){
-                auto& ogreAnim = ecs.Get<SkinnedMesh>(other).GetAnimationController();
+                auto& ogreAnim = ecs.Get<SkinnedMesh>(other).GetSkeletalAnimationController();
                 ogreAnim.PlayOnceImmediate(animation::ogre_attack);
                 auto& tag = ecs.Get<Tag>(other);
                 GameLog::Log(fmt::format("Collision Enter: {}", tag.value));
@@ -190,7 +202,7 @@ void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
             mesh::skeleton,
             material::skeleton,
             animation::skeleton_idle
-        ).GetAnimationController();
+        ).GetSkeletalAnimationController();
 
         animator.AddState(LoopAnimation{
             .animId = animation::skeleton_walk_forward,

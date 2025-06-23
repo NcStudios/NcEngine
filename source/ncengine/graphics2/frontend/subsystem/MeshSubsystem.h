@@ -43,6 +43,9 @@ class MeshSubsystem
                                  const MaterialInstance& material,
                                  MaterialPassFlags oldPasses);
 
+        void SetInstanceShapeKeyAnimation(MeshInstanceContext& ctx,
+                                          const MaterialInstance& material);
+
         auto BuildState(ecs::ExplicitEcs<Transform> ecs) -> MeshRenderState;
         void OnBeforeSceneLoad();
 

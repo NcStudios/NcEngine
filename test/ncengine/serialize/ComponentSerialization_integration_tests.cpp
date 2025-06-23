@@ -237,7 +237,7 @@ TEST(ComponentSerializationTests, RoundTrip_skinnedMesh_preservesValues)
     const auto actual = nc::DeserializeSkinnedMesh(stream, g_deserializationContext, nullptr);
     EXPECT_EQ(expected.GetEntity(), actual.GetEntity());
     EXPECT_EQ(expectedMesh.id, actual.GetMeshId());
-    EXPECT_EQ(expectedAnimId, actual.GetAnimationController().GetAnimation(nc::RootAnimationState));
+    EXPECT_EQ(expectedAnimId, actual.GetSkeletalAnimationController().GetAnimation(nc::RootAnimationState));
     EXPECT_EQ(expectedMaterialDesc.name, actual.GetMaterial().GetName());
     EXPECT_EQ(expectedMaterialDesc.passes, actual.GetMaterial().GetPasses());
     const auto& actualMaterialProperties = actual.GetMaterial().GetProperties();

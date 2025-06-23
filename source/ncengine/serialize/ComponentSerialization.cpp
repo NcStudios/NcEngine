@@ -126,7 +126,7 @@ void SerializeSkinnedMesh(std::ostream& stream, const SkinnedMesh& out, const Se
     serialize::Serialize(stream, ctx.entityMap.at(out.GetEntity()));
     serialize::Serialize(stream, out.GetMeshId());
     SerializeMaterialDesc(stream, out.GetMaterial());
-    serialize::Serialize(stream, out.GetAnimationController().GetAnimation(RootAnimationState));
+    serialize::Serialize(stream, out.GetSkeletalAnimationController().GetAnimation(RootAnimationState));
 }
 
 auto DeserializeSkinnedMesh(std::istream& stream, const DeserializationContext& ctx, const std::any&) -> SkinnedMesh

@@ -6,8 +6,9 @@ namespace nc
 MeshBase::MeshBase(Entity self,
                    const asset::MeshView& meshAsset,
                    const MaterialDesc& materialDesc,
+                   asset::AssetId rootShapeKeyAnimationId,
                    MeshInstanceType type)
-    : m_ctx{self, meshAsset.id, 0, 0, 0, type},
+    : m_ctx{self, meshAsset.id, std::numeric_limits<uint32_t>::max(), std::numeric_limits<uint32_t>::max(), rootShapeKeyAnimationId == asset::NullAssetId ? std::numeric_limits<uint32_t>::max() : 1u, type},
       m_material{MaterialInstance{materialDesc}}
 {
     s_subsystem->AddInstance(m_ctx, m_material, meshAsset);
@@ -26,6 +27,12 @@ void MeshBase::SetMaterial(const MaterialDesc& materialDesc)
     s_subsystem->SetInstanceMaterial(m_ctx, m_material, previousPasses);
 }
 
+void MeshBase::SetShapeKeyAnimation(uint32_t shapeKeyDataHandle)
+{
+    m_ctx.shapeKeyDataHandle = shapeKeyDataHandle;
+    s_subsystem->SetInstanceShapeKeyAnimation(m_ctx, m_material);
+}
+
 void MeshBase::Release() noexcept
 {
     if (m_ctx.entity.Valid())
@@ -37,7 +44,7 @@ void MeshBase::Release() noexcept
 void SkinnedMesh::SetMesh(const asset::MeshView& meshAsset)
 {
     MeshBase::SetMesh(meshAsset);
-    m_controller.RefreshAnimation();
+    m_skeletalAnimationcontroller.RefreshAnimation();
 }
 } // namespace nc
 

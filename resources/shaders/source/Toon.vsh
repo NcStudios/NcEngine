@@ -1,4 +1,5 @@
 #include "core/PerFrameTypes.fxh"
+#include "core/Util.fxh"
 
 struct VSInput
 {
@@ -38,12 +39,13 @@ void main(in  VSInput VSIn, uint InstanceID : SV_InstanceID, uint VertexID : SV_
 {
     uint transformIndex = StaticInstances[InstanceID].transformIndex;
     uint materialIndex = StaticInstances[InstanceID].materialIndex;
+    uint vertexIndex = VertexID -47288;
 
-    if (StaticInstances[InstanceID].shapeKeyMetadataIndex != -1)
+    if (IsValidShapeKeyIndex(StaticInstances[InstanceID].shapeKeyMetadataIndex))
     {
         float shapeKeyLerpFactor = frac((time) / .416); // 0,1
-        float3 result = lerp(positions1[VertexID], positions2[VertexID], shapeKeyLerpFactor);
-        VSIn.Pos += result;
+        float3 result = lerp(positions1[vertexIndex], positions2[vertexIndex], shapeKeyLerpFactor);
+        VSIn.Pos = result;
     }
 
     float4 TransformedPos = mul(float4(VSIn.Pos, 1.0), Transforms[transformIndex].model);

@@ -84,6 +84,7 @@ cbuffer WireframeProperties
     float4x4 wireframeModelMatrix;
     float4 wireframeColor;
 };
+
 static const float3 positions1[] = {
     float3(-1.0, -1.0, -1.0),
     float3(-1.0,  1.0, -1.0),

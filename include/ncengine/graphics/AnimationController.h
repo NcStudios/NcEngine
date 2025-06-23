@@ -94,7 +94,7 @@ class AnimationController
          * This state is set with the id 'RootState' and cannot not be removed.
          */
         explicit AnimationController(asset::AssetId animationId = asset::NullAssetId,
-                                             float defaultTransitionDuration = 0.3f);
+                                    float defaultTransitionDuration = 0.3f);
 
         /**
          * @name State Machine Functions

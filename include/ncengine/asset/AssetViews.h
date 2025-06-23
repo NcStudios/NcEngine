@@ -99,6 +99,12 @@ struct ShaderView
     std::span<const DescriptorManifest> descriptors;
 };
 
+struct ShapeKeyAnimationView
+{
+    AssetId id = NullAssetId;
+    uint32_t index = NullAssetIndex;
+};
+
 struct SkeletalAnimationView
 {
     AssetId id = NullAssetId;
@@ -127,6 +133,7 @@ concept AssetView = std::same_as<T, AudioClipView>         ||
                     std::same_as<T, MeshColliderView>      ||
                     std::same_as<T, MeshView>              ||
                     std::same_as<T, ShaderView>            ||
+                    std::same_as<T, ShapeKeyAnimationView> ||
                     std::same_as<T, SkeletalAnimationView> ||
                     std::same_as<T, TextureView>;
 } // namespace nc::asset

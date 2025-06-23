@@ -8,14 +8,13 @@
 namespace nc::graphics
 {
 class SkeletalAnimationStorage;
-class ShapeKeyAnimator;
 
 struct InFlightAnimation
 {
-    uint64_t meshId = 0;
-    uint64_t animId = 0;
-    uint64_t blendFromAnimId = 0;
-    uint32_t dataHandle = 0;
+    uint64_t meshId = std::numeric_limits<uint32_t>::max();
+    uint64_t animId =  std::numeric_limits<uint32_t>::max();
+    uint64_t blendFromAnimId =  std::numeric_limits<uint32_t>::max();
+    uint32_t dataHandle =  std::numeric_limits<uint32_t>::max();
     float time = 0.0f;
     float blendFromTime = 0.0f;
     float currentTransitionTime = 0.0f;
@@ -23,12 +22,12 @@ struct InFlightAnimation
     float blendFactor = 0.0f;
 };
 
-// T is any component that has a GetAnimationController() method and a GetMeshContext() method.
+// T is any component that has a GetSkeletalAnimationController() method and a GetMeshContext() method.
 template<typename T>
 concept AnimatableComponent = 
 requires(T t)
 {
-    {t.GetAnimationController() } -> std::same_as<AnimationController&>;
+    {t.GetSkeletalAnimationController() } -> std::same_as<AnimationController&>;
     {t.GetMeshContext()} -> std::same_as<MeshInstanceContext&>;
 };
 
@@ -61,7 +60,7 @@ void AnimationStateOrchestrator<T>::Transition(ecs::ComponentPool<T>& pool, cons
 {
     for (auto& animatable : pool)
     {
-        const auto transition = animatable.GetAnimationController().CheckForTransition();
+        const auto transition = animatable.GetSkeletalAnimationController().CheckForTransition();
         switch (transition.type)
         {
             case AnimationTransitionType::Continue:
@@ -83,7 +82,7 @@ void AnimationStateOrchestrator<T>::NotifyCompleted(ecs::ComponentPool<T>& pool,
 {
     for (const auto entity : completed)
     {
-        pool.Get(entity).GetAnimationController().NotifyCompleteState();
+        pool.Get(entity).GetSkeletalAnimationController().NotifyCompleteState();
     }
 }
 

@@ -125,7 +125,9 @@ void InstanceCache<T>::CommitPendingChanges()
     const auto& stagedRegions = m_stagingArea.GetStagedBatchRegions();
     const auto newBatchCount = stagedRegions.size();
     CommitBatchRegions(stagedRegions);
-    CommitRemovals(m_stagingArea.GetStagedRemovals());
+
+    auto removals = m_stagingArea.GetStagedRemovals();
+    CommitRemovals(removals);
     CommitAdditions(m_stagingArea.GetStagedInstances(), newBatchCount);
     m_stagingArea.ClearStaged();
 }

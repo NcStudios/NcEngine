@@ -18,8 +18,9 @@ void MaterialInstance::Release() noexcept {}
 MeshBase::MeshBase(Entity self,
                    const asset::MeshView& mesh,
                    const MaterialDesc&,
+                   asset::AssetId,
                    MeshInstanceType type)
-    : m_ctx{self, mesh.id, 0, 0, 0, type}
+    : m_ctx{self, mesh.id, std::numeric_limits<uint32_t>::max(), std::numeric_limits<uint32_t>::max(), std::numeric_limits<uint32_t>::max(), type}
 {
 }
 

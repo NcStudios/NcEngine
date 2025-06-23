@@ -17,7 +17,8 @@ auto MakeStaticInstanceData(const nc::MeshInstanceContext& ctx,
 {
     return nc::graphics::StaticMeshInstanceData{
         ctx.transformDataHandle,
-        material.GetHandle()
+        material.GetHandle(),
+        ctx.shapeKeyDataHandle
     };
 }
 
@@ -27,7 +28,8 @@ auto MakeSkinnedInstanceData(const nc::MeshInstanceContext& ctx,
     return nc::graphics::SkinnedMeshInstanceData{
         ctx.transformDataHandle,
         material.GetHandle(),
-        ctx.boneDataHandle
+        ctx.boneDataHandle,
+        ctx.shapeKeyDataHandle
     };
 }
 } // anonymous namespace
@@ -147,6 +149,38 @@ void MeshSubsystem::SetInstanceMaterial(const MeshInstanceContext& ctx,
             ctx.entity.Index(),
             oldPasses,
             material.GetPasses(),
+            ctx.meshId,
+            asset::AcquireMeshAsset(ctx.meshId),
+            instanceData
+        );
+    };
+
+    switch (ctx.type)
+    {
+        case MeshInstanceType::Static:
+        {
+            updateInstance(MakeStaticInstanceData(ctx, material), m_staticMeshInstanceCache);
+            break;
+        }
+        case MeshInstanceType::Skinned:
+        {
+            updateInstance(MakeSkinnedInstanceData(ctx, material), m_skinnedMeshInstanceCache);
+            break;
+        }
+    }
+}
+
+void MeshSubsystem::SetInstanceShapeKeyAnimation(MeshInstanceContext& ctx,
+                                                 const MaterialInstance& material)
+{
+    m_staticMeshInstanceCache.CommitPendingChanges();
+    m_skinnedMeshInstanceCache.CommitPendingChanges();
+    auto updateInstance = [&ctx, &material](const auto& instanceData, auto& cache) {
+        const auto passes = material.GetPasses();
+        cache.GetStagingArea().UpdateInstance(
+            ctx.entity.Index(),
+            passes,
+            passes,
             ctx.meshId,
             asset::AcquireMeshAsset(ctx.meshId),
             instanceData
