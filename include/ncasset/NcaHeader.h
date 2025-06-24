@@ -24,6 +24,7 @@ struct MagicNumber
     static constexpr auto mesh = std::string_view{"MESH"};
     static constexpr auto meshCollider = std::string_view{"CONC"};
     static constexpr auto shader = std::string_view{"SHAD"};
+    static constexpr auto shapeKeyAnimation = std::string_view{"SHAP"};
     static constexpr auto skeletalAnimation = std::string_view{"SKEL"};
     static constexpr auto texture = std::string_view{"TEXT"};
 };

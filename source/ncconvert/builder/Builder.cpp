@@ -93,7 +93,7 @@ auto Builder::Build(asset::AssetType type, const Target& target) -> bool
         {
             NC_ASSERT(target.subResourceName.has_value(), "Shape Key animations must supply a subresource name.");
             const auto asset = m_geometryConverter->ImportShapeKeyAnimation(target.sourcePath, target.subResourceName.value());
-            //convert::Serialize(outFile, asset, asset::currentVersion);
+            convert::Serialize(outFile, asset, asset::currentVersion);
             return true;
         }
         case asset::AssetType::SkeletalAnimation:

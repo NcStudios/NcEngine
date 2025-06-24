@@ -130,7 +130,15 @@ void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
         0
     };
 
-    world.Emplace<StaticMesh>(deformableCube, mesh::cube, material::green, cubeAnimView.id);
+    world.Emplace<StaticMesh>(deformableCube, mesh::cube, material::green);
+
+    const auto deformablePlane = world.Emplace<Entity>({
+        .position = Vector3{1.0f, 2.0f, 4.0f},
+        .rotation = Quaternion::FromEulerAngles(-2.983f, 0.0f, 0.0f),
+        .scale = Vector3{1.0f, 1.0f, 1.0f},
+        .tag = "Deformable Plane"
+    });
+    world.Emplace<StaticMesh>(deformablePlane, mesh::plane, material::blue, cubeAnimView.id);
     
     // Ogre
     {

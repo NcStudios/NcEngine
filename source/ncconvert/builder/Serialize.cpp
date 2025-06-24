@@ -47,6 +47,11 @@ void Serialize(std::ostream& stream, const asset::Mesh& data, uint64_t version)
     SerializeImpl(stream, data, asset::MagicNumber::mesh, version);
 }
 
+void Serialize(std::ostream& stream, const asset::ShapeKeyAnimation& data, uint64_t version)
+{
+    SerializeImpl(stream, data, asset::MagicNumber::shapeKeyAnimation, version);
+}
+
 void Serialize(std::ostream& stream, const asset::SkeletalAnimation& data, uint64_t version)
 {
     SerializeImpl(stream, data, asset::MagicNumber::skeletalAnimation, version);

@@ -162,6 +162,7 @@ const auto g_paths = std::array{
     std::string{path::girl_dress},
     std::string{path::girl_body},
     std::string{path::cube},
+    std::string{path::plane},
 };
 
 nc::asset::MeshView default_plane{};
@@ -179,6 +180,7 @@ nc::asset::MeshView skeleton{};
 nc::asset::MeshView girl_dress{};
 nc::asset::MeshView girl_body{};
 nc::asset::MeshView cube{};
+nc::asset::MeshView plane{};
 
 void Load()
 {
@@ -202,6 +204,7 @@ void Acquire()
     girl_dress = nc::asset::AcquireMeshAsset(path::girl_dress);
     girl_body = nc::asset::AcquireMeshAsset(path::girl_body);
     cube = nc::asset::AcquireMeshAsset(path::cube);
+    plane = nc::asset::AcquireMeshAsset(path::plane);
 }
 
 } // namespace mesh

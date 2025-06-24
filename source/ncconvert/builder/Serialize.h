@@ -22,6 +22,9 @@ void Serialize(std::ostream& stream, const asset::ConvexHull& data, uint64_t ver
 /** @brief Write a Mesh to a binary stream. */
 void Serialize(std::ostream& stream, const asset::Mesh& data, uint64_t version);
 
+/** @brief Write a ShapeKeyAnimation to a binary stream. */
+void Serialize(std::ostream& stream, const asset::ShapeKeyAnimation& data, uint64_t version);
+
 /** @brief Write a SkeletalAnimation to a binary stream. */
 void Serialize(std::ostream& stream, const asset::SkeletalAnimation& data, uint64_t version);
 

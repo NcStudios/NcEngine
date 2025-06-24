@@ -39,12 +39,31 @@ void main(in  VSInput VSIn, uint InstanceID : SV_InstanceID, uint VertexID : SV_
 {
     uint transformIndex = StaticInstances[InstanceID].transformIndex;
     uint materialIndex = StaticInstances[InstanceID].materialIndex;
-    uint vertexIndex = VertexID -47288;
+    uint vertexIndex = VertexID -47300;
 
     if (IsValidShapeKeyIndex(StaticInstances[InstanceID].shapeKeyMetadataIndex))
     {
-        float shapeKeyLerpFactor = frac((time) / .416); // 0,1
-        float3 result = lerp(positions1[vertexIndex], positions2[vertexIndex], shapeKeyLerpFactor);
+        float shapeKeyLerpFactor = frac((time) * 0.1f / .8333); // 0,1
+        float3 a;
+        float3 b;
+
+        if (shapeKeyLerpFactor < 0.333f)
+        {
+            a = positionsPlane0[vertexIndex];
+            b = positionsPlane1[vertexIndex];
+        }
+        else if (shapeKeyLerpFactor < 0.666667f)
+        {
+            a = positionsPlane1[vertexIndex];
+            b = positionsPlane2[vertexIndex];
+        }
+        else
+        {
+            a = positionsPlane2[vertexIndex];
+            b = positionsPlane0[vertexIndex];
+        }
+
+        float3 result = lerp(a, b, shapeKeyLerpFactor);
         VSIn.Pos = result;
     }
 

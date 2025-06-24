@@ -2,7 +2,7 @@
     "globalOptions": {
         "outputDirectory": "./nca",
         "defaultMeshOptions": {
-            "optimizeMesh": false
+            "optimizeMesh": true
         },
         "defaultCubeMapOptions": {
             "textureFormat": "BC3_UNORM_SRGB"
@@ -92,8 +92,16 @@
                     "assetName": "mesh\\cube"
                 }
             ]
+        },
+        {
+            "sourcePath": "raw/model/plane.glb",
+            "assetNames": [
+                {
+                    "subResourceName": "Plane",
+                    "assetName": "mesh\\plane"
+                }
+            ]
         }
-        
     ],
     "mesh-collider": [
         {
@@ -108,6 +116,15 @@
                 {
                     "subResourceName": "Move",
                     "assetName": "shapekey_animation\\cube"
+                }
+            ]
+        },
+        {
+            "sourcePath": "raw/model/plane.glb",
+            "assetNames": [
+                {
+                    "subResourceName": "Y2",
+                    "assetName": "shapekey_animation\\plane"
                 }
             ]
         }

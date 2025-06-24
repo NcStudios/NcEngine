@@ -118,6 +118,7 @@ constexpr auto skeleton = "skeleton.nca";
 constexpr auto girl_dress = "girl/dress.nca";
 constexpr auto girl_body = "girl/body.nca";
 constexpr auto cube = "cube.nca";
+constexpr auto plane = "plane.nca";
 } // namespace path
 
 extern nc::asset::MeshView default_plane;
@@ -135,6 +136,7 @@ extern nc::asset::MeshView skeleton;
 extern nc::asset::MeshView girl_dress;
 extern nc::asset::MeshView girl_body;
 extern nc::asset::MeshView cube;
+extern nc::asset::MeshView plane;
 
 void Load();
 void Acquire();
