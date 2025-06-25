@@ -34,6 +34,9 @@ auto DeserializeConvexHull(std::istream& stream) -> DeserializedResult<ConvexHul
 /** @brief Construct a Mesh from data in a binary stream. */
 auto DeserializeMesh(std::istream& stream) -> DeserializedResult<Mesh>;
 
+/** @brief Construct a ShapeKeyAnimation from data in a binary stream. */
+auto DeserializeShapeKeyAnimation(std::istream& stream) -> DeserializedResult<ShapeKeyAnimation>;
+
 /** @brief Construct a SkeletalAnimation from data in a binary stream. */
 auto DeserializeSkeletalAnimation(std::istream& stream) -> DeserializedResult<SkeletalAnimation>;
 

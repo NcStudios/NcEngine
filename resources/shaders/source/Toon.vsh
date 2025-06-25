@@ -43,6 +43,12 @@ void main(in  VSInput VSIn, uint InstanceID : SV_InstanceID, uint VertexID : SV_
 
     if (IsValidShapeKeyIndex(StaticInstances[InstanceID].shapeKeyMetadataIndex))
     {
+        
+
+
+
+
+
         float shapeKeyLerpFactor = frac((time) * 0.1f / .8333); // 0,1
         float3 a;
         float3 b;

@@ -42,6 +42,12 @@ auto ImportMesh(const std::filesystem::path& ncaPath) -> Mesh;
 /** @brief Read a Mesh asset from a binary stream. */
 auto ImportMesh(std::istream& data) -> Mesh;
 
+/** @brief Read a ShapeKeyAnimation asset from an .nca file. */
+auto ImportShapeKeyAnimation(const std::filesystem::path& ncaPath) -> ShapeKeyAnimation;
+
+/** @brief Read a ShapeKeyAnimation asset from a binary stream. */
+auto ImportShapeKeyAnimation(std::istream& data) -> ShapeKeyAnimation;
+
 /** @brief Read a SkeletalAnimation asset from an .nca file. */
 auto ImportSkeletalAnimation(const std::filesystem::path& ncaPath) -> SkeletalAnimation;
 

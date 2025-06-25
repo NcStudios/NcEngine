@@ -34,6 +34,10 @@ auto GetAssetType(const NcaHeader& header) -> AssetType
     {
         return AssetType::Shader;
     }
+    else if (magicNumber == MagicNumber::shapeKeyAnimation)
+    {
+        return AssetType::ShapeKeyAnimation;
+    }
     else if (magicNumber == MagicNumber::texture)
     {
         return AssetType::Texture;

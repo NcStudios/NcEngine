@@ -587,13 +587,17 @@ In Vertex Shader
 
  /*
 
- struct ShapeKeyAnimation
+struct ShapeKeyAnimation
 {
     std::string name;
-    uint32_t durationInTicks;
-    float ticksPerSecond;
-    uint32_t shapeKeyCount;
-    std::vector<std::vector<Vector3>> positionFrames;
+    float durationInSeconds;
+    uint32_t numVertices; // Width (width must be numVertices * 3)
+    uint32_t numShapeKeys; // Height
+    std::vector<float> positionData = {};
+    // positionData {0.1,  2.0, 1.3,  1.0, 3.5, 1.0}
+    //              { x,   y,   z,    x,   y,   z}
+    // VK_FORMAT_R32_SFLOAT 
+    // 
 };
  */
 
@@ -607,16 +611,21 @@ auto ConvertToShapeKeyAnimation(const aiAnimation* animationClip, const aiMesh* 
 
     auto shapeKeyAnimation = nc::asset::ShapeKeyAnimation{};
     shapeKeyAnimation.name = std::string(animationClip->mName.C_Str());
-    shapeKeyAnimation.durationInTicks = static_cast<uint32_t>(animationClip->mDuration);
-    shapeKeyAnimation.ticksPerSecond = animationClip->mTicksPerSecond == 0 ? 25.0f : static_cast<float>(animationClip->mTicksPerSecond); // Ticks per second is not required to be set in animation software.
-    shapeKeyAnimation.shapeKeyCount = numShapeKeys;
-    shapeKeyAnimation.positionFrames.reserve(numShapeKeys);
+    auto durationInTicks = static_cast<uint32_t>(animationClip->mDuration);
+    auto ticksPerSecond = animationClip->mTicksPerSecond == 0 ? 25.0f : static_cast<float>(animationClip->mTicksPerSecond); // Ticks per second is not required to be set in animation software.
+    shapeKeyAnimation.durationInSeconds = durationInTicks / ticksPerSecond;
+    shapeKeyAnimation.numVertices = mesh->mAnimMeshes[0]->mNumVertices;
+    shapeKeyAnimation.numShapeKeys = numShapeKeys;
+    shapeKeyAnimation.positionData.reserve(mesh->mAnimMeshes[0]->mNumVertices * 3u * numShapeKeys); // Each vertex has 3 floats, flattening nested array of vertices * shapekeys
 
     for (const auto& animMesh : std::span(mesh->mAnimMeshes, mesh->mNumAnimMeshes))
     {
-        auto shapeKey = std::vector<nc::Vector3>{};
-        shapeKey.reserve(animMesh->mNumVertices);
-        shapeKeyAnimation.positionFrames.push_back(std::move(::ConvertToVertices(::ViewVertices(animMesh))));
+        for (const auto& vertex : ::ViewVertices(animMesh))
+        {
+            shapeKeyAnimation.positionData.push_back(vertex.x);
+            shapeKeyAnimation.positionData.push_back(vertex.y);
+            shapeKeyAnimation.positionData.push_back(vertex.z);
+        }
     }
 
     return shapeKeyAnimation;

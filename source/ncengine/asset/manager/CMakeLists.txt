@@ -8,6 +8,7 @@ target_sources(${NC_ENGINE_LIB}
         MeshAssetManager.cpp
         MeshColliderAssetManager.cpp
         ShaderAssetManager.cpp
+        ShapeKeyAnimationAssetManager.cpp
         SkeletalAnimationAssetManager.cpp
         TextureAssetManager.cpp
 )
