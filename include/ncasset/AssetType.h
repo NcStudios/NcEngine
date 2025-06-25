@@ -42,6 +42,7 @@ enum class TextureFormat : uint8_t
     BC1_UNORM_SRGB,   ///< 32-bit unorm sRGB compressed with BC1 (DXT1)
     BC1_UNORM,        ///< 32-bit unorm compressed with BC1 (DXT1)
     BC3_UNORM_SRGB,   ///< 32-bit unorm sRGB compressed with BC3 (DXT5)
-    BC3_UNORM         ///< 32-bit unorm compressed with BC3 (DXT5)
+    BC3_UNORM,        ///< 32-bit unorm compressed with BC3 (DXT5)
+    R32_SFLOAT        ///< 32-bit float
 };
 } // namespace nc::asset

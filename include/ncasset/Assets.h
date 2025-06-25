@@ -213,22 +213,6 @@ XYZ, XYZ, XYZ.... (Num vertices in a mesh)
 
 */ 
 
-
-
-
-struct ShapeKeyAnimation
-{
-    std::string name;
-    float durationInSeconds;
-    uint32_t numVertices; // Width (width must be numVertices * 3)
-    uint32_t numShapeKeys; // Height
-    std::vector<float> positionData = {};
-    // positionData {0.1,  2.0, 1.3,  1.0, 3.5, 1.0}
-    //              { x,   y,   z,    x,   y,   z}
-    // VK_FORMAT_R32_SFLOAT 
-    // 
-};
-
 struct TextureSubResource
 {
     uint32_t width = 0u;
@@ -246,6 +230,17 @@ struct Texture
     uint32_t numChannels = 4u;
     std::vector<T> pixelData = {};
     std::vector<TextureSubResource> mipmaps = {};
+};
+
+struct ShapeKeyAnimation
+{
+    std::string name;
+    float durationInSeconds;
+    Texture<float> animation;
+    // positionData {0.1,  2.0, 1.3,  1.0, 3.5, 1.0}
+    //              { x,   y,   z,    x,   y,   z}
+    // VK_FORMAT_R32_SFLOAT 
+    // 
 };
 
 struct CubeMap

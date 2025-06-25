@@ -67,7 +67,6 @@ struct ShapeKeyAnimationWithId
     TextureWithId<float> animation;
     uint32_t durationInTicks;
     float ticksPerSecond;
-    size_t id;
 };
 
 /** @brief Event data for shape key animation load and unload operations. */

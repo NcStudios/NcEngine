@@ -6,6 +6,7 @@
 #include "utility/Log.h"
 
 #include "ncasset/Assets.h"
+#include "ncasset/AssetType.h"
 #include "ncjolt/JoltApi.h"
 #include "ncjolt/ShapeUtility.h"
 #include "ncjolt/Profiler.inl"
@@ -591,10 +592,8 @@ struct ShapeKeyAnimation
 {
     std::string name;
     float durationInSeconds;
-    uint32_t numVertices; // Width (width must be numVertices * 3)
-    uint32_t numShapeKeys; // Height
-    Texture positionData = {};
-    // positionData {0.1,  2.0, 1.3,  1.0, 3.5, 1.0}
+    Texture animation = {};
+    // animation {0.1,  2.0, 1.3,  1.0, 3.5, 1.0}
     //              { x,   y,   z,    x,   y,   z}
     // VK_FORMAT_R32_SFLOAT 
     // 
@@ -625,19 +624,27 @@ auto ConvertToShapeKeyAnimation(const aiAnimation* animationClip, const aiMesh* 
     auto durationInTicks = static_cast<uint32_t>(animationClip->mDuration);
     auto ticksPerSecond = animationClip->mTicksPerSecond == 0 ? 25.0f : static_cast<float>(animationClip->mTicksPerSecond); // Ticks per second is not required to be set in animation software.
     shapeKeyAnimation.durationInSeconds = durationInTicks / ticksPerSecond;
-    shapeKeyAnimation.numVertices = mesh->mAnimMeshes[0]->mNumVertices;
-    shapeKeyAnimation.numShapeKeys = numShapeKeys;
-    shapeKeyAnimation.positionData.reserve(mesh->mAnimMeshes[0]->mNumVertices * 3u * numShapeKeys); // Each vertex has 3 floats, flattening nested array of vertices * shapekeys
+    auto positionData = std::vector<float>{};
+    positionData.reserve(mesh->mAnimMeshes[0]->mNumVertices * 3u * numShapeKeys); // Each vertex has 3 floats, flattening nested array of vertices * shapekeys
 
     for (const auto& animMesh : std::span(mesh->mAnimMeshes, mesh->mNumAnimMeshes))
     {
         for (const auto& vertex : ::ViewVertices(animMesh))
         {
-            shapeKeyAnimation.positionData.push_back(vertex.x);
-            shapeKeyAnimation.positionData.push_back(vertex.y);
-            shapeKeyAnimation.positionData.push_back(vertex.z);
+            positionData.push_back(vertex.x);
+            positionData.push_back(vertex.y);
+            positionData.push_back(vertex.z);
         }
     }
+
+    shapeKeyAnimation.animation = nc::asset::Texture<float>
+    {
+        .format = nc::asset::TextureFormat::R32_SFLOAT,
+        .width = mesh->mAnimMeshes[0]->mNumVertices * 3u, // Each vertex has 3 floats
+        .height = numShapeKeys,
+        .numChannels = 1u, // Storing everything in R
+        .pixelData = std::move(positionData)
+    };
 
     return shapeKeyAnimation;
 }
