@@ -66,6 +66,16 @@ auto AcquireTextureAsset(const std::string& path) -> TextureView;
 auto AcquireTextureAsset(AssetId id) -> TextureView;
 
 /** Supported file types: .nca 
+ *  @note Unloading shape key animations invalidates all ShapeKeyAnimations. It is intended
+ *  to be done on scene change. */
+bool LoadShapeKeyAnimationAsset(const std::string& path);
+bool LoadShapeKeyAnimationAssets(std::span<const std::string> paths);
+bool UnloadShapeKeyAnimationAsset(const std::string& path);
+void UnloadAllShapeKeyAnimationAssets();
+auto AcquireShapeKeyAnimationAsset(const std::string& path) -> ShapeKeyAnimationView;
+auto AcquireShapeKeyAnimationAsset(AssetId id) -> ShapeKeyAnimationView;
+
+/** Supported file types: .nca 
  *  @note Unloading skeletal animations invalidates all SkeletalAnimations. It is intended
  *  to be done on scene change. */
 bool LoadSkeletalAnimationAsset(const std::string& path);

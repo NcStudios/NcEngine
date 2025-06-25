@@ -153,6 +153,37 @@ auto AcquireMeshAsset(AssetId id) -> MeshView
     return AssetService<MeshView>::Get()->Acquire(id);
 }
 
+bool LoadShapeKeyAnimationAsset(const std::string& path)
+{
+    return AssetService<ShapeKeyAnimationView>::Get()->Load(path);
+}
+
+bool LoadShapeKeyAnimationAssets(std::span<const std::string> paths)
+{
+    return AssetService<ShapeKeyAnimationView>::Get()->Load(paths);
+}
+
+bool UnloadShapeKeyAnimationAsset(const std::string& path)
+{
+    return AssetService<ShapeKeyAnimationView>::Get()->Unload(path);
+}
+
+void UnloadAllShapeKeyAnimationAssets()
+{
+    return AssetService<ShapeKeyAnimationView>::Get()->UnloadAll();
+}
+
+auto AcquireShapeKeyAnimationAsset(const std::string& path) -> ShapeKeyAnimationView
+{
+    return AssetService<ShapeKeyAnimationView>::Get()->Acquire(path);
+}
+
+auto AcquireShapeKeyAnimationAsset(AssetId id) -> ShapeKeyAnimationView
+{
+    return AssetService<ShapeKeyAnimationView>::Get()->Acquire(id);
+}
+
+
 bool LoadSkeletalAnimationAsset(const std::string& path)
 {
     return AssetService<SkeletalAnimationView>::Get()->Load(path);

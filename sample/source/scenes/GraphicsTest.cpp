@@ -27,9 +27,14 @@ GraphicsTest::GraphicsTest(SampleUI* ui, Vector3 extents)
 {
 }
 
+const auto g_paths = std::array{
+    std::string{"shapekey_animation\\plane"}
+};
+
 void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
 {
     ReloadPrefabs();
+    nc::asset::LoadShapeKeyAnimationAssets(g_paths);
 
     m_sampleUI->SetWidgetCallback(nullptr);
     modules.Get<NcGraphics>()->SetSkybox(cube_map::path::night_sky);

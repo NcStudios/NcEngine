@@ -16,20 +16,6 @@ ShapeKeyAnimationAssetManager::ShapeKeyAnimationAssetManager(const std::string& 
 {
 }
 
-/**
- *   struct ShapeKeyAnimation
-{
-    std::string name;
-    uint32_t durationInTicks;
-    float ticksPerSecond;
-    uint32_t shapeKeyCount;
-    std::vector<std::vector<Vector3>> positionFrames;
-};
-
- */
-
-
-
 auto ShapeKeyAnimationAssetManager::Load(const std::string& path) -> bool
 {
     //auto previousTableSize = m_table.size();
