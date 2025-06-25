@@ -16,7 +16,7 @@ namespace
 {
 const auto supportedFileExtensions = std::array<std::string, 4>{".png", ".jpg", ".jpeg", ".bmp"};
 
-auto ReadTextureFromAtlas(const nc::asset::Texture& atlas, unsigned char* dest, nc::convert::SubTexturePos pos, uint32_t sideLength) -> size_t
+auto ReadTextureFromAtlas(const nc::asset::Texture<unsigned char>& atlas, unsigned char* dest, nc::convert::SubTexturePos pos, uint32_t sideLength) -> size_t
 {
     const auto source = atlas.pixelData.data();
     const auto xByteOffset = pos.x * atlas.numChannels;
@@ -35,7 +35,7 @@ auto ReadTextureFromAtlas(const nc::asset::Texture& atlas, unsigned char* dest, 
 
 auto MakePrimaryTexture(nc::convert::Image& image,
                         nc::asset::TextureFormat format,
-                        bool useCompression) -> nc::asset::Texture
+                        bool useCompression) -> nc::asset::Texture<unsigned char>
 {
     auto subresource = [&](){
         if (useCompression)
@@ -52,7 +52,7 @@ auto MakePrimaryTexture(nc::convert::Image& image,
         return image.MakeTextureSubResource();
     }();
 
-    return nc::asset::Texture{
+    return nc::asset::Texture<unsigned char>{
         .format = format,
         .width = subresource.width,
         .height = subresource.height,
@@ -125,7 +125,7 @@ auto TextureConverter::ImportCubeMap(const std::filesystem::path& path,
 
 auto TextureConverter::ImportTexture(const std::filesystem::path& path,
                                      asset::TextureFormat format,
-                                     bool generateMips) -> asset::Texture
+                                     bool generateMips) -> asset::Texture<unsigned char>
 {
     if (!ValidateInputFileExtension(path, supportedFileExtensions))
     {

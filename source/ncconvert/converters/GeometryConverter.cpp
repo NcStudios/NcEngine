@@ -593,11 +593,22 @@ struct ShapeKeyAnimation
     float durationInSeconds;
     uint32_t numVertices; // Width (width must be numVertices * 3)
     uint32_t numShapeKeys; // Height
-    std::vector<float> positionData = {};
+    Texture positionData = {};
     // positionData {0.1,  2.0, 1.3,  1.0, 3.5, 1.0}
     //              { x,   y,   z,    x,   y,   z}
     // VK_FORMAT_R32_SFLOAT 
     // 
+};
+
+struct Texture
+{
+
+    TextureFormat format = TextureFormat::UNKNOWN;
+    uint32_t width = 0u;
+    uint32_t height = 0u;
+    uint32_t numChannels = 4u;
+    std::vector<unsigned char> pixelData = {};
+    std::vector<TextureSubResource> mipmaps = {};
 };
  */
 

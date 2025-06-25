@@ -324,7 +324,7 @@ TEST(AssetSerializationTest, Texture_roundTrip_succeeds)
 
     auto stream = std::stringstream{std::ios::in | std::ios::out | std::ios::binary};
     nc::convert::Serialize(stream, expectedAsset, version);
-    const auto [actualHeader, actualAsset] = nc::asset::DeserializeTexture(stream);
+    const auto [actualHeader, actualAsset] = nc::asset::DeserializeRgbaTexture(stream);
 
     EXPECT_STREQ("TEXT", actualHeader.magicNumber);
     EXPECT_EQ(version, actualHeader.version);
@@ -573,9 +573,9 @@ TEST(AssetSerializationTest, DeserializeSkeletalAnimation_unsupportedVersion_thr
 
 TEST(AssetSerializationTest, DeserializeTexture_unsupportedVersion_throws)
 {
-    const auto dummyAsset = nc::asset::Texture{};
+    const auto dummyAsset = nc::asset::Texture<unsigned char>{};
     const auto unsupportedVersion = 1ull;
     auto stream = std::stringstream{std::ios::in | std::ios::out | std::ios::binary};
     nc::convert::Serialize(stream, dummyAsset, unsupportedVersion);
-    EXPECT_THROW(nc::asset::DeserializeTexture(stream), nc::NcError);
+    EXPECT_THROW(nc::asset::DeserializeRgbaTexture(stream), nc::NcError);
 }

@@ -57,7 +57,12 @@ void Serialize(std::ostream& stream, const asset::SkeletalAnimation& data, uint6
     SerializeImpl(stream, data, asset::MagicNumber::skeletalAnimation, version);
 }
 
-void Serialize(std::ostream& stream, const asset::Texture& data, uint64_t version)
+void Serialize(std::ostream& stream, const asset::Texture<unsigned char>& data, uint64_t version)
+{
+    SerializeImpl(stream, data, asset::MagicNumber::texture, version);
+}
+
+void Serialize(std::ostream& stream, const asset::Texture<float>& data, uint64_t version)
 {
     SerializeImpl(stream, data, asset::MagicNumber::texture, version);
 }

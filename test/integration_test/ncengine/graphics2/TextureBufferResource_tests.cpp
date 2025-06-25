@@ -57,7 +57,7 @@ class TextureBufferResourceTest : public DiligentEngineFixture
 };
 
 const auto imageTexture1 = nc::asset::TextureWithId{
-    .texture = nc::asset::Texture{
+    .texture = nc::asset::Texture<unsigned char>{
         .format = nc::asset::TextureFormat::RGBA8_UNORM_SRGB,
         .width = 1,
         .height = 1,
@@ -67,7 +67,7 @@ const auto imageTexture1 = nc::asset::TextureWithId{
 };
 
 const auto imageTexture2 = nc::asset::TextureWithId{
-    .texture = nc::asset::Texture{
+    .texture = nc::asset::Texture<unsigned char>{
         .format = nc::asset::TextureFormat::RGBA8_UNORM_SRGB,
         .width = 2,
         .height = 2,
@@ -80,7 +80,7 @@ const auto imageTexture2 = nc::asset::TextureWithId{
 };
 
 const auto normalTexture = nc::asset::TextureWithId{
-    .texture = nc::asset::Texture{
+    .texture = nc::asset::Texture<unsigned char>{
         .format = nc::asset::TextureFormat::RGBA8_UNORM,
         .width = 1,
         .height = 2,

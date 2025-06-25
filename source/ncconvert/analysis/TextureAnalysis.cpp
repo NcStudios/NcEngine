@@ -5,7 +5,7 @@
 
 namespace nc::convert
 {
-auto GetCubeMapAtlasLayout(const nc::asset::Texture& texture) -> CubeMapAtlasLayout
+auto GetCubeMapAtlasLayout(const nc::asset::Texture<unsigned char>& texture) -> CubeMapAtlasLayout
 {
     if (texture.height * 6u == texture.width)
     {
@@ -29,7 +29,7 @@ auto GetCubeMapAtlasLayout(const nc::asset::Texture& texture) -> CubeMapAtlasLay
     }
 }
 
-auto GetSubTextureInfo(const nc::asset::Texture& texture) -> CubeMapAtlasSubTextureInfo
+auto GetSubTextureInfo(const nc::asset::Texture<unsigned char>& texture) -> CubeMapAtlasSubTextureInfo
 {
     switch(GetCubeMapAtlasLayout(texture))
     {

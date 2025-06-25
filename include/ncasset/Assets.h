@@ -236,6 +236,7 @@ struct TextureSubResource
     std::vector<unsigned char> pixelData = {};
 };
 
+template<typename T>
 struct Texture
 {
 
@@ -243,7 +244,7 @@ struct Texture
     uint32_t width = 0u;
     uint32_t height = 0u;
     uint32_t numChannels = 4u;
-    std::vector<unsigned char> pixelData = {};
+    std::vector<T> pixelData = {};
     std::vector<TextureSubResource> mipmaps = {};
 };
 

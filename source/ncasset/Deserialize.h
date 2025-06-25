@@ -41,5 +41,8 @@ auto DeserializeShapeKeyAnimation(std::istream& stream) -> DeserializedResult<Sh
 auto DeserializeSkeletalAnimation(std::istream& stream) -> DeserializedResult<SkeletalAnimation>;
 
 /** @brief Construct a Texture from data in a binary stream. */
-auto DeserializeTexture(std::istream& stream) -> DeserializedResult<Texture>;
+auto DeserializeRgbaTexture(std::istream& stream) -> DeserializedResult<Texture<unsigned char>>;
+
+/** @brief Construct a Texture from data in a binary stream. */
+auto DeserializeFloatTexture(std::istream& stream) -> DeserializedResult<Texture<float>>;
 } // nc::asset

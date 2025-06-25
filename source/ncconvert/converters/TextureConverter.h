@@ -14,6 +14,6 @@ class TextureConverter
 
         auto ImportTexture(const std::filesystem::path& path,
                            asset::TextureFormat format,
-                           bool generateMips) -> asset::Texture;
+                           bool generateMips) -> asset::Texture<unsigned char>;
 };
 } // namespace nc::convert

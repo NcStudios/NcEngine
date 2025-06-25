@@ -29,5 +29,8 @@ void Serialize(std::ostream& stream, const asset::ShapeKeyAnimation& data, uint6
 void Serialize(std::ostream& stream, const asset::SkeletalAnimation& data, uint64_t version);
 
 /** @brief Write a Texture to a binary stream. */
-void Serialize(std::ostream& stream, const asset::Texture& data, uint64_t version);
+void Serialize(std::ostream& stream, const asset::Texture<unsigned char>& data, uint64_t version);
+
+/** @brief Write a Texture to a binary stream. */
+void Serialize(std::ostream& stream, const asset::Texture<float>& data, uint64_t version);
 } // nc::convert

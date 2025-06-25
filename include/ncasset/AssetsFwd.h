@@ -17,6 +17,7 @@ struct MeshCollider;
 struct MeshVertex;
 struct ShapeKeyAnimation;
 struct SkeletalAnimation;
+template<typename T>
 struct Texture;
 struct TextureSubResource;
 

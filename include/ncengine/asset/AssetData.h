@@ -53,10 +53,17 @@ struct MeshUpdateEventData
     std::span<const uint32_t> indices;
 };
 
+/** @brief A data/id pair for a loaded texture. */
+struct TextureWithId
+{
+    Texture<unsigned char> texture;
+    size_t id;
+};
+
 /** @brief A data/id pair for a loaded shape key animation. */
 struct ShapeKeyAnimationWithId
 {
-    Texture animation;
+    TextureWithId animation;
     uint32_t durationInTicks;
     float ticksPerSecond;
     size_t id;
@@ -78,13 +85,6 @@ struct SkeletalAnimationUpdateEventData
     std::span<const std::string> ids;
     std::span<const SkeletalAnimation> data;
     UpdateAction updateAction;
-};
-
-/** @brief A data/id pair for a loaded texture. */
-struct TextureWithId
-{
-    Texture texture;
-    size_t id;
 };
 
 /** @brief Event data for texture load and unload operations. */

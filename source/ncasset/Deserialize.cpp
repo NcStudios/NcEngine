@@ -92,8 +92,13 @@ auto DeserializeSkeletalAnimation(std::istream& stream) -> DeserializedResult<Sk
     return DeserializeImpl<SkeletalAnimation>(stream, MagicNumber::skeletalAnimation);
 }
 
-auto DeserializeTexture(std::istream& stream) -> DeserializedResult<Texture>
+auto DeserializeRgbaTexture(std::istream& stream) -> DeserializedResult<Texture<unsigned char>>
 {
-    return DeserializeImpl<Texture>(stream, MagicNumber::texture);
+    return DeserializeImpl<Texture<unsigned char>>(stream, MagicNumber::texture);
+}
+
+auto DeserializeFloatTexture(std::istream& stream) -> DeserializedResult<Texture<float>>
+{
+    return DeserializeImpl<Texture<float>>(stream, MagicNumber::texture);
 }
 } // namespace nc::asset

@@ -122,13 +122,13 @@ auto ImportSkeletalAnimation(const std::filesystem::path& ncaPath) -> SkeletalAn
     return ImportSkeletalAnimation(file);
 }
 
-auto ImportTexture(std::istream& data) -> Texture
+auto ImportTexture(std::istream& data) -> Texture<unsigned char>
 {
-    auto [header, asset] = DeserializeTexture(data);
+    auto [header, asset] = DeserializeRgbaTexture(data);
     return asset;
 }
 
-auto ImportTexture(const std::filesystem::path& ncaPath) -> Texture
+auto ImportTexture(const std::filesystem::path& ncaPath) -> Texture<unsigned char>
 {
     auto file = ::OpenNca(ncaPath);
     return ImportTexture(file);

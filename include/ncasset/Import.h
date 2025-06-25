@@ -55,10 +55,10 @@ auto ImportSkeletalAnimation(const std::filesystem::path& ncaPath) -> SkeletalAn
 auto ImportSkeletalAnimation(std::istream& data) -> SkeletalAnimation;
 
 /** @brief Read a Texture asset from an .nca file. */
-auto ImportTexture(const std::filesystem::path& ncaPath) -> Texture;
+auto ImportTexture(const std::filesystem::path& ncaPath) -> Texture<unsigned char>;
 
 /** @brief Read a Texture asset from a binary stream */
-auto ImportTexture(std::istream& data) -> Texture;
+auto ImportTexture(std::istream& data) -> Texture<unsigned char>;
 
 /** @brief Read the header from an .nca file. */
 auto ImportNcaHeader(const std::filesystem::path& ncaPath) -> NcaHeader;

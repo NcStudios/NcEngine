@@ -7,6 +7,7 @@ namespace nc
 {
 namespace asset
 {
+template<typename T>
 struct Texture;
 } // namespace asset
 
@@ -37,8 +38,8 @@ struct CubeMapAtlasSubTextureInfo
     SubTexturePos leftPosition;
 };
 
-auto GetCubeMapAtlasLayout(const nc::asset::Texture& texture) -> CubeMapAtlasLayout;
-auto GetSubTextureInfo(const nc::asset::Texture& texture) -> CubeMapAtlasSubTextureInfo;
+auto GetCubeMapAtlasLayout(const nc::asset::Texture<unsigned char>& texture) -> CubeMapAtlasLayout;
+auto GetSubTextureInfo(const nc::asset::Texture<unsigned char>& texture) -> CubeMapAtlasSubTextureInfo;
 auto GetMipLevels(uint32_t width, uint32_t height, uint32_t minDimension = 1u) -> uint32_t;
 } // namespace convert
 } // namespace nc

@@ -128,7 +128,7 @@ auto ToTextureFormat(nc::asset::TextureFormat format) -> Diligent::TEXTURE_FORMA
     std::unreachable();
 }
 
-auto ToTextureDesc(const nc::asset::Texture& texture) -> Diligent::TextureDesc
+auto ToTextureDesc(const nc::asset::Texture<unsigned char>& texture) -> Diligent::TextureDesc
 {
     auto texDesc = Diligent::TextureDesc{
         "",
@@ -175,7 +175,7 @@ auto ToTextureCubeDesc(const nc::graphics::CubeSinkBufferResourceDesc& desc,
     return textureDesc;
 }
 
-auto ToTextureSubResData(const nc::asset::Texture& texture) -> std::vector<Diligent::TextureSubResData>
+auto ToTextureSubResData(const nc::asset::Texture<unsigned char>& texture) -> std::vector<Diligent::TextureSubResData>
 {
     const auto mipLevels = static_cast<uint32_t>(1 + texture.mipmaps.size());
     auto subResources = std::vector<Diligent::TextureSubResData>{};
