@@ -4,7 +4,7 @@
 
 namespace nc::asset
 {
-TextureUpdateEventData::TextureUpdateEventData(UpdateAction updateAction_, std::span<const TextureWithId> data_)
+TextureUpdateEventData::TextureUpdateEventData(UpdateAction updateAction_, std::span<const TextureWithId<unsigned char>> data_)
     : data{data_},
       updateAction{updateAction_}
 {

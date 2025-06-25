@@ -86,11 +86,42 @@ auto GetVariable(const ResourceDesc& desc, Diligent::IShaderResourceBinding* srb
 }
 
 auto ToTextureFormat(nc::asset::TextureFormat format) -> Diligent::TEXTURE_FORMAT;
-auto ToTextureDesc(const nc::asset::Texture<unsigned char>& texture) -> Diligent::TextureDesc;
 auto ToTextureCubeDesc(const nc::asset::CubeMap& desc) -> Diligent::TextureDesc;
 auto ToTextureCubeDesc(const nc::graphics::CubeSinkBufferResourceDesc& desc, uint32_t width, uint32_t height) -> Diligent::TextureDesc;
-auto ToTextureSubResData(const nc::asset::Texture<unsigned char>& texture) -> std::vector<Diligent::TextureSubResData>;
 void SetArrayRegion(Diligent::IShaderResourceVariable* variable, std::span<Diligent::IDeviceObject*> views, size_t offset, size_t count);
 void InitializeCubeArray(Diligent::IDeviceContext& context, Diligent::IRenderDevice& device, Diligent::IShaderResourceVariable* variable, uint32_t arraySize, bool transition);
 void InitializeArray(Diligent::IDeviceContext& context, Diligent::IRenderDevice& device, Diligent::IShaderResourceVariable* variable, uint32_t arraySize, bool transition = true);
+
+template <typename T>
+auto ToTextureSubResData(const nc::asset::Texture<T>& texture) -> std::vector<Diligent::TextureSubResData>
+{
+    const auto mipLevels = static_cast<uint32_t>(1 + texture.mipmaps.size());
+    auto subResources = std::vector<Diligent::TextureSubResData>{};
+    subResources.reserve(mipLevels);
+    subResources.emplace_back(texture.pixelData.data(), texture.width * texture.numChannels);
+    for (const auto& subResource : texture.mipmaps)
+    {
+        subResources.emplace_back(subResource.pixelData.data(), subResource.width * texture.numChannels);
+    }
+
+    return subResources;
+}
+
+template <typename T>
+auto ToTextureDesc(const nc::asset::Texture<T>& texture) -> Diligent::TextureDesc
+{
+    auto texDesc = Diligent::TextureDesc{
+        "",
+        Diligent::RESOURCE_DIMENSION::RESOURCE_DIM_TEX_2D,
+        texture.width,
+        texture.height,
+        1,
+        ToTextureFormat(texture.format)
+    };
+
+    texDesc.MipLevels = static_cast<uint32_t>(texture.mipmaps.size() + 1);
+    texDesc.BindFlags = Diligent::BIND_FLAGS::BIND_SHADER_RESOURCE;
+    return texDesc;
+}
+
 } // namespace nc::graphics7

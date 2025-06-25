@@ -8,6 +8,7 @@
 
 namespace nc::asset
 {
+template <typename T>
 struct TextureWithId;
 struct TextureUpdateEventData;
 

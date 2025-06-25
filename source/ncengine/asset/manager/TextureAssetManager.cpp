@@ -33,7 +33,7 @@ auto TextureAssetManager::Load(const std::string& path) -> bool
     m_table.emplace(path);
     m_onUpdate.Emit(asset::TextureUpdateEventData{
         asset::UpdateAction::Load,
-        std::span<const asset::TextureWithId>{&texture, 1}
+        std::span<const asset::TextureWithId<unsigned char>>{&texture, 1}
     });
 
     return true;
@@ -46,7 +46,7 @@ auto TextureAssetManager::Load(std::span<const std::string> paths) -> bool
         throw NcError("Cannot exceed max texture count.");
     }
 
-    auto textures = std::vector<TextureWithId>{};
+    auto textures = std::vector<TextureWithId<unsigned char>>{};
     textures.reserve(paths.size());
 
     for (const auto& path : paths)
@@ -65,7 +65,7 @@ auto TextureAssetManager::Load(std::span<const std::string> paths) -> bool
     {
         m_onUpdate.Emit(TextureUpdateEventData{
             UpdateAction::Load,
-            std::span<const TextureWithId>{textures}
+            std::span<const TextureWithId<unsigned char>>{textures}
         });
     }
 
@@ -79,7 +79,7 @@ auto TextureAssetManager::Unload(const std::string& path) -> bool
 
     m_onUpdate.Emit(TextureUpdateEventData{
         UpdateAction::Unload,
-        std::span<const TextureWithId>{}
+        std::span<const TextureWithId<unsigned char>>{}
     });
 
     return true;

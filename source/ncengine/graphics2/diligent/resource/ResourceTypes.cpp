@@ -128,22 +128,6 @@ auto ToTextureFormat(nc::asset::TextureFormat format) -> Diligent::TEXTURE_FORMA
     std::unreachable();
 }
 
-auto ToTextureDesc(const nc::asset::Texture<unsigned char>& texture) -> Diligent::TextureDesc
-{
-    auto texDesc = Diligent::TextureDesc{
-        "",
-        Diligent::RESOURCE_DIMENSION::RESOURCE_DIM_TEX_2D,
-        texture.width,
-        texture.height,
-        1,
-        ToTextureFormat(texture.format)
-    };
-
-    texDesc.MipLevels = static_cast<uint32_t>(texture.mipmaps.size() + 1);
-    texDesc.BindFlags = Diligent::BIND_FLAGS::BIND_SHADER_RESOURCE;
-    return texDesc;
-}
-
 auto ToTextureCubeDesc(const nc::asset::CubeMap& desc) -> Diligent::TextureDesc
 {
     Diligent::TextureDesc textureDesc{};
@@ -173,20 +157,6 @@ auto ToTextureCubeDesc(const nc::graphics::CubeSinkBufferResourceDesc& desc,
     textureDesc.ClearValue = desc.clearValue;
     textureDesc.SampleCount = 1;
     return textureDesc;
-}
-
-auto ToTextureSubResData(const nc::asset::Texture<unsigned char>& texture) -> std::vector<Diligent::TextureSubResData>
-{
-    const auto mipLevels = static_cast<uint32_t>(1 + texture.mipmaps.size());
-    auto subResources = std::vector<Diligent::TextureSubResData>{};
-    subResources.reserve(mipLevels);
-    subResources.emplace_back(texture.pixelData.data(), texture.width * texture.numChannels);
-    for (const auto& subResource : texture.mipmaps)
-    {
-        subResources.emplace_back(subResource.pixelData.data(), subResource.width * texture.numChannels);
-    }
-
-    return subResources;
 }
 
 void SetArrayRegion(Diligent::IShaderResourceVariable* variable, std::span<Diligent::IDeviceObject*> views, size_t offset, size_t count)

@@ -56,7 +56,7 @@ class TextureBufferResourceTest : public DiligentEngineFixture
         }
 };
 
-const auto imageTexture1 = nc::asset::TextureWithId{
+const auto imageTexture1 = nc::asset::TextureWithId<unsigned char>{
     .texture = nc::asset::Texture<unsigned char>{
         .format = nc::asset::TextureFormat::RGBA8_UNORM_SRGB,
         .width = 1,
@@ -66,7 +66,7 @@ const auto imageTexture1 = nc::asset::TextureWithId{
     .id = 0
 };
 
-const auto imageTexture2 = nc::asset::TextureWithId{
+const auto imageTexture2 = nc::asset::TextureWithId<unsigned char>{
     .texture = nc::asset::Texture<unsigned char>{
         .format = nc::asset::TextureFormat::RGBA8_UNORM_SRGB,
         .width = 2,
@@ -79,7 +79,7 @@ const auto imageTexture2 = nc::asset::TextureWithId{
     .id = 1
 };
 
-const auto normalTexture = nc::asset::TextureWithId{
+const auto normalTexture = nc::asset::TextureWithId<unsigned char>{
     .texture = nc::asset::Texture<unsigned char>{
         .format = nc::asset::TextureFormat::RGBA8_UNORM,
         .width = 1,
@@ -142,17 +142,17 @@ TEST_F(TextureBufferResourceTest, Load_existingTextures_appendsToArray)
 TEST_F(TextureBufferResourceTest, Load_exceedsMaxTextures_throws)
 {
     const auto textures = std::array{imageTexture1, imageTexture2, normalTexture};
-    uut->Load(textures, engine->GetContext(), engine->GetDevice());
-    EXPECT_THROW(uut->Load(textures, engine->GetContext(), engine->GetDevice()), std::exception);
+    uut->Load<unsigned char>(textures, engine->GetContext(), engine->GetDevice());
+    EXPECT_THROW(uut->Load<unsigned char>(textures, engine->GetContext(), engine->GetDevice()), std::exception);
 }
 
 TEST_F(TextureBufferResourceTest, Load_afterUnload_overwritesExisting)
 {
     auto initialTextures = std::array{imageTexture1, imageTexture2};
     auto overwriteTextures = std::array{normalTexture};
-    uut->Load(initialTextures, engine->GetContext(), engine->GetDevice());
+    uut->Load<unsigned char>(initialTextures, engine->GetContext(), engine->GetDevice());
     uut->Unload();
-    uut->Load(overwriteTextures, engine->GetContext(), engine->GetDevice());
+    uut->Load<unsigned char>(overwriteTextures, engine->GetContext(), engine->GetDevice());
 
     auto overwrittenView = GetRenderTargetView(0);
     ASSERT_NE(overwrittenView, nullptr);
