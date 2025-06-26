@@ -183,7 +183,6 @@ auto AcquireShapeKeyAnimationAsset(AssetId id) -> ShapeKeyAnimationView
     return AssetService<ShapeKeyAnimationView>::Get()->Acquire(id);
 }
 
-
 bool LoadSkeletalAnimationAsset(const std::string& path)
 {
     return AssetService<SkeletalAnimationView>::Get()->Load(path);

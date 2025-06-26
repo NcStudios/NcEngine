@@ -343,6 +343,7 @@ add_executable(NcAsset_tests
     ${NC_SOURCE_DIR}/asset/manager/MeshAssetManager.cpp
     ${NC_SOURCE_DIR}/asset/manager/MeshColliderAssetManager.cpp
     ${NC_SOURCE_DIR}/asset/manager/ShaderAssetManager.cpp
+    ${NC_SOURCE_DIR}/asset/manager/ShapeKeyAnimationAssetManager.cpp
     ${NC_SOURCE_DIR}/asset/manager/SkeletalAnimationAssetManager.cpp
     ${NC_SOURCE_DIR}/asset/manager/TextureAssetManager.cpp
 )

@@ -24,6 +24,7 @@ struct ConvexHullUpdateEventData;
 struct CubeMapUpdateEventData;
 struct MeshColliderUpdateEventData;
 struct MeshUpdateEventData;
+struct ShapeKeyAnimationUpdateEventData;
 struct SkeletalAnimationUpdateEventData;
 struct TextureUpdateEventData;
 
@@ -45,6 +46,9 @@ class NcAsset : public Module
 
         /** @brief Get the signal for SkeletalAnimation load and unload events. */
         virtual auto OnSkeletalAnimationUpdate() noexcept -> Signal<const SkeletalAnimationUpdateEventData&>& = 0;
+
+        /** @brief Get the signal for ShapeKeyAnimation load and unload events. */
+        virtual auto OnShapeKeyAnimationUpdate() noexcept -> Signal<const ShapeKeyAnimationUpdateEventData&>& = 0;
 
         /** @brief Get the signal for Texture load and unload events. */
         virtual auto OnTextureUpdate() noexcept -> Signal<const TextureUpdateEventData&>& = 0;

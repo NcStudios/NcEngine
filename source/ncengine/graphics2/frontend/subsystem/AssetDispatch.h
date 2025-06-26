@@ -21,23 +21,27 @@ class AssetDispatch
                       Diligent::IRenderDevice& device,
                       CubeMapBufferResource& cubeMapBuffer,
                       TextureBufferResource& textureBuffer,
+                      TextureBufferResource& shapeKeyAnimationBuffer,
                       MeshBuffer& meshBuffer,
                       SkeletalAnimationStorage& animationStorage,
                       Signal<const asset::CubeMapUpdateEventData&>& onCubeMapEvent,
                       Signal<const asset::TextureUpdateEventData&>& onTextureEvent,
                       Signal<const asset::MeshUpdateEventData&>& onMeshEvent,
-                      Signal<const asset::SkeletalAnimationUpdateEventData&>& onAnimationEvent,
+                      Signal<const asset::ShapeKeyAnimationUpdateEventData&>& onShapeKeyAnimationEvent,
+                      Signal<const asset::SkeletalAnimationUpdateEventData&>& onSkeletalAnimationEvent,
                       Signal<const asset::BoneUpdateEventData&>& onBoneEvent)
             : m_context{&context},
               m_device{&device},
               m_cubeMapBuffer{&cubeMapBuffer},
               m_textureBuffer{&textureBuffer},
+              m_shapeKeyAnimationBuffer{&shapeKeyAnimationBuffer},
               m_meshBuffer{&meshBuffer},
-              m_animationStorage{&animationStorage},
+              m_skeletalAnimationStorage{&animationStorage},
               m_cubeMapConnection{onCubeMapEvent.Connect(this, &AssetDispatch::OnCubeMapEvent)},
               m_textureConnection{onTextureEvent.Connect(this, &AssetDispatch::OnTextureEvent)},
               m_meshConnection{onMeshEvent.Connect(this, &AssetDispatch::OnMeshEvent)},
-              m_animationConnection{onAnimationEvent.Connect(this, &AssetDispatch::OnAnimationEvent)},
+              m_shapeKeyAnimationConnection{onShapeKeyAnimationEvent.Connect(this, &AssetDispatch::OnShapeKeyAnimationEvent)},
+              m_skeletalAnimationConnection{onSkeletalAnimationEvent.Connect(this, &AssetDispatch::OnSkeletalAnimationEvent)},
               m_boneConnection{onBoneEvent.Connect(this, &AssetDispatch::OnBoneEvent)}
         {
         }
@@ -47,12 +51,14 @@ class AssetDispatch
         Diligent::IRenderDevice* m_device;
         CubeMapBufferResource* m_cubeMapBuffer;
         TextureBufferResource* m_textureBuffer;
+        TextureBufferResource* m_shapeKeyAnimationBuffer;
         MeshBuffer* m_meshBuffer;
-        SkeletalAnimationStorage* m_animationStorage;
+        SkeletalAnimationStorage* m_skeletalAnimationStorage;
         Connection m_cubeMapConnection;
         Connection m_textureConnection;
         Connection m_meshConnection;
-        Connection m_animationConnection;
+        Connection m_shapeKeyAnimationConnection;
+        Connection m_skeletalAnimationConnection;
         Connection m_boneConnection;
 
         void OnCubeMapEvent(const asset::CubeMapUpdateEventData& event)
@@ -82,7 +88,7 @@ class AssetDispatch
             {
                 case asset::UpdateAction::Load:
                 {
-                    m_textureBuffer->Load(event.data, *m_context, *m_device);
+                    m_textureBuffer->Load<unsigned char>(event.data, *m_context, *m_device);
                     break;
                 }
                 case asset::UpdateAction::UnloadAll:
@@ -102,24 +108,53 @@ class AssetDispatch
             m_meshBuffer->Load(event.vertices, event.indices, *m_context, *m_device);
         }
 
-        void OnAnimationEvent(const asset::SkeletalAnimationUpdateEventData& event)
+        void OnShapeKeyAnimationEvent(const asset::ShapeKeyAnimationUpdateEventData& event)
         {
             switch (event.updateAction)
             {
                 case asset::UpdateAction::Load:
                 {
-                    m_animationStorage->LoadAnimations(event.ids, event.data);
+                    auto animations = std::vector<nc::asset::TextureWithId<float>>{};
+                    animations.reserve(event.data.size());
+
+                    std::ranges::transform(event.data, std::back_inserter(animations), [](const nc::asset::ShapeKeyAnimationWithId& anim)
+                    {
+                        return anim.animation;
+                    });
+                    m_shapeKeyAnimationBuffer->Load<float>(animations,  *m_context, *m_device);
+                    break;
+                }
+                case asset::UpdateAction::Unload:
+                {
+                    m_shapeKeyAnimationBuffer->Unload();
+                    break;
+                }
+                case asset::UpdateAction::UnloadAll:
+                {
+                    throw NcError{"Unexpected UpdateAction"};
+                    break;
+                }
+            }
+        }
+
+        void OnSkeletalAnimationEvent(const asset::SkeletalAnimationUpdateEventData& event)
+        {
+            switch (event.updateAction)
+            {
+                case asset::UpdateAction::Load:
+                {
+                    m_skeletalAnimationStorage->LoadAnimations(event.ids, event.data);
                     break;
                 }
                 case asset::UpdateAction::Unload:
                 {
                     NC_ASSERT(event.ids.size() == 1, "Unexpected SkeletalAnimationUpdateEventData size");
-                    m_animationStorage->UnloadAnimation(event.ids[0]);
+                    m_skeletalAnimationStorage->UnloadAnimation(event.ids[0]);
                     break;
                 }
                 case asset::UpdateAction::UnloadAll:
                 {
-                    m_animationStorage->UnloadAllAnimations();
+                    m_skeletalAnimationStorage->UnloadAllAnimations();
                     break;
                 }
             }
@@ -131,18 +166,18 @@ class AssetDispatch
             {
                 case asset::UpdateAction::Load:
                 {
-                    m_animationStorage->LoadBones(event.ids, event.data);
+                    m_skeletalAnimationStorage->LoadBones(event.ids, event.data);
                     break;
                 }
                 case asset::UpdateAction::Unload:
                 {
                     NC_ASSERT(event.ids.size() == 1, "Unexpected BoneUpdateEventData size");
-                    m_animationStorage->UnloadBones(event.ids[0]);
+                    m_skeletalAnimationStorage->UnloadBones(event.ids[0]);
                     break;
                 }
                 case asset::UpdateAction::UnloadAll:
                 {
-                    m_animationStorage->UnloadAllBones();
+                    m_skeletalAnimationStorage->UnloadAllBones();
                     break;
                 }
             }

@@ -18,7 +18,6 @@ ShapeKeyAnimationAssetManager::ShapeKeyAnimationAssetManager(const std::string& 
 
 auto ShapeKeyAnimationAssetManager::Load(const std::string& path) -> bool
 {
-    //auto previousTableSize = m_table.size();
     if (m_table.size() + 1 >= m_maxShapeKeyAnimationCount)
     {
         throw NcError("Cannot exceed max shape key animations count.");
@@ -29,28 +28,27 @@ auto ShapeKeyAnimationAssetManager::Load(const std::string& path) -> bool
         return false;
     }
 
-    // Need to go from ShapeKeyAnimation struct to texture
-
     m_table.emplace(path);
     const auto fullPath = m_assetDirectory + path;
     auto animation = ImportShapeKeyAnimation(fullPath);
-    // m_onUpdate.Emit(ShapeKeyAnimationUpdateEventData{
-    //     std::span<const std::string>{m_table.keys().begin() + previousTableSize, m_table.keys().end()},
-    //     std::span<const ShapeKeyAnimation>{&animation, 1},
-    //     UpdateAction::Load
-    // });
+    auto animationAsTextureWithId = asset::TextureWithId<float>{std::move(animation.animation), m_table.hash(path)};
+    auto animationWithId = asset::ShapeKeyAnimationWithId{std::move(animationAsTextureWithId), animation.durationInSeconds};
+
+    m_onUpdate.Emit(ShapeKeyAnimationUpdateEventData{
+        UpdateAction::Load,
+        std::span<const ShapeKeyAnimationWithId>{&animationWithId, 1},
+    });
     return true;
 }
 
 auto ShapeKeyAnimationAssetManager::Load(std::span<const std::string> paths) -> bool
 {
-    //auto previousTableSize = m_table.size();
     if (m_table.size() + paths.size() >= m_maxShapeKeyAnimationCount)
     {
         throw NcError("Cannot exceed max shape key animations count.");
     }
 
-    auto animations = std::vector<ShapeKeyAnimation>{};
+    auto animations = std::vector<ShapeKeyAnimationWithId>{};
     for(const auto& path : paths)
     {
         if (IsLoaded(path))
@@ -60,16 +58,17 @@ auto ShapeKeyAnimationAssetManager::Load(std::span<const std::string> paths) -> 
 
         m_table.emplace(path);
         const auto fullPath = m_assetDirectory + path;
-        animations.push_back(ImportShapeKeyAnimation(fullPath));
+        auto animation = ImportShapeKeyAnimation(fullPath);
+        auto animationAsTextureWithId = asset::TextureWithId<float>{std::move(animation.animation), m_table.hash(path)};
+        animations.emplace_back(std::move(animationAsTextureWithId), animation.durationInSeconds);
     }
 
     if (!animations.empty())
     {
-        // m_onUpdate.Emit(ShapeKeyAnimationUpdateEventData{
-        //     std::span<const std::string>{m_table.keys().begin() + previousTableSize, m_table.keys().end()},
-        //     std::span<const ShapeKeyAnimation>{animations},
-        //     UpdateAction::Load
-        // });
+        m_onUpdate.Emit(ShapeKeyAnimationUpdateEventData{
+            UpdateAction::Load,
+            std::span<const ShapeKeyAnimationWithId>{animations}
+        });
 
         return true;
     }
@@ -82,22 +81,20 @@ auto ShapeKeyAnimationAssetManager::Unload(const std::string& path) -> bool
     if (!m_table.erase(path))
         return false;
 
-    // m_onUpdate.Emit(ShapeKeyAnimationUpdateEventData{
-    //     std::span<const std::string>{&path, 1},
-    //     {},
-    //     UpdateAction::Unload
-    // });
+    m_onUpdate.Emit(ShapeKeyAnimationUpdateEventData{
+        UpdateAction::Unload,
+        {},
+    });
     return true;
 }
 
 void ShapeKeyAnimationAssetManager::UnloadAll()
 {
     m_table.clear();
-    // m_onUpdate.Emit(ShapeKeyAnimationUpdateEventData{
-    //     {},
-    //     {},
-    //     UpdateAction::UnloadAll
-    // });
+    m_onUpdate.Emit(ShapeKeyAnimationUpdateEventData{
+        UpdateAction::UnloadAll,
+        {}
+    });
 }
 
 auto ShapeKeyAnimationAssetManager::Acquire(const std::string& path) const -> ShapeKeyAnimationView

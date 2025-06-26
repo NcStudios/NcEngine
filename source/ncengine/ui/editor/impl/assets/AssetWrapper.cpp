@@ -16,6 +16,7 @@ auto GetLoadedAssets(asset::AssetType type) -> std::vector<std::string_view>
         case AssetType::Mesh:              return AssetService<MeshView>::Get()->GetAllLoaded();
         case AssetType::MeshCollider:      return AssetService<MeshColliderView>::Get()->GetAllLoaded();
         case AssetType::Shader:            return AssetService<ShaderView>::Get()->GetAllLoaded();
+        case AssetType::ShapeKeyAnimation: return AssetService<ShapeKeyAnimationView>::Get()->GetAllLoaded();
         case AssetType::SkeletalAnimation: return std::vector<std::string_view>(); // @todo: UI for editor
         case AssetType::Texture:           return AssetService<TextureView>::Get()->GetAllLoaded();
     }

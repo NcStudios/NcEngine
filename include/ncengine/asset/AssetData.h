@@ -65,14 +65,14 @@ struct TextureWithId
 struct ShapeKeyAnimationWithId
 {
     TextureWithId<float> animation;
-    uint32_t durationInSeconds;
+    float durationInSeconds;
 };
 
 /** @brief Event data for shape key animation load and unload operations. */
 struct ShapeKeyAnimationUpdateEventData
 {
     ShapeKeyAnimationUpdateEventData(UpdateAction updateAction_,
-                           std::span<const ShapeKeyAnimationWithId> data_);
+                                     std::span<const ShapeKeyAnimationWithId> data_);
 
     std::span<const ShapeKeyAnimationWithId> data;
     UpdateAction updateAction;

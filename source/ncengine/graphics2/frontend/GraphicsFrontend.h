@@ -27,6 +27,7 @@ class GraphicsFrontend
                          Diligent::IRenderDevice& device,
                          CubeMapBufferResource& cubeMapBuffer,
                          TextureBufferResource& textureBuffer,
+                         TextureBufferResource& shapeKeyAnimationBuffer,
                          MeshBuffer& meshBuffer,
                          ecs::Ecs world,
                          ModuleProvider modules,
@@ -39,7 +40,8 @@ class GraphicsFrontend
                          Signal<const asset::CubeMapUpdateEventData&>& onCubeMapEvent,
                          Signal<const asset::TextureUpdateEventData&>& onTextureEvent,
                          Signal<const asset::MeshUpdateEventData&>& onMeshEvent,
-                         Signal<const asset::SkeletalAnimationUpdateEventData&>& onAnimationEvent,
+                         Signal<const asset::ShapeKeyAnimationUpdateEventData&>& onShapeKeyAnimationEvent,
+                         Signal<const asset::SkeletalAnimationUpdateEventData&>& onSkeletalAnimationEvent,
                          Signal<const asset::BoneUpdateEventData&>& onBoneEvent)
             : m_animationSystem{maxBones},
               m_assetDispatch{
@@ -47,12 +49,14 @@ class GraphicsFrontend
                 device,
                 cubeMapBuffer,
                 textureBuffer,
+                shapeKeyAnimationBuffer,
                 meshBuffer,
                 m_animationSystem.GetStorage(),
                 onCubeMapEvent,
                 onTextureEvent,
                 onMeshEvent,
-                onAnimationEvent,
+                onShapeKeyAnimationEvent,
+                onSkeletalAnimationEvent,
                 onBoneEvent
               },
               m_materialRegistry{maxRenderers},

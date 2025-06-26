@@ -7,6 +7,7 @@
 #include "manager/FontAssetManager.h"
 #include "manager/MeshAssetManager.h"
 #include "manager/MeshColliderAssetManager.h"
+#include "manager/ShapeKeyAnimationAssetManager.h"
 #include "manager/SkeletalAnimationAssetManager.h"
 #include "manager/TextureAssetManager.h"
 
@@ -30,6 +31,7 @@ NcAssetImpl::NcAssetImpl(const config::AssetSettings& assetSettings,
       m_cubeMapManager{std::make_unique<CubeMapAssetManager>(assetSettings.cubeMapsPath, memorySettings.maxCubeMaps)},
       m_convexHullManager{std::make_unique<ConvexHullAssetManager>(assetSettings.convexHullsPath)},
       m_meshManager{std::make_unique<MeshAssetManager>(assetSettings.meshesPath)},
+      m_shapeKeyAnimationManager{std::make_unique<ShapeKeyAnimationAssetManager>(assetSettings.shapekeyAnimationsPath, memorySettings.maxShapeKeyAnimations)},
       m_skeletalAnimationManager{std::make_unique<SkeletalAnimationAssetManager>(assetSettings.skeletalAnimationsPath, memorySettings.maxSkeletalAnimations)},
       m_textureManager{std::make_unique<TextureAssetManager>(assetSettings.texturesPath, memorySettings.maxTextures)},
       m_fontManager{std::make_unique<FontAssetManager>(assetSettings.fontsPath)},
@@ -64,6 +66,11 @@ auto NcAssetImpl::OnMeshUpdate() noexcept -> Signal<const MeshUpdateEventData&>&
     return m_meshManager->OnMeshUpdate();
 }
 
+auto NcAssetImpl::OnShapeKeyAnimationUpdate() noexcept -> Signal<const ShapeKeyAnimationUpdateEventData&>&
+{
+    return m_shapeKeyAnimationManager->OnUpdate();
+}
+
 auto NcAssetImpl::OnSkeletalAnimationUpdate() noexcept -> Signal<const SkeletalAnimationUpdateEventData&>&
 {
     return m_skeletalAnimationManager->OnUpdate();
@@ -96,6 +103,8 @@ void NcAssetImpl::LoadAssets(const AssetMap& assets)
         m_meshManager->Load(assets.at(asset::AssetType::Mesh));
     if (assets.contains(asset::AssetType::MeshCollider))
         m_meshColliderManager->Load(assets.at(asset::AssetType::MeshCollider));
+    if (assets.contains(asset::AssetType::ShapeKeyAnimation))
+        m_shapeKeyAnimationManager->Load(assets.at(asset::AssetType::ShapeKeyAnimation));
     if (assets.contains(asset::AssetType::SkeletalAnimation))
         m_skeletalAnimationManager->Load(assets.at(asset::AssetType::SkeletalAnimation));
     if (assets.contains(asset::AssetType::Texture))
@@ -104,13 +113,14 @@ void NcAssetImpl::LoadAssets(const AssetMap& assets)
 
 auto NcAssetImpl::GetLoadedAssets() const noexcept -> AssetMap
 {
-    const auto managers = std::array<IAssetServiceBase*, 7>
+    const auto managers = std::array<IAssetServiceBase*, 8>
     {
         m_audioClipManager.get(),
         m_meshColliderManager.get(),
         m_cubeMapManager.get(),
         m_convexHullManager.get(),
         m_meshManager.get(),
+        m_shapeKeyAnimationManager.get(),
         m_skeletalAnimationManager.get(),
         m_textureManager.get()
     };
@@ -142,6 +152,7 @@ auto NcAssetImpl::GetService(AssetType type) const -> const IAssetServiceBase&
         case AssetType::Mesh:              return *m_meshManager;
         case AssetType::MeshCollider:      return *m_meshColliderManager;
         case AssetType::Shader:            throw NcError{"Not Implemented"};
+        case AssetType::ShapeKeyAnimation: return *m_shapeKeyAnimationManager;
         case AssetType::SkeletalAnimation: return *m_skeletalAnimationManager;
         case AssetType::Texture:           return *m_textureManager;
         case AssetType::Font:              return *m_fontManager;

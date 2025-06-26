@@ -348,6 +348,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
             m_engine.GetDevice(),
             m_shaderBindings.GetPerFrameSignature().GetCubeMapBuffer(),
             m_shaderBindings.GetPerFrameSignature().GetTextureBuffer(),
+            m_shaderBindings.GetPerFrameSignature().GetShapeKeyClipBuffer(),
             m_shaderBindings.GetMeshBuffer(),
             m_world,
             modules,
@@ -360,6 +361,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
             modules.Get<asset::NcAsset>()->OnCubeMapUpdate(),
             modules.Get<asset::NcAsset>()->OnTextureUpdate(),
             modules.Get<asset::NcAsset>()->OnMeshUpdate(),
+            modules.Get<asset::NcAsset>()->OnShapeKeyAnimationUpdate(),
             modules.Get<asset::NcAsset>()->OnSkeletalAnimationUpdate(),
             modules.Get<asset::NcAsset>()->OnBoneUpdate()
           },

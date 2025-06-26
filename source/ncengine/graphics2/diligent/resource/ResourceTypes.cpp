@@ -121,6 +121,7 @@ auto ToTextureFormat(nc::asset::TextureFormat format) -> Diligent::TEXTURE_FORMA
         case BC1_UNORM:        return Diligent::TEX_FORMAT_BC1_UNORM;
         case BC3_UNORM_SRGB:   return Diligent::TEX_FORMAT_BC3_UNORM_SRGB;
         case BC3_UNORM:        return Diligent::TEX_FORMAT_BC3_UNORM;
+        case R32_SFLOAT:       return Diligent::TEX_FORMAT_R32_FLOAT;
         case UNKNOWN:          break;
     }
 

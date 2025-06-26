@@ -92,16 +92,28 @@ void SetArrayRegion(Diligent::IShaderResourceVariable* variable, std::span<Dilig
 void InitializeCubeArray(Diligent::IDeviceContext& context, Diligent::IRenderDevice& device, Diligent::IShaderResourceVariable* variable, uint32_t arraySize, bool transition);
 void InitializeArray(Diligent::IDeviceContext& context, Diligent::IRenderDevice& device, Diligent::IShaderResourceVariable* variable, uint32_t arraySize, bool transition = true);
 
+template<typename T>
+constexpr uint32_t BytesPerChannel()
+{
+    if constexpr (std::is_same_v<T, unsigned char>)
+        return 1;
+    else if constexpr (std::is_same_v<T, float>)
+        return 4;
+    else
+        static_assert(sizeof(T) == 0, "Unsupported texture type");
+}
+
 template <typename T>
 auto ToTextureSubResData(const nc::asset::Texture<T>& texture) -> std::vector<Diligent::TextureSubResData>
 {
+    constexpr uint32_t bytesPerChannel = BytesPerChannel<T>();
     const auto mipLevels = static_cast<uint32_t>(1 + texture.mipmaps.size());
     auto subResources = std::vector<Diligent::TextureSubResData>{};
     subResources.reserve(mipLevels);
-    subResources.emplace_back(texture.pixelData.data(), texture.width * texture.numChannels);
+    subResources.emplace_back(texture.pixelData.data(), texture.width * texture.numChannels* bytesPerChannel);
     for (const auto& subResource : texture.mipmaps)
     {
-        subResources.emplace_back(subResource.pixelData.data(), subResource.width * texture.numChannels);
+        subResources.emplace_back(subResource.pixelData.data(), subResource.width * texture.numChannels * bytesPerChannel);
     }
 
     return subResources;

@@ -21,6 +21,7 @@ class FontAssetManager;
 class IAssetServiceBase;
 class MeshAssetManager;
 class MeshColliderAssetManager;
+class ShapeKeyAnimationAssetManager;
 class SkeletalAnimationAssetManager;
 class TextureAssetManager;
 
@@ -38,6 +39,7 @@ class NcAssetImpl : public NcAsset
         auto OnCubeMapUpdate() noexcept -> Signal<const CubeMapUpdateEventData&>& override;
         auto OnMeshUpdate() noexcept -> Signal<const MeshUpdateEventData&> & override;
         auto OnTextureUpdate() noexcept -> Signal<const TextureUpdateEventData&>& override;
+        auto OnShapeKeyAnimationUpdate() noexcept -> Signal<const ShapeKeyAnimationUpdateEventData&>& override;
         auto OnSkeletalAnimationUpdate() noexcept -> Signal<const SkeletalAnimationUpdateEventData&>& override;
         auto OnConvexHullUpdate() noexcept -> Signal<const ConvexHullUpdateEventData&>& override;
         auto OnMeshColliderUpdate() noexcept -> Signal<const MeshColliderUpdateEventData&>& override;
@@ -52,6 +54,7 @@ class NcAssetImpl : public NcAsset
         std::unique_ptr<CubeMapAssetManager> m_cubeMapManager;
         std::unique_ptr<ConvexHullAssetManager> m_convexHullManager;
         std::unique_ptr<MeshAssetManager> m_meshManager;
+        std::unique_ptr<ShapeKeyAnimationAssetManager> m_shapeKeyAnimationManager;
         std::unique_ptr<SkeletalAnimationAssetManager> m_skeletalAnimationManager;
         std::unique_ptr<TextureAssetManager> m_textureManager;
         std::unique_ptr<FontAssetManager> m_fontManager;

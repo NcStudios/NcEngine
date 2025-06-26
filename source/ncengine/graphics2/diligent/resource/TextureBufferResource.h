@@ -78,7 +78,7 @@ void TextureBufferResource::Load(std::span<const asset::TextureWithId<T>> textur
         auto mipSubResources = ToTextureSubResData<T>(texture);
         const auto mipLevels = static_cast<uint32_t>(mipSubResources.size());
         auto texData = Diligent::TextureData{mipSubResources.data(), mipLevels, &context};
-        auto desc = ToTextureDesc(texture);
+        auto desc = ToTextureDesc<T>(texture);
         auto& textureHandle = m_textures.emplace_back();
         device.CreateTexture(desc, &texData, &textureHandle);
         if (!textureHandle)

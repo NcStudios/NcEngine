@@ -28,7 +28,7 @@ GraphicsTest::GraphicsTest(SampleUI* ui, Vector3 extents)
 }
 
 const auto g_paths = std::array{
-    std::string{"shapekey_animation\\plane"}
+    std::string{"plane.nca"}
 };
 
 void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)

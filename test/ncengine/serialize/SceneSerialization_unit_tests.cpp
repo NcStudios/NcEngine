@@ -17,6 +17,7 @@ class NcAssetMock : public NcAsset
         auto OnBoneUpdate()               noexcept -> Signal<const BoneUpdateEventData&>&              override { return m_boneSignal; }
         auto OnCubeMapUpdate()            noexcept -> Signal<const CubeMapUpdateEventData&>&           override { return m_cubeMapSignal; }
         auto OnMeshUpdate()               noexcept -> Signal<const MeshUpdateEventData&>&              override { return m_meshSignal; }
+        auto OnShapeKeyAnimationUpdate()  noexcept -> Signal<const ShapeKeyAnimationUpdateEventData&>& override { return m_shapeKeyAnimSignal; }
         auto OnSkeletalAnimationUpdate()  noexcept -> Signal<const SkeletalAnimationUpdateEventData&>& override { return m_animSignal; }
         auto OnTextureUpdate()            noexcept -> Signal<const TextureUpdateEventData&>&           override { return m_textureSignal; }
         auto OnConvexHullUpdate()         noexcept -> Signal<const ConvexHullUpdateEventData&>&        override { return m_convexHullSignal; }
@@ -41,6 +42,7 @@ class NcAssetMock : public NcAsset
         Signal<const BoneUpdateEventData&> m_boneSignal;
         Signal<const CubeMapUpdateEventData&> m_cubeMapSignal;
         Signal<const MeshUpdateEventData&> m_meshSignal;
+        Signal<const ShapeKeyAnimationUpdateEventData&> m_shapeKeyAnimSignal;
         Signal<const SkeletalAnimationUpdateEventData&> m_animSignal;
         Signal<const TextureUpdateEventData&> m_textureSignal;
         Signal<const ConvexHullUpdateEventData&> m_convexHullSignal;

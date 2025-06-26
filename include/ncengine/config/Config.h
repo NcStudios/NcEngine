@@ -39,6 +39,7 @@ struct AssetSettings
     std::string meshesPath = "assets/mesh/";
     std::string meshCollidersPath = "assets/mesh_collider/";
     std::string shadersPath = "assets/shader/";
+    std::string shapekeyAnimationsPath = "assets/shapekey_animation/";
     std::string skeletalAnimationsPath = "assets/skeletal_animation/";
     std::string texturesPath = "assets/texture/";
 };
@@ -58,6 +59,7 @@ struct MemorySettings
     unsigned maxPointLights = 10;
     unsigned maxDirectionalLights = 10;
     unsigned maxSpotLights = 10;
+    unsigned maxShapeKeyAnimations = 1000;
     unsigned maxSkeletalAnimations = 1000;
     unsigned maxTextures = 1000;
     unsigned maxCubeMaps = 10;
