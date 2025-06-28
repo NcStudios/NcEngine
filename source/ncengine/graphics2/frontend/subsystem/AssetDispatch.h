@@ -2,7 +2,9 @@
 
 #include "graphics2/diligent/resource/MeshBuffer.h"
 #include "graphics2/diligent/resource/CubeMapBufferResource.h"
+#include "graphics2/diligent/resource/base/StructuredBuffer.h"
 #include "graphics2/diligent/resource/TextureBufferResource.h"
+#include "graphics2/ShaderTypes.h"
 #include "graphics2/frontend/subsystem/animation/SkeletalAnimationStorage.h"
 
 #include "ncengine/asset/AssetData.h"
@@ -22,6 +24,7 @@ class AssetDispatch
                       CubeMapBufferResource& cubeMapBuffer,
                       TextureBufferResource& textureBuffer,
                       TextureBufferResource& shapeKeyAnimationBuffer,
+                      StructuredBuffer<ShapeKeyMetadata>& shapeKeyMetadataBuffer,
                       MeshBuffer& meshBuffer,
                       SkeletalAnimationStorage& animationStorage,
                       Signal<const asset::CubeMapUpdateEventData&>& onCubeMapEvent,
@@ -35,6 +38,7 @@ class AssetDispatch
               m_cubeMapBuffer{&cubeMapBuffer},
               m_textureBuffer{&textureBuffer},
               m_shapeKeyAnimationBuffer{&shapeKeyAnimationBuffer},
+              m_shapeKeyMetadataBuffer{&shapeKeyMetadataBuffer},
               m_meshBuffer{&meshBuffer},
               m_skeletalAnimationStorage{&animationStorage},
               m_cubeMapConnection{onCubeMapEvent.Connect(this, &AssetDispatch::OnCubeMapEvent)},
@@ -52,6 +56,7 @@ class AssetDispatch
         CubeMapBufferResource* m_cubeMapBuffer;
         TextureBufferResource* m_textureBuffer;
         TextureBufferResource* m_shapeKeyAnimationBuffer;
+        StructuredBuffer<ShapeKeyMetadata>* m_shapeKeyMetadataBuffer;
         MeshBuffer* m_meshBuffer;
         SkeletalAnimationStorage* m_skeletalAnimationStorage;
         Connection m_cubeMapConnection;
@@ -117,11 +122,22 @@ class AssetDispatch
                     auto animations = std::vector<nc::asset::TextureWithId<float>>{};
                     animations.reserve(event.data.size());
 
-                    std::ranges::transform(event.data, std::back_inserter(animations), [](const nc::asset::ShapeKeyAnimationWithId& anim)
+                    auto metadata = std::vector<ShapeKeyMetadata>{};
+                    metadata.reserve(event.data.size());
+
+                    for (const auto& animation : event.data)
                     {
-                        return anim.animation;
-                    });
-                    m_shapeKeyAnimationBuffer->Load<float>(animations,  *m_context, *m_device);
+                        animations.push_back(std::move(animation.animation));
+                        metadata.emplace_back(0u, animation.durationInSeconds);
+                    }
+
+                    auto metadataUpdateInfo = BufferUpdateInfo<ShapeKeyMetadata>{
+                        .instances = metadata,
+                        .dirtyRanges = {{0, metadata.size()}}
+                    };
+
+                    m_shapeKeyAnimationBuffer->Load<float>(animations, *m_context, *m_device);
+                    m_shapeKeyMetadataBuffer->Update(*m_context, *m_device, metadataUpdateInfo);
                     break;
                 }
                 case asset::UpdateAction::Unload:

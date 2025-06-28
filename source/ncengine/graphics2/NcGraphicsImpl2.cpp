@@ -349,6 +349,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
             m_shaderBindings.GetPerFrameSignature().GetCubeMapBuffer(),
             m_shaderBindings.GetPerFrameSignature().GetTextureBuffer(),
             m_shaderBindings.GetPerFrameSignature().GetShapeKeyClipBuffer(),
+            m_shaderBindings.GetPerFrameSignature().GetShapeKeyMetadataBuffer(),
             m_shaderBindings.GetMeshBuffer(),
             m_world,
             modules,
