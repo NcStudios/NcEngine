@@ -216,6 +216,8 @@ struct ShapeKeyMetadata
 {
     int32_t ShapeKeyAnimationIndex = -1;
     float DurationInSeconds = 0.0f;
+    uint32_t padding0;
+    uint32_t padding1;
 };
 
 // Specifies a subrange within a buffer.

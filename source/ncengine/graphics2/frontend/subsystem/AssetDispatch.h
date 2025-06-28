@@ -125,15 +125,22 @@ class AssetDispatch
                     auto metadata = std::vector<ShapeKeyMetadata>{};
                     metadata.reserve(event.data.size());
 
+                    uint32_t offset = 0u;
+                    bool offsetPopulated = false;
                     for (const auto& animation : event.data)
                     {
+                        if (!offsetPopulated)
+                        {
+                            offset = static_cast<uint32_t>(animation.index);
+                            offsetPopulated = true;
+                        }
                         animations.push_back(std::move(animation.animation));
-                        metadata.emplace_back(0u, animation.durationInSeconds);
+                        metadata.emplace_back(static_cast<uint32_t>(animation.index), animation.durationInSeconds);
                     }
 
                     auto metadataUpdateInfo = BufferUpdateInfo<ShapeKeyMetadata>{
                         .instances = metadata,
-                        .dirtyRanges = {{0, metadata.size()}}
+                        .dirtyRanges = {{offset, metadata.size()}}
                     };
 
                     m_shapeKeyAnimationBuffer->Load<float>(animations, *m_context, *m_device);

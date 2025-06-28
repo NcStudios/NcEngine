@@ -79,6 +79,13 @@ struct LightMatrix
     float4x4 viewProjection;
 };
 
+struct ShapeKeyMetadata
+{
+    int ShapeKeyAnimationIndex;
+    float DurationInSeconds;
+    uint[2] padding;
+};
+
 cbuffer WireframeProperties
 {
     float4x4 wireframeModelMatrix;

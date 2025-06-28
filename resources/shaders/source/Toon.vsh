@@ -24,7 +24,6 @@ struct ShapeKeyMetadata
 {
     int ShapeKeyAnimationIndex;
     float DurationInSeconds;
-    uint NumShapeKeys;
 };
 
 Texture2D     ShapeKeyAnims[];
