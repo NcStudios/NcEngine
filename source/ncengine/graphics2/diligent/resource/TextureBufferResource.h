@@ -20,6 +20,7 @@ class TextureBufferResource
     public:
         explicit TextureBufferResource(Diligent::IShaderResourceVariable& variable, uint32_t maxTextures);
         static auto MakeSamplerDesc(std::string_view variableName) -> Diligent::ImmutableSamplerDesc;
+        // static auto MakePointSamplerDesc(std::string_view variableName) -> Diligent::ImmutableSamplerDesc;
 
         template <typename T>
         void Load(std::span<const asset::TextureWithId<T>> textures,

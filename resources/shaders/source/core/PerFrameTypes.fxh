@@ -81,9 +81,10 @@ struct LightMatrix
 
 struct ShapeKeyMetadata
 {
-    int ShapeKeyAnimationIndex;
-    float DurationInSeconds;
-    uint[2] padding;
+    int shapeKeyAnimationIndex;
+    float durationInSeconds;
+    uint numShapeKeys;
+    uint padding;
 };
 
 cbuffer WireframeProperties

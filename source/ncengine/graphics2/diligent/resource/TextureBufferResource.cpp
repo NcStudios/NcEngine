@@ -19,11 +19,25 @@ auto TextureBufferResource::MakeSamplerDesc(std::string_view variableName) -> Di
     samplerDesc.AddressW = Diligent::TEXTURE_ADDRESS_MODE::TEXTURE_ADDRESS_WRAP;
 
     return Diligent::ImmutableSamplerDesc{
-        Diligent::SHADER_TYPE_PIXEL,
+        Diligent::SHADER_TYPE_VS_PS,
         variableName.data(),
         samplerDesc
     };
 }
+
+// auto TextureBufferResource::MakePointSamplerDesc(std::string_view variableName) -> Diligent::ImmutableSamplerDesc
+// {
+//     Diligent::SamplerDesc samplerDesc{};
+//     samplerDesc.AddressU = Diligent::TEXTURE_ADDRESS_MODE::TEXTURE_ADDRESS_WRAP;
+//     samplerDesc.AddressV = Diligent::TEXTURE_ADDRESS_MODE::TEXTURE_ADDRESS_WRAP;
+//     samplerDesc.AddressW = Diligent::TEXTURE_ADDRESS_MODE::TEXTURE_ADDRESS_WRAP;
+
+//     return Diligent::ImmutableSamplerDesc{
+//         Diligent::SHADER_TYPE_PIXEL,
+//         variableName.data(),
+//         samplerDesc
+//     };
+// }
 
 void TextureBufferResource::Unload()
 {

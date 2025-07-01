@@ -101,6 +101,15 @@
                     "assetName": "mesh\\plane"
                 }
             ]
+        },
+        {
+            "sourcePath": "raw/model/flag.glb",
+            "assetNames": [
+                {
+                    "subResourceName": "Flag",
+                    "assetName": "mesh\\flag"
+                }
+            ]
         }
     ],
     "mesh-collider": [
@@ -125,6 +134,15 @@
                 {
                     "subResourceName": "Y2",
                     "assetName": "shapekey_animation\\plane"
+                }
+            ]
+        },
+        {
+            "sourcePath": "raw/model/flag.glb",
+            "assetNames": [
+                {
+                    "subResourceName": "FlagWave",
+                    "assetName": "shapekey_animation\\flag"
                 }
             ]
         }

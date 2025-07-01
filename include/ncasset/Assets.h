@@ -223,7 +223,6 @@ struct TextureSubResource
 template<typename T>
 struct Texture
 {
-
     TextureFormat format = TextureFormat::UNKNOWN;
     uint32_t width = 0u;
     uint32_t height = 0u;
@@ -234,13 +233,9 @@ struct Texture
 
 struct ShapeKeyAnimation
 {
-    std::string name;
-    float durationInSeconds;
-    Texture<float> animation;
-    // positionData {0.1,  2.0, 1.3,  1.0, 3.5, 1.0}
-    //              { x,   y,   z,    x,   y,   z}
-    // VK_FORMAT_R32_SFLOAT 
-    // 
+    Texture<float> animation = {};
+    float durationInSeconds = 0.0f;
+    uint32_t numShapeKeys = 0u;
 };
 
 struct CubeMap

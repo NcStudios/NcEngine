@@ -214,9 +214,9 @@ struct WireframeData
 // Object model for shape key animation metadata lookup (type: StructuredBuffer element type)
 struct ShapeKeyMetadata
 {
-    int32_t ShapeKeyAnimationIndex = -1;
-    float DurationInSeconds = 0.0f;
-    uint32_t padding0;
+    int32_t shapeKeyAnimationIndex = -1;
+    float durationInSeconds = 0.0f;
+    uint32_t numShapeKeys;
     uint32_t padding1;
 };
 

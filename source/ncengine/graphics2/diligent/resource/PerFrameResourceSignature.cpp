@@ -47,6 +47,13 @@ PerFrameResourceSignature::PerFrameResourceSignature(Diligent::IDeviceContext& c
         ToPipelineResourceDesc(wireframeResourceDesc),
     };
 
+    //     const auto samplers = std::array{
+    //     SinkBufferResource::MakeSamplerDesc(colorSinksDesc.resourceKey),
+    //     SinkBufferResource::MakeShadowSamplerDesc(uniShadowMapSinksDesc.resourceKey),
+    //     CubeSinkBufferResource::MakeShadowSamplerDesc(pointShadowMapSinksDesc.resourceKey),
+    // };
+
+
     const auto sampler = TextureBufferResource::MakeSamplerDesc(textureResourceDesc.resourceKey);
     auto desc = Diligent::PipelineResourceSignatureDesc{};
     desc.Name = signatureName.data();

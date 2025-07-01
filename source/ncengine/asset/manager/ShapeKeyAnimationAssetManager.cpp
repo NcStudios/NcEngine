@@ -32,7 +32,7 @@ auto ShapeKeyAnimationAssetManager::Load(const std::string& path) -> bool
     const auto fullPath = m_assetDirectory + path;
     auto animation = ImportShapeKeyAnimation(fullPath);
     auto animationAsTextureWithId = asset::TextureWithId<float>{std::move(animation.animation), m_table.hash(path)};
-    auto animationWithId = asset::ShapeKeyAnimationWithId{std::move(animationAsTextureWithId), animation.durationInSeconds, m_table.size()-1};
+    auto animationWithId = asset::ShapeKeyAnimationWithId{std::move(animationAsTextureWithId), animation.durationInSeconds, animation.numShapeKeys, m_table.size()-1};
 
     m_onUpdate.Emit(ShapeKeyAnimationUpdateEventData{
         UpdateAction::Load,
@@ -60,7 +60,7 @@ auto ShapeKeyAnimationAssetManager::Load(std::span<const std::string> paths) -> 
         const auto fullPath = m_assetDirectory + path;
         auto animation = ImportShapeKeyAnimation(fullPath);
         auto animationAsTextureWithId = asset::TextureWithId<float>{std::move(animation.animation), m_table.hash(path)};
-        animations.emplace_back(std::move(animationAsTextureWithId), animation.durationInSeconds, m_table.size()-1);
+        animations.emplace_back(std::move(animationAsTextureWithId), animation.durationInSeconds, animation.numShapeKeys, m_table.size()-1);
     }
 
     if (!animations.empty())

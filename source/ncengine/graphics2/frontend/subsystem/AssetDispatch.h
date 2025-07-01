@@ -135,7 +135,7 @@ class AssetDispatch
                             offsetPopulated = true;
                         }
                         animations.push_back(std::move(animation.animation));
-                        metadata.emplace_back(static_cast<uint32_t>(animation.index), animation.durationInSeconds);
+                        metadata.emplace_back(static_cast<uint32_t>(animation.index), animation.durationInSeconds, animation.numShapeKeys);
                     }
 
                     auto metadataUpdateInfo = BufferUpdateInfo<ShapeKeyMetadata>{

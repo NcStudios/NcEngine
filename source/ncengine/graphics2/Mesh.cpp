@@ -8,7 +8,7 @@ MeshBase::MeshBase(Entity self,
                    const MaterialDesc& materialDesc,
                    asset::AssetId rootShapeKeyAnimationId,
                    MeshInstanceType type)
-    : m_ctx{self, meshAsset.id, std::numeric_limits<uint32_t>::max(), std::numeric_limits<uint32_t>::max(), rootShapeKeyAnimationId == asset::NullAssetId ? std::numeric_limits<uint32_t>::max() : 1u, type},
+    : m_ctx{self, meshAsset.id, std::numeric_limits<uint32_t>::max(), std::numeric_limits<uint32_t>::max(), rootShapeKeyAnimationId == asset::NullAssetId ? std::numeric_limits<uint32_t>::max() : 0u, type},
       m_material{MaterialInstance{materialDesc}}
 {
     s_subsystem->AddInstance(m_ctx, m_material, meshAsset);

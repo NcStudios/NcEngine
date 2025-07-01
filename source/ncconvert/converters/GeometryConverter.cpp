@@ -620,10 +620,7 @@ auto ConvertToShapeKeyAnimation(const aiAnimation* animationClip, const aiMesh* 
     NC_ASSERT(numShapeKeys != 0, "No shape keys detected in the mesh.");
 
     auto shapeKeyAnimation = nc::asset::ShapeKeyAnimation{};
-    shapeKeyAnimation.name = std::string(animationClip->mName.C_Str());
-    auto durationInTicks = static_cast<uint32_t>(animationClip->mDuration);
-    auto ticksPerSecond = animationClip->mTicksPerSecond == 0 ? 25.0f : static_cast<float>(animationClip->mTicksPerSecond); // Ticks per second is not required to be set in animation software.
-    shapeKeyAnimation.durationInSeconds = durationInTicks / ticksPerSecond;
+
     auto positionData = std::vector<float>{};
     positionData.reserve(mesh->mAnimMeshes[0]->mNumVertices * 3u * numShapeKeys); // Each vertex has 3 floats, flattening nested array of vertices * shapekeys
 
@@ -645,6 +642,12 @@ auto ConvertToShapeKeyAnimation(const aiAnimation* animationClip, const aiMesh* 
         .numChannels = 1u, // Storing everything in R
         .pixelData = std::move(positionData)
     };
+
+    auto durationInTicks = static_cast<uint32_t>(animationClip->mDuration);
+    auto ticksPerSecond = animationClip->mTicksPerSecond == 0 ? 25.0f : static_cast<float>(animationClip->mTicksPerSecond); // Ticks per second is not required to be set in animation software.
+    shapeKeyAnimation.durationInSeconds = durationInTicks / ticksPerSecond;
+
+    shapeKeyAnimation.numShapeKeys = numShapeKeys;
 
     return shapeKeyAnimation;
 }

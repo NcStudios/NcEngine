@@ -66,6 +66,7 @@ struct ShapeKeyAnimationWithId
 {
     TextureWithId<float> animation;
     float durationInSeconds;
+    uint32_t numShapeKeys;
     size_t index;
 };
 
