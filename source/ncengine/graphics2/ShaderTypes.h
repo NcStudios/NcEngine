@@ -65,6 +65,7 @@ struct StaticMeshInstanceData
     uint32_t transformIndex = std::numeric_limits<uint32_t>::max();
     uint32_t materialIndex = std::numeric_limits<uint32_t>::max();
     uint32_t shapeKeyMetadataIndex = std::numeric_limits<uint32_t>::max();
+    uint32_t vertexOffset = 0u;
 };
 
 // Object model for SkinnedMeshes (type: StructuredBuffer element type).
@@ -74,6 +75,7 @@ struct SkinnedMeshInstanceData
     uint32_t materialIndex = std::numeric_limits<uint32_t>::max();
     uint32_t boneIndex = std::numeric_limits<uint32_t>::max();
     uint32_t shapeKeyMetadataIndex = std::numeric_limits<uint32_t>::max();
+    uint32_t vertexOffset = 0u;
 };
 
 // Object model for Transforms (type: StructuredBuffer element type).

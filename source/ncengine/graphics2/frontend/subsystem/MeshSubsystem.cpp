@@ -18,7 +18,8 @@ auto MakeStaticInstanceData(const nc::MeshInstanceContext& ctx,
     return nc::graphics::StaticMeshInstanceData{
         ctx.transformDataHandle,
         material.GetHandle(),
-        ctx.shapeKeyDataHandle
+        ctx.shapeKeyDataHandle,
+        ctx.vertexOffset
     };
 }
 
@@ -29,7 +30,8 @@ auto MakeSkinnedInstanceData(const nc::MeshInstanceContext& ctx,
         ctx.transformDataHandle,
         material.GetHandle(),
         ctx.boneDataHandle,
-        ctx.shapeKeyDataHandle
+        ctx.shapeKeyDataHandle,
+        ctx.vertexOffset
     };
 }
 } // anonymous namespace

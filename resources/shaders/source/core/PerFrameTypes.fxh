@@ -16,6 +16,7 @@ struct StaticMeshInstanceData
     uint transformIndex;
     uint materialIndex;
     uint shapeKeyMetadataIndex;
+    uint vertexOffset;
 };
 
 struct SkinnedMeshInstanceData
@@ -24,6 +25,7 @@ struct SkinnedMeshInstanceData
     uint materialIndex;
     uint boneIndex;
     uint shapeKeyMetadataIndex;
+    uint vertexOffset;
 };
 
 struct TransformData

@@ -28,7 +28,7 @@ GraphicsTest::GraphicsTest(SampleUI* ui, Vector3 extents)
 }
 
 const auto g_paths = std::array{
-    std::string{"plane.nca"}
+    std::string{"flag.nca"}
 };
 
 void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
@@ -135,24 +135,24 @@ void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
         0
     };
 
-    world.Emplace<StaticMesh>(deformableCube, mesh::cube, material::green);
+    // world.Emplace<StaticMesh>(deformableCube, mesh::cube, material::green);
 
-    const auto deformablePlane = world.Emplace<Entity>({
-        .position = Vector3{1.0f, 2.0f, 4.0f},
-        .rotation = Quaternion::FromEulerAngles(0.472f, 0.0f, 0.0f),
-        .scale = Vector3{1.0f, 1.0f, 1.0f},
-        .tag = "Deformable Plane"
-    });
-    world.Emplace<StaticMesh>(deformablePlane, mesh::plane, material::blue, cubeAnimView.id);
-
-    
-    // const auto flag = world.Emplace<Entity>({
-    //     .position = Vector3{6.0f, 2.0f, 4.0f},
+    // const auto deformablePlane = world.Emplace<Entity>({
+    //     .position = Vector3{1.0f, 2.0f, 4.0f},
     //     .rotation = Quaternion::FromEulerAngles(0.472f, 0.0f, 0.0f),
     //     .scale = Vector3{1.0f, 1.0f, 1.0f},
-    //     .tag = "Flag"
+    //     .tag = "Deformable Plane"
     // });
-    // world.Emplace<StaticMesh>(flag, mesh::flag, material::blue, cubeAnimView.id);
+    // world.Emplace<StaticMesh>(deformablePlane, mesh::plane, material::blue, cubeAnimView.id);
+
+    
+    const auto flag = world.Emplace<Entity>({
+        .position = Vector3{6.0f, 2.0f, 4.0f},
+        .rotation = Quaternion::FromEulerAngles(0.472f, 0.0f, 0.0f),
+        .scale = Vector3{1.0f, 1.0f, 1.0f},
+        .tag = "Flag"
+    });
+    world.Emplace<StaticMesh>(flag, mesh::flag, material::blue, cubeAnimView.id);
     
     // Ogre
     {

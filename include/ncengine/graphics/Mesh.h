@@ -31,6 +31,7 @@ struct MeshInstanceContext
     uint32_t transformDataHandle = std::numeric_limits<uint32_t>::max();
     uint32_t boneDataHandle = std::numeric_limits<uint32_t>::max();
     uint32_t shapeKeyDataHandle = std::numeric_limits<uint32_t>::max();
+    uint32_t vertexOffset = 0u;
     MeshInstanceType type = MeshInstanceType::Static;
 };
 

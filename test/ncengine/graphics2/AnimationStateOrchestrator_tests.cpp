@@ -20,7 +20,7 @@ MeshBase::MeshBase(Entity self,
                    const MaterialDesc&,
                    asset::AssetId,
                    MeshInstanceType type)
-    : m_ctx{self, mesh.id, std::numeric_limits<uint32_t>::max(), std::numeric_limits<uint32_t>::max(), std::numeric_limits<uint32_t>::max(), type}
+    : m_ctx{self, mesh.id, std::numeric_limits<uint32_t>::max(), std::numeric_limits<uint32_t>::max(), std::numeric_limits<uint32_t>::max(), 0u, type}
 {
 }
 

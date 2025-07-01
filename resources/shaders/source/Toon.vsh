@@ -68,7 +68,7 @@ void main(in  VSInput VSIn, uint InstanceID : SV_InstanceID, uint VertexID : SV_
         uint shapeKeyIndexHigh = min(shapeKeyIndexLow + 1, metadata.numShapeKeys - 1);
         float shapeKeyLerpFactor = frac(frameF);
 
-        int baseVertexID = VertexID - 47300;
+        int baseVertexID = VertexID - StaticInstances[InstanceID].vertexOffset;
 
         int3 texelCoords = int3(baseVertexID * 3 + 0, shapeKeyIndexLow, 0); // X
         float positionOffsetLowX = ShapeKeyClips[metadata.shapeKeyAnimationIndex].Load(texelCoords); // X, Y, Z, X, Y, Z, X, Y, Z
