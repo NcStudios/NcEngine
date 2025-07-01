@@ -1,0 +1,294 @@
+; SPIR-V
+; Version: 1.0
+; Generator: Khronos Glslang Reference Front End; 11
+; Bound: 695
+; Schema: 0
+               OpCapability Shader
+               OpExtension "SPV_GOOGLE_hlsl_functionality1"
+          %1 = OpExtInstImport "GLSL.std.450"
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Vertex %main "main" %VSIn_Pos %VSIn_Normal %VSIn_UV %InstanceID %VertexID %PSIn_Pos %PSIn_Normal %PSIn_UV %PSIn_MaterialIndex %PSIn_WorldPos %PSIn_LocalPos
+               OpSource HLSL 500
+               OpName %main "main"
+               OpName %StaticMeshInstanceData "StaticMeshInstanceData"
+               OpMemberName %StaticMeshInstanceData 0 "transformIndex"
+               OpMemberName %StaticMeshInstanceData 1 "materialIndex"
+               OpMemberName %StaticMeshInstanceData 2 "shapeKeyMetadataIndex"
+               OpName %StaticInstances "StaticInstances"
+               OpMemberName %StaticInstances 0 "@data"
+               OpName %StaticInstances_0 "StaticInstances"
+               OpName %ShapeKeyMetadata "ShapeKeyMetadata"
+               OpMemberName %ShapeKeyMetadata 0 "shapeKeyAnimationIndex"
+               OpMemberName %ShapeKeyMetadata 1 "durationInSeconds"
+               OpMemberName %ShapeKeyMetadata 2 "numShapeKeys"
+               OpMemberName %ShapeKeyMetadata 3 "padding"
+               OpName %ShapeKeyAnimationMetadata "ShapeKeyAnimationMetadata"
+               OpMemberName %ShapeKeyAnimationMetadata 0 "@data"
+               OpName %ShapeKeyAnimationMetadata_0 "ShapeKeyAnimationMetadata"
+               OpName %EnvironmentProperties "EnvironmentProperties"
+               OpMemberName %EnvironmentProperties 0 "cameraViewProjection"
+               OpMemberName %EnvironmentProperties 1 "cameraInvProjection"
+               OpMemberName %EnvironmentProperties 2 "cameraPosition"
+               OpMemberName %EnvironmentProperties 3 "lightCount"
+               OpMemberName %EnvironmentProperties 4 "nearClip"
+               OpMemberName %EnvironmentProperties 5 "farClip"
+               OpMemberName %EnvironmentProperties 6 "skyboxIndex"
+               OpMemberName %EnvironmentProperties 7 "useSkybox"
+               OpMemberName %EnvironmentProperties 8 "time"
+               OpName %_ ""
+               OpName %ShapeKeyClips "ShapeKeyClips"
+               OpName %TransformData "TransformData"
+               OpMemberName %TransformData 0 "model"
+               OpName %Transforms "Transforms"
+               OpMemberName %Transforms 0 "@data"
+               OpName %Transforms_0 "Transforms"
+               OpName %VSIn_Pos "VSIn.Pos"
+               OpName %VSIn_Normal "VSIn.Normal"
+               OpName %VSIn_UV "VSIn.UV"
+               OpName %InstanceID "InstanceID"
+               OpName %VertexID "VertexID"
+               OpName %PSIn_Pos "PSIn.Pos"
+               OpName %PSIn_Normal "PSIn.Normal"
+               OpName %PSIn_UV "PSIn.UV"
+               OpName %PSIn_MaterialIndex "PSIn.MaterialIndex"
+               OpName %PSIn_WorldPos "PSIn.WorldPos"
+               OpName %PSIn_LocalPos "PSIn.LocalPos"
+               OpMemberDecorate %StaticMeshInstanceData 0 Offset 0
+               OpMemberDecorate %StaticMeshInstanceData 1 Offset 4
+               OpMemberDecorate %StaticMeshInstanceData 2 Offset 8
+               OpDecorate %_runtimearr_StaticMeshInstanceData ArrayStride 12
+               OpDecorate %StaticInstances BufferBlock
+               OpMemberDecorate %StaticInstances 0 NonWritable
+               OpMemberDecorate %StaticInstances 0 Offset 0
+               OpDecorate %StaticInstances_0 NonWritable
+               OpDecorate %StaticInstances_0 Binding 0
+               OpDecorate %StaticInstances_0 DescriptorSet 0
+               OpMemberDecorate %ShapeKeyMetadata 0 Offset 0
+               OpMemberDecorate %ShapeKeyMetadata 1 Offset 4
+               OpMemberDecorate %ShapeKeyMetadata 2 Offset 8
+               OpMemberDecorate %ShapeKeyMetadata 3 Offset 12
+               OpDecorate %_runtimearr_ShapeKeyMetadata ArrayStride 16
+               OpDecorate %ShapeKeyAnimationMetadata BufferBlock
+               OpMemberDecorate %ShapeKeyAnimationMetadata 0 NonWritable
+               OpMemberDecorate %ShapeKeyAnimationMetadata 0 Offset 0
+               OpDecorate %ShapeKeyAnimationMetadata_0 NonWritable
+               OpDecorate %ShapeKeyAnimationMetadata_0 Binding 0
+               OpDecorate %ShapeKeyAnimationMetadata_0 DescriptorSet 0
+               OpDecorate %EnvironmentProperties Block
+               OpMemberDecorate %EnvironmentProperties 0 ColMajor
+               OpMemberDecorate %EnvironmentProperties 0 MatrixStride 16
+               OpMemberDecorate %EnvironmentProperties 0 Offset 0
+               OpMemberDecorate %EnvironmentProperties 1 ColMajor
+               OpMemberDecorate %EnvironmentProperties 1 MatrixStride 16
+               OpMemberDecorate %EnvironmentProperties 1 Offset 64
+               OpMemberDecorate %EnvironmentProperties 2 Offset 128
+               OpMemberDecorate %EnvironmentProperties 3 Offset 140
+               OpMemberDecorate %EnvironmentProperties 4 Offset 144
+               OpMemberDecorate %EnvironmentProperties 5 Offset 148
+               OpMemberDecorate %EnvironmentProperties 6 Offset 152
+               OpMemberDecorate %EnvironmentProperties 7 Offset 156
+               OpMemberDecorate %EnvironmentProperties 8 Offset 160
+               OpDecorate %_ Binding 0
+               OpDecorate %_ DescriptorSet 0
+               OpDecorate %ShapeKeyClips Binding 0
+               OpDecorate %ShapeKeyClips DescriptorSet 0
+               OpMemberDecorate %TransformData 0 ColMajor
+               OpMemberDecorate %TransformData 0 MatrixStride 16
+               OpMemberDecorate %TransformData 0 Offset 0
+               OpDecorate %_runtimearr_TransformData ArrayStride 64
+               OpDecorate %Transforms BufferBlock
+               OpMemberDecorate %Transforms 0 NonWritable
+               OpMemberDecorate %Transforms 0 Offset 0
+               OpDecorate %Transforms_0 NonWritable
+               OpDecorate %Transforms_0 Binding 0
+               OpDecorate %Transforms_0 DescriptorSet 0
+               OpDecorate %VSIn_Pos Location 0
+               OpDecorateString %VSIn_Pos UserSemantic "ATTRIB0"
+               OpDecorate %VSIn_Normal Location 1
+               OpDecorateString %VSIn_Normal UserSemantic "ATTRIB1"
+               OpDecorate %VSIn_UV Location 2
+               OpDecorateString %VSIn_UV UserSemantic "ATTRIB2"
+               OpDecorate %InstanceID BuiltIn InstanceIndex
+               OpDecorateString %InstanceID UserSemantic "SV_INSTANCEID"
+               OpDecorate %VertexID BuiltIn VertexIndex
+               OpDecorateString %VertexID UserSemantic "SV_VERTEXID"
+               OpDecorate %PSIn_Pos BuiltIn Position
+               OpDecorateString %PSIn_Pos UserSemantic "SV_POSITION"
+               OpDecorate %PSIn_Normal Location 0
+               OpDecorateString %PSIn_Normal UserSemantic "NORMAL"
+               OpDecorate %PSIn_UV Location 1
+               OpDecorateString %PSIn_UV UserSemantic "TEX_COORD"
+               OpDecorate %PSIn_MaterialIndex Location 2
+               OpDecorate %PSIn_WorldPos Location 3
+               OpDecorate %PSIn_LocalPos Location 4
+       %void = OpTypeVoid
+          %3 = OpTypeFunction %void
+       %uint = OpTypeInt 32 0
+       %bool = OpTypeBool
+      %float = OpTypeFloat 32
+    %v3float = OpTypeVector %float 3
+    %v2float = OpTypeVector %float 2
+    %v4float = OpTypeVector %float 4
+%uint_4294967295 = OpConstant %uint 4294967295
+%StaticMeshInstanceData = OpTypeStruct %uint %uint %uint
+%_runtimearr_StaticMeshInstanceData = OpTypeRuntimeArray %StaticMeshInstanceData
+%StaticInstances = OpTypeStruct %_runtimearr_StaticMeshInstanceData
+%_ptr_Uniform_StaticInstances = OpTypePointer Uniform %StaticInstances
+%StaticInstances_0 = OpVariable %_ptr_Uniform_StaticInstances Uniform
+        %int = OpTypeInt 32 1
+      %int_0 = OpConstant %int 0
+%_ptr_Uniform_uint = OpTypePointer Uniform %uint
+      %int_1 = OpConstant %int 1
+      %int_2 = OpConstant %int 2
+%ShapeKeyMetadata = OpTypeStruct %int %float %uint %uint
+%_runtimearr_ShapeKeyMetadata = OpTypeRuntimeArray %ShapeKeyMetadata
+%ShapeKeyAnimationMetadata = OpTypeStruct %_runtimearr_ShapeKeyMetadata
+%_ptr_Uniform_ShapeKeyAnimationMetadata = OpTypePointer Uniform %ShapeKeyAnimationMetadata
+%ShapeKeyAnimationMetadata_0 = OpVariable %_ptr_Uniform_ShapeKeyAnimationMetadata Uniform
+%mat4v4float = OpTypeMatrix %v4float 4
+%EnvironmentProperties = OpTypeStruct %mat4v4float %mat4v4float %v3float %uint %float %float %uint %uint %float
+%_ptr_Uniform_EnvironmentProperties = OpTypePointer Uniform %EnvironmentProperties
+          %_ = OpVariable %_ptr_Uniform_EnvironmentProperties Uniform
+      %int_8 = OpConstant %int 8
+%_ptr_Uniform_float = OpTypePointer Uniform %float
+     %uint_1 = OpConstant %uint 1
+      %v3int = OpTypeVector %int 3
+     %uint_3 = OpConstant %uint 3
+        %139 = OpTypeImage %float 2D 0 0 0 1 Unknown
+%_arr_139_uint_1 = OpTypeArray %139 %uint_1
+%_ptr_UniformConstant__arr_139_uint_1 = OpTypePointer UniformConstant %_arr_139_uint_1
+%ShapeKeyClips = OpVariable %_ptr_UniformConstant__arr_139_uint_1 UniformConstant
+%_ptr_UniformConstant_139 = OpTypePointer UniformConstant %139
+      %v2int = OpTypeVector %int 2
+%TransformData = OpTypeStruct %mat4v4float
+%_runtimearr_TransformData = OpTypeRuntimeArray %TransformData
+ %Transforms = OpTypeStruct %_runtimearr_TransformData
+%_ptr_Uniform_Transforms = OpTypePointer Uniform %Transforms
+%Transforms_0 = OpVariable %_ptr_Uniform_Transforms Uniform
+%_ptr_Uniform_mat4v4float = OpTypePointer Uniform %mat4v4float
+    %float_1 = OpConstant %float 1
+    %float_0 = OpConstant %float 0
+%_ptr_Input_v3float = OpTypePointer Input %v3float
+   %VSIn_Pos = OpVariable %_ptr_Input_v3float Input
+%VSIn_Normal = OpVariable %_ptr_Input_v3float Input
+%_ptr_Input_v2float = OpTypePointer Input %v2float
+    %VSIn_UV = OpVariable %_ptr_Input_v2float Input
+%_ptr_Input_uint = OpTypePointer Input %uint
+ %InstanceID = OpVariable %_ptr_Input_uint Input
+   %VertexID = OpVariable %_ptr_Input_uint Input
+%_ptr_Output_v4float = OpTypePointer Output %v4float
+   %PSIn_Pos = OpVariable %_ptr_Output_v4float Output
+%_ptr_Output_v3float = OpTypePointer Output %v3float
+%PSIn_Normal = OpVariable %_ptr_Output_v3float Output
+%_ptr_Output_v2float = OpTypePointer Output %v2float
+    %PSIn_UV = OpVariable %_ptr_Output_v2float Output
+%_ptr_Output_uint = OpTypePointer Output %uint
+%PSIn_MaterialIndex = OpVariable %_ptr_Output_uint Output
+%PSIn_WorldPos = OpVariable %_ptr_Output_v4float Output
+%PSIn_LocalPos = OpVariable %_ptr_Output_v3float Output
+%_ptr_Uniform_int = OpTypePointer Uniform %int
+     %uint_0 = OpConstant %uint 0
+     %uint_2 = OpConstant %uint 2
+       %main = OpFunction %void None %3
+          %5 = OpLabel
+        %306 = OpLoad %v3float %VSIn_Pos
+        %309 = OpLoad %v3float %VSIn_Normal
+        %313 = OpLoad %v2float %VSIn_UV
+        %318 = OpLoad %uint %InstanceID
+        %321 = OpLoad %uint %VertexID
+        %424 = OpAccessChain %_ptr_Uniform_uint %StaticInstances_0 %int_0 %318 %int_0
+        %425 = OpLoad %uint %424
+        %427 = OpAccessChain %_ptr_Uniform_uint %StaticInstances_0 %int_0 %318 %int_1
+        %428 = OpLoad %uint %427
+        %432 = OpAccessChain %_ptr_Uniform_uint %StaticInstances_0 %int_0 %318 %int_2
+        %433 = OpLoad %uint %432
+        %624 = OpINotEqual %bool %433 %uint_4294967295
+               OpSelectionMerge %580 None
+               OpBranchConditional %624 %436 %580
+        %436 = OpLabel
+        %688 = OpAccessChain %_ptr_Uniform_int %ShapeKeyAnimationMetadata_0 %int_0 %433 %uint_0
+        %689 = OpLoad %int %688
+        %690 = OpAccessChain %_ptr_Uniform_float %ShapeKeyAnimationMetadata_0 %int_0 %433 %uint_1
+        %691 = OpLoad %float %690
+        %693 = OpAccessChain %_ptr_Uniform_uint %ShapeKeyAnimationMetadata_0 %int_0 %433 %uint_2
+        %694 = OpLoad %uint %693
+        %448 = OpAccessChain %_ptr_Uniform_float %_ %int_8
+        %449 = OpLoad %float %448
+        %452 = OpFMod %float %449 %691
+        %456 = OpFDiv %float %452 %691
+        %460 = OpISub %uint %694 %uint_1
+        %461 = OpConvertUToF %float %460
+        %462 = OpFMul %float %456 %461
+        %464 = OpExtInst %float %1 Floor %462
+        %465 = OpConvertFToU %uint %464
+        %467 = OpIAdd %uint %465 %uint_1
+        %471 = OpExtInst %uint %1 UMin %467 %460
+        %473 = OpExtInst %float %1 Fract %462
+        %475 = OpIMul %uint %321 %uint_3
+        %477 = OpBitcast %int %475
+        %479 = OpBitcast %int %465
+        %480 = OpCompositeConstruct %v3int %477 %479 %int_0
+        %483 = OpAccessChain %_ptr_UniformConstant_139 %ShapeKeyClips %689
+        %484 = OpLoad %139 %483
+        %486 = OpVectorShuffle %v2int %480 %480 0 1
+        %489 = OpImageFetch %v4float %484 %486 Lod %int_0
+        %490 = OpCompositeExtract %float %489 0
+        %493 = OpIAdd %int %477 %int_1
+        %670 = OpCompositeInsert %v3int %493 %480 0
+        %500 = OpVectorShuffle %v2int %670 %670 0 1
+        %503 = OpImageFetch %v4float %484 %500 Lod %int_0
+        %504 = OpCompositeExtract %float %503 0
+        %507 = OpIAdd %int %477 %int_2
+        %674 = OpCompositeInsert %v3int %507 %670 0
+        %514 = OpVectorShuffle %v2int %674 %674 0 1
+        %517 = OpImageFetch %v4float %484 %514 Lod %int_0
+        %518 = OpCompositeExtract %float %517 0
+        %524 = OpBitcast %int %471
+        %525 = OpCompositeConstruct %v3int %477 %524 %int_0
+        %531 = OpVectorShuffle %v2int %525 %525 0 1
+        %534 = OpImageFetch %v4float %484 %531 Lod %int_0
+        %535 = OpCompositeExtract %float %534 0
+        %679 = OpCompositeInsert %v3int %493 %525 0
+        %545 = OpVectorShuffle %v2int %679 %679 0 1
+        %548 = OpImageFetch %v4float %484 %545 Lod %int_0
+        %549 = OpCompositeExtract %float %548 0
+        %683 = OpCompositeInsert %v3int %507 %679 0
+        %559 = OpVectorShuffle %v2int %683 %683 0 1
+        %562 = OpImageFetch %v4float %484 %559 Lod %int_0
+        %563 = OpCompositeExtract %float %562 0
+        %567 = OpExtInst %float %1 FMix %490 %535 %473
+        %571 = OpExtInst %float %1 FMix %504 %549 %473
+        %575 = OpExtInst %float %1 FMix %518 %563 %473
+        %576 = OpCompositeConstruct %v3float %567 %571 %575
+        %579 = OpFAdd %v3float %306 %576
+               OpBranch %580
+        %580 = OpLabel
+        %685 = OpPhi %v3float %306 %5 %579 %436
+        %582 = OpAccessChain %_ptr_Uniform_mat4v4float %Transforms_0 %int_0 %425 %int_0
+        %583 = OpLoad %mat4v4float %582
+        %585 = OpCompositeExtract %float %685 0
+        %586 = OpCompositeExtract %float %685 1
+        %587 = OpCompositeExtract %float %685 2
+        %588 = OpCompositeConstruct %v4float %585 %586 %587 %float_1
+        %589 = OpMatrixTimesVector %v4float %583 %588
+        %590 = OpAccessChain %_ptr_Uniform_mat4v4float %_ %int_0
+        %591 = OpLoad %mat4v4float %590
+        %593 = OpMatrixTimesVector %v4float %591 %589
+        %603 = OpCompositeExtract %float %309 0
+        %604 = OpCompositeExtract %float %309 1
+        %605 = OpCompositeExtract %float %309 2
+        %606 = OpCompositeConstruct %v4float %603 %604 %605 %float_0
+        %607 = OpMatrixTimesVector %v4float %583 %606
+        %608 = OpExtInst %v4float %1 Normalize %607
+        %609 = OpCompositeExtract %float %608 0
+        %610 = OpCompositeExtract %float %608 1
+        %611 = OpCompositeExtract %float %608 2
+        %612 = OpCompositeConstruct %v3float %609 %610 %611
+               OpStore %PSIn_Pos %593
+               OpStore %PSIn_Normal %612
+               OpStore %PSIn_UV %313
+               OpStore %PSIn_MaterialIndex %428
+               OpStore %PSIn_WorldPos %589
+               OpStore %PSIn_LocalPos %685
+               OpReturn
+               OpFunctionEnd

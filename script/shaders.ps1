@@ -17,15 +17,15 @@ $Compiler = $Env:VULKAN_SDK + "\Bin\glslangValidator.exe"
 $Optimizer = $Env:VULKAN_SDK + "\Bin\spirv-opt.exe"
 $Preamble = "#pragma pack_matrix(row_major)"
 
-if ($DebugMode) {
-    $CompilerOutputDir = Join-Path $OutputDir "debug"
-    if (-not (Test-Path -Path $OutputDir)) {
-        New-Item -Path $OutputDir -ItemType Directory | Out-Null
-    }
-}
-else {
-    $CompilerOutputDir = Join-Path $OutputDir "temp"
-}
+# if ($DebugMode) {
+#     $CompilerOutputDir = Join-Path $OutputDir "debug"
+#     if (-not (Test-Path -Path $OutputDir)) {
+#         New-Item -Path $OutputDir -ItemType Directory | Out-Null
+#     }
+# }
+# else {
+    $CompilerOutputDir = $OutputDir
+# }
 
 $FailureCount = 0
 

@@ -68,16 +68,16 @@ void main(in  VSInput VSIn, uint InstanceID : SV_InstanceID, uint VertexID : SV_
         uint shapeKeyIndexHigh = min(shapeKeyIndexLow + 1, metadata.numShapeKeys - 1);
         float shapeKeyLerpFactor = frac(frameF);
 
+        int baseVertexID = VertexID - 47300;
 
-
-        int3 texelCoords = int3(VertexID * 3 + 0, shapeKeyIndexLow, 0); // X
+        int3 texelCoords = int3(baseVertexID * 3 + 0, shapeKeyIndexLow, 0); // X
         float positionOffsetLowX = ShapeKeyClips[metadata.shapeKeyAnimationIndex].Load(texelCoords); // X, Y, Z, X, Y, Z, X, Y, Z
         texelCoords.x += 1; // Y
         float positionOffsetLowY = ShapeKeyClips[metadata.shapeKeyAnimationIndex].Load(texelCoords);
         texelCoords.x += 1; // Z
         float positionOffsetLowZ = ShapeKeyClips[metadata.shapeKeyAnimationIndex].Load(texelCoords);
 
-        texelCoords = int3(VertexID * 3 + 0, shapeKeyIndexHigh, 0); // X
+        texelCoords = int3(baseVertexID * 3 + 0, shapeKeyIndexHigh, 0); // X
         float positionOffsetHighX = ShapeKeyClips[metadata.shapeKeyAnimationIndex].Load(texelCoords); // X, Y, Z, X, Y, Z, X, Y, Z
         texelCoords.x += 1; // Y
         float positionOffsetHighY = ShapeKeyClips[metadata.shapeKeyAnimationIndex].Load(texelCoords);
@@ -95,6 +95,7 @@ void main(in  VSInput VSIn, uint InstanceID : SV_InstanceID, uint VertexID : SV_
     PSIn.WorldPos = TransformedPos;
     PSIn.LocalPos = animatedPos.xyz;
     PSIn.MaterialIndex = materialIndex;
+
 
 
     /*
