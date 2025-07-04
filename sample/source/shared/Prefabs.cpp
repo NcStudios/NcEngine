@@ -54,6 +54,7 @@ void InitializeResources()
     mesh::Load();
     mesh_collider::Load();
     animation::Load();
+    shapekey_animation::Load();
     texture::Load();
 }
 

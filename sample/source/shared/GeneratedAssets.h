@@ -120,6 +120,8 @@ constexpr auto girl_body = "girl/body.nca";
 constexpr auto cube = "cube.nca";
 constexpr auto plane = "plane.nca";
 constexpr auto flag = "flag.nca";
+constexpr auto sheet = "sheet.nca";
+constexpr auto steeple = "steeple.nca";
 } // namespace path
 
 extern nc::asset::MeshView default_plane;
@@ -139,6 +141,8 @@ extern nc::asset::MeshView girl_body;
 extern nc::asset::MeshView cube;
 extern nc::asset::MeshView plane;
 extern nc::asset::MeshView flag;
+extern nc::asset::MeshView sheet;
+extern nc::asset::MeshView steeple;
 
 void Load();
 void Acquire();
@@ -157,6 +161,28 @@ extern nc::asset::AssetId halfpipe;
 
 void Load();
 } // namespace mesh_collider
+
+namespace shapekey_animation
+{
+namespace path
+{
+constexpr auto default_shapekey = "default/shapekey.nca";
+constexpr auto cube = "cube.nca";
+constexpr auto plane = "plane.nca";
+constexpr auto flag = "flag.nca";
+constexpr auto chute = "chute.nca";
+constexpr auto fall = "fall.nca";
+} // namespace path
+
+extern nc::asset::AssetId default_shapekey;
+extern nc::asset::AssetId cube;
+extern nc::asset::AssetId plane;
+extern nc::asset::AssetId flag;
+extern nc::asset::AssetId chute;
+extern nc::asset::AssetId fall;
+
+void Load();
+} // namespace shapekey_animation
 
 namespace animation
 {

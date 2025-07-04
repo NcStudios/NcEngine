@@ -142,7 +142,7 @@ void WriteAcquireFunction(std::ostream& source,
     source << "}\n\n";
 }
 
-void WriteAnimations(std::ostream& header,
+void WriteSkeletalAnimations(std::ostream& header,
                      std::ostream& source,
                      const std::vector<nc::convert::ReflectedTarget>& assets)
 {
@@ -255,6 +255,25 @@ void WriteMeshColliders(std::ostream& header,
     EndNamespace(source, ns);
 }
 
+void WriteShapeKeyAnimations(std::ostream& header,
+                             std::ostream& source,
+                             const std::vector<nc::convert::ReflectedTarget>& assets)
+{
+    constexpr auto ns = std::string_view{"shapekey_animation"};
+    constexpr auto variableType = std::string_view{"nc::asset::AssetId"};
+    BeginNamespace(header, ns);
+    WritePaths(header, assets);
+    WriteVariableDeclarations(header, assets, variableType);
+    WriteLoadFunctionDeclaration(header);
+    EndNamespace(header, ns);
+
+    BeginNamespace(source, ns);
+    WritePathsArray(source, assets, "g_paths");
+    WriteAssetIds(source, assets);
+    WriteLoadFunction(source, "nc::asset::LoadShapeKeyAnimationAssets", "g_paths");
+    EndNamespace(source, ns);
+}
+
 void WriteTextures(std::ostream& header,
                    std::ostream& source,
                    const std::vector<nc::convert::ReflectedTarget>& assets)
@@ -306,13 +325,14 @@ void GeneratePrefabFile(const std::filesystem::path& manifestPath,
         using enum nc::asset::AssetType;
         switch (type)
         {
-            case AudioClip:         WriteAudioClips(header, source, assets);    break;
-            case ConvexHull:        WriteConvexHulls(header, source, assets);   break;
-            case CubeMap:           WriteCubeMaps(header, source, assets);      break;
-            case Mesh:              WriteMeshes(header, source, assets);        break;
-            case MeshCollider:      WriteMeshColliders(header, source, assets); break;
-            case SkeletalAnimation: WriteAnimations(header, source, assets);    break;
-            case Texture:           WriteTextures(header, source, assets);      break;
+            case AudioClip:         WriteAudioClips(header, source, assets);         break;
+            case ConvexHull:        WriteConvexHulls(header, source, assets);        break;
+            case CubeMap:           WriteCubeMaps(header, source, assets);           break;
+            case Mesh:              WriteMeshes(header, source, assets);             break;
+            case MeshCollider:      WriteMeshColliders(header, source, assets);      break;
+            case SkeletalAnimation: WriteSkeletalAnimations(header, source, assets); break;
+            case ShapeKeyAnimation: WriteShapeKeyAnimations(header, source, assets); break;
+            case Texture:           WriteTextures(header, source, assets);           break;
             case Shader:
             case Font:
                 continue;

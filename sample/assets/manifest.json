@@ -2,7 +2,7 @@
     "globalOptions": {
         "outputDirectory": "./nca",
         "defaultMeshOptions": {
-            "optimizeMesh": false
+            "optimizeMesh": true
         },
         "defaultCubeMapOptions": {
             "textureFormat": "BC3_UNORM_SRGB"
@@ -100,7 +100,11 @@
                     "subResourceName": "Plane",
                     "assetName": "mesh\\plane"
                 }
-            ]
+            ],
+            "options":
+            {
+                "optimizeMesh": false
+            }
         },
         {
             "sourcePath": "raw/model/flag.glb",
@@ -109,7 +113,28 @@
                     "subResourceName": "Flag",
                     "assetName": "mesh\\flag"
                 }
-            ]
+            ],
+            "options":
+            {
+                "optimizeMesh": false
+            }
+        },
+        {
+            "sourcePath": "raw/model/steeple.glb",
+            "assetNames": [
+                {
+                    "subResourceName": "Sheet",
+                    "assetName": "mesh\\sheet"
+                },
+                {
+                    "subResourceName": "Steeple",
+                    "assetName": "mesh\\steeple"
+                }
+            ],
+            "options":
+            {
+                "optimizeMesh": false
+            }
         }
     ],
     "mesh-collider": [
@@ -143,6 +168,19 @@
                 {
                     "subResourceName": "FlagWave",
                     "assetName": "shapekey_animation\\flag"
+                }
+            ]
+        },
+        {
+            "sourcePath": "raw/model/steeple.glb",
+            "assetNames": [
+                {
+                    "subResourceName": "Chute",
+                    "assetName": "shapekey_animation\\chute"
+                },
+                {
+                    "subResourceName": "Fall",
+                    "assetName": "shapekey_animation\\fall"
                 }
             ]
         }

@@ -19,26 +19,8 @@ struct PSInput
     float3 LocalPos;
 };
 
-/*
-struct ShapeKeyMetadata
-{
-    int ShapeKeyAnimationIndex;
-    float DurationInSeconds;
-};
-
-SamplerState  ShapeKeyAnims_sampler; // By convention, texture samplers must use the '_sampler' suffix
-
-struct ShapeKeyMetadata
-{
-    int shapeKeyAnimationIndex;
-    float durationInSeconds;
-    uint numShapeKeys;
-    uint padding;
-};
-
-*/
 Texture2D<float> ShapeKeyClips[];
-SamplerState  Textures_sampler; // By convention, texture samplers must use the '_sampler' suffix
+SamplerState  Textures_sampler; 
 StructuredBuffer<ShapeKeyMetadata> ShapeKeyAnimationMetadata;
 
 StructuredBuffer<TransformData> Transforms;
@@ -63,7 +45,7 @@ void main(in  VSInput VSIn, uint InstanceID : SV_InstanceID, uint VertexID : SV_
 
         float wrappedTime = fmod(time, metadata.durationInSeconds);
         float normalizedT = wrappedTime / metadata.durationInSeconds;
-        float frameF = normalizedT * (metadata.numShapeKeys - 1);
+        float frameF = normalizedT * (metadata.numShapeKeys - 1); 
         uint shapeKeyIndexLow = (uint)floor(frameF);
         uint shapeKeyIndexHigh = min(shapeKeyIndexLow + 1, metadata.numShapeKeys - 1);
         float shapeKeyLerpFactor = frac(frameF);

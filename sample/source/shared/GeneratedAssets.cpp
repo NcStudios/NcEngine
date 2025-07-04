@@ -164,6 +164,8 @@ const auto g_paths = std::array{
     std::string{path::cube},
     std::string{path::plane},
     std::string{path::flag},
+    std::string{path::sheet},
+    std::string{path::steeple},
 };
 
 nc::asset::MeshView default_plane{};
@@ -183,6 +185,8 @@ nc::asset::MeshView girl_body{};
 nc::asset::MeshView cube{};
 nc::asset::MeshView plane{};
 nc::asset::MeshView flag{};
+nc::asset::MeshView sheet{};
+nc::asset::MeshView steeple{};
 
 void Load()
 {
@@ -208,6 +212,8 @@ void Acquire()
     cube = nc::asset::AcquireMeshAsset(path::cube);
     plane = nc::asset::AcquireMeshAsset(path::plane);
     flag = nc::asset::AcquireMeshAsset(path::flag);
+    sheet = nc::asset::AcquireMeshAsset(path::sheet);
+    steeple = nc::asset::AcquireMeshAsset(path::steeple);
 }
 
 } // namespace mesh
@@ -228,6 +234,31 @@ void Load()
 }
 
 } // namespace mesh_collider
+
+namespace shapekey_animation
+{
+const auto g_paths = std::array{
+    std::string{path::default_shapekey},
+    std::string{path::cube},
+    std::string{path::plane},
+    std::string{path::flag},
+    std::string{path::chute},
+    std::string{path::fall},
+};
+
+nc::asset::AssetId default_shapekey{nc::utility::Fnv1a(path::default_shapekey)};
+nc::asset::AssetId cube{nc::utility::Fnv1a(path::cube)};
+nc::asset::AssetId plane{nc::utility::Fnv1a(path::plane)};
+nc::asset::AssetId flag{nc::utility::Fnv1a(path::flag)};
+nc::asset::AssetId chute{nc::utility::Fnv1a(path::chute)};
+nc::asset::AssetId fall{nc::utility::Fnv1a(path::fall)};
+
+void Load()
+{
+    nc::asset::LoadShapeKeyAnimationAssets(g_paths);
+}
+
+} // namespace shapekey_animation
 
 namespace animation
 {

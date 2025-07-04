@@ -296,6 +296,40 @@ target_link_libraries(TextureAssetManager_tests
 
 add_test(TextureAssetManager_tests TextureAssetManager_tests)
 
+### ShapeKeyAnimationAssetManager Tests ###
+add_executable(ShapeKeyAnimationAssetManager_tests
+    ShapeKeyAnimationAssetManager_tests.cpp
+    ${NC_SOURCE_DIR}/asset/manager/ShapeKeyAnimationAssetManager.cpp
+    ${NC_SOURCE_DIR}/asset/AssetData.cpp
+)
+
+target_compile_definitions(ShapeKeyAnimationAssetManager_tests
+    PRIVATE
+        NC_TEST_COLLATERAL_DIRECTORY="${PROJECT_SOURCE_DIR}/sample/assets/nca/shapekey_animation/"
+)
+
+target_include_directories(ShapeKeyAnimationAssetManager_tests
+    PRIVATE
+        ${NC_INCLUDE_DIR}
+        ${NC_INCLUDE_DIR}/ncengine
+        ${NC_SOURCE_DIR}
+        ${NC_EXTERNAL_DIR}
+)
+
+target_compile_options(ShapeKeyAnimationAssetManager_tests
+    PUBLIC
+        ${NC_COMPILER_FLAGS}
+)
+
+target_link_libraries(ShapeKeyAnimationAssetManager_tests
+    PRIVATE
+        NcAsset
+        NcUtility
+        gtest_main
+)
+
+add_test(ShapeKeyAnimationAssetManager_tests ShapeKeyAnimationAssetManager_tests)
+
 ### SkeletalAnimationAssetManager Tests ###
 add_executable(SkeletalAnimationAssetManager_tests
     SkeletalAnimationAssetManager_tests.cpp

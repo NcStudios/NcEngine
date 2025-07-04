@@ -27,15 +27,9 @@ GraphicsTest::GraphicsTest(SampleUI* ui, Vector3 extents)
 {
 }
 
-const auto g_paths = std::array{
-    std::string{"flag.nca"}
-};
-
 void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
 {
     ReloadPrefabs();
-    nc::asset::LoadShapeKeyAnimationAssets(g_paths);
-
     m_sampleUI->SetWidgetCallback(nullptr);
     modules.Get<NcGraphics>()->SetSkybox(cube_map::path::night_sky);
 
@@ -46,113 +40,48 @@ void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
     const auto guy2 = world.Emplace<Entity>({
         .position = Vector3{6.0f, 1.8f, 4.0f},
         .rotation = Quaternion::FromEulerAngles(1.579f, 1.322f, 0.091f),
-        .scale = Vector3{3.0f, 3.0f, 3.0f},
+        .scale = Vector3{2.75f, 2.75f, 2.75f},
         .tag = "guy2"
     });
     world.Emplace<StaticMesh>(guy2, mesh::guy2, material::guy2);
 
-    const auto deformableCube = world.Emplace<Entity>({
-        .position = Vector3{4.0f, 2.0f, 4.0f},
+    const auto steeple = world.Emplace<Entity>({
+        .position = Vector3{1.0f, 1.3f, 4.0f},
+        .rotation = Quaternion::FromEulerAngles(0.0f, 0.0f, 0.0f),
+        .scale = Vector3{2.9f, 1.8f, 3.0f},
+        .tag = "steeple"
+    });
+    world.Emplace<StaticMesh>(steeple, mesh::steeple, material::blue);
+
+    const auto sheet = world.Emplace<Entity>({
+        .position = Vector3{1.0f, 1.0f, 4.0f},
         .rotation = Quaternion::FromEulerAngles(0.0f, 0.0f, 0.0f),
         .scale = Vector3{1.0f, 1.0f, 1.0f},
-        .tag = "Deformable Cube"
+        .tag = "sheet"
     });
-    
-    std::vector<std::vector<nc::Vector3>> frames(2);
-    frames[0] = {
-        nc::Vector3{-1.0f, -1.0f, -1.0f},
-        nc::Vector3{-1.0f,  1.0f, -1.0f},
-        nc::Vector3{-1.0f,  1.0f,  1.0f},
-        nc::Vector3{-1.0f, -1.0f,  1.0f},
-        nc::Vector3{-1.0f, -1.0f,  1.0f},
-        nc::Vector3{-1.0f,  1.0f,  1.0f},
-        nc::Vector3{ 1.0f,  1.0f,  2.0f},
-        nc::Vector3{ 1.0f, -1.0f,  1.0f},
-        nc::Vector3{ 1.0f, -1.0f,  1.0f},
-        nc::Vector3{ 1.0f,  1.0f,  2.0f},
-        nc::Vector3{ 1.0f,  1.0f, -1.0f},
-        nc::Vector3{ 1.0f, -1.0f, -1.0f},
-        nc::Vector3{ 1.0f, -1.0f, -1.0f},
-        nc::Vector3{ 1.0f,  1.0f, -1.0f},
-        nc::Vector3{-1.0f,  1.0f, -1.0f},
-        nc::Vector3{-1.0f, -1.0f, -1.0f},
-        nc::Vector3{-1.0f, -1.0f,  1.0f},
-        nc::Vector3{ 1.0f, -1.0f,  1.0f},
-        nc::Vector3{ 1.0f, -1.0f, -1.0f},
-        nc::Vector3{-1.0f, -1.0f, -1.0f},
-        nc::Vector3{ 1.0f,  1.0f,  2.0f},
-        nc::Vector3{-1.0f,  1.0f,  1.0f},
-        nc::Vector3{-1.0f,  1.0f, -1.0f},
-        nc::Vector3{ 1.0f,  1.0f, -1.0f}
-    };
 
-    // Second group of 24 points
-    frames[1] = {
-        nc::Vector3{-1.0f, -1.0f, -1.0f},
-        nc::Vector3{-1.0f,  2.0f, -1.0f},
-        nc::Vector3{-1.0f,  1.0f,  1.0f},
-        nc::Vector3{-1.0f, -1.0f,  1.0f},
-        nc::Vector3{-1.0f, -1.0f,  1.0f},
-        nc::Vector3{-1.0f,  1.0f,  1.0f},
-        nc::Vector3{ 1.0f,  1.0f,  1.0f},
-        nc::Vector3{ 1.0f, -1.0f,  1.0f},
-        nc::Vector3{ 1.0f, -1.0f,  1.0f},
-        nc::Vector3{ 1.0f,  1.0f,  1.0f},
-        nc::Vector3{ 1.0f,  1.0f, -1.0f},
-        nc::Vector3{ 1.0f, -1.0f, -1.0f},
-        nc::Vector3{ 1.0f, -1.0f, -1.0f},
-        nc::Vector3{ 1.0f,  1.0f, -1.0f},
-        nc::Vector3{-1.0f,  2.0f, -1.0f},
-        nc::Vector3{-1.0f, -1.0f, -1.0f},
-        nc::Vector3{-1.0f, -1.0f,  1.0f},
-        nc::Vector3{ 1.0f, -1.0f,  1.0f},
-        nc::Vector3{ 1.0f, -1.0f, -1.0f},
-        nc::Vector3{-1.0f, -1.0f, -1.0f},
-        nc::Vector3{ 1.0f,  1.0f,  1.0f},
-        nc::Vector3{-1.0f,  1.0f,  1.0f},
-        nc::Vector3{-1.0f,  2.0f, -1.0f},
-        nc::Vector3{ 1.0f,  1.0f, -1.0f}
-    };
+    auto& shapeKeyController = world.Emplace<StaticMesh>(sheet, mesh::sheet, material::yellow, shapekey_animation::chute).GetShapeKeyAnimationController();
+    shapeKeyController.AddState(PlayOnceAnimation{
+        .animId = shapekey_animation::fall,
+        .enterWhen = [](){ return input::KeyDown(input::KeyCode::Space);}
+    });
 
-    // auto cubeAnim = asset::ShapeKeyAnimation
-    // {
-    //     .name = "Move",
-    //     .durationInTicks = 416,
-    //     .ticksPerSecond = 1000,
-    //     .shapeKeyCount = 2,
-    //     .positionFrames = frames
-    // };
-
-//     struct ShapeKeyAnimationView
-// {
-//     AssetId id = NullAssetId;
-//     uint32_t index = NullAssetIndex;
-// };
-
-    auto cubeAnimView = asset::ShapeKeyAnimationView
-    {
-        1,
-        0
-    };
-
-    // world.Emplace<StaticMesh>(deformableCube, mesh::cube, material::green);
-
-    // const auto deformablePlane = world.Emplace<Entity>({
-    //     .position = Vector3{1.0f, 2.0f, 4.0f},
-    //     .rotation = Quaternion::FromEulerAngles(0.472f, 0.0f, 0.0f),
-    //     .scale = Vector3{1.0f, 1.0f, 1.0f},
-    //     .tag = "Deformable Plane"
-    // });
-    // world.Emplace<StaticMesh>(deformablePlane, mesh::plane, material::blue, cubeAnimView.id);
-
-    
     const auto flag = world.Emplace<Entity>({
-        .position = Vector3{6.0f, 2.0f, 4.0f},
+        .position = Vector3{3.0f, 2.0f, 4.0f},
         .rotation = Quaternion::FromEulerAngles(0.472f, 0.0f, 0.0f),
-        .scale = Vector3{1.0f, 1.0f, 1.0f},
+        .scale = Vector3{2.0f, 2.0f, 2.0f},
         .tag = "Flag"
     });
-    world.Emplace<StaticMesh>(flag, mesh::flag, material::blue, cubeAnimView.id);
+    world.Emplace<StaticMesh>(flag, mesh::flag, material::blue, shapekey_animation::flag);
+    
+    
+    // const auto plane = world.Emplace<Entity>({
+    //     .position = Vector3{1.0f, 5.0f, 4.0f},
+    //     .rotation = Quaternion::FromEulerAngles(0.472f, 0.0f, 0.0f),
+    //     .scale = Vector3{1.0f, 1.0f, 1.0f},
+    //     .tag = "plane"
+    // });
+    // world.Emplace<StaticMesh>(plane, mesh::plane, material::green, shapekey_animation::plane);
     
     // Ogre
     {

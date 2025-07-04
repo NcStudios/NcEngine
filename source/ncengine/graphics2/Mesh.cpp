@@ -1,14 +1,16 @@
 #include "ncengine/graphics/Mesh.h"
 #include "frontend/subsystem/MeshSubsystem.h"
+#include "ncasset/Assets.h"
+#include "asset/AssetService.h"
 
 namespace nc
 {
 MeshBase::MeshBase(Entity self,
                    const asset::MeshView& meshAsset,
                    const MaterialDesc& materialDesc,
-                   asset::AssetId rootShapeKeyAnimationId,
+                   asset::AssetId shapeKeyAnimationId,
                    MeshInstanceType type)
-    : m_ctx{self, meshAsset.id, std::numeric_limits<uint32_t>::max(), std::numeric_limits<uint32_t>::max(), rootShapeKeyAnimationId == asset::NullAssetId ? std::numeric_limits<uint32_t>::max() : 0u, meshAsset.firstVertex, type},
+    : m_ctx{self, meshAsset.id, std::numeric_limits<uint32_t>::max(), std::numeric_limits<uint32_t>::max(), shapeKeyAnimationId == asset::NullAssetId ? std::numeric_limits<uint32_t>::max() : asset::AssetService<asset::ShapeKeyAnimationView>::Get()->Acquire(shapeKeyAnimationId).index, meshAsset.firstVertex, type},
       m_material{MaterialInstance{materialDesc}}
 {
     s_subsystem->AddInstance(m_ctx, m_material, meshAsset);
