@@ -1,7 +1,7 @@
 #pragma once
 
-#include "CollateralCommon.h"
 #include "analysis/GeometryAnalysis.h"
+#include "CollateralCommon.h"
 
 #include "ncmath/Geometry.h"
 
@@ -15,17 +15,21 @@ namespace cube_fbx
 {
 const auto filePath = collateralDirectory / "cube.fbx";
 constexpr auto vertexCount = 24ull; // note that duplicates are removed below
-constexpr auto possibleVertices = std::array<nc::Vector3, 8>{
-    nc::Vector3{ 0.5f,  0.5f,  0.5f}, nc::Vector3{-0.5f,  0.5f,  0.5f},
-    nc::Vector3{ 0.5f,  0.5f, -0.5f}, nc::Vector3{-0.5f,  0.5f, -0.5f},
-    nc::Vector3{ 0.5f, -0.5f,  0.5f}, nc::Vector3{-0.5f, -0.5f,  0.5f},
-    nc::Vector3{ 0.5f, -0.5f, -0.5f}, nc::Vector3{-0.5f, -0.5f, -0.5f}
-};
+constexpr auto possibleVertices = std::array<nc::Vector3, 8>{nc::Vector3{0.5f, 0.5f, 0.5f},
+                                                             nc::Vector3{-0.5f, 0.5f, 0.5f},
+                                                             nc::Vector3{0.5f, 0.5f, -0.5f},
+                                                             nc::Vector3{-0.5f, 0.5f, -0.5f},
+                                                             nc::Vector3{0.5f, -0.5f, 0.5f},
+                                                             nc::Vector3{-0.5f, -0.5f, 0.5f},
+                                                             nc::Vector3{0.5f, -0.5f, -0.5f},
+                                                             nc::Vector3{-0.5f, -0.5f, -0.5f}};
 
-constexpr auto possibleNormals = std::array<nc::Vector3, 6>{
-    nc::Vector3::Left(), nc::Vector3::Right(), nc::Vector3::Up(),
-    nc::Vector3::Down(), nc::Vector3::Front(), nc::Vector3::Back()
-};
+constexpr auto possibleNormals = std::array<nc::Vector3, 6>{nc::Vector3::Left(),
+                                                            nc::Vector3::Right(),
+                                                            nc::Vector3::Up(),
+                                                            nc::Vector3::Down(),
+                                                            nc::Vector3::Front(),
+                                                            nc::Vector3::Back()};
 
 constexpr auto meshVertexExtents = nc::Vector3::One();
 const auto furthestDistanceFromOrigin = std::sqrt(0.75f);
@@ -90,20 +94,48 @@ namespace plane_fbx
 {
 const auto filePath = collateralDirectory / "plane.fbx";
 constexpr auto triangleCount = 2ull;
-constexpr auto possibleTriangles = std::array<nc::Triangle, triangleCount>{
-    nc::Triangle{
-        nc::Vector3{-1.0f, -1.0f, 0.0f},
-        nc::Vector3{-1.0f,  1.0f, 0.0f},
-        nc::Vector3{ 1.0f, -1.0f, 0.0f}
-    },
-    nc::Triangle{
-        nc::Vector3{-1.0f,  1.0f, 0.0f},
-        nc::Vector3{ 1.0f,  1.0f, 0.0f},
-        nc::Vector3{ 1.0f, -1.0f, 0.0f}
-    }
-};
+constexpr auto possibleTriangles =
+    std::array<nc::Triangle, triangleCount>{nc::Triangle{nc::Vector3{-1.0f, -1.0f, 0.0f},
+                                                         nc::Vector3{-1.0f, 1.0f, 0.0f},
+                                                         nc::Vector3{1.0f, -1.0f, 0.0f}},
+                                            nc::Triangle{nc::Vector3{-1.0f, 1.0f, 0.0f},
+                                                         nc::Vector3{1.0f, 1.0f, 0.0f},
+                                                         nc::Vector3{1.0f, -1.0f, 0.0f}}};
 
 constexpr auto meshVertexExtents = nc::Vector3{2.0f, 2.0f, 0.0f};
 const auto furthestDistanceFromOrigin = std::sqrt(2.0f);
 } // namespace plane_fbx
+
+// Sample models with shape key animations
+namespace cube_glb
+{
+const auto filePath = std::filesystem::path{SAMPLE_MODEL_DIR} / "cube.glb";
+constexpr auto vertexCount = 14ull;
+constexpr auto shapeKeyCount = 2u;
+constexpr auto animationDuration = 0.41666666f;
+} // namespace cube_glb
+
+namespace plane_glb
+{
+const auto filePath = std::filesystem::path{SAMPLE_MODEL_DIR} / "plane.glb";
+constexpr auto vertexCount = 4ull;
+constexpr auto shapeKeyCount = 3u;
+constexpr auto animationDuration = 8.333333f;
+} // namespace plane_glb
+
+namespace flag_glb
+{
+const auto filePath = std::filesystem::path{SAMPLE_MODEL_DIR} / "flag.glb";
+constexpr auto vertexCount = 1281ull;
+constexpr auto shapeKeyCount = 25u;
+constexpr auto animationDuration = 10.041667f;
+} // namespace flag_glb
+
+namespace steeple_glb
+{
+const auto filePath = std::filesystem::path{SAMPLE_MODEL_DIR} / "steeple.glb";
+constexpr auto vertexCount = 4225ull;
+constexpr auto shapeKeyCount = 20u;
+constexpr auto animationDuration = 4.0f;
+} // namespace steeple_glb
 } // namespace collateral

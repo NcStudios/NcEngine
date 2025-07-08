@@ -186,6 +186,7 @@ if(NC_BUILD_NCCONVERT)
     target_compile_definitions(GeometryConverter_unit_tests
         PRIVATE
             TEST_COLLATERAL_DIR="${NC_CONVERT_TEST_COLLATERAL_DIR}"
+            SAMPLE_MODEL_DIR="${PROJECT_SOURCE_DIR}/sample/assets/raw/model"
     )
 
     target_include_directories(GeometryConverter_unit_tests

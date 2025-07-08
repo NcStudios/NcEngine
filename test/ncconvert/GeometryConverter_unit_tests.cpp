@@ -1,6 +1,6 @@
-#include "gtest/gtest.h"
-#include "GeometryTestUtility.h"
 #include "CollateralGeometry.h"
+#include "GeometryTestUtility.h"
+#include "gtest/gtest.h"
 
 #include "analysis/GeometryAnalysis.h"
 #include "converters/GeometryConverter.h"
@@ -75,7 +75,8 @@ TEST(GeometryConverterTest, ImportedMesh_convertsToNca)
     }
 
     const auto nVertices = actual.vertices.size();
-    EXPECT_TRUE(std::ranges::all_of(actual.indices, [&nVertices](auto i){ return i < nVertices; }));
+    EXPECT_TRUE(
+        std::ranges::all_of(actual.indices, [&nVertices](auto i) { return i < nVertices; }));
 }
 
 TEST(GeometryConverterTest, ImportedMesh_optimizeMesh_convertsToNca)
@@ -97,7 +98,8 @@ TEST(GeometryConverterTest, ImportedMesh_optimizeMesh_convertsToNca)
     }
 
     const auto nVertices = actual.vertices.size();
-    EXPECT_TRUE(std::ranges::all_of(actual.indices, [&nVertices](auto i){ return i < nVertices; }));
+    EXPECT_TRUE(
+        std::ranges::all_of(actual.indices, [&nVertices](auto i) { return i < nVertices; }));
 }
 
 TEST(GeometryConverterTest, ImportedMesh_multipleSubResources_specifiedMeshParsed)
@@ -159,12 +161,13 @@ TEST(GeometryConverterTest, GetBoneWeights_fiveBonesPerVertex_importFails)
     {
         uut.ImportMesh(test_data::filePath);
     }
-    catch(const nc::NcError& e)
+    catch (const nc::NcError& e)
     {
-        EXPECT_TRUE(std::string(e.what()).find(std::string("more than four bones")) != std::string::npos);
+        EXPECT_TRUE(std::string(e.what()).find(std::string("more than four bones")) !=
+                    std::string::npos);
         threwNcError = true;
     }
-    
+
     EXPECT_TRUE(threwNcError);
 }
 
@@ -177,12 +180,13 @@ TEST(GeometryConverterTest, GetBoneWeights_weightsNotEqual100_importFails)
     {
         uut.ImportMesh(test_data::filePath);
     }
-    catch(const nc::NcError& e)
+    catch (const nc::NcError& e)
     {
-        EXPECT_TRUE(std::string(e.what()).find(std::string("affecting each vertex must equal 1")) != std::string::npos);
+        EXPECT_TRUE(std::string(e.what()).find(std::string("affecting each vertex must equal 1")) !=
+                    std::string::npos);
         threwNcError = true;
     }
-    
+
     EXPECT_TRUE(threwNcError);
 }
 
@@ -205,14 +209,14 @@ TEST(GeometryConverterTest, GetBonesData_getBonesWeight_elementsCorrespond)
 
     for (const auto& vertex : actual.vertices)
     {
-        EXPECT_EQ(vertex.boneIds[0], 0); // Bone0
-        EXPECT_EQ(vertex.boneIds[1], 1); // Bone1
-        EXPECT_EQ(vertex.boneIds[2], 2); // Bone2
-        EXPECT_EQ(vertex.boneIds[3], 3); // Bone3
-        EXPECT_FLOAT_EQ(vertex.boneWeights.x, 0.1f);  // Bone0
-        EXPECT_FLOAT_EQ(vertex.boneWeights.y, 0.1f);  // Bone1
-        EXPECT_FLOAT_EQ(vertex.boneWeights.z, 0.1f);  // Bone2
-        EXPECT_FLOAT_EQ(vertex.boneWeights.w, 0.7f);  // Bone3
+        EXPECT_EQ(vertex.boneIds[0], 0);             // Bone0
+        EXPECT_EQ(vertex.boneIds[1], 1);             // Bone1
+        EXPECT_EQ(vertex.boneIds[2], 2);             // Bone2
+        EXPECT_EQ(vertex.boneIds[3], 3);             // Bone3
+        EXPECT_FLOAT_EQ(vertex.boneWeights.x, 0.1f); // Bone0
+        EXPECT_FLOAT_EQ(vertex.boneWeights.y, 0.1f); // Bone1
+        EXPECT_FLOAT_EQ(vertex.boneWeights.z, 0.1f); // Bone2
+        EXPECT_FLOAT_EQ(vertex.boneWeights.w, 0.7f); // Bone3
     }
 
     const auto& bonesData = actual.bonesData.value();
@@ -230,11 +234,11 @@ TEST(GeometryConverterTest, GetBonesData_complexMesh_convertedCorrectly)
     auto uut = nc::convert::GeometryConverter{};
     const auto actual = uut.ImportMesh(test_data::filePath);
 
-    EXPECT_FLOAT_EQ(actual.vertices[0].boneWeights.x, 0.35232919f);  // Bone0
-    EXPECT_FLOAT_EQ(actual.vertices[0].boneWeights.y, 0.17152755f);  // Bone1
-    EXPECT_FLOAT_EQ(actual.vertices[0].boneWeights.z, 0.11047833f);  // Bone2
-    EXPECT_FLOAT_EQ(actual.vertices[0].boneWeights.w, 0.36566496f);  // Bone3
-    
+    EXPECT_FLOAT_EQ(actual.vertices[0].boneWeights.x, 0.35232919f); // Bone0
+    EXPECT_FLOAT_EQ(actual.vertices[0].boneWeights.y, 0.17152755f); // Bone1
+    EXPECT_FLOAT_EQ(actual.vertices[0].boneWeights.z, 0.11047833f); // Bone2
+    EXPECT_FLOAT_EQ(actual.vertices[0].boneWeights.w, 0.36566496f); // Bone3
+
     const auto& bonesData = actual.bonesData.value();
     EXPECT_EQ(bonesData.boneSpaceToParentSpace.size(), 383);
     EXPECT_EQ(bonesData.vertexSpaceToBoneSpace.size(), 283);
@@ -248,7 +252,8 @@ TEST(GeometryConverterTest, ImportSkeletalAnimation_singleClip_convertedCorrectl
 {
     namespace test_data = collateral::simple_cube_animation_fbx;
     auto uut = nc::convert::GeometryConverter{};
-    const auto actual = uut.ImportSkeletalAnimation(test_data::filePath, std::string("Armature|Wiggle"));
+    const auto actual =
+        uut.ImportSkeletalAnimation(test_data::filePath, std::string("Armature|Wiggle"));
 
     EXPECT_EQ(actual.name, std::string("Armature|Wiggle"));
     EXPECT_EQ(actual.durationInTicks, 60);
@@ -260,5 +265,62 @@ TEST(GeometryConverterTest, ImportSkeletalAnimation_incorrectSubResourceName_thr
 {
     namespace test_data = collateral::simple_cube_animation_fbx;
     auto uut = nc::convert::GeometryConverter{};
-    EXPECT_THROW(uut.ImportSkeletalAnimation(test_data::filePath, std::string("Armature|Wigglde")), nc::NcError);
+    EXPECT_THROW(uut.ImportSkeletalAnimation(test_data::filePath, std::string("Armature|Wigglde")),
+                 nc::NcError);
+}
+
+TEST(GeometryConverterTest, ImportShapeKeyAnimation_cube_convertedCorrectly)
+{
+    namespace test_data = collateral::cube_glb;
+    auto uut = nc::convert::GeometryConverter{};
+    const auto actual = uut.ImportShapeKeyAnimation(test_data::filePath, std::string{"Move"});
+
+    EXPECT_EQ(actual.numShapeKeys, test_data::shapeKeyCount);
+    EXPECT_EQ(actual.animation.width, test_data::vertexCount * 3u);
+    EXPECT_EQ(actual.animation.height, test_data::shapeKeyCount);
+    EXPECT_NEAR(actual.durationInSeconds, test_data::animationDuration, 0.0001f);
+    EXPECT_EQ(actual.animation.pixelData.size(),
+              test_data::vertexCount * 3ull * test_data::shapeKeyCount);
+}
+
+TEST(GeometryConverterTest, ImportShapeKeyAnimation_plane_convertedCorrectly)
+{
+    namespace test_data = collateral::plane_glb;
+    auto uut = nc::convert::GeometryConverter{};
+    const auto actual = uut.ImportShapeKeyAnimation(test_data::filePath, std::string{"Y2"});
+
+    EXPECT_EQ(actual.numShapeKeys, test_data::shapeKeyCount);
+    EXPECT_EQ(actual.animation.width, test_data::vertexCount * 3u);
+    EXPECT_EQ(actual.animation.height, test_data::shapeKeyCount);
+    EXPECT_NEAR(actual.durationInSeconds, test_data::animationDuration, 0.0001f);
+    EXPECT_EQ(actual.animation.pixelData.size(),
+              test_data::vertexCount * 3ull * test_data::shapeKeyCount);
+}
+
+TEST(GeometryConverterTest, ImportShapeKeyAnimation_flag_convertedCorrectly)
+{
+    namespace test_data = collateral::flag_glb;
+    auto uut = nc::convert::GeometryConverter{};
+    const auto actual = uut.ImportShapeKeyAnimation(test_data::filePath, std::string{"FlagWave"});
+
+    EXPECT_EQ(actual.numShapeKeys, test_data::shapeKeyCount);
+    EXPECT_EQ(actual.animation.width, test_data::vertexCount * 3u);
+    EXPECT_EQ(actual.animation.height, test_data::shapeKeyCount);
+    EXPECT_NEAR(actual.durationInSeconds, test_data::animationDuration, 0.0001f);
+    EXPECT_EQ(actual.animation.pixelData.size(),
+              test_data::vertexCount * 3ull * test_data::shapeKeyCount);
+}
+
+TEST(GeometryConverterTest, ImportShapeKeyAnimation_steeple_convertedCorrectly)
+{
+    namespace test_data = collateral::steeple_glb;
+    auto uut = nc::convert::GeometryConverter{};
+    const auto actual = uut.ImportShapeKeyAnimation(test_data::filePath, std::string{"Chute"});
+
+    EXPECT_EQ(actual.numShapeKeys, test_data::shapeKeyCount);
+    EXPECT_EQ(actual.animation.width, test_data::vertexCount * 3u);
+    EXPECT_EQ(actual.animation.height, test_data::shapeKeyCount);
+    EXPECT_NEAR(actual.durationInSeconds, test_data::animationDuration, 0.0001f);
+    EXPECT_EQ(actual.animation.pixelData.size(),
+              test_data::vertexCount * 3ull * test_data::shapeKeyCount);
 }
