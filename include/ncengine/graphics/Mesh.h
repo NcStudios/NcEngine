@@ -81,6 +81,10 @@ class MeshBase
         auto GetMaterial() -> MaterialInstance& { return m_material; }
         void SetMaterial(const MaterialDesc& materialDesc);
 
+        /** @name Shape Key Animation Functions */
+        auto GetShapeKeyAnimationController() const -> const AnimationController& { return m_shapeKeyAnimationcontroller; }
+        auto GetShapeKeyAnimationController()       ->       AnimationController& { return m_shapeKeyAnimationcontroller; }
+
         /** @cond internal */
         static void RegisterSubsystem(graphics::MeshSubsystem* subsystem)
         {
@@ -95,6 +99,7 @@ class MeshBase
         }
 
     private:
+        AnimationController m_shapeKeyAnimationcontroller;
         inline static graphics::MeshSubsystem* s_subsystem = nullptr;
         MeshInstanceContext m_ctx;
         MaterialInstance m_material;
@@ -110,16 +115,9 @@ class StaticMesh : public MeshBase
                             const asset::MeshView& meshAsset,
                             const MaterialDesc& materialDesc,
                             asset::AssetId shapeKeyAnimationId = asset::NullAssetId)
-            : MeshBase{self, meshAsset, materialDesc, shapeKeyAnimationId, MeshInstanceType::Static},
-              m_shapeKeyAnimationcontroller{shapeKeyAnimationId}
+            : MeshBase{self, meshAsset, materialDesc, shapeKeyAnimationId, MeshInstanceType::Static}
         {
         }
-
-        auto GetShapeKeyAnimationController() const -> const AnimationController& { return m_shapeKeyAnimationcontroller; }
-        auto GetShapeKeyAnimationController()       ->       AnimationController& { return m_shapeKeyAnimationcontroller; }
-
-    private:
-        AnimationController m_shapeKeyAnimationcontroller;
 };
 
 /** @brief Component enabling rendering of an Entity with a given mesh, material, and skeletal animation. */
@@ -132,8 +130,7 @@ class SkinnedMesh : public MeshBase
                              asset::AssetId rootSkeletalAnimationId = asset::NullAssetId,
                              asset::AssetId shapeKeyAnimationId = asset::NullAssetId)
             : MeshBase{self, meshAsset, materialDesc, shapeKeyAnimationId, MeshInstanceType::Skinned},
-              m_skeletalAnimationcontroller{rootSkeletalAnimationId},
-              m_shapeKeyAnimationcontroller{shapeKeyAnimationId}
+              m_skeletalAnimationcontroller{rootSkeletalAnimationId}
         {
         }
 
@@ -143,11 +140,8 @@ class SkinnedMesh : public MeshBase
         /** @name Animation Functions */
         auto GetSkeletalAnimationController() const -> const AnimationController& { return m_skeletalAnimationcontroller; }
         auto GetSkeletalAnimationController()       ->       AnimationController& { return m_skeletalAnimationcontroller; }
-        auto GetShapeKeyAnimationController() const -> const AnimationController& { return m_shapeKeyAnimationcontroller; }
-        auto GetShapeKeyAnimationController()       ->       AnimationController& { return m_shapeKeyAnimationcontroller; }
 
     private:
         AnimationController m_skeletalAnimationcontroller;
-        AnimationController m_shapeKeyAnimationcontroller;
 };
 } // namespace nc

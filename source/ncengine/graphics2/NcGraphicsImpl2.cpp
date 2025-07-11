@@ -464,6 +464,7 @@ void NcGraphicsImpl2::OnBuildTaskGraph(task::UpdateTasks& update, task::RenderTa
         "SkeletalAnimationUpdate",
         [this]{
             m_frontend.GetSkeletalAnimationSubsystem().Update(m_world);
+            m_frontend.GetMeshSubsystem().Update(m_world, m_world);
         },
         {update_task_id::CommitStagedChanges}
     );

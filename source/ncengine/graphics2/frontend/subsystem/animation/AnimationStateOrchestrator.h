@@ -117,11 +117,11 @@ void AnimationStateOrchestrator<T>::Purge() noexcept
 
 template<AnimatableComponent T>
 void AnimationStateOrchestrator<T>::AddAnimation(const MeshInstanceContext& ctx,
-                                              const nc::AnimationTransition& transition,
-                                              const StorageType* storage)
+                                                 const nc::AnimationTransition& transition,
+                                                 const StorageType* storage)
 {
-    // Null animation, mesh with no shape keys (and no bones) and boneless mesh (without shape keys) are valid, just ignore
-    if (transition.toAnimId == asset::NullAssetId || (storage != nullptr && !storage->HasRig(ctx.meshId)) || (storage == nullptr && ctx.shapeKeyDataHandle != -1))
+    // Null animation, mesh with no shape keys (and no bones) are valid, just ignore
+    if (transition.toAnimId == asset::NullAssetId || (storage != nullptr && !storage->HasRig(ctx.meshId)))
     {
         return;
     }

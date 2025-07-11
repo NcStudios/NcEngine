@@ -8,6 +8,8 @@
 #include "Jolt/Physics/Collision/Shape/ConvexHullShape.h"
 #include "Jolt/Physics/Collision/Shape/MeshShape.h"
 
+#include "gtest/gtest.h"
+
 #include <ranges>
 
 namespace nc

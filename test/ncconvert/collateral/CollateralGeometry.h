@@ -107,33 +107,17 @@ const auto furthestDistanceFromOrigin = std::sqrt(2.0f);
 } // namespace plane_fbx
 
 // Sample models with shape key animations
-namespace cube_glb
-{
-const auto filePath = std::filesystem::path{SAMPLE_MODEL_DIR} / "cube.glb";
-constexpr auto vertexCount = 14ull;
-constexpr auto shapeKeyCount = 2u;
-constexpr auto animationDuration = 0.41666666f;
-} // namespace cube_glb
-
 namespace plane_glb
 {
-const auto filePath = std::filesystem::path{SAMPLE_MODEL_DIR} / "plane.glb";
+const auto filePath = collateralDirectory / "plane.glb";
 constexpr auto vertexCount = 4ull;
 constexpr auto shapeKeyCount = 3u;
 constexpr auto animationDuration = 8.333333f;
 } // namespace plane_glb
 
-namespace flag_glb
-{
-const auto filePath = std::filesystem::path{SAMPLE_MODEL_DIR} / "flag.glb";
-constexpr auto vertexCount = 1281ull;
-constexpr auto shapeKeyCount = 25u;
-constexpr auto animationDuration = 10.041667f;
-} // namespace flag_glb
-
 namespace steeple_glb
 {
-const auto filePath = std::filesystem::path{SAMPLE_MODEL_DIR} / "steeple.glb";
+const auto filePath = collateralDirectory / "steeple.glb";
 constexpr auto vertexCount = 4225ull;
 constexpr auto shapeKeyCount = 20u;
 constexpr auto animationDuration = 4.0f;

@@ -12,6 +12,8 @@ namespace nc
 {
 class MaterialInstance;
 struct MeshInstanceContext;
+class StaticMesh;
+class SkinnedMesh;
 struct SystemEvents;
 class Transform;
 
@@ -27,6 +29,9 @@ class MeshSubsystem
                                uint32_t maxEntities,
                                uint32_t maxMeshRenderers,
                                uint32_t initialBatchSize);
+
+        void Update(ecs::ExplicitEcs<SkinnedMesh> skinnedMeshes,
+                    ecs::ExplicitEcs<StaticMesh> staticMeshes);
 
         void AddInstance(MeshInstanceContext& ctx,
                          const MaterialInstance& material,

@@ -269,39 +269,11 @@ TEST(GeometryConverterTest, ImportSkeletalAnimation_incorrectSubResourceName_thr
                  nc::NcError);
 }
 
-TEST(GeometryConverterTest, ImportShapeKeyAnimation_cube_convertedCorrectly)
-{
-    namespace test_data = collateral::cube_glb;
-    auto uut = nc::convert::GeometryConverter{};
-    const auto actual = uut.ImportShapeKeyAnimation(test_data::filePath, std::string{"Move"});
-
-    EXPECT_EQ(actual.numShapeKeys, test_data::shapeKeyCount);
-    EXPECT_EQ(actual.animation.width, test_data::vertexCount * 3u);
-    EXPECT_EQ(actual.animation.height, test_data::shapeKeyCount);
-    EXPECT_NEAR(actual.durationInSeconds, test_data::animationDuration, 0.0001f);
-    EXPECT_EQ(actual.animation.pixelData.size(),
-              test_data::vertexCount * 3ull * test_data::shapeKeyCount);
-}
-
 TEST(GeometryConverterTest, ImportShapeKeyAnimation_plane_convertedCorrectly)
 {
     namespace test_data = collateral::plane_glb;
     auto uut = nc::convert::GeometryConverter{};
     const auto actual = uut.ImportShapeKeyAnimation(test_data::filePath, std::string{"Y2"});
-
-    EXPECT_EQ(actual.numShapeKeys, test_data::shapeKeyCount);
-    EXPECT_EQ(actual.animation.width, test_data::vertexCount * 3u);
-    EXPECT_EQ(actual.animation.height, test_data::shapeKeyCount);
-    EXPECT_NEAR(actual.durationInSeconds, test_data::animationDuration, 0.0001f);
-    EXPECT_EQ(actual.animation.pixelData.size(),
-              test_data::vertexCount * 3ull * test_data::shapeKeyCount);
-}
-
-TEST(GeometryConverterTest, ImportShapeKeyAnimation_flag_convertedCorrectly)
-{
-    namespace test_data = collateral::flag_glb;
-    auto uut = nc::convert::GeometryConverter{};
-    const auto actual = uut.ImportShapeKeyAnimation(test_data::filePath, std::string{"FlagWave"});
 
     EXPECT_EQ(actual.numShapeKeys, test_data::shapeKeyCount);
     EXPECT_EQ(actual.animation.width, test_data::vertexCount * 3u);

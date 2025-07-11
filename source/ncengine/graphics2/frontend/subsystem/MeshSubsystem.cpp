@@ -1,6 +1,8 @@
 #include "MeshSubsystem.h"
 #include "animation/SkeletalAnimationSubsystem.h"
 #include "animation/SkeletalAnimationStorage.h"
+#include "asset/AssetService.h"
+#include "ncasset/Assets.h"
 #include "ncengine/Events.h"
 #include "ncengine/asset/Assets.h"
 #include "ncengine/ecs/Ecs.h"
@@ -50,6 +52,53 @@ MeshSubsystem::MeshSubsystem(ISkeletalAnimationSubsystem& animationSystem,
       m_rebuildStaticsConnection{events.rebuildStatics.Connect(this, &MeshSubsystem::OnRebuildStatics)}
 {
     MeshBase::RegisterSubsystem(this);
+}
+
+void MeshSubsystem::Update(ecs::ExplicitEcs<SkinnedMesh> skinnedMeshesPool,
+                           ecs::ExplicitEcs<StaticMesh> staticMeshesPool)
+{
+    auto& skinnedMeshPool = skinnedMeshesPool.GetPool<SkinnedMesh>();
+    auto& staticMeshPool = staticMeshesPool.GetPool<StaticMesh>();
+
+    for (auto& animatable : staticMeshPool)
+    {
+        const auto transition = animatable.GetShapeKeyAnimationController().CheckForTransition();
+        if (transition.toAnimId == asset::NullAssetId)
+        {
+            continue;
+        }
+        auto& meshContext = animatable.GetMeshContext();
+        switch (transition.type)
+        {
+            case AnimationTransitionType::Continue:
+                break;
+            case AnimationTransitionType::Loop:
+            case AnimationTransitionType::PlayOnce:
+                meshContext.shapeKeyDataHandle = asset::AssetService<asset::ShapeKeyAnimationView>::Get()->Acquire(transition.toAnimId).index;
+                break;
+            case AnimationTransitionType::Stop:
+                meshContext.shapeKeyDataHandle = std::numeric_limits<uint32_t>::max();
+                break;
+        }
+    }
+
+    for (auto& animatable : skinnedMeshPool)
+    {
+        const auto transition = animatable.GetShapeKeyAnimationController().CheckForTransition();
+        auto& meshContext = animatable.GetMeshContext();
+        switch (transition.type)
+        {
+            case AnimationTransitionType::Continue:
+                break;
+            case AnimationTransitionType::Loop:
+            case AnimationTransitionType::PlayOnce:
+                meshContext.shapeKeyDataHandle = asset::AssetService<asset::ShapeKeyAnimationView>::Get()->Acquire(transition.toAnimId).index;
+                break;
+            case AnimationTransitionType::Stop:
+                meshContext.shapeKeyDataHandle = std::numeric_limits<uint32_t>::max();
+                break;
+        }
+    }
 }
 
 void MeshSubsystem::AddInstance(MeshInstanceContext& ctx,

@@ -37,21 +37,21 @@ void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
     auto lvHandle = world.Emplace<Entity>({.position = Vector3{3.1f, 6.2f, 4.5f}, .tag = "Point Light 1"});
     world.Emplace<PointLight>(lvHandle, Vector3(1.0f, 1.0f, 1.0f), Vector3(1.0f, 1.0f, 1.0f), 1.0f, 45.0f);
 
-    const auto guy2 = world.Emplace<Entity>({
-        .position = Vector3{6.0f, 1.8f, 4.0f},
-        .rotation = Quaternion::FromEulerAngles(1.579f, 1.322f, 0.091f),
-        .scale = Vector3{2.75f, 2.75f, 2.75f},
-        .tag = "guy2"
-    });
-    world.Emplace<StaticMesh>(guy2, mesh::guy2, material::guy2);
+    // const auto guy2 = world.Emplace<Entity>({
+    //     .position = Vector3{6.0f, 1.8f, 4.0f},
+    //     .rotation = Quaternion::FromEulerAngles(1.579f, 1.322f, 0.091f),
+    //     .scale = Vector3{2.75f, 2.75f, 2.75f},
+    //     .tag = "guy2"
+    // });
+    // world.Emplace<StaticMesh>(guy2, mesh::guy2, material::guy2);
 
-    const auto steeple = world.Emplace<Entity>({
-        .position = Vector3{1.0f, 1.3f, 4.0f},
-        .rotation = Quaternion::FromEulerAngles(0.0f, 0.0f, 0.0f),
-        .scale = Vector3{2.9f, 1.8f, 3.0f},
-        .tag = "steeple"
-    });
-    world.Emplace<StaticMesh>(steeple, mesh::steeple, material::blue);
+    // const auto steeple = world.Emplace<Entity>({
+    //     .position = Vector3{1.0f, 1.3f, 4.0f},
+    //     .rotation = Quaternion::FromEulerAngles(0.0f, 0.0f, 0.0f),
+    //     .scale = Vector3{2.9f, 1.8f, 3.0f},
+    //     .tag = "steeple"
+    // });
+    // world.Emplace<StaticMesh>(steeple, mesh::steeple, material::blue);
 
     const auto sheet = world.Emplace<Entity>({
         .position = Vector3{1.0f, 1.0f, 4.0f},
@@ -61,139 +61,136 @@ void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
     });
 
     auto& shapeKeyController = world.Emplace<StaticMesh>(sheet, mesh::sheet, material::yellow, shapekey_animation::chute).GetShapeKeyAnimationController();
-    shapeKeyController.AddState(PlayOnceAnimation{
-        .animId = shapekey_animation::fall,
-        .enterWhen = [](){ return input::KeyDown(input::KeyCode::Space);}
-    });
+    shapeKeyController.AddState(LoopAnimation{
+            .animId = shapekey_animation::fall,
+            .enterWhen = [](){ return input::KeyHeld(input::KeyCode::Space);},
+            .exitWhen = [](){ return input::KeyUp(input::KeyCode::Space);}
+        });
+    
+    // shapeKeyController.AddState(PlayOnceAnimation{
+    //         .animId = shapekey_animation::fall,
+    //         .enterWhen = [](){ return input::KeyDown(input::KeyCode::Space);}
+    //     });
 
-    const auto flag = world.Emplace<Entity>({
-        .position = Vector3{3.0f, 2.0f, 4.0f},
-        .rotation = Quaternion::FromEulerAngles(0.472f, 0.0f, 0.0f),
-        .scale = Vector3{2.0f, 2.0f, 2.0f},
-        .tag = "Flag"
-    });
-    world.Emplace<StaticMesh>(flag, mesh::flag, material::blue, shapekey_animation::flag);
-    
-    
-    // const auto plane = world.Emplace<Entity>({
-    //     .position = Vector3{1.0f, 5.0f, 4.0f},
+    // const auto flag = world.Emplace<Entity>({
+    //     .position = Vector3{3.0f, 2.0f, 4.0f},
     //     .rotation = Quaternion::FromEulerAngles(0.472f, 0.0f, 0.0f),
-    //     .scale = Vector3{1.0f, 1.0f, 1.0f},
-    //     .tag = "plane"
+    //     .scale = Vector3{2.0f, 2.0f, 2.0f},
+    //     .tag = "Flag"
     // });
-    // world.Emplace<StaticMesh>(plane, mesh::plane, material::green, shapekey_animation::plane);
-    
-    // Ogre
-    {
-        const auto ogre = world.Emplace<Entity>({
-            .position = Vector3{-5.0f, 0.0f, 12.0f},
-            .rotation = Quaternion::FromEulerAngles(0.0f, 1.0f, 0.0f),
-            .scale = Vector3{3.0f, 3.0f, 3.0f},
-            .tag = "ogre"
-        });
+    // world.Emplace<StaticMesh>(flag, mesh::flag, material::blue, shapekey_animation::flag);
 
-        world.Emplace<RigidBody>(
-            ogre,
-            Shape::MakeSphere(),
-            RigidBodyInfo{
-                .type = BodyType::Kinematic
-            }
-        );
+    // // Ogre
+    // {
+    //     const auto ogre = world.Emplace<Entity>({
+    //         .position = Vector3{-5.0f, 0.0f, 12.0f},
+    //         .rotation = Quaternion::FromEulerAngles(0.0f, 1.0f, 0.0f),
+    //         .scale = Vector3{3.0f, 3.0f, 3.0f},
+    //         .tag = "ogre"
+    //     });
 
-        auto& animator = world.Emplace<SkinnedMesh>(
-            ogre,
-            mesh::ogre,
-            material::ogre,
-            animation::ogre_idle
-        ).GetSkeletalAnimationController();
+    //     world.Emplace<RigidBody>(
+    //         ogre,
+    //         Shape::MakeSphere(),
+    //         RigidBodyInfo{
+    //             .type = BodyType::Kinematic
+    //         }
+    //     );
 
-        const auto stopState = animator.AddState(StopAnimation{
-            .enterWhen = [](){ return input::KeyDown(input::KeyCode::One);},
-            .enterFrom = RootAnimationState
-        });
+    //     auto& animator = world.Emplace<SkinnedMesh>(
+    //         ogre,
+    //         mesh::ogre,
+    //         material::ogre,
+    //         animation::ogre_idle
+    //     ).GetSkeletalAnimationController();
 
-        animator.AddState(LoopAnimation{
-            .animId = animation::ogre_idle,
-            .enterWhen = [](){ return input::KeyDown(input::KeyCode::One);},
-            .enterFrom = stopState,
-            .exitWhen = [](){ return input::KeyDown(input::KeyCode::One);},
-            .exitTo = stopState
-        });
-    }
+    //     const auto stopState = animator.AddState(StopAnimation{
+    //         .enterWhen = [](){ return input::KeyDown(input::KeyCode::One);},
+    //         .enterFrom = RootAnimationState
+    //     });
 
-    // Skeleton
-    {
-        const auto skeleton = world.Emplace<Entity>({
-            .position = Vector3{5.3f, 0.0f, -6.4f},
-            .rotation = Quaternion::FromEulerAngles(0.0f, 0.5f, 0.0f),
-            .scale = Vector3{2.0f, 2.0f, 2.0f},
-            .tag = "skeleton"
-        });
+    //     animator.AddState(LoopAnimation{
+    //         .animId = animation::ogre_idle,
+    //         .enterWhen = [](){ return input::KeyDown(input::KeyCode::One);},
+    //         .enterFrom = stopState,
+    //         .exitWhen = [](){ return input::KeyDown(input::KeyCode::One);},
+    //         .exitTo = stopState
+    //     });
+    // }
 
-        world.Emplace<FrameLogic>(skeleton, WasdBasedSimulatedBodyMovement);
-        world.Emplace<RigidBody>(
-            skeleton,
-            Shape::MakeSphere(),
-            RigidBodyInfo{
-                .type = BodyType::Kinematic,
-                .flags = RigidBodyFlags::Trigger
-            }
-        );
+    // // Skeleton
+    // {
+    //     const auto skeleton = world.Emplace<Entity>({
+    //         .position = Vector3{5.3f, 0.0f, -6.4f},
+    //         .rotation = Quaternion::FromEulerAngles(0.0f, 0.5f, 0.0f),
+    //         .scale = Vector3{2.0f, 2.0f, 2.0f},
+    //         .tag = "skeleton"
+    //     });
 
-        world.Emplace<CollisionListener>(skeleton)
-            .onTriggerEnter = [](Entity, Entity other, ecs::Ecs ecs){
-                auto& ogreAnim = ecs.Get<SkinnedMesh>(other).GetSkeletalAnimationController();
-                ogreAnim.PlayOnceImmediate(animation::ogre_attack);
-                auto& tag = ecs.Get<Tag>(other);
-                GameLog::Log(fmt::format("Collision Enter: {}", tag.value));
-            };
+    //     world.Emplace<FrameLogic>(skeleton, WasdBasedSimulatedBodyMovement);
+    //     world.Emplace<RigidBody>(
+    //         skeleton,
+    //         Shape::MakeSphere(),
+    //         RigidBodyInfo{
+    //             .type = BodyType::Kinematic,
+    //             .flags = RigidBodyFlags::Trigger
+    //         }
+    //     );
 
-        auto& animator = world.Emplace<SkinnedMesh>(
-            skeleton,
-            mesh::skeleton,
-            material::skeleton,
-            animation::skeleton_idle
-        ).GetSkeletalAnimationController();
+    //     world.Emplace<CollisionListener>(skeleton)
+    //         .onTriggerEnter = [](Entity, Entity other, ecs::Ecs ecs){
+    //             auto& ogreAnim = ecs.Get<SkinnedMesh>(other).GetSkeletalAnimationController();
+    //             ogreAnim.PlayOnceImmediate(animation::ogre_attack);
+    //             auto& tag = ecs.Get<Tag>(other);
+    //             GameLog::Log(fmt::format("Collision Enter: {}", tag.value));
+    //         };
 
-        animator.AddState(LoopAnimation{
-            .animId = animation::skeleton_walk_forward,
-            .enterWhen = [](){ return input::KeyHeld(input::KeyCode::W);},
-            .exitWhen = [](){ return input::KeyUp(input::KeyCode::W);}
-        });
+    //     auto& animator = world.Emplace<SkinnedMesh>(
+    //         skeleton,
+    //         mesh::skeleton,
+    //         material::skeleton,
+    //         animation::skeleton_idle
+    //     ).GetSkeletalAnimationController();
 
-        animator.AddState(LoopAnimation{
-            .animId = animation::skeleton_walk_left,
-            .enterWhen = [](){ return input::KeyHeld(input::KeyCode::A);},
-            .exitWhen = [](){ return input::KeyUp(input::KeyCode::A);}
-        });
+    //     animator.AddState(LoopAnimation{
+    //         .animId = animation::skeleton_walk_forward,
+    //         .enterWhen = [](){ return input::KeyHeld(input::KeyCode::W);},
+    //         .exitWhen = [](){ return input::KeyUp(input::KeyCode::W);}
+    //     });
 
-        animator.AddState(LoopAnimation{
-            .animId = animation::skeleton_walk_back,
-            .enterWhen = [](){ return input::KeyHeld(input::KeyCode::S);},
-            .exitWhen = [](){ return input::KeyUp(input::KeyCode::S);}
-        });
+    //     animator.AddState(LoopAnimation{
+    //         .animId = animation::skeleton_walk_left,
+    //         .enterWhen = [](){ return input::KeyHeld(input::KeyCode::A);},
+    //         .exitWhen = [](){ return input::KeyUp(input::KeyCode::A);}
+    //     });
 
-        animator.AddState(LoopAnimation{
-            .animId = animation::skeleton_walk_right,
-            .enterWhen = [](){ return input::KeyHeld(input::KeyCode::D);},
-            .exitWhen = [](){ return input::KeyUp(input::KeyCode::D);}
-        });
+    //     animator.AddState(LoopAnimation{
+    //         .animId = animation::skeleton_walk_back,
+    //         .enterWhen = [](){ return input::KeyHeld(input::KeyCode::S);},
+    //         .exitWhen = [](){ return input::KeyUp(input::KeyCode::S);}
+    //     });
 
-        animator.AddState(PlayOnceAnimation{
-            .animId = animation::skeleton_jump,
-            .enterWhen = [](){ return input::KeyDown(input::KeyCode::Space);}
-        });
-    }
+    //     animator.AddState(LoopAnimation{
+    //         .animId = animation::skeleton_walk_right,
+    //         .enterWhen = [](){ return input::KeyHeld(input::KeyCode::D);},
+    //         .exitWhen = [](){ return input::KeyUp(input::KeyCode::D);}
+    //     });
 
-    // Cave
-    const auto cave_floor = world.Emplace<Entity>({
-        .position = Vector3{0.0f, 0.0f, 0.0f},
-        .rotation = Quaternion::FromEulerAngles(0.0f, 1.5708f, 0.0f),
-        .scale = Vector3{1.5f, 1.5f, 1.5f},
-        .tag = "cave_floor"
-    });
+    //     animator.AddState(PlayOnceAnimation{
+    //         .animId = animation::skeleton_jump,
+    //         .enterWhen = [](){ return input::KeyDown(input::KeyCode::Space);}
+    //     });
+    // }
 
-    world.Emplace<StaticMesh>(cave_floor, mesh::cave, material::cave);
+    // // Cave
+    // const auto cave_floor = world.Emplace<Entity>({
+    //     .position = Vector3{0.0f, 0.0f, 0.0f},
+    //     .rotation = Quaternion::FromEulerAngles(0.0f, 1.5708f, 0.0f),
+    //     .scale = Vector3{1.5f, 1.5f, 1.5f},
+    //     .tag = "cave_floor"
+    // });
+
+    // world.Emplace<StaticMesh>(cave_floor, mesh::cave, material::cave);
 
     // Camera
     auto cameraHandle = world.Emplace<Entity>({
