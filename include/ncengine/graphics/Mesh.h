@@ -82,8 +82,8 @@ class MeshBase
         void SetMaterial(const MaterialDesc& materialDesc);
 
         /** @name Shape Key Animation Functions */
-        auto GetShapeKeyAnimationController() const -> const AnimationController& { return m_shapeKeyAnimationcontroller; }
-        auto GetShapeKeyAnimationController()       ->       AnimationController& { return m_shapeKeyAnimationcontroller; }
+        auto GetShapeKeyAnimationController() const -> const AnimationController& { return m_shapeKeyAnimationController; }
+        auto GetShapeKeyAnimationController()       ->       AnimationController& { return m_shapeKeyAnimationController; }
 
         /** @cond internal */
         static void RegisterSubsystem(graphics::MeshSubsystem* subsystem)
@@ -99,7 +99,7 @@ class MeshBase
         }
 
     private:
-        AnimationController m_shapeKeyAnimationcontroller;
+        AnimationController m_shapeKeyAnimationController;
         inline static graphics::MeshSubsystem* s_subsystem = nullptr;
         MeshInstanceContext m_ctx;
         MaterialInstance m_material;

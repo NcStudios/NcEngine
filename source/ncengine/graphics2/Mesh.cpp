@@ -12,7 +12,7 @@ MeshBase::MeshBase(Entity self,
                    MeshInstanceType type)
     : m_ctx{self, meshAsset.id, std::numeric_limits<uint32_t>::max(), std::numeric_limits<uint32_t>::max(), shapeKeyAnimationId == asset::NullAssetId ? std::numeric_limits<uint32_t>::max() : asset::AssetService<asset::ShapeKeyAnimationView>::Get()->Acquire(shapeKeyAnimationId).index, meshAsset.firstVertex, type},
       m_material{MaterialInstance{materialDesc}},
-      m_shapeKeyAnimationcontroller{shapeKeyAnimationId}
+      m_shapeKeyAnimationController{shapeKeyAnimationId}
 {
     s_subsystem->AddInstance(m_ctx, m_material, meshAsset);
 }
