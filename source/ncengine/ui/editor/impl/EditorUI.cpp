@@ -9,6 +9,8 @@
 #include "ncengine/ui/ImGuiUtility.h"
 #include "ncengine/window/Window.h"
 
+#include "imgui.h"
+
 // Helper for setting up initial window layout:
 // Runs a block only the first time its seen by wrapping in an immediately
 // invoked lambda and storing an arbitrary result in a local static.
@@ -20,6 +22,11 @@ constexpr auto g_initialGraphWidth = 180.0f;
 constexpr auto g_initialInspectorWidth = 240.0f;
 constexpr auto g_pivotLeft = ImVec2{0.0f, 0.0f};
 constexpr auto g_pivotRight = ImVec2{1.0f, 0.0f};
+constexpr auto g_pivotCenter = ImVec2{0.5f, 0.0f};
+constexpr auto g_toolbarFlags = ImGuiWindowFlags_NoTitleBar |
+                                ImGuiWindowFlags_NoResize |
+                                ImGuiWindowFlags_NoMove |
+                                ImGuiWindowFlags_NoBackground;
 
 void WindowLayout(float width, ImVec2 pivot)
 {
@@ -30,6 +37,15 @@ void WindowLayout(float width, ImVec2 pivot)
     const auto pos = ImVec2{xPadding + screenExtent.x * pivot.x - width * pivot.x, yPadding};
     ImGui::SetNextWindowSize(size, ImGuiCond_FirstUseEver);
     ImGui::SetNextWindowPos(pos, ImGuiCond_FirstUseEver);
+}
+
+void ToolbarLayout()
+{
+    const auto windowDimensions = nc::window::GetDimensions();
+    const auto screenExtent = nc::window::GetScreenExtent();
+    const auto [xPadding, yPadding] = (windowDimensions - screenExtent) / 2.0f;
+    const auto pos = ImVec2{xPadding + screenExtent.x * g_pivotCenter.x, yPadding};
+    ImGui::SetNextWindowPos(pos, ImGuiCond_FirstUseEver, g_pivotCenter);
 }
 } // anonymous namespace
 
@@ -71,6 +87,17 @@ void EditorUI::Draw(EditorContext& ctx)
         DrawMenu(ctx);
         m_sceneGraph.Draw(ctx, m_createEntityDialog);
     });
+
+    if (m_toolbar.IsOpen())
+    {
+        RUN_ONCE(ToolbarLayout());
+        Window("Toolbar", g_toolbarFlags, [&]()
+        {
+            m_toolbar.DrawToolbar(ctx);
+        });
+    }
+
+    m_toolbar.DrawGizmos(ctx);
 
     if (!ctx.selectedEntity.Valid())
     {
@@ -175,6 +202,16 @@ void EditorUI::DrawMenu(EditorContext& ctx)
                 ImGui::EndMenu();
             }
 
+
+            ImGui::EndMenu();
+        }
+
+        if (ImGui::BeginMenu("View"))
+        {
+            if (ImGui::MenuItem("Toolbar"))
+            {
+                m_toolbar.ToggleOpen();
+            }
 
             ImGui::EndMenu();
         }

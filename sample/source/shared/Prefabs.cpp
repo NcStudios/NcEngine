@@ -13,6 +13,7 @@ bool IsInitialized = false;
 namespace font
 {
 asset::FontInfo ui{"SourceCodePro-Regular.ttf", 16.0f};
+asset::FontInfo icons{"icons.ttf", 12.0f};
 } // namespace font
 
 namespace material
@@ -47,6 +48,7 @@ void InitializeResources()
     IsInitialized = true;
 
     nc::asset::LoadFont(font::ui);
+    nc::asset::LoadFont(font::icons);
 
     audio_clip::Load();
     convex_hull::Load();

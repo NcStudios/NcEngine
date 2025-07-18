@@ -2,6 +2,7 @@
 
 #include "ui/editor/Editor.h"
 #include "windows/FpsOverlay.h"
+#include "windows/GizmoToolbar.h"
 #include "windows/Inspector.h"
 #include "windows/SceneGraph.h"
 #include "windows/dialogs/CreateEntityDialog.h"
@@ -41,6 +42,9 @@ class EditorUI
         LoadSceneDialog m_loadSceneDialog;
         PostProcessDialog m_postProcessDialog;
         EnvironmentDialog m_environmentDialog;
+
+        // toolbars
+        GizmoToolbar m_toolbar;
 
         auto ProcessInput(const EditorHotkeys& hotkeys, asset::NcAsset& ncAsset) -> OpenState;
         void DrawMenu(EditorContext& ctx);

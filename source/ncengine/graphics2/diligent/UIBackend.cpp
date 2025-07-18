@@ -1,5 +1,8 @@
 #include "UIBackend.h"
 
+#include "imgui.h"
+#include "ImGuizmo.h"
+
 namespace nc::graphics
 {
 UIBackend::UIBackend(Diligent::IRenderDevice& device,
@@ -15,6 +18,8 @@ void UIBackend::FrameBegin(Diligent::ISwapChain& swapChain)
 {
     const auto& scDesc = swapChain.GetDesc();
     m_imguiBackend.NewFrame(scDesc.Width, scDesc.Height, scDesc.PreTransform);
+
+    ImGuizmo::BeginFrame();
 }
 
 void UIBackend::Render(Diligent::IDeviceContext& context)

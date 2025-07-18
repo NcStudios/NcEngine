@@ -149,6 +149,12 @@ class Transform final : public ComponentBase
             m_dirty = true;
         }
 
+        void SetTransformationMatrix(DirectX::FXMMATRIX matrix)
+        {
+            m_localMatrix = matrix;
+            m_dirty = true;
+        }
+
         /** @brief Add to local position */
         void Translate(const Vector3& vec);
 

@@ -48,10 +48,17 @@ FetchContent_Declare(imgui
                      GIT_SHALLOW    TRUE
 )
 
-FetchContent_MakeAvailable(glfw imgui)
+FetchContent_Declare(imguizmo
+                     GIT_REPOSITORY https://github.com/CedricGuillemet/ImGuizmo.git
+                     GIT_TAG        1.83
+                     GIT_SHALLOW    TRUE
+)
+
+FetchContent_MakeAvailable(glfw imgui imguizmo)
 
 # Dear ImGui target needs to be available before diligent. Also, it doesn't have a cmake lists, so we add it via script.
 include(cmake/AddImguiTarget.cmake)
+# include(cmake/AddImGuizmoTarget.cmake)
 disable_warnings_for_headers(imgui)
 
 # Taskflow

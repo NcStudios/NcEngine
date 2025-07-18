@@ -7,24 +7,11 @@
 
 namespace
 {
-constexpr auto g_defaultProperties = nc::CameraProperties{};
-const auto g_defaultView = DirectX::XMMatrixLookAtRH(
-    DirectX::g_XMIdentityR3,
-    DirectX::g_XMIdentityR2,
-    DirectX::g_XMNegIdentityR1
-);
-
 auto MakeDefaultViewProjection() -> DirectX::XMMATRIX
 {
-    const auto [width, height] = nc::window::GetScreenExtent();
     return DirectX::XMMatrixMultiply(
-        g_defaultView,
-        DirectX::XMMatrixPerspectiveFovRH(
-            g_defaultProperties.fov,
-            width / height,
-            g_defaultProperties.nearClip,
-            g_defaultProperties.farClip
-        )
+        nc::MakeDefaultViewMatrix(),
+        nc::MakeDefaultProjectionMatrix()
     );
 }
 } // anonymous namespace
@@ -58,8 +45,8 @@ auto CameraSubsystem::BuildState(ecs::ExplicitEcs<Transform> ecs) -> CameraRende
         .viewProjection = viewProj,
         .invProjection = inverseProj,
         .position = Vector3::Zero(),
-        .nearClip = g_defaultProperties.nearClip,
-        .farClip = g_defaultProperties.farClip
+        .nearClip = CameraProperties::DefaultNearClip,
+        .farClip = CameraProperties::DefaultFarClip
     };
 }
 } // namespace nc::graphics
