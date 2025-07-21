@@ -30,9 +30,6 @@ class MeshSubsystem
                                uint32_t maxMeshRenderers,
                                uint32_t initialBatchSize);
 
-        void Update(ecs::ExplicitEcs<SkinnedMesh> skinnedMeshes,
-                    ecs::ExplicitEcs<StaticMesh> staticMeshes);
-
         void AddInstance(MeshInstanceContext& ctx,
                          const MaterialInstance& material,
                          const asset::MeshView& mesh);

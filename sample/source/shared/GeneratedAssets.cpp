@@ -166,6 +166,9 @@ const auto g_paths = std::array{
     std::string{path::flag},
     std::string{path::sheet},
     std::string{path::steeple},
+    std::string{path::girlglb},
+    std::string{path::dress},
+    std::string{path::girl},
 };
 
 nc::asset::MeshView default_plane{};
@@ -187,6 +190,9 @@ nc::asset::MeshView plane{};
 nc::asset::MeshView flag{};
 nc::asset::MeshView sheet{};
 nc::asset::MeshView steeple{};
+nc::asset::MeshView girlglb{};
+nc::asset::MeshView dress{};
+nc::asset::MeshView girl{};
 
 void Load()
 {
@@ -214,6 +220,9 @@ void Acquire()
     flag = nc::asset::AcquireMeshAsset(path::flag);
     sheet = nc::asset::AcquireMeshAsset(path::sheet);
     steeple = nc::asset::AcquireMeshAsset(path::steeple);
+    girlglb = nc::asset::AcquireMeshAsset(path::girlglb);
+    dress = nc::asset::AcquireMeshAsset(path::dress);
+    girl = nc::asset::AcquireMeshAsset(path::girl);
 }
 
 } // namespace mesh
@@ -244,6 +253,7 @@ const auto g_paths = std::array{
     std::string{path::flag},
     std::string{path::chute},
     std::string{path::fall},
+    std::string{path::twirl},
 };
 
 nc::asset::AssetId default_shapekey{nc::utility::Fnv1a(path::default_shapekey)};
@@ -252,6 +262,7 @@ nc::asset::AssetId plane{nc::utility::Fnv1a(path::plane)};
 nc::asset::AssetId flag{nc::utility::Fnv1a(path::flag)};
 nc::asset::AssetId chute{nc::utility::Fnv1a(path::chute)};
 nc::asset::AssetId fall{nc::utility::Fnv1a(path::fall)};
+nc::asset::AssetId twirl{nc::utility::Fnv1a(path::twirl)};
 
 void Load()
 {
@@ -272,7 +283,7 @@ const auto g_paths = std::array{
     std::string{path::skeleton_walk_forward},
     std::string{path::skeleton_walk_left},
     std::string{path::skeleton_walk_right},
-    std::string{path::girl_twirl},
+    std::string{path::dance},
 };
 
 nc::asset::AssetId default_cube{nc::utility::Fnv1a(path::default_cube)};
@@ -284,7 +295,7 @@ nc::asset::AssetId skeleton_walk_back{nc::utility::Fnv1a(path::skeleton_walk_bac
 nc::asset::AssetId skeleton_walk_forward{nc::utility::Fnv1a(path::skeleton_walk_forward)};
 nc::asset::AssetId skeleton_walk_left{nc::utility::Fnv1a(path::skeleton_walk_left)};
 nc::asset::AssetId skeleton_walk_right{nc::utility::Fnv1a(path::skeleton_walk_right)};
-nc::asset::AssetId girl_twirl{nc::utility::Fnv1a(path::girl_twirl)};
+nc::asset::AssetId dance{nc::utility::Fnv1a(path::dance)};
 
 void Load()
 {

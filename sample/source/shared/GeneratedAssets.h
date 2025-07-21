@@ -122,6 +122,9 @@ constexpr auto plane = "plane.nca";
 constexpr auto flag = "flag.nca";
 constexpr auto sheet = "sheet.nca";
 constexpr auto steeple = "steeple.nca";
+constexpr auto girlglb = "girlglb.nca";
+constexpr auto dress = "dress.nca";
+constexpr auto girl = "girl.nca";
 } // namespace path
 
 extern nc::asset::MeshView default_plane;
@@ -143,6 +146,9 @@ extern nc::asset::MeshView plane;
 extern nc::asset::MeshView flag;
 extern nc::asset::MeshView sheet;
 extern nc::asset::MeshView steeple;
+extern nc::asset::MeshView girlglb;
+extern nc::asset::MeshView dress;
+extern nc::asset::MeshView girl;
 
 void Load();
 void Acquire();
@@ -172,6 +178,7 @@ constexpr auto plane = "plane.nca";
 constexpr auto flag = "flag.nca";
 constexpr auto chute = "chute.nca";
 constexpr auto fall = "fall.nca";
+constexpr auto twirl = "twirl.nca";
 } // namespace path
 
 extern nc::asset::AssetId default_shapekey;
@@ -180,6 +187,7 @@ extern nc::asset::AssetId plane;
 extern nc::asset::AssetId flag;
 extern nc::asset::AssetId chute;
 extern nc::asset::AssetId fall;
+extern nc::asset::AssetId twirl;
 
 void Load();
 } // namespace shapekey_animation
@@ -197,7 +205,7 @@ constexpr auto skeleton_walk_back = "skeleton/walk_back.nca";
 constexpr auto skeleton_walk_forward = "skeleton/walk_forward.nca";
 constexpr auto skeleton_walk_left = "skeleton/walk_left.nca";
 constexpr auto skeleton_walk_right = "skeleton/walk_right.nca";
-constexpr auto girl_twirl = "girl/twirl.nca";
+constexpr auto dance = "dance.nca";
 } // namespace path
 
 extern nc::asset::AssetId default_cube;
@@ -209,7 +217,7 @@ extern nc::asset::AssetId skeleton_walk_back;
 extern nc::asset::AssetId skeleton_walk_forward;
 extern nc::asset::AssetId skeleton_walk_left;
 extern nc::asset::AssetId skeleton_walk_right;
-extern nc::asset::AssetId girl_twirl;
+extern nc::asset::AssetId dance;
 
 void Load();
 } // namespace animation

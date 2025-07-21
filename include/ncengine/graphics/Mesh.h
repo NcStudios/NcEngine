@@ -74,16 +74,11 @@ class MeshBase
         /** @name Mesh Functions */
         auto GetMeshId() const -> uint64_t { return m_ctx.meshId; }
         void SetMesh(const asset::MeshView& meshAsset);
-        void SetShapeKeyAnimation(uint32_t shapeKeyDataHandle);
 
         /** @name Material Functions */
         auto GetMaterial() const -> const MaterialInstance& { return m_material; }
         auto GetMaterial() -> MaterialInstance& { return m_material; }
         void SetMaterial(const MaterialDesc& materialDesc);
-
-        /** @name Shape Key Animation Functions */
-        auto GetShapeKeyAnimationController() const -> const AnimationController& { return m_shapeKeyAnimationController; }
-        auto GetShapeKeyAnimationController()       ->       AnimationController& { return m_shapeKeyAnimationController; }
 
         /** @cond internal */
         static void RegisterSubsystem(graphics::MeshSubsystem* subsystem)
@@ -98,8 +93,9 @@ class MeshBase
             Release();
         }
 
+        auto GetSubsystem() -> graphics::MeshSubsystem* const { return s_subsystem; }
+
     private:
-        AnimationController m_shapeKeyAnimationController;
         inline static graphics::MeshSubsystem* s_subsystem = nullptr;
         MeshInstanceContext m_ctx;
         MaterialInstance m_material;
@@ -118,6 +114,8 @@ class StaticMesh : public MeshBase
             : MeshBase{self, meshAsset, materialDesc, shapeKeyAnimationId, MeshInstanceType::Static}
         {
         }
+
+        void SetShapeKeyAnimation(asset::AssetId shapeKeyAnimationId);
 };
 
 /** @brief Component enabling rendering of an Entity with a given mesh, material, and skeletal animation. */
@@ -127,9 +125,8 @@ class SkinnedMesh : public MeshBase
         explicit SkinnedMesh(Entity self,
                              const asset::MeshView& meshAsset,
                              const MaterialDesc& materialDesc,
-                             asset::AssetId rootSkeletalAnimationId = asset::NullAssetId,
-                             asset::AssetId shapeKeyAnimationId = asset::NullAssetId)
-            : MeshBase{self, meshAsset, materialDesc, shapeKeyAnimationId, MeshInstanceType::Skinned},
+                             asset::AssetId rootSkeletalAnimationId = asset::NullAssetId)
+            : MeshBase{self, meshAsset, materialDesc, asset::NullAssetId, MeshInstanceType::Skinned},
               m_skeletalAnimationcontroller{rootSkeletalAnimationId}
         {
         }

@@ -135,6 +135,23 @@
             {
                 "optimizeMesh": false
             }
+        },
+        {
+            "sourcePath": "raw/model/girl.fbx",
+            "assetNames": [
+                {
+                    "subResourceName": "Woman",
+                    "assetName": "mesh\\girl"
+                },
+                {
+                    "subResourceName": "Dress",
+                    "assetName": "mesh\\dress"
+                }
+            ],
+            "options":
+            {
+                "optimizeMesh": false
+            }
         }
     ],
     "mesh-collider": [
@@ -183,6 +200,15 @@
                     "assetName": "shapekey_animation\\fall"
                 }
             ]
+        },
+        {
+            "sourcePath": "raw/model/girl.fbx",
+            "assetNames": [
+                {
+                    "subResourceName": "TwirlFromKey",
+                    "assetName": "shapekey_animation\\twirl"
+                }
+            ]
         }
     ],
     "skeletal-animation": [
@@ -229,11 +255,11 @@
             ]
         },
         {
-            "sourcePath": "raw/model/twirl.fbx",
+            "sourcePath": "raw/model/girl.fbx",
             "assetNames": [
                 {
-                    "subResourceName": "metarig|Spin",
-                    "assetName": "skeletal_animation\\girl\\twirl"
+                    "subResourceName": "Dance",
+                    "assetName": "skeletal_animation\\dance"
                 }
             ]
         }

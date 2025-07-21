@@ -31,7 +31,7 @@ StructuredBuffer<BoneData> Bones;
 #define INSTANCE_DATA SkinnedMeshInstanceData
 #define INSTANCE_BUFFER SkinnedInstances
 
-#include "core/Animation.fxh"
+#include "core/SkeletalAnimation.fxh"
 #else
 StructuredBuffer<StaticMeshInstanceData> StaticInstances;
 

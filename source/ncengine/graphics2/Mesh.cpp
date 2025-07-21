@@ -11,8 +11,7 @@ MeshBase::MeshBase(Entity self,
                    asset::AssetId shapeKeyAnimationId,
                    MeshInstanceType type)
     : m_ctx{self, meshAsset.id, std::numeric_limits<uint32_t>::max(), std::numeric_limits<uint32_t>::max(), shapeKeyAnimationId == asset::NullAssetId ? std::numeric_limits<uint32_t>::max() : asset::AssetService<asset::ShapeKeyAnimationView>::Get()->Acquire(shapeKeyAnimationId).index, meshAsset.firstVertex, type},
-      m_material{MaterialInstance{materialDesc}},
-      m_shapeKeyAnimationController{shapeKeyAnimationId}
+      m_material{MaterialInstance{materialDesc}}
 {
     s_subsystem->AddInstance(m_ctx, m_material, meshAsset);
 }
@@ -30,18 +29,21 @@ void MeshBase::SetMaterial(const MaterialDesc& materialDesc)
     s_subsystem->SetInstanceMaterial(m_ctx, m_material, previousPasses);
 }
 
-void MeshBase::SetShapeKeyAnimation(uint32_t shapeKeyDataHandle)
-{
-    m_ctx.shapeKeyDataHandle = shapeKeyDataHandle;
-    s_subsystem->SetInstanceShapeKeyAnimation(m_ctx, m_material);
-}
-
 void MeshBase::Release() noexcept
 {
     if (m_ctx.entity.Valid())
     {
         s_subsystem->RemoveInstance(m_ctx, m_material);
     }
+}
+
+void StaticMesh::SetShapeKeyAnimation(asset::AssetId shapeKeyAnimationId)
+{
+    auto& ctx = GetMeshContext();
+    ctx.shapeKeyDataHandle = shapeKeyAnimationId == asset::NullAssetId ? std::numeric_limits<uint32_t>::max() : asset::AssetService<asset::ShapeKeyAnimationView>::Get()->Acquire(shapeKeyAnimationId).index;
+    auto* subsystem = GetSubsystem();
+    auto& material = GetMaterial();
+    subsystem->SetInstanceShapeKeyAnimation(ctx, material);
 }
 
 void SkinnedMesh::SetMesh(const asset::MeshView& meshAsset)

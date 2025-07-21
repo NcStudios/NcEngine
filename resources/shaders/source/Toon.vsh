@@ -1,5 +1,6 @@
 #include "core/PerFrameTypes.fxh"
 #include "core/Util.fxh"
+#include "core/ShapeKeyAnimation.fxh"
 
 struct VSInput
 {
@@ -37,37 +38,7 @@ void main(in  VSInput VSIn, uint InstanceID : SV_InstanceID, uint VertexID : SV_
     if (IsValidShapeKeyIndex(shapeKeyMetadataIndex))
     {
         ShapeKeyMetadata metadata = ShapeKeyAnimationMetadata[shapeKeyMetadataIndex];
-        // float shapeKeyPosition = (time) % metadata.durationInSeconds;
-        // uint shapeKeyIndexLow = floor(shapeKeyPosition); // 1001 % 10 second clip = 1, 1002 % 10 = 2
-        // uint shapeKeyIndexHigh = ceil(shapeKeyPosition);
-        // float shapeKeyLerpFactor = shapeKeyPosition % 1;
-
-
-        float wrappedTime = fmod(time, metadata.durationInSeconds);
-        float normalizedT = wrappedTime / metadata.durationInSeconds;
-        float frameF = normalizedT * (metadata.numShapeKeys - 1); 
-        uint shapeKeyIndexLow = (uint)floor(frameF);
-        uint shapeKeyIndexHigh = min(shapeKeyIndexLow + 1, metadata.numShapeKeys - 1);
-        float shapeKeyLerpFactor = frac(frameF);
-
-        int baseVertexID = VertexID - StaticInstances[InstanceID].vertexOffset;
-
-        int3 texelCoords = int3(baseVertexID * 3 + 0, shapeKeyIndexLow, 0); // X
-        float positionOffsetLowX = ShapeKeyClips[metadata.shapeKeyAnimationIndex].Load(texelCoords); // X, Y, Z, X, Y, Z, X, Y, Z
-        texelCoords.x += 1; // Y
-        float positionOffsetLowY = ShapeKeyClips[metadata.shapeKeyAnimationIndex].Load(texelCoords);
-        texelCoords.x += 1; // Z
-        float positionOffsetLowZ = ShapeKeyClips[metadata.shapeKeyAnimationIndex].Load(texelCoords);
-
-        texelCoords = int3(baseVertexID * 3 + 0, shapeKeyIndexHigh, 0); // X
-        float positionOffsetHighX = ShapeKeyClips[metadata.shapeKeyAnimationIndex].Load(texelCoords); // X, Y, Z, X, Y, Z, X, Y, Z
-        texelCoords.x += 1; // Y
-        float positionOffsetHighY = ShapeKeyClips[metadata.shapeKeyAnimationIndex].Load(texelCoords);
-        texelCoords.x += 1; // Z
-        float positionOffsetHighZ = ShapeKeyClips[metadata.shapeKeyAnimationIndex].Load(texelCoords);
-
-        float3 positionOffset = float3(lerp(positionOffsetLowX, positionOffsetHighX, shapeKeyLerpFactor), lerp(positionOffsetLowY, positionOffsetHighY, shapeKeyLerpFactor), lerp(positionOffsetLowZ, positionOffsetHighZ, shapeKeyLerpFactor));
-        animatedPos += positionOffset;
+        animatedPos += ApplyShapeKeyAnimation(shapeKeyMetadataIndex, metadata, ShapeKeyClips[metadata.shapeKeyAnimationIndex], time, VertexID - StaticInstances[InstanceID].vertexOffset);
     }
 
     float4 TransformedPos = mul(float4(animatedPos, 1.0), Transforms[transformIndex].model);
@@ -77,22 +48,4 @@ void main(in  VSInput VSIn, uint InstanceID : SV_InstanceID, uint VertexID : SV_
     PSIn.WorldPos = TransformedPos;
     PSIn.LocalPos = animatedPos.xyz;
     PSIn.MaterialIndex = materialIndex;
-
-
-
-    /*
-    if (ShapeKeyMetadata.ShapeKeyAnimationIndex > -1)
-    {
-        get time.deltatime
-        Get ShapeKeyMetadata.DurationInSeconds;
-        If TotalT = 10 seconds
-        If T = 3 seconds
-        
-
-
-
-        uint2 shapeKeyUVA = uint2{0, ShapeKeyIndex}
-        float3 shapeKeyA = ShapeKeyAnims[ShapeKeyAnimationIndex].Sample(ShapeKeyAnims_sampler, PSIn.UV * hatchTiling).b;
-    }
-    */
 }
