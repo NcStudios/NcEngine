@@ -22,11 +22,12 @@
 
 #include <algorithm>
 #include <array>
+#include <ctime>
+#include <iostream>
 #include <queue>
 #include <span>
 #include <unordered_map>
-#include <ctime>
-#include <iostream>
+#include <ranges>
 
 namespace
 {
@@ -99,6 +100,30 @@ auto GetAnimationFromScene(const aiScene* scene, const std::string_view subResou
     SubResourceErrorHandler<aiAnimation*>(subResourceName.data(), animations);
 }
 
+/**
+ * @brief FBX exports animMesh mesh names with a trailing "*n" where n is an index. Remove this as it doesn't accurately reference the mesh name.
+ * Intentionally copying to a string
+ */
+auto CleanAnimMeshMeshName(std::string_view name) -> std::string
+{
+    auto reversedName = name | std::views::reverse;
+
+    // Find the first character that is not a digit, starting from the end.
+    auto pos = std::ranges::find_if_not(reversedName, [](char c)
+    {
+        return std::isdigit(static_cast<unsigned char>(c));
+    });
+
+    if (pos != reversedName.end() && *pos == '*')
+    {
+        auto trailLength = std::ranges::distance(reversedName.begin(), ++pos);
+        return std::string(name.substr(0, name.size() - trailLength));
+    }
+
+    // No trail found.
+    return std::string(name);
+}
+
 auto GetAnimMeshMeshFromAnimation(const aiScene* scene, const aiAnimation* animation) -> aiMesh*
 {
     NC_ASSERT(animation != nullptr, "Animation cannot be nullptr.");
@@ -106,27 +131,9 @@ auto GetAnimMeshMeshFromAnimation(const aiScene* scene, const aiAnimation* anima
     NC_ASSERT(scene->mNumMeshes != 0, "No meshes found in scene.");
 
     auto animationName = std::string_view(animation->mMorphMeshChannels[0]->mName.C_Str());
-    return GetMeshFromScene(scene, animationName);
+    auto cleanedAnimationName = CleanAnimMeshMeshName(animationName);
+    return GetMeshFromScene(scene, cleanedAnimationName);
 }
-
-// Data Structure of aiAnimMesh for Blend Shapes:
-/*
-aiScene
-    mNumMeshes: 1
-    mMeshes: aiMesh[]
-
-aiMesh
-    mNumAnimMeshes: 25
-    mAnimMeshes: aiAnimMesh[]
-    mMethod: aiMorphingMethod
-        aiMorphingMethod_Unknown
-
-aiAnimMesh
-    mName: ShapeKey.1
-    mNumVertices: 1089
-    mVertices: aiVector3t<float>
-    mWeight: float
-*/
 
 auto GetAnimMeshesFromScene(const aiScene* scene, const std::string_view subResourceName) -> aiAnimMesh**
 {
@@ -251,6 +258,14 @@ auto GetBoneWeights(const aiMesh* mesh) -> std::unordered_map<uint32_t, nc::asse
     for (auto boneIndex = 0u; boneIndex < mesh->mNumBones; boneIndex++)
     {
         auto* currentBone = mesh->mBones[boneIndex];
+
+        if (currentBone->mNumWeights ==1)
+        {
+            if (nc::FloatEqual(currentBone->mWeights[0].mWeight, 0.0f))
+            {
+                continue;
+            }
+        }
         
         // Iterate through all the vertex weights each bone has
         for (auto boneWeightIndex = 0u; boneWeightIndex < currentBone->mNumWeights; boneWeightIndex++)
@@ -794,7 +809,6 @@ class GeometryConverter::impl
             const auto* mesh = GetAnimMeshMeshFromAnimation(scene, animation);
             
             return ::ConvertToShapeKeyAnimation(animation, mesh);
-            // return ::ConvertToShapeKeyAnimation(animation, meshMorphs);
         }
 
     private:

@@ -159,16 +159,15 @@ const auto g_paths = std::array{
     std::string{path::ogre},
     std::string{path::ramp},
     std::string{path::skeleton},
-    std::string{path::girl_dress},
-    std::string{path::girl_body},
     std::string{path::cube},
     std::string{path::plane},
     std::string{path::flag},
     std::string{path::sheet},
     std::string{path::steeple},
-    std::string{path::girlglb},
-    std::string{path::dress},
     std::string{path::girl},
+    std::string{path::dress},
+    std::string{path::girlglb},
+    std::string{path::dressglb},
 };
 
 nc::asset::MeshView default_plane{};
@@ -183,16 +182,15 @@ nc::asset::MeshView halfpipe{};
 nc::asset::MeshView ogre{};
 nc::asset::MeshView ramp{};
 nc::asset::MeshView skeleton{};
-nc::asset::MeshView girl_dress{};
-nc::asset::MeshView girl_body{};
 nc::asset::MeshView cube{};
 nc::asset::MeshView plane{};
 nc::asset::MeshView flag{};
 nc::asset::MeshView sheet{};
 nc::asset::MeshView steeple{};
-nc::asset::MeshView girlglb{};
-nc::asset::MeshView dress{};
 nc::asset::MeshView girl{};
+nc::asset::MeshView dress{};
+nc::asset::MeshView girlglb{};
+nc::asset::MeshView dressglb{};
 
 void Load()
 {
@@ -213,16 +211,15 @@ void Acquire()
     ogre = nc::asset::AcquireMeshAsset(path::ogre);
     ramp = nc::asset::AcquireMeshAsset(path::ramp);
     skeleton = nc::asset::AcquireMeshAsset(path::skeleton);
-    girl_dress = nc::asset::AcquireMeshAsset(path::girl_dress);
-    girl_body = nc::asset::AcquireMeshAsset(path::girl_body);
     cube = nc::asset::AcquireMeshAsset(path::cube);
     plane = nc::asset::AcquireMeshAsset(path::plane);
     flag = nc::asset::AcquireMeshAsset(path::flag);
     sheet = nc::asset::AcquireMeshAsset(path::sheet);
     steeple = nc::asset::AcquireMeshAsset(path::steeple);
-    girlglb = nc::asset::AcquireMeshAsset(path::girlglb);
-    dress = nc::asset::AcquireMeshAsset(path::dress);
     girl = nc::asset::AcquireMeshAsset(path::girl);
+    dress = nc::asset::AcquireMeshAsset(path::dress);
+    girlglb = nc::asset::AcquireMeshAsset(path::girlglb);
+    dressglb = nc::asset::AcquireMeshAsset(path::dressglb);
 }
 
 } // namespace mesh
@@ -254,6 +251,7 @@ const auto g_paths = std::array{
     std::string{path::chute},
     std::string{path::fall},
     std::string{path::twirl},
+    std::string{path::twirlglb},
 };
 
 nc::asset::AssetId default_shapekey{nc::utility::Fnv1a(path::default_shapekey)};
@@ -263,6 +261,7 @@ nc::asset::AssetId flag{nc::utility::Fnv1a(path::flag)};
 nc::asset::AssetId chute{nc::utility::Fnv1a(path::chute)};
 nc::asset::AssetId fall{nc::utility::Fnv1a(path::fall)};
 nc::asset::AssetId twirl{nc::utility::Fnv1a(path::twirl)};
+nc::asset::AssetId twirlglb{nc::utility::Fnv1a(path::twirlglb)};
 
 void Load()
 {
@@ -284,6 +283,7 @@ const auto g_paths = std::array{
     std::string{path::skeleton_walk_left},
     std::string{path::skeleton_walk_right},
     std::string{path::dance},
+    std::string{path::danceglb},
 };
 
 nc::asset::AssetId default_cube{nc::utility::Fnv1a(path::default_cube)};
@@ -296,6 +296,7 @@ nc::asset::AssetId skeleton_walk_forward{nc::utility::Fnv1a(path::skeleton_walk_
 nc::asset::AssetId skeleton_walk_left{nc::utility::Fnv1a(path::skeleton_walk_left)};
 nc::asset::AssetId skeleton_walk_right{nc::utility::Fnv1a(path::skeleton_walk_right)};
 nc::asset::AssetId dance{nc::utility::Fnv1a(path::dance)};
+nc::asset::AssetId danceglb{nc::utility::Fnv1a(path::danceglb)};
 
 void Load()
 {

@@ -72,19 +72,6 @@
             "assetName": "mesh/skeleton"
         },
         {
-            "sourcePath": "raw/model/twirl.fbx",
-            "assetNames": [
-                {
-                    "subResourceName": "dress_mesh",
-                    "assetName": "mesh\\girl\\dress"
-                },
-                {
-                    "subResourceName": "body.001",
-                    "assetName": "mesh\\girl\\body"
-                }
-            ]
-        },
-        {
             "sourcePath": "raw/model/cube.glb",
             "assetNames": [
                 {
@@ -152,6 +139,23 @@
             {
                 "optimizeMesh": false
             }
+        },
+        {
+            "sourcePath": "raw/model/girl.glb",
+            "assetNames": [
+                {
+                    "subResourceName": "Woman",
+                    "assetName": "mesh\\girlglb"
+                },
+                {
+                    "subResourceName": "Dress",
+                    "assetName": "mesh\\dressglb"
+                }
+            ],
+            "options":
+            {
+                "optimizeMesh": false
+            }
         }
     ],
     "mesh-collider": [
@@ -205,8 +209,17 @@
             "sourcePath": "raw/model/girl.fbx",
             "assetNames": [
                 {
-                    "subResourceName": "TwirlFromKey",
+                    "subResourceName": "Dress|Twirl",
                     "assetName": "shapekey_animation\\twirl"
+                }
+            ]
+        },
+        {
+            "sourcePath": "raw/model/girl.glb",
+            "assetNames": [
+                {
+                    "subResourceName": "TwirlFromKey",
+                    "assetName": "shapekey_animation\\twirlglb"
                 }
             ]
         }
@@ -258,8 +271,17 @@
             "sourcePath": "raw/model/girl.fbx",
             "assetNames": [
                 {
-                    "subResourceName": "Dance",
+                    "subResourceName": "Armature|Dance",
                     "assetName": "skeletal_animation\\dance"
+                }
+            ]
+        },
+        {
+            "sourcePath": "raw/model/girl.glb",
+            "assetNames": [
+                {
+                    "subResourceName": "Dance",
+                    "assetName": "skeletal_animation\\danceglb"
                 }
             ]
         }

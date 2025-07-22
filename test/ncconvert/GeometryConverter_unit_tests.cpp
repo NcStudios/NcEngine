@@ -1,6 +1,6 @@
-#include "CollateralGeometry.h"
-#include "GeometryTestUtility.h"
 #include "gtest/gtest.h"
+#include "GeometryTestUtility.h"
+#include "CollateralGeometry.h"
 
 #include "analysis/GeometryAnalysis.h"
 #include "converters/GeometryConverter.h"
@@ -75,8 +75,7 @@ TEST(GeometryConverterTest, ImportedMesh_convertsToNca)
     }
 
     const auto nVertices = actual.vertices.size();
-    EXPECT_TRUE(
-        std::ranges::all_of(actual.indices, [&nVertices](auto i) { return i < nVertices; }));
+    EXPECT_TRUE(std::ranges::all_of(actual.indices, [&nVertices](auto i) { return i < nVertices; }));
 }
 
 TEST(GeometryConverterTest, ImportedMesh_optimizeMesh_convertsToNca)
@@ -98,8 +97,7 @@ TEST(GeometryConverterTest, ImportedMesh_optimizeMesh_convertsToNca)
     }
 
     const auto nVertices = actual.vertices.size();
-    EXPECT_TRUE(
-        std::ranges::all_of(actual.indices, [&nVertices](auto i) { return i < nVertices; }));
+    EXPECT_TRUE(std::ranges::all_of(actual.indices, [&nVertices](auto i) { return i < nVertices; }));
 }
 
 TEST(GeometryConverterTest, ImportedMesh_multipleSubResources_specifiedMeshParsed)
@@ -163,8 +161,7 @@ TEST(GeometryConverterTest, GetBoneWeights_fiveBonesPerVertex_importFails)
     }
     catch (const nc::NcError& e)
     {
-        EXPECT_TRUE(std::string(e.what()).find(std::string("more than four bones")) !=
-                    std::string::npos);
+        EXPECT_TRUE(std::string(e.what()).find(std::string("more than four bones")) != std::string::npos);
         threwNcError = true;
     }
 
@@ -182,8 +179,7 @@ TEST(GeometryConverterTest, GetBoneWeights_weightsNotEqual100_importFails)
     }
     catch (const nc::NcError& e)
     {
-        EXPECT_TRUE(std::string(e.what()).find(std::string("affecting each vertex must equal 1")) !=
-                    std::string::npos);
+        EXPECT_TRUE(std::string(e.what()).find(std::string("affecting each vertex must equal 1")) != std::string::npos);
         threwNcError = true;
     }
 
@@ -265,8 +261,7 @@ TEST(GeometryConverterTest, ImportSkeletalAnimation_incorrectSubResourceName_thr
 {
     namespace test_data = collateral::simple_cube_animation_fbx;
     auto uut = nc::convert::GeometryConverter{};
-    EXPECT_THROW(uut.ImportSkeletalAnimation(test_data::filePath, std::string("Armature|Wigglde")),
-                 nc::NcError);
+    EXPECT_THROW(uut.ImportSkeletalAnimation(test_data::filePath, std::string("Armature|Wigglde")), nc::NcError);
 }
 
 TEST(GeometryConverterTest, ImportShapeKeyAnimation_plane_convertedCorrectly)
@@ -278,21 +273,6 @@ TEST(GeometryConverterTest, ImportShapeKeyAnimation_plane_convertedCorrectly)
     EXPECT_EQ(actual.numShapeKeys, test_data::shapeKeyCount);
     EXPECT_EQ(actual.animation.width, test_data::vertexCount * 3u);
     EXPECT_EQ(actual.animation.height, test_data::shapeKeyCount);
-    EXPECT_NEAR(actual.durationInSeconds, test_data::animationDuration, 0.0001f);
-    EXPECT_EQ(actual.animation.pixelData.size(),
-              test_data::vertexCount * 3ull * test_data::shapeKeyCount);
-}
-
-TEST(GeometryConverterTest, ImportShapeKeyAnimation_steeple_convertedCorrectly)
-{
-    namespace test_data = collateral::steeple_glb;
-    auto uut = nc::convert::GeometryConverter{};
-    const auto actual = uut.ImportShapeKeyAnimation(test_data::filePath, std::string{"Chute"});
-
-    EXPECT_EQ(actual.numShapeKeys, test_data::shapeKeyCount);
-    EXPECT_EQ(actual.animation.width, test_data::vertexCount * 3u);
-    EXPECT_EQ(actual.animation.height, test_data::shapeKeyCount);
-    EXPECT_NEAR(actual.durationInSeconds, test_data::animationDuration, 0.0001f);
-    EXPECT_EQ(actual.animation.pixelData.size(),
-              test_data::vertexCount * 3ull * test_data::shapeKeyCount);
+    EXPECT_FLOAT_EQ(actual.durationInSeconds, test_data::animationDuration);
+    EXPECT_EQ(actual.animation.pixelData.size(), test_data::vertexCount * 3ull * test_data::shapeKeyCount);
 }

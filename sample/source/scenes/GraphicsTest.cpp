@@ -70,39 +70,6 @@ void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
     });
     world.Emplace<StaticMesh>(flag, mesh::flag, material::blue, shapekey_animation::flag);
 
-    const auto dress = world.Emplace<Entity>({
-        .position = Vector3{0.0f, 0.0f, 0.0f},
-        .rotation = Quaternion::FromEulerAngles(0.0f, 0.0f, 0.0f),
-        .scale = Vector3{1.0f, 1.0f, 1.0f},
-        .tag = "Dress"
-    });
-    world.Emplace<StaticMesh>(dress, mesh::dress, material::red, shapekey_animation::twirl);
-
-    const auto girl = world.Emplace<Entity>({
-        .position = Vector3{0.0f, 0.0f, 0.0f},
-        .rotation = Quaternion::FromEulerAngles(0.0f, 0.0f, 0.0f),
-        .scale = Vector3{1.0f, 1.0f, 1.0f},
-        .tag = "girl"
-    });
-    world.Emplace<SkinnedMesh>(girl, mesh::girlglb, material::blue, animation::dance);
-    
-    const auto steeple = world.Emplace<Entity>({
-        .position = Vector3{8.0f, 0.3f, 1.0f},
-        .rotation = Quaternion::FromEulerAngles(0.0f, 0.0f, 0.0f),
-        .scale = Vector3{2.9f, 1.8f, 3.0f},
-        .tag = "steeple"
-    });
-    world.Emplace<StaticMesh>(steeple, mesh::steeple, material::blue);
-
-    const auto sheet = world.Emplace<Entity>({
-        .position = Vector3{8.0f, 0.0f, 1.0f},
-        .rotation = Quaternion::FromEulerAngles(0.0f, 0.0f, 0.0f),
-        .scale = Vector3{1.0f, 1.0f, 1.0f},
-        .tag = "sheet"
-    });
-    world.Emplace<StaticMesh>(sheet, mesh::sheet, material::yellow, shapekey_animation::chute);
-    world.Emplace<FrameLogic>(sheet, ChangeShapeKey);
-
     // Ogre
     {
         const auto ogre = world.Emplace<Entity>({
