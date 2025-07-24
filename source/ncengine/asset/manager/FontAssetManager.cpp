@@ -27,15 +27,6 @@ void ClearFontAtlas()
 #else
 auto LoadFontToAtlas(const char* path, float size) -> ImFont*
 {
-    if (strcmp(path, "nca/font/icons.ttf") == 0)
-    {
-        static const ImWchar icon_ranges[] = { 0xE000, 0xF8FF, 0 }; // Private Use Area
-        ImFontConfig icons_config;
-        icons_config.MergeMode = true;
-        icons_config.PixelSnapH = true;
-        return ImGui::GetIO().Fonts->AddFontFromFileTTF(path, size, &icons_config, icon_ranges);
-    }
-
     return ImGui::GetIO().Fonts->AddFontFromFileTTF(path, size);
 }
 

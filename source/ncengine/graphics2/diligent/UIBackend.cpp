@@ -18,7 +18,6 @@ void UIBackend::FrameBegin(Diligent::ISwapChain& swapChain)
 {
     const auto& scDesc = swapChain.GetDesc();
     m_imguiBackend.NewFrame(scDesc.Width, scDesc.Height, scDesc.PreTransform);
-
     ImGuizmo::BeginFrame();
 }
 

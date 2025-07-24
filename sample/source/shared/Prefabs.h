@@ -24,7 +24,6 @@ void ReloadPrefabs();
 namespace font
 {
 extern asset::FontInfo ui;
-extern asset::FontInfo icons;
 } // namespace font
 
 namespace material

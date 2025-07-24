@@ -88,6 +88,11 @@ void EditorUI::Draw(EditorContext& ctx)
         m_sceneGraph.Draw(ctx, m_createEntityDialog);
     });
 
+    if (!ctx.selectedEntity.Valid())
+    {
+        return;
+    }
+
     if (m_toolbar.IsOpen())
     {
         RUN_ONCE(ToolbarLayout());
@@ -98,11 +103,6 @@ void EditorUI::Draw(EditorContext& ctx)
     }
 
     m_toolbar.DrawGizmos(ctx);
-
-    if (!ctx.selectedEntity.Valid())
-    {
-        return;
-    }
 
     RUN_ONCE(WindowLayout(g_initialInspectorWidth, g_pivotRight));
     Window("Inspector", [&]()
@@ -200,17 +200,6 @@ void EditorUI::DrawMenu(EditorContext& ctx)
                 }
 
                 ImGui::EndMenu();
-            }
-
-
-            ImGui::EndMenu();
-        }
-
-        if (ImGui::BeginMenu("View"))
-        {
-            if (ImGui::MenuItem("Toolbar"))
-            {
-                m_toolbar.ToggleOpen();
             }
 
             ImGui::EndMenu();
