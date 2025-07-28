@@ -4,6 +4,28 @@
 
 namespace nc
 {
+auto MakeDefaultViewMatrix() -> DirectX::XMMATRIX
+{
+    static const auto defaultView = DirectX::XMMatrixLookAtRH(
+        DirectX::g_XMIdentityR3,
+        DirectX::g_XMIdentityR2,
+        DirectX::g_XMNegIdentityR1
+    );
+
+    return defaultView;
+}
+
+auto MakeDefaultProjectionMatrix() -> DirectX::XMMATRIX
+{
+    const auto [width, height] = nc::window::GetScreenExtent();
+    return DirectX::XMMatrixPerspectiveFovRH(
+        CameraProperties::DefaultFOV,
+        width / height,
+        CameraProperties::DefaultNearClip,
+        CameraProperties::DefaultFarClip
+    );
+}
+
 Camera::Camera(Entity entity, const CameraProperties& properties) noexcept
     : FreeComponent(entity),
       m_view{},

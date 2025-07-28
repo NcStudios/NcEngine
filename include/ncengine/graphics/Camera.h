@@ -11,14 +11,19 @@ namespace nc
 /** @brief Properties for controlling a camera's frustum. */
 struct CameraProperties
 {
+    /** @name Default Properties */
+    static constexpr auto DefaultFOV = 1.0472f;
+    static constexpr auto DefaultNearClip = 0.1f;
+    static constexpr auto DefaultFarClip = 400.0f;
+
     /** @brief Camera field of view in radians. */
-    float fov = 1.0472f;
+    float fov = DefaultFOV;
 
     /** @brief Distance to near clipping plane. Must be greater than 0. */
-    float nearClip = 0.1f;
+    float nearClip = DefaultNearClip;
 
     /** @brief Distance to far clipping plane. Must be greater than nearClip. */
-    float farClip = 400.0f;
+    float farClip = DefaultFarClip;
 };
 
 /** @brief Two points lying on a Camera's near and far planes. */
@@ -27,6 +32,12 @@ struct NearFarPoints
     Vector3 nearPoint = Vector3::Zero();
     Vector3 farPoint = Vector3::Zero();
 };
+
+/** @brief Get a default view matrix. */
+auto MakeDefaultViewMatrix() -> DirectX::XMMATRIX;
+
+/** @brief Get a default project matrix. */
+auto MakeDefaultProjectionMatrix() -> DirectX::XMMATRIX;
 
 /** @brief Basic camera component. */
 class Camera : public FreeComponent

@@ -23,6 +23,10 @@ struct EditorHotkeys
     input::KeyCode openSaveSceneDialog = input::KeyCode::F2;
     input::KeyCode openLoadSceneDialog = input::KeyCode::F3;
     input::KeyCode toggleEditorCamera = input::KeyCode::F5;
+
+    input::KeyCode translateMode = input::KeyCode::T;
+    input::KeyCode rotateMode = input::KeyCode::R;
+    input::KeyCode scaleMode = input::KeyCode::S;
 };
 
 /** @brief Signals editor open and close events */

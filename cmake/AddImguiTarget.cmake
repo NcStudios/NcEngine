@@ -5,6 +5,7 @@ add_library(imgui STATIC
     ${imgui_SOURCE_DIR}/imgui_widgets.cpp
     ${imgui_SOURCE_DIR}/backends/imgui_impl_glfw.cpp
     ${imgui_SOURCE_DIR}/backends/imgui_impl_vulkan.cpp # only needed for old gfx impl
+    ${imguizmo_SOURCE_DIR}/ImGuizmo.cpp
 )
 
 if(WIN32)
@@ -22,6 +23,7 @@ target_compile_definitions(imgui
 target_include_directories(imgui
     PUBLIC
         "${imgui_SOURCE_DIR}"
+        "${imguizmo_SOURCE_DIR}"
 )
 
 target_link_libraries(imgui

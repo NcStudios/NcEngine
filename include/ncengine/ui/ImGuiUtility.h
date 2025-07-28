@@ -53,6 +53,10 @@ void Window(const char* label, ImGuiWindowFlags flags, F&& drawContents);
 template<class F>
 void ChildWindow(const char* label, F&& drawContents);
 
+/** @brief Create a child window. */
+template<class F>
+void ChildWindow(const char* label, ImGuiChildFlags flags, F&& drawContents);
+
 /** @brief Check if the current window background is clicked on. */
 auto IsWindowBackgroundClicked() -> bool;
 
@@ -112,6 +116,9 @@ auto InputText(std::string& value, const char* label) -> bool;
 
 /** @brief Wrap a widget with a selectable - allows for things like list box of input widgets. */
 auto SelectableWidget(bool selected, const ImVec2& size, auto&& widget) -> bool;
+
+/** @brief Set tooltip text if the last item is hovered. */
+void SetTooltip(const char* text);
 
 /**
  * @brief Simple getter/setter-based property wrapper.
@@ -182,6 +189,20 @@ struct StyleColor
     ~StyleColor() noexcept                                  { ImGui::PopStyleColor();            }
 };
 
+/** @brief RAII wrapper for scoped style var. */
+struct StyleVar
+{
+    explicit StyleVar(ImGuiStyleVar index, const ImVec2& value) { ImGui::PushStyleVar(index, value); }
+    ~StyleVar() noexcept                                        { ImGui::PopStyleVar();              }
+};
+
+/** @brief RAII wrapper for ui font. */
+struct StyleFont
+{
+    explicit StyleFont(ImFont* font) { ImGui::PushFont(font); }
+    ~StyleFont() noexcept            { ImGui::PopFont();      }
+};
+
 /** @brief RAII wrapper for scoped item width. */
 struct ItemWidth
 {
@@ -225,6 +246,17 @@ template<class F>
 void Window(const char* label, F&& drawContents)
 {
     Window(label, ImGuiWindowFlags_None, std::forward<F>(drawContents));
+}
+
+template<class F>
+void ChildWindow(const char* label, ImGuiChildFlags flags, F&& drawContents)
+{
+    if (ImGui::BeginChild(label, {0, 0}, flags))
+    {
+        drawContents();
+    };
+
+    ImGui::EndChild();
 }
 
 template<class F>
@@ -504,6 +536,14 @@ void DragAndDropTarget(F&& func)
         }
 
         ImGui::EndDragDropTarget();
+    }
+}
+
+inline void SetTooltip(const char* text)
+{
+    if (ImGui::IsItemHovered())
+    {
+        ImGui::SetTooltip("%s", text);
     }
 }
 } // namespace nc::ui
