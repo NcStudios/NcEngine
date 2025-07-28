@@ -9,8 +9,6 @@
 #include "ncengine/ui/ImGuiUtility.h"
 #include "ncengine/window/Window.h"
 
-#include "imgui.h"
-
 // Helper for setting up initial window layout:
 // Runs a block only the first time its seen by wrapping in an immediately
 // invoked lambda and storing an arbitrary result in a local static.

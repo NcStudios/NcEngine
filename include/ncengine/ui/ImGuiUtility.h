@@ -53,6 +53,10 @@ void Window(const char* label, ImGuiWindowFlags flags, F&& drawContents);
 template<class F>
 void ChildWindow(const char* label, F&& drawContents);
 
+/** @brief Create a child window. */
+template<class F>
+void ChildWindow(const char* label, ImGuiChildFlags flags, F&& drawContents);
+
 /** @brief Check if the current window background is clicked on. */
 auto IsWindowBackgroundClicked() -> bool;
 

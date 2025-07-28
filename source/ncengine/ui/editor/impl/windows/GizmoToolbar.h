@@ -12,17 +12,6 @@ enum class GizmoMode
     Scale     = 896
 };
 
-struct GizmoOptions
-{
-    static constexpr auto TranslateSnapValueOffset = 0u;
-    static constexpr auto RotateSnapValueOffset = 3u;
-    static constexpr auto ScaleSnapValueOffset = 4u;
-
-    GizmoMode mode = GizmoMode::Translate;
-    float snapValues[5] = {1.0f, 1.0f, 1.0f, 0.174533f, 1.0f};
-    bool enableSnap = false;
-};
-
 class GizmoToolbar
 {
     public:
@@ -41,7 +30,6 @@ class GizmoToolbar
 
     private:
         GizmoMode m_mode = GizmoMode::Translate;
-        GizmoOptions m_options;
         bool m_open = true;
 };
 } // namespace nc::ui::editor

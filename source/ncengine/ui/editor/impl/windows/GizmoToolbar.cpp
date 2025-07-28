@@ -17,39 +17,6 @@ constexpr auto g_buttonSize = ImVec2{16.0f, 16.0f};
 constexpr auto g_selectedColor = nc::ui::color::Green;
 constexpr auto g_unselectedColor = nc::ui::default_scheme::Border;
 
-auto GetTranslateSnapValues(GizmoOptions& options) -> float*
-{
-    return &options.snapValues[GizmoOptions::TranslateSnapValueOffset];
-}
-
-auto GetRotateSnapValues(GizmoOptions& options) -> float*
-{
-    return &options.snapValues[GizmoOptions::RotateSnapValueOffset];
-}
-
-auto GetScaleSnapValues(GizmoOptions& options) -> float*
-{
-    return &options.snapValues[GizmoOptions::ScaleSnapValueOffset];
-}
-
-auto GetSnapValues(GizmoOptions& options) -> float*
-{
-    if (!options.enableSnap)
-    {
-        return nullptr;
-    }
-
-    switch (options.mode)
-    {
-        case GizmoMode::Translate: return GetTranslateSnapValues(options);
-        case GizmoMode::Rotate:    return GetRotateSnapValues(options);
-        case GizmoMode::Scale:     return GetScaleSnapValues(options);
-        default:
-            NC_ASSERT(false, "Unhandled GizmoMode");
-            std::unreachable();
-    }
-};
-
 struct ViewProjection
 {
     DirectX::XMFLOAT4X4 view = DirectX::XMFLOAT4X4{};
@@ -79,7 +46,7 @@ auto GetViewProjectionMatrices(EditorContext& ctx) -> ViewProjection
 auto GetModelMatrix(const nc::Transform& transform) -> DirectX::XMFLOAT4X4
 {
     auto out = DirectX::XMFLOAT4X4{};
-    DirectX::XMStoreFloat4x4(&out, transform.TransformationMatrix());
+    DirectX::XMStoreFloat4x4(&out, transform.LocalTransformationMatrix());
     return out;
 }
 
@@ -94,13 +61,13 @@ void SetImGuizmoRect()
     ImGuizmo::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
 }
 
-void PollHotkeys(const EditorHotkeys& hotkeys, GizmoOptions& options)
+void PollHotkeys(const EditorHotkeys& hotkeys, GizmoMode& mode)
 {
     if (KeyHeld(nc::input::KeyCode::LeftCtrl))
     {
-        if (KeyDown(hotkeys.translateMode)) options.mode = GizmoMode::Translate;
-        if (KeyDown(hotkeys.rotateMode))    options.mode = GizmoMode::Rotate;
-        if (KeyDown(hotkeys.scaleMode))     options.mode = GizmoMode::Scale;
+        if (KeyDown(hotkeys.translateMode)) mode = GizmoMode::Translate;
+        if (KeyDown(hotkeys.rotateMode))    mode = GizmoMode::Rotate;
+        if (KeyDown(hotkeys.scaleMode))     mode = GizmoMode::Scale;
     }
 }
 
@@ -126,7 +93,6 @@ void MoveObject(EditorContext& ctx,
                 const DirectX::XMFLOAT4X4& model)
 {
     auto newModel = DirectX::XMLoadFloat4x4(&model);
-
     if (ctx.world.Contains<nc::RigidBody>(ctx.selectedEntity))
     {
         auto& body = ctx.world.Get<nc::RigidBody>(ctx.selectedEntity);
@@ -159,45 +125,13 @@ void GizmoToolbar::DrawToolbar(EditorContext& ctx)
 {
     IMGUI_SCOPE(StyleVar, ImGuiStyleVar_FramePadding, ImVec2{1.0f, 1.0f});
     IMGUI_SCOPE(StyleVar, ImGuiStyleVar_ItemSpacing, ImVec2{1.0f, 1.0f});
-    PollHotkeys(ctx.hotkeys, m_options);
+    PollHotkeys(ctx.hotkeys, m_mode);
 
     {
         IMGUI_SCOPE(DisableIf, !ctx.selectedEntity.Valid());
-        ToolbarButton("T", "Translate Mode", GizmoMode::Translate, m_options.mode);
-        ToolbarButton("R",    "Rotate Mode", GizmoMode::Rotate,    m_options.mode);
-        ToolbarButton("S",     "Scale Mode", GizmoMode::Scale,     m_options.mode);
-
-        {
-            IMGUI_SCOPE(ui::DisableIf, !m_options.enableSnap);
-            SameLineSpaced();
-            SameLineSpaced();
-            ImGui::SetNextItemWidth(150.0f);
-            constexpr auto label = "##snapto";
-            constexpr auto fmt = "%.3f";
-            constexpr auto flags = ImGuiSliderFlags_AlwaysClamp;
-            switch (m_options.mode)
-            {
-                case GizmoMode::Translate:
-                    ImGui::DragFloat3(label, GetTranslateSnapValues(m_options), 1.0f, 0.001f, g_maxPos, fmt, flags);
-                    break;
-                case GizmoMode::Rotate:
-                    ImGui::DragFloat(label, GetRotateSnapValues(m_options), 0.1f, 0.001f, g_maxAngle, fmt, flags);
-                    break;
-                case GizmoMode::Scale:
-                    ImGui::DragFloat(label, GetScaleSnapValues(m_options), 0.5f, g_minScale, g_maxScale, fmt, flags);
-                    break;
-                default:
-                    NC_ASSERT(false, "Unhandled GizmoMode");
-                    std::unreachable();
-            }
-
-            SetTooltip("Snap To");
-        }
-
-        SameLineSpaced();
-        SameLineSpaced();
-        ui::Checkbox(m_options.enableSnap, "Snap");
-        SetTooltip("Enable Snap");
+        ToolbarButton("T", "Translate Mode", GizmoMode::Translate, m_mode);
+        ToolbarButton("R",    "Rotate Mode", GizmoMode::Rotate,    m_mode);
+        ToolbarButton("S",     "Scale Mode", GizmoMode::Scale,     m_mode);
     }
 }
 
@@ -211,13 +145,12 @@ void GizmoToolbar::DrawGizmos(EditorContext& ctx)
     {
         auto& transform = ctx.world.Get<Transform>(ctx.selectedEntity);
         auto model = GetModelMatrix(transform);
-        const auto op = static_cast<ImGuizmo::OPERATION>(m_options.mode);
-        const auto snap = GetSnapValues(m_options);
-        ImGuizmo::Manipulate(&view._11, &proj._11, op, ImGuizmo::LOCAL, &model._11, nullptr, snap);
+        const auto op = static_cast<ImGuizmo::OPERATION>(m_mode);
+        ImGuizmo::Manipulate(&view._11, &proj._11, op, ImGuizmo::LOCAL, &model._11);
 
         if (ImGuizmo::IsUsing())
         {
-            MoveObject(ctx, m_options.mode, transform, model);
+            MoveObject(ctx, m_mode, transform, model);
         }
     }
 }
