@@ -56,24 +56,29 @@ class PassBackend
         void RenderSkybox(Diligent::IDeviceContext& context,
                           Diligent::ISwapChain& swapChain,
                           PerPassResourceSignature& perPassResourceSignature,
-                          const nc::graphics::EnvironmentRenderState& environmentRenderState);
+                          const nc::graphics::EnvironmentRenderState& environmentRenderState,
+                          const Viewport& viewport);
 
         void RenderMaterial(Diligent::IDeviceContext& context,
                             Diligent::ISwapChain& swapChain,
                             PerPassResourceSignature& perPassResourceSignature,
                             const std::vector<std::vector<Batch>>& staticPassBatches,
                             const std::vector<std::vector<Batch>>& skinnedPassBatches,
-                            const std::span<const LightData>& lights);
+                            const std::span<const LightData>& lights,
+                            const Viewport& viewport);
+
 
         void RenderWireframe(Diligent::IDeviceContext& context,
                              Diligent::ISwapChain& swapChain,
                              PerPassResourceSignature& perPassResourceSignature,
-                             const WireframeRendererRenderState& state);
+                             const WireframeRendererRenderState& state,
+                             const Viewport& viewport);
 
         void RenderParticle(Diligent::IDeviceContext& context,
                             Diligent::ISwapChain& swapChain,
                             PerPassResourceSignature& perPassResourceSignature,
-                            const ParticleRenderState& state);
+                            const ParticleRenderState& state,
+                            const Viewport& viewport);
 
         void RenderPostProcess(Diligent::IDeviceContext& context,
                                Diligent::ISwapChain& swapChain,

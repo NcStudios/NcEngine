@@ -6,6 +6,7 @@
 
 #include "ncengine/ecs/EcsFwd.h"
 #include "ncengine/graphics/Camera.h"
+#include "ncengine/graphics/GraphicsUtility.h"
 #include "ncengine/graphics/PostProcess.h"
 #include "ncengine/module/Module.h"
 #include "ncengine/module/ModuleProvider.h"
@@ -85,6 +86,13 @@ struct NcGraphics : public Module
      * @return The AssetID of the current skybox, or NullAssetID if none set.
      */
     virtual auto GetSkybox() const -> nc::asset::AssetId = 0;
+
+    /**
+     * @brief Set the Viewport. 
+     * Controls the viewport, the scissor, and the projection matrix for the scene.
+     * @param viewport The Viewport object.
+     */
+    virtual void SetViewport(const Viewport& viewport) = 0;
 
     /**
      * @brief Clear all environment data (currently only the skybox).

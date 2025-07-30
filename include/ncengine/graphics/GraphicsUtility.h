@@ -28,6 +28,13 @@ struct MiscPassFlag
     static constexpr auto Skybox    = type{1 << 2};
 };
 
+/** @brief A struct that controls the viewport and scissor size and placement. */
+struct Viewport
+{
+    nc::Vector2 Size    = nc::Vector2{1600, 900};
+    nc::Vector2 TopLeft = nc::Vector2{0, 0};
+};
+
 /** @brief Returns a view of all material pass names, ordered by ascending flag value. */
 auto GetMaterialPassNames() -> std::span<const std::string_view>;
 

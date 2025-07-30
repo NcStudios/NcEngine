@@ -29,7 +29,9 @@ GraphicsTest::GraphicsTest(SampleUI* ui, Vector3 extents)
 void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
 {
     m_sampleUI->SetWidgetCallback(nullptr);
-    modules.Get<NcGraphics>()->SetSkybox(cube_map::path::night_sky);
+    auto* ncGraphics = modules.Get<NcGraphics>();
+    ncGraphics->SetSkybox(cube_map::path::night_sky);
+    ncGraphics->SetViewport(nc::Viewport{.Size = nc::Vector2{800.0f, 450.0f}, .TopLeft = nc::Vector2{400.0f, 100.0f}});
 
     // Lights
     auto lvHandle = world.Emplace<Entity>({.position = Vector3{3.1f, 6.2f, 4.5f}, .tag = "Point Light 1"});
@@ -164,7 +166,6 @@ void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
 
     auto& camera = world.Emplace<SceneNavigationCamera>(cameraHandle);
     world.Emplace<FrameLogic>(cameraHandle, InvokeFreeComponent<SceneNavigationCamera>{});
-    auto ncGraphics = modules.Get<NcGraphics>();
     ncGraphics->SetCamera(&camera);
     ncGraphics->SetPostProcessEffectEnabled(nc::OutlinedToonEffectId, true);
     ncGraphics->SetPostProcessEffectProperties(nc::OutlinedToonEffectId, PostProcessPassFlag::Outline, OutlinePassProperties

@@ -74,6 +74,9 @@ class NcWindow : public Module
         /** @brief Get the dimensions of the renderable window region. */
         auto GetScreenExtent() const noexcept -> const Vector2& { return m_screenExtent; }
 
+        /** @brief Get the dimensions of the renderable window region if the viewport is smaller than the window. */
+        auto GetViewportDimensions() const noexcept -> const Vector2& { return m_viewportDimensions; }
+
         /** @brief Get the ratio between the current DPI and the platform's default DPI. */
         auto GetContentScale() const noexcept -> const Vector2& { return m_contentScale; }
 
@@ -86,6 +89,9 @@ class NcWindow : public Module
         /** @brief Set the window for the module. */
         virtual void SetWindow(WindowInfo windowInfo) = 0;
 
+        /** @brief set the dimensions of the renderable window region if the viewport is smaller than the window. */
+        virtual void SetViewportDimensions(const Vector2& viewportDimensions) noexcept = 0;
+
         /**
          * @brief Process window and input events.
          * @note This is called by NcEngine each frame.
@@ -95,6 +101,7 @@ class NcWindow : public Module
     protected:
         Vector2 m_dimensions;
         Vector2 m_screenExtent;
+        Vector2 m_viewportDimensions;
         Vector2 m_contentScale;
         GLFWwindow* m_window;
         Signal<const Vector2&, bool> m_onResize;

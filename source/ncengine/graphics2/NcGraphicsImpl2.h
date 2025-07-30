@@ -38,6 +38,7 @@ class NcGraphicsImpl2 : public NcGraphics
         bool IsUiHovered() const noexcept override;
         void SetSkybox(const std::string& path) override;
         auto GetSkybox() const -> nc::asset::AssetId override;
+        void SetViewport(const Viewport& viewport) override;
         void ClearEnvironment() override;
         auto IsPostProcessEffectEnabled(PostProcessEffectId effectId) const -> bool override;
         void SetPostProcessEffectEnabled(PostProcessEffectId effectId, bool enabled) override;
@@ -63,6 +64,7 @@ class NcGraphicsImpl2 : public NcGraphics
         GraphicsFrontend m_frontend;
         Connection m_onResizeConnection;
         Vector2 m_dimensions;
+        Viewport m_viewport;
         bool m_resizeNeeded;
         uint32_t m_numSamples;
         bool m_isMinimized;

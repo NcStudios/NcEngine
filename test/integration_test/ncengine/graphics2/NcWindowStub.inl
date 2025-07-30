@@ -55,6 +55,7 @@ class NcWindowStub : public NcWindow
                 glfwDestroyWindow(m_window);
         }
 
+        void SetViewportDimensions(const Vector2&) noexcept override {};
         void ProcessSystemMessages() override {};
 
         auto GetWindowHandle() const noexcept -> GLFWwindow* 

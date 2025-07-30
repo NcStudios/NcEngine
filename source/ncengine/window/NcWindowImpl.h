@@ -37,6 +37,7 @@ class NcWindowImpl : public NcWindow
         void RegisterOnResizeReceiver(IOnResizeReceiver* receiver);
         void UnregisterOnResizeReceiver(IOnResizeReceiver* receiver) noexcept;
         void SetWindow(WindowInfo windowInfo) override;
+        void SetViewportDimensions(const Vector2& viewportDimensions) noexcept override;
         void ProcessSystemMessages() override;
 
     private:

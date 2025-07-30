@@ -49,6 +49,7 @@ struct NcGraphicsStub2 : nc::NcGraphics
     bool IsUiHovered() const noexcept override { return false; }
     void SetSkybox(const std::string&) override {}
     auto GetSkybox() const -> nc::asset::AssetId override { return nc::asset::NullAssetId; }
+    void SetViewport(const nc::Viewport&) override {}
     void ClearEnvironment() override {}
     auto IsPostProcessEffectEnabled(nc::PostProcessEffectId) const -> bool override { return false; }
     void SetPostProcessEffectEnabled(nc::PostProcessEffectId, bool) override {}
@@ -96,6 +97,16 @@ void LogCallback(Diligent::DEBUG_MESSAGE_SEVERITY severity,
             break;
     }
 }
+
+auto DefaultViewport(Diligent::SwapChainDesc swapchainDesc) -> nc::Viewport
+{
+    return nc::Viewport
+    {
+        .Size = nc::Vector2{static_cast<float>(swapchainDesc.Width), static_cast<float>(swapchainDesc.Height)},
+        .TopLeft = nc::Vector2{0, 0}
+    };
+}
+
 } // anonymous namespace
 
 namespace nc
@@ -364,6 +375,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
             modules.Get<asset::NcAsset>()->OnBoneUpdate()
           },
           m_onResizeConnection{window.OnResize().Connect(this, &NcGraphicsImpl2::OnResize)},
+          m_viewport{DefaultViewport(m_engine.GetSwapChain().GetDesc())},
           m_resizeNeeded{false},
           m_numSamples{m_engine.GetDeviceCapability().msaaSampleCount},
           m_isMinimized{false}
@@ -404,6 +416,23 @@ auto NcGraphicsImpl2::GetSkybox() const -> nc::asset::AssetId
     return m_frontend.GetEnvironmentSubsystem().GetSkybox();
 }
 
+void NcGraphicsImpl2::SetViewport(const Viewport& viewport)
+{
+    auto aspectRatioViewport = AdjustDimensionsToAspectRatio(viewport.Size);
+    m_viewport = Viewport
+    {
+        .Size = aspectRatioViewport,
+        .TopLeft = viewport.TopLeft
+    };
+
+    if (auto* camera = m_frontend.GetCameraSubsystem().Get())
+    {
+        camera->UpdateProjectionMatrix(viewport.Size.x, viewport.Size.y);
+    }
+
+    
+}
+
 void NcGraphicsImpl2::ClearEnvironment()
 {
     m_frontend.GetEnvironmentSubsystem().ClearSkybox();
@@ -441,6 +470,7 @@ void NcGraphicsImpl2::Clear() noexcept
 {
     ClearEnvironment();
     m_frontend.Clear();
+    SetViewport(DefaultViewport(m_engine.GetSwapChain().GetDesc()));
 }
 
 void NcGraphicsImpl2::OnBuildTaskGraph(task::UpdateTasks& update, task::RenderTasks& render)
@@ -507,28 +537,32 @@ void NcGraphicsImpl2::Run()
         m_shaderBindings.GetPerPassSignature(),
         renderState.meshRenderState.staticMeshBatches,
         renderState.meshRenderState.skinnedMeshBatches,
-        renderState.lightRenderState.lights
+        renderState.lightRenderState.lights,
+        m_viewport
     );
 
     m_passBackend.RenderWireframe(
         context,
         swapChain,
         m_shaderBindings.GetPerPassSignature(),
-        renderState.wireframeRenderState
+        renderState.wireframeRenderState,
+        m_viewport
     );
 
     m_passBackend.RenderSkybox(
         context,
         swapChain,
         m_shaderBindings.GetPerPassSignature(),
-        renderState.environmentRenderState
+        renderState.environmentRenderState,
+        m_viewport
     );
 
     m_passBackend.RenderParticle(
         context,
         swapChain,
         m_shaderBindings.GetPerPassSignature(),
-        renderState.particleRenderState
+        renderState.particleRenderState,
+        m_viewport
     );
 
     m_passBackend.RenderPostProcess(

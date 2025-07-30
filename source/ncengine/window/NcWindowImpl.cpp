@@ -42,13 +42,12 @@ namespace nc::window
     Vector2 ToNormalizedDeviceCoordinates(const Vector2& screenCoordinates)
     {
         NC_ASSERT(g_instance, "Window instance is not set");
-        const auto& [screenX, screenY] = g_instance->GetScreenExtent();
+        const auto& [screenX, screenY] = g_instance->GetViewportDimensions();
         return Vector2{
             (2.0f * screenCoordinates.x) / screenX - 1.0f,
             (2.0f * screenCoordinates.y) / screenY - 1.0f
         };
     }
-
 
     void RegisterOnResizeReceiver(IOnResizeReceiver* receiver)
     {
@@ -188,6 +187,8 @@ namespace nc::window
                 m_dimensions = windowInfo.dimensions;
             }
 
+            m_viewportDimensions = m_dimensions;
+
             m_screenExtent = AdjustDimensionsToAspectRatio(m_dimensions);
             auto width = Clamp((int)m_dimensions.x, 0, nativeWidth);
             auto height = Clamp((int)m_dimensions.y, 0, nativeHeight);
@@ -215,6 +216,11 @@ namespace nc::window
         glfwSetWindowSizeCallback(m_window, &ProcessResizeEvent);
         glfwSetWindowContentScaleCallback(m_window, &ProcessSetContentScaleEvent);
         glfwSetWindowCloseCallback(m_window, &ProcessWindowCloseEvent);
+    }
+
+    void NcWindowImpl::SetViewportDimensions(const Vector2& viewportDimensions) noexcept
+    {
+        m_viewportDimensions = viewportDimensions;
     }
 
     void NcWindowImpl::ProcessSystemMessages()
