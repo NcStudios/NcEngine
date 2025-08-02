@@ -130,11 +130,6 @@ namespace nc::graphics
 {
 using namespace Diligent;
 
-constexpr auto SwapchainWidth = 1600u;
-constexpr auto SwapchainHeight = 900u;
-constexpr auto ViewportWidth = 800u;
-constexpr auto ViewportHeight = 450u;
-
 PassBackend::PassBackend(IRenderDevice& device,
                          IDeviceContext& context,
                          ISwapChain& swapChain,
@@ -320,7 +315,6 @@ void PassBackend::RenderSkybox(Diligent::IDeviceContext& context,
     m_finalColorTarget = m_skyboxPass->sinks.color;
     BindRenderTarget(context, swapChain, perPassResourceSignature, m_skyboxPass->sinks.color, m_skyboxPass->sinks.depth, false);
     SetViewportAndScissor(context, swapChain.GetDesc(), viewport);
-
     context.SetPipelineState(m_skyboxPass->pso);
 
     perPassResourceSignature.Commit(context);
@@ -396,11 +390,10 @@ void PassBackend::RenderWireframe(IDeviceContext& context,
     {
         return;
     }
-    
+
     m_finalColorTarget = m_wireframePass->sinks.color;
     BindRenderTarget(context, swapChain, perPassResourceSignature, m_wireframePass->sinks.color, m_wireframePass->sinks.depth, m_wireframePass->isMsaa && m_numSamples > 1);
     SetViewportAndScissor(context, swapChain.GetDesc(), viewport);
-
     context.SetPipelineState(m_wireframePass->pso);
 
     for (const auto& [data, mesh] : state.wireframeData)
@@ -435,7 +428,6 @@ void PassBackend::RenderParticle(IDeviceContext& context,
     m_finalColorTarget = m_particlePass->sinks.color;
     BindRenderTarget(context, swapChain, perPassResourceSignature, m_particlePass->sinks.color, m_particlePass->sinks.depth, m_particlePass->isMsaa && m_numSamples > 1);
     SetViewportAndScissor(context, swapChain.GetDesc(), viewport);
-
     context.SetPipelineState(m_particlePass->pso);
     const auto attribs = DrawIndexedAttribs{
         state.mesh.indexCount,

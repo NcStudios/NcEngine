@@ -96,7 +96,6 @@ void LogCallback(Diligent::DEBUG_MESSAGE_SEVERITY severity,
             break;
     }
 }
-
 } // anonymous namespace
 
 namespace nc

@@ -6,7 +6,6 @@
 
 #include "ncengine/ecs/EcsFwd.h"
 #include "ncengine/graphics/Camera.h"
-#include "ncengine/graphics/GraphicsUtility.h"
 #include "ncengine/graphics/PostProcess.h"
 #include "ncengine/module/Module.h"
 #include "ncengine/module/ModuleProvider.h"

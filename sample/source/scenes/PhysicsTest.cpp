@@ -19,7 +19,6 @@
 #include "ncengine/physics/RigidBody.h"
 #include "ncengine/physics/Vehicle.h"
 #include "ncengine/ui/ImGuiUtility.h"
-#include "ncengine/window/Window.h"
 #include "ncutility/ScopeExit.h"
 
 namespace nc::sample
@@ -1295,7 +1294,7 @@ void PhysicsTest::Load(ecs::Ecs world, ModuleProvider modules)
 
 void PhysicsTest::Unload()
 {
-    m_sampleUI->SetWidgetCallback(std::function<void()>{});
+    m_sampleUI->SetWidgetCallback(nullptr);
     CharacterEntities.clear();
 }
 } // namespace nc::sample

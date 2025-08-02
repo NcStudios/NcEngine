@@ -93,8 +93,8 @@ class NcWindow : public Module
         /** @brief Set the window for the module. */
         virtual void SetWindow(WindowInfo windowInfo) = 0;
 
-        /** @brief Set the dimensions and position of the renderable window (must be less than or equal to Screen Extent).
-         * @remarks Excludes ImGui
+        /** @brief Set the dimensions and position of the renderable window. Values must be between [0.0f and 1.0f].
+         * @remarks Excludes ImGui, which is always rendered to the full screen.
          */
         virtual void SetViewport(const Viewport& viewport) = 0;
 

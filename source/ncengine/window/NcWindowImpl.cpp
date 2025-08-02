@@ -45,11 +45,11 @@ namespace nc::window
         const auto& viewport = g_instance->GetViewport();
 
         // Convert from screen to viewport-local coordinates
-        Vector2 local = screenCoordinates - viewport.TopLeft;
+        const auto local = screenCoordinates - viewport.TopLeft;
 
         // Normalize to [0, 1] in viewport space
-        float normalizedX = local.x / viewport.Size.x;
-        float normalizedY = local.y / viewport.Size.y;
+        const auto normalizedX = local.x / viewport.Size.x;
+        const auto normalizedY = local.y / viewport.Size.y;
 
         // Convert to [-1, 1] NDC
         return Vector2{
@@ -140,10 +140,10 @@ namespace nc::window
         NC_ASSERT(viewport.TopLeft.x <= 1.0, "Viewport position must be normalized from 0.0 to 1.0.");
         NC_ASSERT(viewport.TopLeft.y <= 1.0, "Viewport position must be normalized from 0.0 to 1.0.");
 
-        auto viewportSizeX = m_screenExtent.x * viewport.Size.x;
-        auto viewportSizeY = m_screenExtent.y * viewport.Size.y;
-        auto viewportTopLeftX = m_screenExtent.x * viewport.TopLeft.x;
-        auto viewportTopLeftY = m_screenExtent.y * viewport.TopLeft.y;
+        const auto viewportSizeX = m_screenExtent.x * viewport.Size.x;
+        const auto viewportSizeY = m_screenExtent.y * viewport.Size.y;
+        const auto viewportTopLeftX = m_screenExtent.x * viewport.TopLeft.x;
+        const auto viewportTopLeftY = m_screenExtent.y * viewport.TopLeft.y;
 
         m_viewport = Viewport
         {
@@ -204,8 +204,8 @@ namespace nc::window
                 throw NcError("Error getting the monitor's video mode information.");
             }
 
-            auto nativeWidth = videoMode->width;
-            auto nativeHeight = videoMode->height;
+            const auto nativeWidth = videoMode->width;
+            const auto nativeHeight = videoMode->height;
 
             if(windowInfo.useNativeResolution || windowInfo.launchInFullScreen)
             {
@@ -223,10 +223,10 @@ namespace nc::window
             };
 
             m_screenExtent = AdjustDimensionsToAspectRatio(m_dimensions);
-            auto width = Clamp((int)m_dimensions.x, 0, nativeWidth);
-            auto height = Clamp((int)m_dimensions.y, 0, nativeHeight);
+            const auto width = Clamp((int)m_dimensions.x, 0, nativeWidth);
+            const auto height = Clamp((int)m_dimensions.y, 0, nativeHeight);
 
-            auto adjustedDimensions = AdjustDimensionsToAspectRatio(Vector2{static_cast<float>(width), static_cast<float>(height)});
+            const auto adjustedDimensions = AdjustDimensionsToAspectRatio(Vector2{static_cast<float>(width), static_cast<float>(height)});
             auto monitor = windowInfo.launchInFullScreen ? glfwGetPrimaryMonitor() : nullptr;
 
             if (m_window)
