@@ -366,8 +366,8 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
           m_onResizeConnection{window.OnResize().Connect(this, &NcGraphicsImpl2::OnResize)},
           m_onViewportResizeConnection{window.OnViewportResize().Connect(this, &NcGraphicsImpl2::OnViewportResize)},
           m_viewport{},
-          m_resizeNeeded{false},
           m_isViewportDirty{false},
+          m_resizeNeeded{false},
           m_numSamples{m_engine.GetDeviceCapability().msaaSampleCount},
           m_isMinimized{false}
 {

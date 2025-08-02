@@ -68,7 +68,6 @@ class PassBackend
                             const std::span<const LightData>& lights,
                             const Viewport& viewport);
 
-
         void RenderWireframe(Diligent::IDeviceContext& context,
                              Diligent::ISwapChain& swapChain,
                              PerPassResourceSignature& perPassResourceSignature,
