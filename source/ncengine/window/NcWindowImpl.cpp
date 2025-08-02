@@ -225,8 +225,6 @@ namespace nc::window
             m_screenExtent = AdjustDimensionsToAspectRatio(m_dimensions);
             const auto width = Clamp((int)m_dimensions.x, 0, nativeWidth);
             const auto height = Clamp((int)m_dimensions.y, 0, nativeHeight);
-
-            const auto adjustedDimensions = AdjustDimensionsToAspectRatio(Vector2{static_cast<float>(width), static_cast<float>(height)});
             auto monitor = windowInfo.launchInFullScreen ? glfwGetPrimaryMonitor() : nullptr;
 
             if (m_window)
