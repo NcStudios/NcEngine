@@ -11,6 +11,7 @@
 #include "PostProcessPass.h"
 #include "SkyboxPass.h"
 #include "WireframePass.h"
+#include "ncengine/window/WindowTypes.h"
 
 #include "Graphics/GraphicsEngine/interface/DeviceContext.h"
 

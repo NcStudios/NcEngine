@@ -30,9 +30,10 @@ void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
 {
     m_sampleUI->SetWidgetCallback(nullptr);
     auto* ncGraphics = modules.Get<NcGraphics>();
+    auto ncWindow = modules.Get<window::NcWindow>();
     ncGraphics->SetSkybox(cube_map::path::night_sky);
-    ncGraphics->SetViewport(nc::Viewport{.Size = nc::Vector2{800.0f, 450.0f}, .TopLeft = nc::Vector2{400.0f, 100.0f}});
-
+    ncWindow->SetViewport(nc::Viewport{.Size = nc::Vector2{0.8f, 0.8f}, .TopLeft = nc::Vector2{0.1f, 0.00f}});
+    
     // Lights
     auto lvHandle = world.Emplace<Entity>({.position = Vector3{3.1f, 6.2f, 4.5f}, .tag = "Point Light 1"});
     world.Emplace<PointLight>(lvHandle, Vector3(1.0f, 1.0f, 1.0f), Vector3(1.0f, 1.0f, 1.0f), 1.0f, 45.0f);

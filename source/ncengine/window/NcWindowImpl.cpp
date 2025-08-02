@@ -42,10 +42,19 @@ namespace nc::window
     Vector2 ToNormalizedDeviceCoordinates(const Vector2& screenCoordinates)
     {
         NC_ASSERT(g_instance, "Window instance is not set");
-        const auto& [screenX, screenY] = g_instance->GetViewportDimensions();
+        const auto& viewport = g_instance->GetViewport();
+
+        // Convert from screen to viewport-local coordinates
+        Vector2 local = screenCoordinates - viewport.TopLeft;
+
+        // Normalize to [0, 1] in viewport space
+        float normalizedX = local.x / viewport.Size.x;
+        float normalizedY = local.y / viewport.Size.y;
+
+        // Convert to [-1, 1] NDC
         return Vector2{
-            (2.0f * screenCoordinates.x) / screenX - 1.0f,
-            (2.0f * screenCoordinates.y) / screenY - 1.0f
+            normalizedX * 2.0f - 1.0f,
+            normalizedY * 2.0f - 1.0f
         };
     }
 
@@ -124,6 +133,26 @@ namespace nc::window
         }
     }
 
+    void NcWindowImpl::SetViewport(const Viewport& viewport)
+    {
+        NC_ASSERT(viewport.Size.x <= 1.0, "Viewport size must be normalized from 0.0 to 1.0.");
+        NC_ASSERT(viewport.Size.y <= 1.0, "Viewport size must be normalized from 0.0 to 1.0.");
+        NC_ASSERT(viewport.TopLeft.x <= 1.0, "Viewport position must be normalized from 0.0 to 1.0.");
+        NC_ASSERT(viewport.TopLeft.y <= 1.0, "Viewport position must be normalized from 0.0 to 1.0.");
+
+        auto viewportSizeX = m_screenExtent.x * viewport.Size.x;
+        auto viewportSizeY = m_screenExtent.y * viewport.Size.y;
+        auto viewportTopLeftX = m_screenExtent.x * viewport.TopLeft.x;
+        auto viewportTopLeftY = m_screenExtent.y * viewport.TopLeft.y;
+
+        m_viewport = Viewport
+        {
+            .Size = Vector2(viewportSizeX, viewportSizeY),
+            .TopLeft = Vector2(viewportTopLeftX, viewportTopLeftY)
+        };
+        m_onViewportResize.Emit(m_viewport);
+    }
+
     void NcWindowImpl::RegisterOnResizeReceiver(IOnResizeReceiver* receiver)
     {
         m_onResizeReceivers.push_back(receiver);
@@ -187,11 +216,17 @@ namespace nc::window
                 m_dimensions = windowInfo.dimensions;
             }
 
-            m_viewportDimensions = m_dimensions;
+            m_viewport = Viewport
+            {
+                .Size = Vector2{1.0f, 1.0f},
+                .TopLeft = Vector2{0.0f, 0.0f}
+            };
 
             m_screenExtent = AdjustDimensionsToAspectRatio(m_dimensions);
             auto width = Clamp((int)m_dimensions.x, 0, nativeWidth);
             auto height = Clamp((int)m_dimensions.y, 0, nativeHeight);
+
+            auto adjustedDimensions = AdjustDimensionsToAspectRatio(Vector2{static_cast<float>(width), static_cast<float>(height)});
             auto monitor = windowInfo.launchInFullScreen ? glfwGetPrimaryMonitor() : nullptr;
 
             if (m_window)
@@ -216,11 +251,6 @@ namespace nc::window
         glfwSetWindowSizeCallback(m_window, &ProcessResizeEvent);
         glfwSetWindowContentScaleCallback(m_window, &ProcessSetContentScaleEvent);
         glfwSetWindowCloseCallback(m_window, &ProcessWindowCloseEvent);
-    }
-
-    void NcWindowImpl::SetViewportDimensions(const Vector2& viewportDimensions) noexcept
-    {
-        m_viewportDimensions = viewportDimensions;
     }
 
     void NcWindowImpl::ProcessSystemMessages()

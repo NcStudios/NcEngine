@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ncengine/window/Window.h"
+#include "ncengine/window/WindowTypes.h"
 
 #include "ncmath/Vector.h"
 
@@ -36,8 +37,9 @@ class NcWindowImpl : public NcWindow
 
         void RegisterOnResizeReceiver(IOnResizeReceiver* receiver);
         void UnregisterOnResizeReceiver(IOnResizeReceiver* receiver) noexcept;
+        auto GetViewport() -> const Viewport& { return m_viewport; }
         void SetWindow(WindowInfo windowInfo) override;
-        void SetViewportDimensions(const Vector2& viewportDimensions) noexcept override;
+        void SetViewport(const Viewport& viewport) override;
         void ProcessSystemMessages() override;
 
     private:

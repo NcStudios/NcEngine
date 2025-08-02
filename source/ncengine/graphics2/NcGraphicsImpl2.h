@@ -9,6 +9,7 @@
 #include "ncengine/ecs/Ecs.h"
 #include "ncengine/graphics/NcGraphics.h"
 #include "ncengine/module/ModuleProvider.h"
+#include "ncengine/window/WindowTypes.h"
 
 namespace nc
 {
@@ -38,7 +39,6 @@ class NcGraphicsImpl2 : public NcGraphics
         bool IsUiHovered() const noexcept override;
         void SetSkybox(const std::string& path) override;
         auto GetSkybox() const -> nc::asset::AssetId override;
-        void SetViewport(const Viewport& viewport) override;
         void ClearEnvironment() override;
         auto IsPostProcessEffectEnabled(PostProcessEffectId effectId) const -> bool override;
         void SetPostProcessEffectEnabled(PostProcessEffectId effectId, bool enabled) override;
@@ -52,9 +52,11 @@ class NcGraphicsImpl2 : public NcGraphics
         void Clear() noexcept override;
         void Run();
         void OnResize(const Vector2& dimensions, bool isMinimized);
+        void OnViewportResize(const Viewport& viewport);
 
     private:
         void Resize();
+        void ViewportResize();
         ecs::Ecs m_world;
         DiligentEngine m_engine;
         ShaderBindings m_shaderBindings;
@@ -63,8 +65,10 @@ class NcGraphicsImpl2 : public NcGraphics
         PassBackend m_passBackend;
         GraphicsFrontend m_frontend;
         Connection m_onResizeConnection;
+        Connection m_onViewportResizeConnection;
         Vector2 m_dimensions;
         Viewport m_viewport;
+        bool m_isViewportDirty;
         bool m_resizeNeeded;
         uint32_t m_numSamples;
         bool m_isMinimized;

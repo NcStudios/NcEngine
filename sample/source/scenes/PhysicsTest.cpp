@@ -19,6 +19,7 @@
 #include "ncengine/physics/RigidBody.h"
 #include "ncengine/physics/Vehicle.h"
 #include "ncengine/ui/ImGuiUtility.h"
+#include "ncengine/window/Window.h"
 #include "ncutility/ScopeExit.h"
 
 namespace nc::sample
@@ -1220,7 +1221,6 @@ void PhysicsTest::Load(ecs::Ecs world, ModuleProvider modules)
     auto ncGraphics = modules.Get<NcGraphics>();
     auto ncRandom = modules.Get<Random>();
     auto ncPhysics = modules.Get<NcPhysics>();
-    ncGraphics->SetViewport(nc::Viewport{.Size = nc::Vector2{800.0f, 450.0f}, .TopLeft = nc::Vector2{0.0f, 100.0f}});
 
     // Reserve space for default objects so references don't get invalidated
     world.GetPool<Transform>().Reserve(140);
@@ -1295,7 +1295,7 @@ void PhysicsTest::Load(ecs::Ecs world, ModuleProvider modules)
 
 void PhysicsTest::Unload()
 {
-    m_sampleUI->SetWidgetCallback(nullptr);
+    m_sampleUI->SetWidgetCallback(std::function<void()>{});
     CharacterEntities.clear();
 }
 } // namespace nc::sample

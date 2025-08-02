@@ -88,13 +88,6 @@ struct NcGraphics : public Module
     virtual auto GetSkybox() const -> nc::asset::AssetId = 0;
 
     /**
-     * @brief Set the Viewport. 
-     * Controls the viewport, the scissor, and the projection matrix for the scene.
-     * @param viewport The Viewport object.
-     */
-    virtual void SetViewport(const Viewport& viewport) = 0;
-
-    /**
      * @brief Clear all environment data (currently only the skybox).
      * 
      * This is called automatically on scene changes. The main Camera

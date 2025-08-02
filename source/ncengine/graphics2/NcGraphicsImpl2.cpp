@@ -49,7 +49,6 @@ struct NcGraphicsStub2 : nc::NcGraphics
     bool IsUiHovered() const noexcept override { return false; }
     void SetSkybox(const std::string&) override {}
     auto GetSkybox() const -> nc::asset::AssetId override { return nc::asset::NullAssetId; }
-    void SetViewport(const nc::Viewport&) override {}
     void ClearEnvironment() override {}
     auto IsPostProcessEffectEnabled(nc::PostProcessEffectId) const -> bool override { return false; }
     void SetPostProcessEffectEnabled(nc::PostProcessEffectId, bool) override {}
@@ -96,15 +95,6 @@ void LogCallback(Diligent::DEBUG_MESSAGE_SEVERITY severity,
             NC_LOG_ERROR_EXT(subsystem, file, line, msg);
             break;
     }
-}
-
-auto DefaultViewport(Diligent::SwapChainDesc swapchainDesc) -> nc::Viewport
-{
-    return nc::Viewport
-    {
-        .Size = nc::Vector2{static_cast<float>(swapchainDesc.Width), static_cast<float>(swapchainDesc.Height)},
-        .TopLeft = nc::Vector2{0, 0}
-    };
 }
 
 } // anonymous namespace
@@ -375,8 +365,10 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
             modules.Get<asset::NcAsset>()->OnBoneUpdate()
           },
           m_onResizeConnection{window.OnResize().Connect(this, &NcGraphicsImpl2::OnResize)},
-          m_viewport{DefaultViewport(m_engine.GetSwapChain().GetDesc())},
+          m_onViewportResizeConnection{window.OnViewportResize().Connect(this, &NcGraphicsImpl2::OnViewportResize)},
+          m_viewport{},
           m_resizeNeeded{false},
+          m_isViewportDirty{false},
           m_numSamples{m_engine.GetDeviceCapability().msaaSampleCount},
           m_isMinimized{false}
 {
@@ -416,23 +408,6 @@ auto NcGraphicsImpl2::GetSkybox() const -> nc::asset::AssetId
     return m_frontend.GetEnvironmentSubsystem().GetSkybox();
 }
 
-void NcGraphicsImpl2::SetViewport(const Viewport& viewport)
-{
-    auto aspectRatioViewport = AdjustDimensionsToAspectRatio(viewport.Size);
-    m_viewport = Viewport
-    {
-        .Size = aspectRatioViewport,
-        .TopLeft = viewport.TopLeft
-    };
-
-    if (auto* camera = m_frontend.GetCameraSubsystem().Get())
-    {
-        camera->UpdateProjectionMatrix(viewport.Size.x, viewport.Size.y);
-    }
-
-    
-}
-
 void NcGraphicsImpl2::ClearEnvironment()
 {
     m_frontend.GetEnvironmentSubsystem().ClearSkybox();
@@ -470,7 +445,6 @@ void NcGraphicsImpl2::Clear() noexcept
 {
     ClearEnvironment();
     m_frontend.Clear();
-    SetViewport(DefaultViewport(m_engine.GetSwapChain().GetDesc()));
 }
 
 void NcGraphicsImpl2::OnBuildTaskGraph(task::UpdateTasks& update, task::RenderTasks& render)
@@ -509,6 +483,11 @@ void NcGraphicsImpl2::Run()
     if (m_resizeNeeded)
     {
         Resize();
+    }
+
+    if (m_isViewportDirty)
+    {
+        ViewportResize();
     }
 
     if (m_isMinimized)
@@ -598,6 +577,12 @@ void NcGraphicsImpl2::OnResize(const Vector2& dimensions, bool isMinimized)
     m_dimensions = dimensions;
 }
 
+void NcGraphicsImpl2::OnViewportResize(const Viewport& viewport)
+{
+    m_isViewportDirty = true;
+    m_viewport = viewport;
+}
+
 void NcGraphicsImpl2::Resize()
 {
     const auto width = static_cast<uint32_t>(m_dimensions.x);
@@ -608,5 +593,15 @@ void NcGraphicsImpl2::Resize()
     m_resizeNeeded = false;
     m_engine.GetDevice().IdleGPU();
 }
+
+void NcGraphicsImpl2::ViewportResize()
+{
+    if (auto* camera = m_frontend.GetCameraSubsystem().Get())
+    {
+        camera->UpdateProjectionMatrix(m_viewport.Size.x, m_viewport.Size.y);
+    }
+    m_isViewportDirty = false;
+}
+
 } // namespace graphics
 } // namespace nc
