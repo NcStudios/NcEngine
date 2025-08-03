@@ -42,13 +42,21 @@ namespace nc::window
     Vector2 ToNormalizedDeviceCoordinates(const Vector2& screenCoordinates)
     {
         NC_ASSERT(g_instance, "Window instance is not set");
-        const auto& [screenX, screenY] = g_instance->GetScreenExtent();
+        const auto& viewport = g_instance->GetViewport();
+
+        // Convert from screen to viewport-local coordinates
+        const auto local = screenCoordinates - viewport.TopLeft;
+
+        // Normalize to [0, 1] in viewport space
+        const auto normalizedX = local.x / viewport.Size.x;
+        const auto normalizedY = local.y / viewport.Size.y;
+
+        // Convert to [-1, 1] NDC
         return Vector2{
-            (2.0f * screenCoordinates.x) / screenX - 1.0f,
-            (2.0f * screenCoordinates.y) / screenY - 1.0f
+            normalizedX * 2.0f - 1.0f,
+            normalizedY * 2.0f - 1.0f
         };
     }
-
 
     void RegisterOnResizeReceiver(IOnResizeReceiver* receiver)
     {
@@ -125,6 +133,26 @@ namespace nc::window
         }
     }
 
+    void NcWindowImpl::SetViewport(const Viewport& viewport)
+    {
+        NC_ASSERT(viewport.Size.x <= 1.0, "Viewport size must be normalized from 0.0 to 1.0.");
+        NC_ASSERT(viewport.Size.y <= 1.0, "Viewport size must be normalized from 0.0 to 1.0.");
+        NC_ASSERT(viewport.TopLeft.x <= 1.0, "Viewport position must be normalized from 0.0 to 1.0.");
+        NC_ASSERT(viewport.TopLeft.y <= 1.0, "Viewport position must be normalized from 0.0 to 1.0.");
+
+        const auto viewportSizeX = m_screenExtent.x * viewport.Size.x;
+        const auto viewportSizeY = m_screenExtent.y * viewport.Size.y;
+        const auto viewportTopLeftX = m_screenExtent.x * viewport.TopLeft.x;
+        const auto viewportTopLeftY = m_screenExtent.y * viewport.TopLeft.y;
+
+        m_viewport = Viewport
+        {
+            .Size = Vector2(viewportSizeX, viewportSizeY),
+            .TopLeft = Vector2(viewportTopLeftX, viewportTopLeftY)
+        };
+        m_onViewportResize.Emit(m_viewport);
+    }
+
     void NcWindowImpl::RegisterOnResizeReceiver(IOnResizeReceiver* receiver)
     {
         m_onResizeReceivers.push_back(receiver);
@@ -176,8 +204,8 @@ namespace nc::window
                 throw NcError("Error getting the monitor's video mode information.");
             }
 
-            auto nativeWidth = videoMode->width;
-            auto nativeHeight = videoMode->height;
+            const auto nativeWidth = videoMode->width;
+            const auto nativeHeight = videoMode->height;
 
             if(windowInfo.useNativeResolution || windowInfo.launchInFullScreen)
             {
@@ -188,9 +216,15 @@ namespace nc::window
                 m_dimensions = windowInfo.dimensions;
             }
 
+            m_viewport = Viewport
+            {
+                .Size = Vector2{1.0f, 1.0f},
+                .TopLeft = Vector2{0.0f, 0.0f}
+            };
+
             m_screenExtent = AdjustDimensionsToAspectRatio(m_dimensions);
-            auto width = Clamp((int)m_dimensions.x, 0, nativeWidth);
-            auto height = Clamp((int)m_dimensions.y, 0, nativeHeight);
+            const auto width = Clamp((int)m_dimensions.x, 0, nativeWidth);
+            const auto height = Clamp((int)m_dimensions.y, 0, nativeHeight);
             auto monitor = windowInfo.launchInFullScreen ? glfwGetPrimaryMonitor() : nullptr;
 
             if (m_window)

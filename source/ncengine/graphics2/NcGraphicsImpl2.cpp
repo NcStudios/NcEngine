@@ -364,6 +364,9 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
             modules.Get<asset::NcAsset>()->OnBoneUpdate()
           },
           m_onResizeConnection{window.OnResize().Connect(this, &NcGraphicsImpl2::OnResize)},
+          m_onViewportResizeConnection{window.OnViewportResize().Connect(this, &NcGraphicsImpl2::OnViewportResize)},
+          m_viewport{},
+          m_isViewportDirty{false},
           m_resizeNeeded{false},
           m_numSamples{m_engine.GetDeviceCapability().msaaSampleCount},
           m_isMinimized{false}
@@ -481,6 +484,11 @@ void NcGraphicsImpl2::Run()
         Resize();
     }
 
+    if (m_isViewportDirty)
+    {
+        ViewportResize();
+    }
+
     if (m_isMinimized)
     {
         return;
@@ -507,28 +515,32 @@ void NcGraphicsImpl2::Run()
         m_shaderBindings.GetPerPassSignature(),
         renderState.meshRenderState.staticMeshBatches,
         renderState.meshRenderState.skinnedMeshBatches,
-        renderState.lightRenderState.lights
+        renderState.lightRenderState.lights,
+        m_viewport
     );
 
     m_passBackend.RenderWireframe(
         context,
         swapChain,
         m_shaderBindings.GetPerPassSignature(),
-        renderState.wireframeRenderState
+        renderState.wireframeRenderState,
+        m_viewport
     );
 
     m_passBackend.RenderSkybox(
         context,
         swapChain,
         m_shaderBindings.GetPerPassSignature(),
-        renderState.environmentRenderState
+        renderState.environmentRenderState,
+        m_viewport
     );
 
     m_passBackend.RenderParticle(
         context,
         swapChain,
         m_shaderBindings.GetPerPassSignature(),
-        renderState.particleRenderState
+        renderState.particleRenderState,
+        m_viewport
     );
 
     m_passBackend.RenderPostProcess(
@@ -564,6 +576,12 @@ void NcGraphicsImpl2::OnResize(const Vector2& dimensions, bool isMinimized)
     m_dimensions = dimensions;
 }
 
+void NcGraphicsImpl2::OnViewportResize(const Viewport& viewport)
+{
+    m_isViewportDirty = true;
+    m_viewport = viewport;
+}
+
 void NcGraphicsImpl2::Resize()
 {
     const auto width = static_cast<uint32_t>(m_dimensions.x);
@@ -574,5 +592,15 @@ void NcGraphicsImpl2::Resize()
     m_resizeNeeded = false;
     m_engine.GetDevice().IdleGPU();
 }
+
+void NcGraphicsImpl2::ViewportResize()
+{
+    if (auto* camera = m_frontend.GetCameraSubsystem().Get())
+    {
+        camera->UpdateProjectionMatrix(m_viewport.Size.x, m_viewport.Size.y);
+    }
+    m_isViewportDirty = false;
+}
+
 } // namespace graphics
 } // namespace nc

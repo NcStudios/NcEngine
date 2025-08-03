@@ -1,6 +1,6 @@
 /**
  * @file Window.h
- * @copyright Jaremie Romer and McCallister Romer 2024
+ * @copyright Jaremie Romer and McCallister Romer 2025
  */
 #pragma once
 
@@ -8,6 +8,7 @@
 #include "ncengine/type/EngineId.h"
 #include "ncengine/utility/Signal.h"
 #include "ncengine/window/IOnResizeReceiver.h"
+#include "ncengine/window/WindowTypes.h"
 
 #include "ncmath/Vector.h"
 
@@ -68,6 +69,9 @@ class NcWindow : public Module
         explicit NcWindow() noexcept
             : Module{NcWindowId} {}
 
+        // @brief Override OnBeforeSceneLoad to refresh the viewport
+        void OnBeforeSceneLoad(const Scene&) override { SetViewport(Viewport{}); };
+
         /** @brief Get the dimensions of the entire window. */
         auto GetDimensions() const noexcept -> const Vector2& { return m_dimensions; }
 
@@ -83,8 +87,16 @@ class NcWindow : public Module
         /** @brief Get the Signal for window resize events. */
         auto OnResize() noexcept -> Signal<const Vector2&, bool>& { return m_onResize; }
 
+        /** @brief Get the Signal for viewport resize events. */
+        auto OnViewportResize() noexcept -> Signal<const Viewport&>& {return m_onViewportResize; }
+
         /** @brief Set the window for the module. */
         virtual void SetWindow(WindowInfo windowInfo) = 0;
+
+        /** @brief Set the dimensions and position of the renderable window. Values must be between [0.0f and 1.0f].
+         * @remarks Excludes ImGui, which is always rendered to the full screen.
+         */
+        virtual void SetViewport(const Viewport& viewport) = 0;
 
         /**
          * @brief Process window and input events.
@@ -95,9 +107,11 @@ class NcWindow : public Module
     protected:
         Vector2 m_dimensions;
         Vector2 m_screenExtent;
+        Viewport m_viewport;
         Vector2 m_contentScale;
         GLFWwindow* m_window;
         Signal<const Vector2&, bool> m_onResize;
+        Signal<const Viewport&> m_onViewportResize;
 };
 
 /** @brief Build an NcWindow module instance. */

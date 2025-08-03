@@ -1,4 +1,5 @@
 #include "ncengine/window/Window.h"
+#include "ncengine/window/WindowTypes.h"
 
 #define GLFW_INCLUDE_NONE
 #include "GLFW/glfw3.h"
@@ -9,7 +10,8 @@ class NcWindowStub : public NcWindow
 {
     public:
         NcWindowStub(WindowInfo info)
-        : m_window{nullptr}
+        : m_window{nullptr},
+          m_viewport{}
         {
             if (!glfwInit())
                 throw std::runtime_error("Could not init GLFW.");
@@ -57,6 +59,9 @@ class NcWindowStub : public NcWindow
 
         void ProcessSystemMessages() override {};
 
+        auto GetViewport() -> const Viewport& { return m_viewport; }
+        void SetViewport(const Viewport&) override {}
+
         auto GetWindowHandle() const noexcept -> GLFWwindow* 
         { 
             return m_window;
@@ -64,6 +69,6 @@ class NcWindowStub : public NcWindow
 
     private:
         GLFWwindow* m_window;
-
+        Viewport m_viewport;
 };
 } // namespace nc::window

@@ -114,6 +114,16 @@ void ResolveMsaaTextures(IDeviceContext& context, PerPassResourceSignature& perP
         context.ResolveTextureSubresource(colorSinkBuffer.GetMsaaTexture(i), colorSinkBuffer.GetTexture(i), resolveAttribs);
     }
 }
+
+void SetViewportAndScissor(Diligent::IDeviceContext& context,
+                           const Diligent::SwapChainDesc& swapChainDesc,
+                           const nc::Viewport& viewport)
+{
+    const auto pipelineViewport = Diligent::Viewport{viewport.TopLeft.x, viewport.TopLeft.y, viewport.Size.x, viewport.Size.y, 0.0f, 1.0f};
+    context.SetViewports(1, &pipelineViewport, swapChainDesc.Width, swapChainDesc.Height);
+    const auto pipelineScissor = Diligent::Rect{0, 0, static_cast<int32_t>(viewport.Size.x), static_cast<int32_t>(viewport.Size.y)};
+    context.SetScissorRects(1, &pipelineScissor, swapChainDesc.Width, swapChainDesc.Height);
+}
 } // anonymous namespace
 
 namespace nc::graphics
@@ -269,7 +279,8 @@ void PassBackend::RenderShadowPass(IDeviceContext& context,
 void PassBackend::RenderSkybox(Diligent::IDeviceContext& context,
                                Diligent::ISwapChain& swapChain,
                                PerPassResourceSignature& perPassResourceSignature,
-                               const nc::graphics::EnvironmentRenderState& environmentRenderState)
+                               const nc::graphics::EnvironmentRenderState& environmentRenderState,
+                               const Viewport& viewport)
 {
     NC_PROFILE_SCOPE("PassBackend::RenderSkybox()", ProfileCategory::Rendering);
     if (!environmentRenderState.useSkybox || !m_skyboxPass)
@@ -303,6 +314,7 @@ void PassBackend::RenderSkybox(Diligent::IDeviceContext& context,
 
     m_finalColorTarget = m_skyboxPass->sinks.color;
     BindRenderTarget(context, swapChain, perPassResourceSignature, m_skyboxPass->sinks.color, m_skyboxPass->sinks.depth, false);
+    SetViewportAndScissor(context, swapChain.GetDesc(), viewport);
     context.SetPipelineState(m_skyboxPass->pso);
 
     perPassResourceSignature.Commit(context);
@@ -328,7 +340,8 @@ void PassBackend::RenderMaterial(IDeviceContext& context,
                                  PerPassResourceSignature& perPassResourceSignature,
                                  const std::vector<std::vector<Batch>>& staticPassBatches,
                                  const std::vector<std::vector<Batch>>& skinnedPassBatches,
-                                 const std::span<const LightData>& lights)
+                                 const std::span<const LightData>& lights,
+                                 const Viewport& viewport)
 {
     NC_PROFILE_SCOPE("PassBackend::RenderMaterial()", ProfileCategory::Rendering);
     NC_ASSERT(
@@ -357,6 +370,7 @@ void PassBackend::RenderMaterial(IDeviceContext& context,
         // PassManifest verifies static/skinned pass pairs specify the same render targets, so we can just choose from either here.
         BindRenderTarget(context, swapChain, perPassResourceSignature, staticPass.sinks.color, staticPass.sinks.depth, staticPass.isMsaa && m_numSamples > 1);
         ClearRenderTarget(context, swapChain, perPassResourceSignature, staticPass.sinks.color, staticPass.sinks.depth, staticPass.isMsaa && m_numSamples > 1);
+        SetViewportAndScissor(context, swapChain.GetDesc(), viewport);
 
         context.SetPipelineState(staticPass.pso);
         DrawIndexed(context, staticBatches);
@@ -368,16 +382,18 @@ void PassBackend::RenderMaterial(IDeviceContext& context,
 void PassBackend::RenderWireframe(IDeviceContext& context,
                                   ISwapChain& swapChain,
                                   PerPassResourceSignature& perPassResourceSignature,
-                                  const WireframeRendererRenderState& state)
+                                  const WireframeRendererRenderState& state,
+                                  const Viewport& viewport)
 {
     NC_PROFILE_SCOPE("PassBackend::RenderWireframe()", ProfileCategory::Rendering);
     if (state.wireframeData.empty() || !m_wireframePass)
     {
         return;
     }
-    
+
     m_finalColorTarget = m_wireframePass->sinks.color;
     BindRenderTarget(context, swapChain, perPassResourceSignature, m_wireframePass->sinks.color, m_wireframePass->sinks.depth, m_wireframePass->isMsaa && m_numSamples > 1);
+    SetViewportAndScissor(context, swapChain.GetDesc(), viewport);
     context.SetPipelineState(m_wireframePass->pso);
 
     for (const auto& [data, mesh] : state.wireframeData)
@@ -400,7 +416,9 @@ void PassBackend::RenderWireframe(IDeviceContext& context,
 void PassBackend::RenderParticle(IDeviceContext& context,
                                  ISwapChain& swapChain,
                                  PerPassResourceSignature& perPassResourceSignature,
-                                 const ParticleRenderState& state)
+                                 const ParticleRenderState& state,
+                                 const Viewport& viewport)
+
 {
     if (state.particleData.instances.empty() || !m_particlePass)
     {
@@ -409,7 +427,7 @@ void PassBackend::RenderParticle(IDeviceContext& context,
 
     m_finalColorTarget = m_particlePass->sinks.color;
     BindRenderTarget(context, swapChain, perPassResourceSignature, m_particlePass->sinks.color, m_particlePass->sinks.depth, m_particlePass->isMsaa && m_numSamples > 1);
-
+    SetViewportAndScissor(context, swapChain.GetDesc(), viewport);
     context.SetPipelineState(m_particlePass->pso);
     const auto attribs = DrawIndexedAttribs{
         state.mesh.indexCount,
