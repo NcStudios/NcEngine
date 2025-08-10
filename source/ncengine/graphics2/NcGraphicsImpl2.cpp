@@ -13,6 +13,7 @@
 #include "ncengine/scene/NcScene.h"
 #include "ncengine/task/TaskGraph.h"
 #include "ncengine/utility/Log.h"
+#include "ncengine/ui/UIImage.h"
 
 #include "imgui.h"
 #include "DirectXMath.h"
@@ -371,6 +372,10 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
           m_numSamples{m_engine.GetDeviceCapability().msaaSampleCount},
           m_isMinimized{false}
 {
+    ui::SetUIImageProvider([this](uint32_t index) -> ImTextureID
+    {
+        return m_shaderBindings.GetPerFrameSignature().GetTextureBuffer().GetImGuiHandle(index);
+    });
 }
 
 NcGraphicsImpl2::~NcGraphicsImpl2()
