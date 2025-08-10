@@ -52,6 +52,7 @@ void TextureBufferResource::Load(std::span<const asset::TextureWithId> textures,
     barriers.reserve(textureCount);
     m_textures.reserve(m_textures.size() + textureCount);
     m_views.reserve(m_views.size() + textureCount);
+    m_imguiHandles.reserve(m_imguiHandles.size() + textureCount);
 
     for (const auto& [texture, id] : textures)
     {
@@ -67,6 +68,8 @@ void TextureBufferResource::Load(std::span<const asset::TextureWithId> textures,
         }
 
         m_views.push_back(textureHandle->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE));
+        m_imguiHandles.push_back(static_cast<ImTextureID>(m_views.back()));
+
         barriers.emplace_back(
             textureHandle.RawPtr(),
             Diligent::RESOURCE_STATE_UNKNOWN,
@@ -80,11 +83,20 @@ void TextureBufferResource::Load(std::span<const asset::TextureWithId> textures,
     SetArrayRegion(m_variable, std::span<Diligent::IDeviceObject*>(m_views.data() + offset, textureCount), offset, textureCount);
 }
 
+auto TextureBufferResource::GetImGuiHandle(uint32_t index) const -> ImTextureID
+{
+    NC_ASSERT(index < m_imguiHandles.size(), "ImGui image index was out of range.");
+
+    return m_imguiHandles.at(index);
+}
+
 void TextureBufferResource::Unload()
 {
     m_textures.clear();
     m_textures.shrink_to_fit();
     m_views.clear();
     m_views.shrink_to_fit();
+    m_imguiHandles.clear();
+    m_imguiHandles.shrink_to_fit();
 }
 } // namespace nc::graphics

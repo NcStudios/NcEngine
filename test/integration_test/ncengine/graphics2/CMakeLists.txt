@@ -176,6 +176,11 @@ target_sources(TextureBufferResource_tests
         ${NC_SOURCE_DIR}/graphics2/diligent/resource/ResourceTypes.cpp
 )
 
+target_link_libraries(TextureBufferResource_tests
+    PRIVATE
+        imgui
+)
+
 ### UIBackend Tests ###
 add_graphics_test(UIBackend_tests)
 

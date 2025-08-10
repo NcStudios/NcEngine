@@ -7,6 +7,7 @@
 
 #include <span>
 #include <vector>
+#include "imgui.h"
 
 namespace nc
 {
@@ -34,9 +35,12 @@ class TextureBufferResource
             return m_maxTextures;
         }
 
+        auto GetImGuiHandle(uint32_t index) const -> ImTextureID;
+
     private:
         std::vector<Diligent::RefCntAutoPtr<Diligent::ITexture>> m_textures;
         std::vector<Diligent::IDeviceObject*> m_views;
+        std::vector<ImTextureID> m_imguiHandles;
         Diligent::IShaderResourceVariable* m_variable;
         uint32_t m_maxTextures;
         bool m_initialLoadComplete;
