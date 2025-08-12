@@ -443,32 +443,26 @@ auto NcGraphicsImpl2::GetTextureView(TextureViewType type, uint32_t index) -> vo
         case TextureViewType::Asset:
         {
             return static_cast<void*>(m_shaderBindings.GetPerFrameSignature().GetTextureBuffer().GetTextureView(index));
-            break;
         }
         case TextureViewType::ColorSink:
         {
             return static_cast<void*>(m_shaderBindings.GetPerPassSignature().GetColorSinksResource().GetTextureView(index));
-            break;
         }
         case TextureViewType::DepthSink:
         {
             return static_cast<void*>(m_shaderBindings.GetPerPassSignature().GetDepthSinksResource().GetTextureView(index));
-            break;
         }
         case TextureViewType::UniShadowSink:
         {
             return static_cast<void*>(m_shaderBindings.GetPerPassSignature().GetUniShadowMapSinksResource().GetTextureView(index));
-            break;
         }
         case TextureViewType::PointShadowSink:
         {
             return static_cast<void*>(m_shaderBindings.GetPerPassSignature().GetPointShadowMapSinksResource().GetTextureView(index));
-            break;
         }
         case TextureViewType::PostProcess:
         {
             return static_cast<void*>(m_shaderBindings.GetPerPassSignature().GetPostProcessSinkResource(index).GetTextureView(0u));
-            break;
         }
         default:
         {
