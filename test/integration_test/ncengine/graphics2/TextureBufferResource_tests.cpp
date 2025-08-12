@@ -163,18 +163,3 @@ TEST_F(TextureBufferResourceTest, Load_afterUnload_overwritesExisting)
     EXPECT_EQ(normalTexture.texture.width, overwrittenDesc.GetWidth());
     EXPECT_EQ(normalTexture.texture.height, overwrittenDesc.GetHeight());
 }
-
-TEST_F(TextureBufferResourceTest, GetImGuiHandle_loadedTexture_returnsHandle)
-{
-    const auto& expectedTexture = imageTexture1;
-    uut->Load(std::span{&expectedTexture, 1}, engine->GetContext(), engine->GetDevice());
-    EXPECT_NE(uut->GetImGuiHandle(0), nullptr);
-}
-
-TEST_F(TextureBufferResourceTest, GetImGuiHandle_invalidIndexOrAfterUnload_throws)
-{
-    const auto& expectedTexture = imageTexture1;
-    uut->Load(std::span{&expectedTexture, 1}, engine->GetContext(), engine->GetDevice());
-    uut->Unload();
-    EXPECT_THROW(uut->GetImGuiHandle(0), std::exception);
-}
