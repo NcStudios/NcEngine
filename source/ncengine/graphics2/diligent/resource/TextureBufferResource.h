@@ -35,11 +35,10 @@ class TextureBufferResource
             return m_maxTextures;
         }
 
-        auto GetTextureView(uint32_t index) const -> const void*
+        auto GetTextureView(uint32_t index) -> void*
         {
             NC_ASSERT(index < m_views.size(), "Invalid texture view index.");
-            auto imGuiHandle = static_cast<ImTextureID>(m_views.at(index));
-            return static_cast<void*>(imGuiHandle);
+            return static_cast<void*>(m_views.at(index));
         }
 
     private:

@@ -62,10 +62,10 @@ class SinkBufferResource
         auto GetSinkCount() const                    -> uint32_t                { return static_cast<uint32_t>(m_textures.size()); }
         auto GetMsaaSinkCount() const                -> uint32_t                { return static_cast<uint32_t>(m_texturesMsaa.size()); }
 
-        auto GetTextureView(uint32_t index) const -> const void*
+        auto GetTextureView(uint32_t index) -> void*
         {
             NC_ASSERT(index < m_shaderResourceViews.size(), "Invalid texture view index.");
-            return static_cast<const void*>(m_shaderResourceViews.at(index));
+            return static_cast<void*>(m_shaderResourceViews.at(index));
         }
 
     private:

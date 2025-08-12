@@ -26,7 +26,8 @@ enum class TextureViewType : uint8_t
     DepthSink,
     UniShadowSink,
     PointShadowSink,
-    Asset
+    Asset,
+    PostProcess
 };
 
 /** @brief Pass flags that represent Miscellaneous passes */
