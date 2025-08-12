@@ -38,13 +38,18 @@ class PerPassResourceSignature
         auto GetResourceBinding()   -> Diligent::IShaderResourceBinding&     { return *m_srb; }
         void BindPostProcessSink(uint32_t index);
 
-        auto GetColorSinksResource()                    -> SinkBufferResource&                { return *m_colorSinksResource; }
-        auto GetDepthSinksResource()                    -> SinkBufferResource&                { return *m_depthSinksResource; }
-        auto GetSinkIndexBufferResource()               -> SinkIndexBufferResource&           { return *m_sinkIndexBufferResource; }
-        auto GetPostProcessSinkResource(uint32_t index) -> SinkBufferResource&                { return m_postProcessSinksResource.at(index); }
-        auto GetPostProcessPropertyResource()           -> PostProcessPropertyBufferResource& { return *m_postProcessPropertyResource; }
-        auto GetUniShadowMapSinksResource()             -> SinkBufferResource&                { return *m_uniShadowMapSinksResource; }
-        auto GetPointShadowMapSinksResource()           -> CubeSinkBufferResource&            { return *m_pointShadowMapSinksResource; }
+        auto GetColorSinksResource()                          -> SinkBufferResource&                      { return *m_colorSinksResource; }
+        auto GetDepthSinksResource()                          -> SinkBufferResource&                      { return *m_depthSinksResource; }
+        auto GetSinkIndexBufferResource()                     -> SinkIndexBufferResource&                 { return *m_sinkIndexBufferResource; }
+        auto GetPostProcessSinkResource(uint32_t index)       -> SinkBufferResource&                      { return m_postProcessSinksResource.at(index); }
+        auto GetPostProcessPropertyResource()                 -> PostProcessPropertyBufferResource&       { return *m_postProcessPropertyResource; }
+        auto GetUniShadowMapSinksResource()                   -> SinkBufferResource&                      { return *m_uniShadowMapSinksResource; }
+        auto GetPointShadowMapSinksResource()                 -> CubeSinkBufferResource&                  { return *m_pointShadowMapSinksResource; }
+        auto GetColorSinksResource()                    const -> const SinkBufferResource&                { return *m_colorSinksResource; }
+        auto GetDepthSinksResource()                    const -> const SinkBufferResource&                { return *m_depthSinksResource; }
+        auto GetPostProcessSinkResource(uint32_t index) const -> const SinkBufferResource&                { return m_postProcessSinksResource.at(index); }
+        auto GetUniShadowMapSinksResource()             const -> const SinkBufferResource&                { return *m_uniShadowMapSinksResource; }
+        auto GetPointShadowMapSinksResource()           const -> const CubeSinkBufferResource&            { return *m_pointShadowMapSinksResource; }
 
         auto GetPostProcessSinkCount() const      -> uint32_t { return m_postProcessSinkCount; }
         auto GetColorSinkCount(bool isMsaa) const -> uint32_t { return isMsaa ? m_colorSinksResource->GetMsaaSinkCount() : m_colorSinksResource->GetSinkCount(); }

@@ -47,6 +47,7 @@ class NcGraphicsImpl2 : public NcGraphics
         void SetPostProcessEffectProperties(PostProcessEffectId effectId,
                                             PostProcessPassFlag::type pass,
                                             const PostProcessPassProperties& properties) override;
+        auto GetTextureView(TextureViewType type, uint32_t index) const -> const void* override;
         void OnBuildTaskGraph(task::UpdateTasks& update, task::RenderTasks& render) override;
         void OnBeforeSceneLoad(const Scene& sceneToLoad) override;
         void Clear() noexcept override;

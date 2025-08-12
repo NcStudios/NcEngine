@@ -5,6 +5,7 @@
 #include "ncengine/NcEngine.h"
 #include "ncengine/asset/AssetViews.h"
 #include "ncengine/scene/NcScene.h"
+#include "ncengine/graphics/NcGraphics.h"
 #include "ncengine/ui/IUI.h"
 #include "ncengine/window/Window.h"
 
@@ -15,7 +16,7 @@ namespace nc::sample
 class SampleUI : public ui::IUI, public window::IOnResizeReceiver
 {
     public:
-        SampleUI(NcScene* ncScene);
+        SampleUI(NcScene* ncScene, NcGraphics* ncGraphics);
         ~SampleUI() noexcept;
         void Draw() override;
         bool IsHovered() override;
@@ -24,6 +25,7 @@ class SampleUI : public ui::IUI, public window::IOnResizeReceiver
 
     private:
         NcScene* m_ncScene;
+        NcGraphics* m_ncGraphics;
         GameLog m_gameLog;
         std::function<void()> m_widgetCallback;
         Vector2 m_windowDimensions;

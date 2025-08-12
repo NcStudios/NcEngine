@@ -31,14 +31,15 @@ namespace nc::sample
     auto InitializeSampleUI(NcEngine* engine) -> std::unique_ptr<SampleUI>
     {
         auto ncScene = engine->GetModuleRegistry()->Get<NcScene>();
-        auto ui = std::make_unique<SampleUI>(ncScene);
         auto* graphics = engine->GetModuleRegistry()->Get<NcGraphics>();
+        auto ui = std::make_unique<SampleUI>(ncScene, graphics);
         graphics->SetUi(ui.get());
         return ui;
     }
 
-    SampleUI::SampleUI(NcScene* ncScene)
+    SampleUI::SampleUI(NcScene* ncScene, NcGraphics* ncGraphics)
         : m_ncScene{ncScene},
+          m_ncGraphics{ncGraphics},
           m_gameLog{},
           m_widgetCallback{},
           m_windowDimensions{window::GetDimensions()},
@@ -61,6 +62,8 @@ namespace nc::sample
         ImGui::SetNextWindowSize({ m_screenExtent.x, PanelHeight });
         if (ImGui::Begin("SampleUI", nullptr, WindowFlags))
         {
+            ImGui::Image(static_cast<ImTextureID>(m_ncGraphics->GetTextureView(nc::TextureViewType::Asset, sample::texture::diffuse_skeleton.index)), ImVec2{500.0f, 500.0f} );
+
             ImGui::Columns(3);
             m_widgetCallback ? m_widgetCallback() : DrawDefaultWidget();
             ImGui::NextColumn();

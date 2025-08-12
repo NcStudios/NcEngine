@@ -61,6 +61,7 @@ struct NcGraphicsStub2 : nc::NcGraphics
         static auto dummy = nc::PostProcessPassProperties{};
         return dummy;
     }
+    auto GetTextureView(nc::TextureViewType, uint32_t) const -> const void* override { return nullptr; }
 };
 
 auto MakeEngineCreateInfo(bool enableValidation) -> Diligent::EngineCreateInfo
@@ -433,6 +434,43 @@ void NcGraphicsImpl2::SetPostProcessEffectProperties(PostProcessEffectId effectI
                                                      const PostProcessPassProperties& properties)
 {
     m_frontend.GetPostProcessSubsystem().SetProperties(effectId, pass, properties);
+}
+
+auto NcGraphicsImpl2::GetTextureView(TextureViewType type, uint32_t index) const -> const void*
+{
+    switch(type)
+    {
+        case TextureViewType::Asset:
+        {
+            auto* deviceObjectPtr =  m_shaderBindings.GetPerFrameSignature().GetTextureBuffer().GetTextureView(index);
+            return static_cast<const void*>(m_shaderBindings.GetPerFrameSignature().GetTextureBuffer().GetTextureView(index));
+            break;
+        }
+        case TextureViewType::ColorSink:
+        {
+            return static_cast<const void*>(m_shaderBindings.GetPerPassSignature().GetColorSinksResource().GetTextureView(index));
+            break;
+        }
+        case TextureViewType::DepthSink:
+        {
+            return static_cast<const void*>(m_shaderBindings.GetPerPassSignature().GetDepthSinksResource().GetTextureView(index));
+            break;
+        }
+        case TextureViewType::UniShadowSink:
+        {
+            return static_cast<const void*>(m_shaderBindings.GetPerPassSignature().GetUniShadowMapSinksResource().GetTextureView(index));
+            break;
+        }
+        case TextureViewType::PointShadowSink:
+        {
+            return static_cast<const void*>(m_shaderBindings.GetPerPassSignature().GetPointShadowMapSinksResource().GetTextureView(index));
+            break;
+        }
+        default:
+        {
+            throw NcError("Invalid TextureViewType.");
+        }
+    }
 }
 
 void NcGraphicsImpl2::OnBeforeSceneLoad(const Scene& sceneToLoad)

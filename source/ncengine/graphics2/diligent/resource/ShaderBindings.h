@@ -56,9 +56,19 @@ class ShaderBindings
                     Diligent::IRenderDevice& device,
                     const FrontendRenderState& renderState);
 
+        auto GetPerFrameSignature() const -> const PerFrameResourceSignature&
+        {
+            return m_perFrameSignature;
+        }
+
         auto GetPerFrameSignature() -> PerFrameResourceSignature&
         {
             return m_perFrameSignature;
+        }
+
+        auto GetPerPassSignature() const -> const PerPassResourceSignature&
+        {
+            return m_perPassSignature;
         }
 
         auto GetPerPassSignature() -> PerPassResourceSignature&
