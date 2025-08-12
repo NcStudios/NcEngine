@@ -18,6 +18,18 @@ constexpr auto AspectRatio = 16.0f / 9.0f;
 /** @brief Calculate the maximum region conforming to nc::AspectRatio that fits within dimensions. */
 auto AdjustDimensionsToAspectRatio(const nc::Vector2& dimensions) -> nc::Vector2;
 
+/** @brief Texture view types used throughout NcEngine. */
+enum class TextureViewType : uint8_t
+{
+    None,
+    ColorSink,
+    DepthSink,
+    UniShadowSink,
+    PointShadowSink,
+    Asset,
+    PostProcess
+};
+
 /** @brief Pass flags that represent Miscellaneous passes */
 struct MiscPassFlag
 {

@@ -6,6 +6,7 @@
 
 #include "ncengine/ecs/EcsFwd.h"
 #include "ncengine/graphics/Camera.h"
+#include "ncengine/graphics/GraphicsUtility.h"
 #include "ncengine/graphics/PostProcess.h"
 #include "ncengine/module/Module.h"
 #include "ncengine/module/ModuleProvider.h"
@@ -108,6 +109,9 @@ struct NcGraphics : public Module
     virtual void SetPostProcessEffectProperties(PostProcessEffectId effectId,
                                                 PostProcessPassFlag::type pass,
                                                 const PostProcessPassProperties& properties) = 0;
+
+    /** @brief Get the handle to the texture view at the given index and the given type. */
+    virtual auto GetTextureView(TextureViewType type, uint32_t index) -> void* = 0;
 };
 
 /**

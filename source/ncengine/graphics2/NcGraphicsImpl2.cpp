@@ -61,6 +61,7 @@ struct NcGraphicsStub2 : nc::NcGraphics
         static auto dummy = nc::PostProcessPassProperties{};
         return dummy;
     }
+    auto GetTextureView(nc::TextureViewType, uint32_t) -> void* override { return nullptr; }
 };
 
 auto MakeEngineCreateInfo(bool enableValidation) -> Diligent::EngineCreateInfo
@@ -433,6 +434,41 @@ void NcGraphicsImpl2::SetPostProcessEffectProperties(PostProcessEffectId effectI
                                                      const PostProcessPassProperties& properties)
 {
     m_frontend.GetPostProcessSubsystem().SetProperties(effectId, pass, properties);
+}
+
+auto NcGraphicsImpl2::GetTextureView(TextureViewType type, uint32_t index) -> void*
+{
+    switch(type)
+    {
+        case TextureViewType::Asset:
+        {
+            return static_cast<void*>(m_shaderBindings.GetPerFrameSignature().GetTextureBuffer().GetTextureView(index));
+        }
+        case TextureViewType::ColorSink:
+        {
+            return static_cast<void*>(m_shaderBindings.GetPerPassSignature().GetColorSinksResource().GetTextureView(index));
+        }
+        case TextureViewType::DepthSink:
+        {
+            return static_cast<void*>(m_shaderBindings.GetPerPassSignature().GetDepthSinksResource().GetTextureView(index));
+        }
+        case TextureViewType::UniShadowSink:
+        {
+            return static_cast<void*>(m_shaderBindings.GetPerPassSignature().GetUniShadowMapSinksResource().GetTextureView(index));
+        }
+        case TextureViewType::PointShadowSink:
+        {
+            return static_cast<void*>(m_shaderBindings.GetPerPassSignature().GetPointShadowMapSinksResource().GetTextureView(index));
+        }
+        case TextureViewType::PostProcess:
+        {
+            return static_cast<void*>(m_shaderBindings.GetPerPassSignature().GetPostProcessSinkResource(index).GetTextureView(0u));
+        }
+        default:
+        {
+            throw NcError("Invalid TextureViewType.");
+        }
+    }
 }
 
 void NcGraphicsImpl2::OnBeforeSceneLoad(const Scene& sceneToLoad)

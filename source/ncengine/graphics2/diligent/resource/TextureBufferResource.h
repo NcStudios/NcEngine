@@ -1,5 +1,6 @@
 #pragma once
 #include "ncengine/asset/AssetData.h"
+#include "ncutility/NcError.h"
 
 #include "Common/interface/RefCntAutoPtr.hpp"
 #include "Graphics/GraphicsEngine/interface/RenderDevice.h"
@@ -32,6 +33,12 @@ class TextureBufferResource
         auto GetMaxTextureCount() const -> size_t
         {
             return m_maxTextures;
+        }
+
+        auto GetTextureView(uint32_t index) -> void*
+        {
+            NC_ASSERT(index < m_views.size(), "Invalid texture view index.");
+            return static_cast<void*>(m_views.at(index));
         }
 
     private:
