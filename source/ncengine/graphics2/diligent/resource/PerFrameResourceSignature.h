@@ -56,8 +56,6 @@ class PerFrameResourceSignature
         auto GetTextureBuffer()             -> TextureBufferResource&                     { return *m_textureResource; }
         auto GetEnvironmentBuffer()         -> EnvironmentBufferResource&                 { return *m_environmentResource; }
         auto GetWireframeBuffer()           -> WireframeBufferResource&                   { return *m_wireframeBufferResource; }
-        auto GetTextureBuffer()       const -> const TextureBufferResource&               { return *m_textureResource; }
-        auto GetCubeMapBuffer()       const -> const CubeMapBufferResource&               { return *m_cubeMapResource; }
 
     private:
         Diligent::RefCntAutoPtr<Diligent::IShaderResourceBinding> m_srb;
