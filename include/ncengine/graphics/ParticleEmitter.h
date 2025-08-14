@@ -6,7 +6,9 @@
 
 #include "ncengine/asset/AssetViews.h"
 #include "ncengine/ecs/Component.h"
+#include "ncengine/graphics/Curve.h"
 
+#include "ncmath/Color.h"
 #include "ncmath/Vector.h"
 
 namespace nc
@@ -49,12 +51,22 @@ struct ParticleKinematicInfo
     float scaleOverTimeFactor = 0.0f;
 };
 
+/** @brief Describes particle color properties. */
+struct ParticleColorInfo
+{
+    Gradient start = Gradient{Color::White()}; ///> gradient initial color is randomly selected from
+    Gradient end = Gradient{Color::White()};   ///> gradient final color is randomly selected from
+    CurveType colorCurve = CurveType::Linear;  ///> curve describing how RGB values change over time
+    CurveType alphaCurve = CurveType::Linear;  ///> curve describing how alpha values change over time
+};
+
 /** @brief Settings for a ParticleEmitter. */
 struct ParticleInfo
 {
     ParticleEmissionInfo emission;
     ParticleInitInfo init;
     ParticleKinematicInfo kinematic;
+    ParticleColorInfo color;
 };
 
 /** @brief Component for creating particle effects. */

@@ -67,6 +67,15 @@ static_assert(g_postProcessPassNames.size() == g_postProcessPassFlags.size());
 static_assert(g_postProcessEffectNames.size() == g_postProcessEffectIds.size());
 static_assert(g_postProcessEffectPassFlags.size() == g_postProcessEffectIds.size());
 static_assert(g_combinedPostProcessEffectPassFlags.size() == g_postProcessEffectIds.size());
+
+constexpr auto g_curveTypeNames = std::array{
+    std::string_view{"Linear"},
+    std::string_view{"EaseIn"},
+    std::string_view{"EaseOut"},
+    std::string_view{"EaseInOut"},
+    std::string_view{"Spike"},
+    std::string_view{"Constant"}
+};
 } // anonymous namespace
 
 namespace nc
@@ -145,5 +154,27 @@ auto GetPostProcessEffectPassFlags(PostProcessEffectId effectId) -> std::span<co
 auto GetCombinedPostProcessEffectPassFlags(PostProcessEffectId effectId) -> PostProcessEffectPassFlags
 {
     return g_combinedPostProcessEffectPassFlags.at(effectId);
+}
+
+auto ToString(CurveType curve) -> std::string_view
+{
+    return g_curveTypeNames.at(static_cast<size_t>(curve));
+}
+
+auto ToCurveType(std::string_view curveName) -> CurveType
+{
+    const auto pos = std::ranges::find(g_curveTypeNames, curveName);
+    if (pos != g_curveTypeNames.cend())
+    {
+        const auto index = std::distance(g_curveTypeNames.cbegin(), pos);
+        return static_cast<CurveType>(index);
+    }
+
+    throw NcError{fmt::format("Unknown CurveType '{}'", curveName)};
+}
+
+auto GetCurveTypeNames() -> std::span<const std::string_view>
+{
+    return g_curveTypeNames;
 }
 } // namespace nc

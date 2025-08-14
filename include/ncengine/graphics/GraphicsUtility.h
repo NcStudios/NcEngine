@@ -4,6 +4,7 @@
  */
 #pragma once
 
+#include "ncengine/graphics/Curve.h"
 #include "ncengine/graphics/Material.h"
 #include "ncengine/graphics/PostProcess.h"
 
@@ -57,4 +58,13 @@ auto GetPostProcessEffectPassFlags(PostProcessEffectId effectId) -> std::span<co
 
 /** @brief Returns the combined post process pass flags used by an effect. */
 auto GetCombinedPostProcessEffectPassFlags(PostProcessEffectId effectId) -> PostProcessEffectPassFlags;
+
+/** @brief Return a string name for a given CurveType. */
+auto ToString(CurveType curve) -> std::string_view;
+
+/** @brief Convert a string to a CurveType. */
+auto ToCurveType(std::string_view curveName) -> CurveType;
+
+/** @brief Returns a view of all CurveType names. */
+auto GetCurveTypeNames() -> std::span<const std::string_view>;
 } // namespace nc
