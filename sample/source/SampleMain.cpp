@@ -54,6 +54,7 @@ int main(int argc, char** argv)
     try
     {
         auto config = nc::config::Load(args.configPath);
+        auto ui = std::unique_ptr<nc::sample::SampleUI>{};
         auto engine = nc::InitializeNcEngine(config);
         nc::sample::InitializeResources();
 
@@ -65,7 +66,7 @@ int main(int argc, char** argv)
         }
         else
         {
-            auto ui = nc::sample::InitializeSampleUI(engine.get());
+            ui = nc::sample::InitializeSampleUI(engine.get());
             engine->Start(std::make_unique<nc::sample::PhysicsTest>(ui.get()));
         }
     }

@@ -46,12 +46,10 @@ namespace nc::sample
           m_font{nc::asset::AcquireFont(font::ui)}
     {
         ui::SetDefaultUIStyle();
-        window::RegisterOnResizeReceiver(this);
     }
 
     SampleUI::~SampleUI() noexcept
     {
-        window::UnregisterOnResizeReceiver(this);
     }
 
     void SampleUI::Draw()
@@ -142,11 +140,6 @@ namespace nc::sample
     bool SampleUI::IsHovered()
     {
         return ImGui::GetIO().WantCaptureMouse;
-    }
-
-    void SampleUI::OnResize(nc::Vector2 dimensions)
-    {
-        m_windowDimensions = dimensions;
     }
 
     void SampleUI::SetWidgetCallback(std::function<void()> func)
