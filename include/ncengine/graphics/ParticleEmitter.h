@@ -63,10 +63,10 @@ struct ParticleColorInfo
 /** @brief Settings for a ParticleEmitter. */
 struct ParticleInfo
 {
-    ParticleEmissionInfo emission;
-    ParticleInitInfo init;
-    ParticleKinematicInfo kinematic;
-    ParticleColorInfo color;
+    ParticleEmissionInfo emission = ParticleEmissionInfo{};
+    ParticleInitInfo init = ParticleInitInfo{};
+    ParticleKinematicInfo kinematic = ParticleKinematicInfo{};
+    ParticleColorInfo color = ParticleColorInfo{};
 };
 
 /** @brief Component for creating particle effects. */
