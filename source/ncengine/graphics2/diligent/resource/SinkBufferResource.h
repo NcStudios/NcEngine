@@ -4,6 +4,8 @@
 #include "Graphics/GraphicsEngine/interface/DeviceContext.h"
 #include "Graphics/GraphicsEngine/interface/RenderDevice.h"
 
+#include "ncutility/NcError.h"
+
 #include <vector>
 
 namespace nc::graphics
@@ -59,6 +61,12 @@ class SinkBufferResource
         auto GetTexture(uint32_t index)              -> Diligent::ITexture*     { return m_textures.at(index); }
         auto GetSinkCount() const                    -> uint32_t                { return static_cast<uint32_t>(m_textures.size()); }
         auto GetMsaaSinkCount() const                -> uint32_t                { return static_cast<uint32_t>(m_texturesMsaa.size()); }
+
+        auto GetTextureView(uint32_t index) -> void*
+        {
+            NC_ASSERT(index < m_shaderResourceViews.size(), "Invalid texture view index.");
+            return static_cast<void*>(m_shaderResourceViews.at(index));
+        }
 
     private:
         std::vector<Diligent::RefCntAutoPtr<Diligent::ITexture>> m_textures;

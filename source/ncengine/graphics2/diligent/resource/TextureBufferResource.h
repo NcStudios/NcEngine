@@ -1,5 +1,6 @@
 #pragma once
 #include "ncengine/asset/AssetData.h"
+#include "ncutility/NcError.h"
 
 #include "Common/interface/RefCntAutoPtr.hpp"
 #include "Graphics/GraphicsEngine/interface/RenderDevice.h"
@@ -7,7 +8,6 @@
 
 #include <span>
 #include <vector>
-#include "imgui.h"
 
 namespace nc
 {
@@ -35,12 +35,15 @@ class TextureBufferResource
             return m_maxTextures;
         }
 
-        auto GetImGuiHandle(uint32_t index) const -> ImTextureID;
+        auto GetTextureView(uint32_t index) -> void*
+        {
+            NC_ASSERT(index < m_views.size(), "Invalid texture view index.");
+            return static_cast<void*>(m_views.at(index));
+        }
 
     private:
         std::vector<Diligent::RefCntAutoPtr<Diligent::ITexture>> m_textures;
         std::vector<Diligent::IDeviceObject*> m_views;
-        std::vector<ImTextureID> m_imguiHandles;
         Diligent::IShaderResourceVariable* m_variable;
         uint32_t m_maxTextures;
         bool m_initialLoadComplete;
