@@ -12,14 +12,13 @@
 
 namespace nc::sample
 {
-class SampleUI : public ui::IUI, public window::IOnResizeReceiver
+class SampleUI : public ui::IUI
 {
     public:
         SampleUI(NcScene* ncScene);
         ~SampleUI() noexcept;
         void Draw() override;
         bool IsHovered() override;
-        void OnResize(Vector2 dimensions) override;
         void SetWidgetCallback(std::function<void()> func);
 
     private:
