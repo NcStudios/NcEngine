@@ -23,12 +23,12 @@ struct Color : public Vector4
     {
     }
 
-    static constexpr auto Red()   -> Color { return Color{1.0f, 0.0, 0.0f, 1.0f}; }
-    static constexpr auto Green() -> Color { return Color{0.0f, 1.0, 0.0f, 1.0f}; }
-    static constexpr auto Blue()  -> Color { return Color{0.0f, 0.0, 1.0f, 1.0f}; }
-    static constexpr auto White() -> Color { return Color{1.0f, 1.0, 1.0f, 1.0f}; }
-    static constexpr auto Black() -> Color { return Color{0.0f, 0.0, 0.0f, 1.0f}; }
-    static constexpr auto Clear() -> Color { return Color{0.0f, 0.0, 0.0f, 0.0f}; }
+    static constexpr auto Red()         -> Color { return Color{1.0f, 0.0, 0.0f, 1.0f}; }
+    static constexpr auto Green()       -> Color { return Color{0.0f, 1.0, 0.0f, 1.0f}; }
+    static constexpr auto Blue()        -> Color { return Color{0.0f, 0.0, 1.0f, 1.0f}; }
+    static constexpr auto White()       -> Color { return Color{1.0f, 1.0, 1.0f, 1.0f}; }
+    static constexpr auto Black()       -> Color { return Color{0.0f, 0.0, 0.0f, 1.0f}; }
+    static constexpr auto Transparent() -> Color { return Color{0.0f, 0.0, 0.0f, 0.0f}; }
 
     constexpr auto R()       ->       float& { return x; }
     constexpr auto G()       ->       float& { return y; }
