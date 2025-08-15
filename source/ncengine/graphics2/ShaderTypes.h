@@ -102,6 +102,7 @@ struct BoneData
 struct ParticleData
 {
     DirectX::XMMATRIX model = DirectX::XMMATRIX{};
+    Vector4 color = Vector4::Splat(1.0f);
     uint32_t textureIndex = std::numeric_limits<uint32_t>::max();
 };
 

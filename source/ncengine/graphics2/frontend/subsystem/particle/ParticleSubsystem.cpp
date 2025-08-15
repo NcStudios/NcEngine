@@ -115,9 +115,9 @@ void ParticleSubsystem::Update(Camera* mainCamera)
     for (const auto& state : m_emitterStates)
     {
         const auto textureIndex = state.GetTextureIndex();
-        for (const auto& matrix : state.GetMatrices())
+        for (const auto& [matrix, color] : state.GetFrameData())
         {
-            m_particleDataHostBuffer.emplace_back(matrix, textureIndex);
+            m_particleDataHostBuffer.emplace_back(matrix, color, textureIndex);
         }
     }
 }

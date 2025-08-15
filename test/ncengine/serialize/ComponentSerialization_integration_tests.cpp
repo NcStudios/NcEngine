@@ -295,6 +295,10 @@ TEST(ComponentSerializationTests, RoundTrip_particleEmitter_preservesValues)
     EXPECT_EQ(expectedInfo.kinematic.rotationMax, actualInfo.kinematic.rotationMax);
     EXPECT_EQ(expectedInfo.kinematic.rotationOverTimeFactor, actualInfo.kinematic.rotationOverTimeFactor);
     EXPECT_EQ(expectedInfo.kinematic.scaleOverTimeFactor, actualInfo.kinematic.scaleOverTimeFactor);
+    EXPECT_EQ(expectedInfo.color.start, actualInfo.color.start);
+    EXPECT_EQ(expectedInfo.color.end, actualInfo.color.end);
+    EXPECT_EQ(expectedInfo.color.colorCurve, actualInfo.color.colorCurve);
+    EXPECT_EQ(expectedInfo.color.alphaCurve, actualInfo.color.alphaCurve);
 }
 
 TEST(ComponentSerializationTests, RoundTrip_directionalLight_preservesValues)

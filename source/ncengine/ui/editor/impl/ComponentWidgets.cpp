@@ -914,6 +914,10 @@ constexpr auto getRotationMin = [](auto& obj) { return obj.GetInfo().kinematic.r
 constexpr auto getRotationMax = [](auto& obj) { return obj.GetInfo().kinematic.rotationMax; };
 constexpr auto getRotationOverTime = [](auto& obj) { return obj.GetInfo().kinematic.rotationOverTimeFactor; };
 constexpr auto getScaleOverTime = [](auto& obj) { return obj.GetInfo().kinematic.scaleOverTimeFactor; };
+constexpr auto getStartGradient = [](auto& obj) { return obj.GetInfo().color.start; };
+constexpr auto getEndGradient = [](auto& obj) { return obj.GetInfo().color.end; };
+constexpr auto getColorCurve = [](auto& obj) { return obj.GetInfo().color.colorCurve; };
+constexpr auto getAlphaCurve = [](auto& obj) { return obj.GetInfo().color.alphaCurve; };
 
 DECLARE_SETTER(setMaxParticleCount, emission.maxParticleCount);
 DECLARE_SETTER(setInitialEmissionCount, emission.initialEmissionCount);
@@ -933,6 +937,10 @@ DECLARE_SETTER(setRotationMin, kinematic.rotationMin);
 DECLARE_SETTER(setRotationMax, kinematic.rotationMax);
 DECLARE_SETTER(setRotationOverTime, kinematic.rotationOverTimeFactor);
 DECLARE_SETTER(setScaleOverTime, kinematic.scaleOverTimeFactor);
+DECLARE_SETTER(setStartGradient, color.start);
+DECLARE_SETTER(setEndGradient, color.end);
+DECLARE_SETTER(setColorCurve, color.colorCurve);
+DECLARE_SETTER(setAlphaCurve, color.alphaCurve);
 
 constexpr auto maxParticleCountProp = nc::ui::Property{ getMaxParticleCount, setMaxParticleCount, "maxParticles" };
 constexpr auto initialEmissionCountProp = nc::ui::Property{ getInitialEmissionCount, setInitialEmissionCount, "initialCount" };
@@ -952,6 +960,10 @@ constexpr auto rotationMinProp = nc::ui::Property{ getRotationMin, setRotationMi
 constexpr auto rotationMaxProp = nc::ui::Property{ getRotationMax, setRotationMax, "angVelMax" };
 constexpr auto rotationOverTimeFactorProp = nc::ui::Property{ getRotationOverTime, setRotationOverTime, "angVelOverTime" };
 constexpr auto scaleOverTimeFactoryProp = nc::ui::Property{ getScaleOverTime, setScaleOverTime, "scaleOverTime" };
+constexpr auto startGradientProp = nc::ui::Property{ getStartGradient, setStartGradient, "startGradient" };
+constexpr auto endGradientProp = nc::ui::Property{ getEndGradient, setEndGradient, "endGradient" };
+constexpr auto colorCurveProp = nc::ui::Property{ getColorCurve, setColorCurve, "colorCurve" };
+constexpr auto alphaCurveProp = nc::ui::Property{ getAlphaCurve, setAlphaCurve, "alphaCurve" };
 } // namespace particle_emitter_ext
 } // anonymous namespace
 
@@ -1161,6 +1173,30 @@ void ParticleEmitterUIWidget(ParticleEmitter& emitter, EditorContext& ctx, const
         ui::PropertyWidget(particle_emitter_ext::rotationMaxProp, emitter, &ui::DragFloat, step, ui::g_minAngle, ui::g_maxAngle);
         ui::PropertyWidget(particle_emitter_ext::rotationOverTimeFactorProp, emitter, &ui::DragFloat, step, minFactor, maxFactor);
         ui::PropertyWidget(particle_emitter_ext::scaleOverTimeFactoryProp, emitter, &ui::DragFloat, step, minFactor, maxFactor);
+        ImGui::TreePop();
+    }
+
+    ImGui::Separator();
+    if (ImGui::TreeNodeEx("Color"))
+    {
+        ui::PropertyWidget(particle_emitter_ext::startGradientProp, emitter, &ui::InputGradient);
+        ui::PropertyWidget(particle_emitter_ext::endGradientProp,   emitter, &ui::InputGradient);
+
+        const auto curveNames = nc::GetCurveTypeNames();
+        auto currentName = std::string{nc::ToString(emitter.GetInfo().color.colorCurve)};
+        if (nc::ui::Combobox(currentName, "colorCurve", curveNames))
+        {
+            auto value = nc::ToCurveType(currentName);
+            particle_emitter_ext::setColorCurve(emitter, value);
+        }
+
+        currentName = std::string{nc::ToString(emitter.GetInfo().color.alphaCurve)};
+        if (nc::ui::Combobox(currentName, "alphaCurve", curveNames))
+        {
+            auto value = nc::ToCurveType(currentName);
+            particle_emitter_ext::setAlphaCurve(emitter, value);
+        }
+
         ImGui::TreePop();
     }
 }

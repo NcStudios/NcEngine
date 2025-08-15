@@ -23,7 +23,7 @@ auto CreateParticle(const ParticleInfo& info,
                     const Vector3& positionOffset,
                     Random* random) -> graphics::Particle
 {
-    const auto& [emission, init, kinematic] = info;
+    const auto& [emission, init, kinematic, color] = info;
     return graphics::Particle
     {
         .maxLifetime = init.lifetime,
@@ -32,7 +32,11 @@ auto CreateParticle(const ParticleInfo& info,
         .linearVelocity = random->Between(kinematic.velocityMin, kinematic.velocityMax),
         .rotation = random->Between(init.rotationMin, init.rotationMax),
         .angularVelocity = random->Between(kinematic.rotationMin, kinematic.rotationMax),
-        .scale = random->Between(init.scaleMin, init.scaleMax)
+        .scale = random->Between(init.scaleMin, init.scaleMax),
+        .color = nc::Gradient{
+            info.color.start.Lerp(random->Between(0.0f, 1.0f)),
+            info.color.end.Lerp(random->Between(0.0f, 1.0f))
+        }
     };
 }
 
@@ -48,6 +52,20 @@ void ApplyKinematics(graphics::Particle* particle, float dt, float velOverTimeFa
 
     auto& scale = particle->scale;
     scale = Clamp(scale + scale * sclOverTimeFactor * dt, 0.000001f, 5000.0f); // defaults?
+}
+
+auto ApplyCurve(float t, nc::CurveType curve) -> float
+{
+    switch (curve)
+    {
+        case CurveType::Linear:    return t;
+        case CurveType::EaseIn:    return t * t;
+        case CurveType::EaseOut:   return 1.0f - (1.0f - t) * (1.0f - t);
+        case CurveType::EaseInOut: return t * t * (3 - 2 * t);
+        case CurveType::Spike:     return 1.0f - fabsf(2.0f * t - 1.0f);
+        case CurveType::Constant:  return 0.0f;
+        default:                   return t;
+    }
 }
 } // anonymous namespace
 
@@ -100,7 +118,7 @@ void EmitterState::Update(DirectX::FXMVECTOR position,
     }
 
     PeriodicEmission(position, dt);
-    m_matrices.clear();
+    m_frameData.clear();
 
     if (m_particles.empty())
         return;
@@ -120,7 +138,13 @@ void EmitterState::Update(DirectX::FXMVECTOR position,
         else
         {
             ApplyKinematics(&particle, dt, velOverTimeFactor, rotOverTimeFactor, sclOverTimeFactor);
-            m_matrices.push_back(::ComputeMvp(particle, camRotation, camForward));
+            const auto t = particle.currentLifetime / particle.maxLifetime;
+            const auto colorFactor = ApplyCurve(t, m_info.color.colorCurve);
+            const auto alphaFactor = ApplyCurve(t, m_info.color.alphaCurve);
+            m_frameData.emplace_back(
+                ::ComputeMvp(particle, camRotation, camForward),
+                particle.color.Lerp(colorFactor, alphaFactor)
+            );
         }
     }
 

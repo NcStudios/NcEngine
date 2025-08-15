@@ -74,3 +74,13 @@ TEST(GraphicsUtilityTest, GetPostProcessEffectPassFlags_matchesCombinedFlags)
         EXPECT_EQ(expectedCombined, actualCombined);
     }
 }
+
+TEST(GraphicsUtilityTest, CurveTypeConversion_roundTrip_succeeds)
+{
+    for (const auto& name : nc::GetCurveTypeNames())
+    {
+        const auto curveType = nc::ToCurveType(name);
+        const auto curveTypeName = nc::ToString(curveType);
+        EXPECT_EQ(name, curveTypeName);
+    }
+}

@@ -19,6 +19,13 @@ struct Particle
     float rotation;
     float angularVelocity;
     float scale;
+    Gradient color;
+};
+
+struct ParticleFrameData
+{
+    DirectX::XMMATRIX matrix{};
+    Color color{};
 };
 
 class EmitterState
@@ -42,7 +49,7 @@ class EmitterState
         auto GetInfo()         const noexcept -> const ParticleInfo&                   { return m_info; }
         auto GetEntity()       const noexcept -> Entity                                { return m_entity; }
         auto GetTextureIndex() const noexcept -> uint32_t                              { return m_textureIndex; }
-        auto GetMatrices()     const noexcept -> const std::vector<DirectX::XMMATRIX>& { return m_matrices; }
+        auto GetFrameData()    const noexcept -> const std::vector<ParticleFrameData>& { return m_frameData; }
         auto GetLastPosition() const noexcept -> DirectX::FXMVECTOR                    { return m_lastPosition; }
 
     private:
@@ -50,7 +57,7 @@ class EmitterState
 
         DirectX::XMVECTOR m_lastPosition = DirectX::g_XMZero;
         std::vector<Particle> m_particles;
-        std::vector<DirectX::XMMATRIX> m_matrices;
+        std::vector<ParticleFrameData> m_frameData;
         uint32_t m_textureIndex;
         ParticleInfo m_info;
         Entity m_entity;

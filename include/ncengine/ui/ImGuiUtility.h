@@ -13,6 +13,7 @@
 #include "ncengine/ui/ImGuiConversion.h"
 
 #include "imgui.h"
+#include "ncmath/Color.h"
 #include "ncmath/Vector.h"
 #include "ncmath/Geometry.h"
 
@@ -104,6 +105,9 @@ auto InputColor3(Vector3& value, const char* label) -> bool;
 
 /** @brief RGBA color picker UI widget. */
 auto InputColor4(Vector4& value, const char* label) -> bool;
+
+/** @brief RGBA color pickers over a two color gradient. */
+auto InputGradient(Gradient& value, const char* lable) -> bool;
 
 /** @brief Combobox UI widget. */
 auto Combobox(std::string& value, const char* label, std::span<const std::string_view> items);
@@ -410,6 +414,45 @@ inline auto InputColor3(Vector3& value, const char* label) -> bool
 inline auto InputColor4(Vector4& value, const char* label) -> bool
 {
     return ImGui::ColorEdit4(label, &value.x, ImGuiColorEditFlags_NoInputs);
+}
+
+inline auto InputGradient(Gradient& value, const char* label) -> bool
+{
+    IMGUI_SCOPE(ui::ImGuiId, label);
+    const auto startColor = ImGui::ColorConvertFloat4ToU32(ImVec4{value.start});
+    const auto endColor = ImGui::ColorConvertFloat4ToU32(ImVec4{value.end});
+    const auto canvasPos = ImGui::GetCursorScreenPos();
+    const auto canvasSize = ImVec2{ImGui::CalcItemWidth(), ImGui::GetTextLineHeight()};
+    auto* drawList = ImGui::GetWindowDrawList();
+    drawList->AddRectFilledMultiColor(canvasPos, canvasPos + canvasSize, startColor, endColor, endColor, startColor);
+    ImGui::InvisibleButton("gradientbar", canvasSize);
+
+    if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(0))
+    {
+        const auto mouseX = ImGui::GetIO().MousePos.x;
+        if (mouseX < canvasPos.x + canvasSize.x * 0.5f)
+            ImGui::OpenPopup("StartPicker");
+        else
+            ImGui::OpenPopup("EndPicker");
+    }
+
+    auto changed = false;
+    if (ImGui::BeginPopup("StartPicker"))
+    {
+        changed |= ImGui::ColorPicker4("Start Color", &value.start.x);
+        ImGui::EndPopup();
+    }
+
+    if (ImGui::BeginPopup("EndPicker"))
+    {
+        changed |= ImGui::ColorPicker4("End Color", &value.end.x);
+        ImGui::EndPopup();
+    }
+
+    ImGui::SameLine();
+    ImGui::TextUnformatted(label);
+    ImGui::Dummy(ImVec2{0.0f, 5.0f});
+    return changed;
 }
 
 inline auto Combobox(std::string& value, const char* label, std::span<const std::string_view> items)

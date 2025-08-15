@@ -10,6 +10,7 @@ struct PSOutput
 {
     float4 Pos           : SV_POSITION;
     float2 UV            : TEX_COORD;
+    float4 Color;
     uint   TextureIndex;
 };
 
@@ -21,5 +22,6 @@ void main(in VSInput VSIn, uint InstanceID : SV_InstanceID, out PSOutput PSOut)
     float4 TransformedPos = mul(float4(VSIn.Pos, 1.0), particle.model);
     PSOut.Pos = mul(TransformedPos, cameraViewProjection);
     PSOut.UV = VSIn.UV;
+    PSOut.Color = particle.color;
     PSOut.TextureIndex = particle.textureIndex;
 }

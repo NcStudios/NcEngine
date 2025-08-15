@@ -52,6 +52,7 @@ struct BoneData
 struct ParticleData
 {
     float4x4 model;
+    float4 color;
     uint textureIndex;
 };
 
