@@ -153,6 +153,12 @@ void DeviceStream::CloseStream() noexcept
     }
 }
 
+void DeviceStream::AbandomStream() noexcept
+{
+    CloseStream();
+    m_errorContext->SetStatus(StreamStatus::Abandoned);
+}
+
 auto DeviceStream::GetStreamStatus() const noexcept -> StreamStatus
 {
     return m_errorContext->GetStatus();

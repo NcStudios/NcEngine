@@ -22,8 +22,11 @@ namespace config
 struct AudioSettings;
 } // namespace config
 
+/** @brief Id representing an audio device. */
+using AudioDeviceId = uint32_t;
+
 /** @brief Id representing a system's default audio device. */
-constexpr auto DefaultAudioDeviceId = std::numeric_limits<uint32_t>::max();
+constexpr auto DefaultAudioDeviceId = std::numeric_limits<AudioDeviceId>::max();
 
 /** @brief Id representing a null audio device. */
 constexpr auto InvalidAudioDeviceId = DefaultAudioDeviceId - 1u;
@@ -31,8 +34,8 @@ constexpr auto InvalidAudioDeviceId = DefaultAudioDeviceId - 1u;
 /** @brief The name and device id of an available audio device. */
 struct AudioDevice
 {
-    std::string name;
-    uint32_t id;
+    std::string name = "UnknownDevice";
+    AudioDeviceId id = InvalidAudioDeviceId;
 };
 
 /**
@@ -102,11 +105,13 @@ struct NcAudio : public Module
      * If the operation fails using the provided id, an attempt will be made to fallback
      * to another suitable device, preferring the system default.
      */
-    virtual auto SetOutputDevice(uint32_t deviceId = DefaultAudioDeviceId) noexcept -> bool = 0;
+    virtual auto SetOutputDevice(AudioDeviceId deviceId = DefaultAudioDeviceId) noexcept -> bool = 0;
 
     /**
      * @brief Get the signal for device change events.
      * @return A reference to the signal managing device change events.
+     * @note On device error (e.g. hot unplug), a device change is automatically attempted once. If the attempt fails,
+     *       this event will emit an empty AudioDevice.
     */
     virtual auto OnChangeOutputDevice() noexcept -> Signal<const AudioDevice&>& = 0;
 };

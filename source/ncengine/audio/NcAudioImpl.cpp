@@ -8,38 +8,6 @@
 
 namespace
 {
-constexpr auto g_outputChannelCount = 2u;
-constexpr auto g_sampleRate = 44100u;
-constexpr auto g_bufferCount = 3u;
-
-auto IndividualBufferSize(uint32_t bufferFrames) -> uint32_t
-{
-    return bufferFrames * g_outputChannelCount;
-}
-
-auto BuildBufferPool(uint32_t bufferFrames) -> std::vector<double>
-{
-    return std::vector<double>(IndividualBufferSize(bufferFrames) * g_bufferCount, 0.0);
-}
-
-auto BuildBufferQueue(std::span<double> bufferPool) -> std::queue<std::span<double>>
-{
-    if (bufferPool.size() % g_bufferCount != 0)
-    {
-        throw nc::NcError("Invalid buffer pool size");
-    }
-
-    const auto bufferLength = bufferPool.size() / g_bufferCount;
-    auto queue = std::queue<std::span<double>>{};
-    for(auto i = 0ull; i < g_bufferCount; ++i)
-    {
-        auto begin = bufferPool.begin() + i * bufferLength;
-        queue.emplace(begin, bufferLength);
-    }
-
-    return queue;
-}
-
 int AudioSystemCallback(void* outputBuffer, void*, unsigned nBufferFrames, double, unsigned, void* userData)
 {
     auto* system = static_cast<nc::audio::NcAudioImpl*>(userData);
@@ -52,8 +20,8 @@ auto CreateStreamParams(uint32_t deviceId, uint32_t bufferFrames, nc::audio::NcA
     {
         deviceId,
         bufferFrames,
-        g_outputChannelCount,
-        g_sampleRate,
+        nc::audio::AudioBuffer::OutputChannelCount,
+        nc::audio::AudioBuffer::SampleRate,
         ::AudioSystemCallback,
         static_cast<void*>(impl)
     };
@@ -103,11 +71,7 @@ namespace audio
 NcAudioImpl::NcAudioImpl(const config::AudioSettings& settings, ecs::ExplicitEcs<Entity, Transform, AudioSource> gameState)
     : m_gameState{gameState},
       m_deviceStream{::CreateStreamParams(DefaultAudioDeviceId, settings.bufferFrames, this)},
-      m_bufferMemory(::BuildBufferPool(m_deviceStream.GetBufferFrames())),
-      m_readyBuffers{},
-      m_staleBuffers{::BuildBufferQueue(m_bufferMemory)},
-      m_readyMutex{},
-      m_staleMutex{},
+      m_buffer{m_deviceStream.GetBufferFrames()},
       m_listener{Entity::Null()},
       m_configBufferFrames{settings.bufferFrames}
 {
@@ -120,13 +84,8 @@ NcAudioImpl::~NcAudioImpl() noexcept
 
 void NcAudioImpl::Clear() noexcept
 {
+    m_buffer.Clear();
     m_listener = Entity::Null();
-    auto lock = std::lock_guard{m_readyMutex};
-    while(!m_readyBuffers.empty())
-    {
-        m_staleBuffers.push(m_readyBuffers.front());
-        m_readyBuffers.pop();
-    }
 }
 
 void NcAudioImpl::OnBuildTaskGraph(task::UpdateTasks& update, task::RenderTasks&)
@@ -156,14 +115,11 @@ auto NcAudioImpl::GetOutputDevice() const noexcept -> const AudioDevice&
     return m_deviceStream.GetDevice();
 }
 
-auto NcAudioImpl::SetOutputDevice(uint32_t deviceId) noexcept -> bool
+auto NcAudioImpl::SetOutputDevice(AudioDeviceId deviceId) noexcept -> bool
 {
-    const auto result = m_deviceStream.OpenStream(::CreateStreamParams(deviceId, m_configBufferFrames, this));
-    if (result)
-    {
-        m_outputDeviceChanged.Emit(m_deviceStream.GetDevice());
-    }
-
+    const auto params = ::CreateStreamParams(deviceId, m_configBufferFrames, this);
+    const auto result = m_deviceStream.OpenStream(params);
+    ApplyDeviceChange();
     return result;
 }
 
@@ -184,28 +140,17 @@ void NcAudioImpl::SetStreamTime(double time) noexcept
 
 int NcAudioImpl::WriteToDeviceBuffer(double* output, uint32_t bufferFrames)
 {
-    assert(bufferFrames == m_deviceStream.GetBufferFrames());
-    const auto bufferSizeInBytes = ::IndividualBufferSize(bufferFrames) * sizeof(double);
-    // empty check before lock is only safe with 1 consumer
-    if(m_readyBuffers.empty())
+    assert(bufferFrames == m_buffer.FramesPerBuffer());
+    const auto buffer = m_buffer.AcquireReadyBuffer();
+    const auto bytes = m_buffer.BytesPerBuffer();
+    if (buffer.data)
     {
-        std::memset(output, 0, bufferSizeInBytes);
-        return 0;
+        std::memcpy(output, buffer.data, bytes);
+        m_buffer.MarkBufferStale(buffer);
     }
-
-    auto buffer = std::span<double>{};
-
+    else
     {
-        std::lock_guard lock{m_readyMutex};
-        buffer = m_readyBuffers.front();
-        m_readyBuffers.pop();
-    }
-
-    std::memcpy(output, buffer.data(), bufferSizeInBytes);
-
-    {
-        std::lock_guard lock{m_staleMutex};
-        m_staleBuffers.push(buffer);
+        std::memset(output, 0, bytes);
     }
 
     return 0;
@@ -214,59 +159,41 @@ int NcAudioImpl::WriteToDeviceBuffer(double* output, uint32_t bufferFrames)
 void NcAudioImpl::Run()
 {
     NC_PROFILE_TASK("AudioModule", ProfileCategory::Audio);
-    if(!m_listener.Valid())
+    if (!CheckStreamStatus() || !m_listener.Valid())
     {
         return;
     }
 
-    if (m_deviceStream.GetStreamStatus() == StreamStatus::Failed)
+    const auto bufferFrames = m_buffer.FramesPerBuffer();
+    for (auto bufferNumber = 0u; bufferNumber < AudioBuffer::BufferSlices; ++bufferNumber)
     {
-        // TODO #376: We'd like to attempt to reopen a stream on the same device, but device persistence may not be possible
-        return;
-    }
-
-    auto buffer = std::span<double>{};
-
-    for(auto i = 0u; i < g_bufferCount; ++i)
-    {
-        if(m_staleBuffers.empty())
+        const auto buffer = m_buffer.AcquireStaleBuffer();
+        if (buffer.data)
         {
-            return;
+            MixToBuffer(buffer.data, bufferFrames);
+            m_buffer.MarkBufferReady(buffer);
+            continue;
         }
 
-        {
-            auto lock = std::lock_guard{m_staleMutex};
-            buffer = m_staleBuffers.front();
-            m_staleBuffers.pop();
-        }
-
-        MixToBuffer(buffer.data());
-
-        {
-            auto lock = std::lock_guard{m_readyMutex};
-            m_readyBuffers.push(buffer);
-        }
+        break;
     }
 }
 
-void NcAudioImpl::MixToBuffer(double* buffer)
+void NcAudioImpl::MixToBuffer(double* buffer, uint32_t bufferFrames)
 {
-    const auto bufferFrames = m_deviceStream.GetBufferFrames();
-    const auto bufferSizeInBytes = ::IndividualBufferSize(bufferFrames) * sizeof(double);
-    std::memset(buffer, 0, bufferSizeInBytes);
-
+    std::memset(buffer, 0, m_buffer.BytesPerBuffer());
     const auto& listenerTransform = m_gameState.Get<Transform>(m_listener);
     const auto listenerPosition = listenerTransform.Position();
     const auto rightEar = listenerTransform.Right();
 
-    for(auto& source : m_gameState.GetAll<AudioSource>())
+    for (auto& source : m_gameState.GetAll<AudioSource>())
     {
-        if(!source.IsPlaying())
+        if (!source.IsPlaying())
         {
             continue;
         }
 
-        if(source.IsSpatial())
+        if (source.IsSpatial())
         {
             auto& transform = m_gameState.Get<Transform>(source.ParentEntity());
             source.WriteSpatialSamples(buffer, bufferFrames, transform.Position(), listenerPosition, rightEar);
@@ -276,6 +203,52 @@ void NcAudioImpl::MixToBuffer(double* buffer)
             source.WriteNonSpatialSamples(buffer, bufferFrames);
         }
     }
+}
+
+auto NcAudioImpl::CheckStreamStatus() -> bool
+{
+    switch (m_deviceStream.GetStreamStatus())
+    {
+        case StreamStatus::Open:      return true;
+        case StreamStatus::Failed:    return TryFailureRecovery();
+        default:                      return false;
+    }
+}
+
+void NcAudioImpl::ApplyDeviceChange()
+{
+    const auto bufferFrames = m_deviceStream.GetBufferFrames();
+    if (bufferFrames != m_buffer.FramesPerBuffer())
+    {
+        m_buffer.Resize(bufferFrames);
+    }
+
+    m_outputDeviceChanged.Emit(m_deviceStream.GetDevice());
+}
+
+auto NcAudioImpl::TryFailureRecovery() -> bool
+{
+    const auto lastKnownDevice = m_deviceStream.GetDevice().id;
+    const auto preferredDevice = lastKnownDevice == InvalidAudioDeviceId
+        ? DefaultAudioDeviceId
+        : lastKnownDevice;
+
+    NC_LOG_TRACE("Attempting to to reopen an AudioDevice stream (device {}).", preferredDevice);
+    const auto result = m_deviceStream.OpenStream(::CreateStreamParams(preferredDevice, m_configBufferFrames, this));
+    if (!result)
+    {
+        NC_LOG_TRACE("Failed to reopen an AudioDevice stream. Abandoning AudioDevice.");
+        m_deviceStream.AbandomStream();
+        m_outputDeviceChanged.Emit(m_deviceStream.GetDevice());
+        return false;
+    }
+
+    if (m_deviceStream.GetDevice().id != preferredDevice)
+    {
+        ApplyDeviceChange();
+    }
+
+    return true;
 }
 } // namespace audio
 } // namespace nc
