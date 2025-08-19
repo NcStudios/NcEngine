@@ -26,7 +26,7 @@ class AudioBuffer
             : m_memory(GetTotalBufferFrames(bufferFrames), 0.0),
               m_bufferFrames{bufferFrames}
         {
-            for (auto i = 0; i < BufferSlices; ++i)
+            for (auto i = 0u; i < BufferSlices; ++i)
             {
                 (void)m_staleIndices.push(i);
             }
