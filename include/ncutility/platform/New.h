@@ -25,5 +25,5 @@
 namespace nc
 {
 inline constexpr auto hardware_destructive_interference_size  = NC_DESTRUCTIVE_INTERFERENCE_SIZE;
-inline constexpr auto hardware_constructive_interference_size = NC_DESTRUCTIVE_INTERFERENCE_SIZE;
+inline constexpr auto hardware_constructive_interference_size = NC_CONSTRUCTIVE_INTERFERENCE_SIZE;
 } // namespace nc

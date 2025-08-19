@@ -243,7 +243,7 @@ auto NcAudioImpl::TryFailureRecovery() -> bool
         return false;
     }
 
-    if (m_deviceStream.GetDevice().id != preferredDevice)
+    if (m_deviceStream.GetDevice().id != lastKnownDevice)
     {
         ApplyDeviceChange();
     }
