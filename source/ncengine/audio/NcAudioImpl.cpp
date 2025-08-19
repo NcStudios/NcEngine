@@ -138,7 +138,7 @@ void NcAudioImpl::SetStreamTime(double time) noexcept
     m_deviceStream.SetStreamTime(time);
 }
 
-int NcAudioImpl::WriteToDeviceBuffer(double* output, uint32_t bufferFrames)
+int NcAudioImpl::WriteToDeviceBuffer(double* output, [[maybe_unused]] uint32_t bufferFrames)
 {
     assert(bufferFrames == m_buffer.FramesPerBuffer());
     const auto buffer = m_buffer.AcquireReadyBuffer();
