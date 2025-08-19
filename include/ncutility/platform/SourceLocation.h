@@ -1,3 +1,7 @@
+/**
+ * @file SourceLocation.h
+ * @copyright Jaremie Romer and McCallister Romer 2025
+ */
 #pragma once
 
 #if __has_include(<source_location>)

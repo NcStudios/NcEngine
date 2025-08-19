@@ -4,16 +4,10 @@
  */
 #pragma once
 
-#include "ncutility/platform/Platform.h"
+#include "ncutility/platform/New.h"
 
 #include <array>
 #include <atomic>
-#include <new>
-
-#ifndef __cpp_lib_hardware_interference_size
-#error "Destructive interference not defined"
-#endif
-
 
 namespace nc
 {
@@ -83,7 +77,7 @@ class spsc_queue
 
         static_assert(N >= 1, "Queue capacity must be >= 1");
         static_assert(std::atomic<size_t>::is_always_lock_free);
-        static constexpr auto CacheLine = std::hardware_destructive_interference_size;
+        static constexpr auto CacheLine = nc::hardware_destructive_interference_size;
 
         alignas(CacheLine) std::array<T, N> m_buffer = {};
         alignas(CacheLine) std::atomic<size_t> m_head = 0;
