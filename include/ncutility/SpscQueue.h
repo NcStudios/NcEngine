@@ -10,6 +10,11 @@
 #include <atomic>
 #include <new>
 
+#ifndef __cpp_lib_hardware_interference_size
+#error "Destructive interference not defined"
+#endif
+
+
 namespace nc
 {
 NC_DISABLE_WARNING_PUSH
