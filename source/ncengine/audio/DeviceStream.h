@@ -37,7 +37,7 @@ class DeviceStream
 
         auto OpenStream(const StreamParameters& params) -> bool;
         void CloseStream() noexcept;
-        void AbandomStream() noexcept;
+        void AbandonStream() noexcept;
         auto GetStreamStatus() const noexcept -> StreamStatus;
         auto GetStreamTime() const noexcept -> double;
         void SetStreamTime(double time) noexcept;

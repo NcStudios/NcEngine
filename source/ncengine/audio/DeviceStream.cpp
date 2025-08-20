@@ -32,7 +32,6 @@ auto ToString(RtAudioErrorType type) noexcept -> std::string_view
 
 auto IsSuitableDevice(const RtAudio::DeviceInfo& deviceInfo) noexcept -> bool
 {
-    // TODO: #374 - Need to pin down exact outputChannel requirements
     return deviceInfo.outputChannels >= 2;
 }
 } // anonymous namespace
@@ -153,7 +152,7 @@ void DeviceStream::CloseStream() noexcept
     }
 }
 
-void DeviceStream::AbandomStream() noexcept
+void DeviceStream::AbandonStream() noexcept
 {
     CloseStream();
     m_errorContext->SetStatus(StreamStatus::Abandoned);

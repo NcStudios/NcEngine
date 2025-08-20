@@ -238,7 +238,7 @@ auto NcAudioImpl::TryFailureRecovery() -> bool
     if (!result)
     {
         NC_LOG_TRACE("Failed to reopen an AudioDevice stream. Abandoning AudioDevice.");
-        m_deviceStream.AbandomStream();
+        m_deviceStream.AbandonStream();
         m_outputDeviceChanged.Emit(m_deviceStream.GetDevice());
         return false;
     }
