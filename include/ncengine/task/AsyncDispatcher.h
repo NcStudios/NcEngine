@@ -1,6 +1,6 @@
 /**
  * @file AsyncDispatcher.h
- * @copyright Jaremie Romer and McCallister Romer 2024
+ * @copyright Jaremie Romer and McCallister Romer 2025
  */
 #pragma once
 
@@ -16,14 +16,14 @@ class AsyncDispatcher
 
         /** @brief Run a function asynchronously, returning the eventual result in a std::future. */
         template<class F>
-        auto Async(F&& f) -> std::future<std::invoke_result_t<std::decay_t<F>>>
+        auto Async(F&& f) const -> std::future<std::invoke_result_t<std::decay_t<F>>>
         {
             return m_executor->async(std::forward<F>(f));
         }
 
         /** @brief Run a function asynchronously without returning the result. */
         template<class F>
-        void SilentAsync(F&& f)
+        void SilentAsync(F&& f) const
         {
             m_executor->silent_async(std::forward<F>(f));
         }
