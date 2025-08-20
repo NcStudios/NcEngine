@@ -13,7 +13,7 @@ using StreamCallback = int (*)(void* outputBuffer, void* inputBuffer, unsigned n
 
 struct StreamParameters
 {
-    uint32_t deviceId;
+    AudioDeviceId deviceId;
     uint32_t bufferFrames;
     uint32_t channelCount;
     uint32_t sampleRate;
@@ -25,7 +25,8 @@ enum class StreamStatus : uint8_t
 {
     Open = 0,
     Closed = 1,
-    Failed = 1
+    Failed = 2,
+    Abandoned = 3
 };
 
 class DeviceStream
@@ -36,6 +37,7 @@ class DeviceStream
 
         auto OpenStream(const StreamParameters& params) -> bool;
         void CloseStream() noexcept;
+        void AbandonStream() noexcept;
         auto GetStreamStatus() const noexcept -> StreamStatus;
         auto GetStreamTime() const noexcept -> double;
         void SetStreamTime(double time) noexcept;

@@ -94,6 +94,28 @@ target_link_libraries(ScopeExit_unit_tests
 
 add_test(ScopeExit_unit_tests ScopeExit_unit_tests)
 
+### SpscQueue Tests ###
+add_executable(SpscQueue_unit_tests
+    SpscQueue_unit_test.cpp
+)
+
+target_include_directories(SpscQueue_unit_tests
+    PRIVATE
+        ${PROJECT_SOURCE_DIR}/include
+)
+
+target_compile_options(SpscQueue_unit_tests
+    PUBLIC
+        ${NC_COMPILER_FLAGS}
+)
+
+target_link_libraries(SpscQueue_unit_tests
+    PRIVATE
+        gtest_main
+)
+
+add_test(SpscQueue_unit_tests SpscQueue_unit_tests)
+
 ### StringHash Tests ###
 set(NC_HASH_TEST_COLLATERAL_DIRECTORY ${PROJECT_SOURCE_DIR}/test/ncutility/collateral/)
 

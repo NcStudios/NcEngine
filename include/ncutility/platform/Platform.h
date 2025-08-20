@@ -1,3 +1,7 @@
+/**
+ * @file Platform.h
+ * @copyright Jaremie Romer and McCallister Romer 2025
+ */
 #pragma once
 
 #if defined(_WIN32) || defined(_WIN64)
