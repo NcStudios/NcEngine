@@ -275,26 +275,6 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .useDepthTest = true
                 },
                 PassDesc{
-                    .flag = MiscPassFlag::Wireframe,
-                    .name = "Wireframe",
-                    .type = PassType::Wireframe,
-                    .layoutElements = VertexAttribute::Pos,
-                    .shaderPaths = ShaderPaths{shader::WireframePixel, shader::WireframeVertex},
-                    .colorSink = ColorTarget::Main,
-                    .depthSink = DepthTarget::Main,
-                    .useDepthTest = true
-                },
-                PassDesc{
-                    .flag = MiscPassFlag::Particle,
-                    .name = "Particle",
-                    .type = PassType::Particle,
-                    .layoutElements = VertexAttribute::Pos | VertexAttribute::UV,
-                    .shaderPaths = ShaderPaths{shader::ParticlePixel, shader::ParticleVertex},
-                    .colorSink = ColorTarget::Main,
-                    .depthSink = DepthTarget::Main,
-                    .useDepthTest = true
-                },
-                PassDesc{
                     .flag = PostProcessPassFlag::Outline,
                     .name = "Post Process Outline",
                     .type = PassType::PostProcess,
@@ -327,7 +307,27 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .postProcessSink = PostProcessTarget::PPNoise,
                     .isMsaa = false,
                     .useDepthTest = false
-                }
+                },
+                PassDesc{
+                    .flag = MiscPassFlag::Wireframe,
+                    .name = "Wireframe",
+                    .type = PassType::Wireframe,
+                    .layoutElements = VertexAttribute::Pos,
+                    .shaderPaths = ShaderPaths{shader::WireframePixel, shader::WireframeVertex},
+                    .colorSink = ColorTarget::Swapchain,
+                    .depthSink = DepthTarget::Main,
+                    .useDepthTest = true
+                },
+                PassDesc{
+                    .flag = MiscPassFlag::Particle,
+                    .name = "Particle",
+                    .type = PassType::Particle,
+                    .layoutElements = VertexAttribute::Pos | VertexAttribute::UV,
+                    .shaderPaths = ShaderPaths{shader::ParticlePixel, shader::ParticleVertex},
+                    .colorSink = ColorTarget::Swapchain,
+                    .depthSink = DepthTarget::Main,
+                    .useDepthTest = true
+                },
             },
             GetMaterialPassFlags(),
             GetPostProcessPassFlags(),
@@ -555,27 +555,11 @@ void NcGraphicsImpl2::Run()
         m_viewport
     );
 
-    m_passBackend.RenderWireframe(
-        context,
-        swapChain,
-        m_shaderBindings.GetPerPassSignature(),
-        renderState.wireframeRenderState,
-        m_viewport
-    );
-
     m_passBackend.RenderSkybox(
         context,
         swapChain,
         m_shaderBindings.GetPerPassSignature(),
         renderState.environmentRenderState,
-        m_viewport
-    );
-
-    m_passBackend.RenderParticle(
-        context,
-        swapChain,
-        m_shaderBindings.GetPerPassSignature(),
-        renderState.particleRenderState,
         m_viewport
     );
 
@@ -589,6 +573,22 @@ void NcGraphicsImpl2::Run()
         context,
         swapChain,
         m_shaderBindings.GetPerPassSignature()
+    );
+
+    m_passBackend.RenderWireframe(
+        context,
+        swapChain,
+        m_shaderBindings.GetPerPassSignature(),
+        renderState.wireframeRenderState,
+        m_viewport
+    );
+
+    m_passBackend.RenderParticle(
+        context,
+        swapChain,
+        m_shaderBindings.GetPerPassSignature(),
+        renderState.particleRenderState,
+        m_viewport
     );
 
     m_ui.Render(context);
