@@ -529,7 +529,7 @@ inline auto InputText(std::string& text, const char* label) -> bool
 auto SelectableWidget(bool selected, const ImVec2& size, auto&& widget) -> bool
 {
     static constexpr auto flags = ImGuiSelectableFlags_AllowDoubleClick |
-                                  ImGuiSelectableFlags_AllowItemOverlap;
+                                  ImGuiSelectableFlags_AllowOverlap;
     auto clicked = false;
     if (ImGui::Selectable("##select", selected, flags, size))
         clicked = true;

@@ -28,6 +28,9 @@ void UIBackend::Render(Diligent::IDeviceContext& context)
 
 void UIBackend::OnFontUpdate()
 {
-    m_imguiBackend.UpdateFontsTexture();
+    // Font atlas updates are expressed to the Diligent backend by forcing all
+    // cached ImGui textures to be recreated on the next frame.
+    m_imguiBackend.InvalidateDeviceObjects();
+    m_imguiBackend.CreateDeviceObjects();
 }
 } // namespace nc::graphics
