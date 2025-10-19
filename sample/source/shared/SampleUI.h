@@ -27,12 +27,16 @@ class SampleUI : public ui::IUI
         std::function<void()> m_widgetCallback;
         Vector2 m_windowDimensions;
         Vector2 m_screenExtent;
+        Vector2 m_baseScreenExtent;
+        Vector2 m_contentScale;
         asset::FontView m_font;
+        float m_targetFontSize;
 
         void CheckInput();
         void DrawDefaultWidget();
         void DrawLog();
         void DrawSceneList();
+        void UpdateFontSize();
 };
 
 auto InitializeSampleUI(NcEngine* engine) -> std::unique_ptr<SampleUI>;

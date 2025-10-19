@@ -6,17 +6,18 @@
 #include "imgui.h"
 
 #include <filesystem>
+#include <algorithm>
 
 namespace
 {
 auto GetFontScaling() -> float
 {
     const auto [scaleX, scaleY] = nc::window::GetContentScale();
-    return std::floor(std::max(scaleX, scaleY));
+    return std::max(1.0f, std::max(scaleX, scaleY));
 }
 
 #ifdef NC_TEST_STRIP_DEPENDENCIES
-auto LoadFontToAtlas(const char*, float) -> ImFont*
+auto LoadFontToAtlas(const char*, float, const ImFontConfig*) -> ImFont*
 {
     return nullptr;
 }
@@ -25,9 +26,9 @@ void ClearFontAtlas()
 {
 }
 #else
-auto LoadFontToAtlas(const char* path, float size) -> ImFont*
+auto LoadFontToAtlas(const char* path, float size, const ImFontConfig* config) -> ImFont*
 {
-    return ImGui::GetIO().Fonts->AddFontFromFileTTF(path, size);
+    return ImGui::GetIO().Fonts->AddFontFromFileTTF(path, size, config);
 }
 
 void ClearFontAtlas()
@@ -53,7 +54,9 @@ auto FontAssetManager::Load(const FontInfo& font) -> bool
     if (!std::filesystem::exists(fullPath))
         throw NcError{fmt::format("Font file does not exist '{}'", fullPath)};
 
-    auto fontHandle = ::LoadFontToAtlas(fullPath.c_str(), font.size * ::GetFontScaling());
+    ImFontConfig config{};
+    config.RasterizerDensity = GetFontScaling();
+    auto fontHandle = LoadFontToAtlas(fullPath.c_str(), font.size, &config);
     m_fonts.emplace(font, FontView{fontHandle, font.size}); // save original size as its part the 'id'
     m_onUpdate.Emit();
     return true;
@@ -61,7 +64,7 @@ auto FontAssetManager::Load(const FontInfo& font) -> bool
 
 auto FontAssetManager::Load(std::span<const FontInfo> fonts) -> bool
 {
-    const auto scale = ::GetFontScaling();
+    const auto dpiScale = GetFontScaling();
     auto anyLoaded = false;
     for(const auto& font : fonts)
     {
@@ -72,7 +75,9 @@ auto FontAssetManager::Load(std::span<const FontInfo> fonts) -> bool
         if (!std::filesystem::exists(fullPath))
             throw NcError{fmt::format("Font file does not exist '{}'", fullPath)};
 
-        auto fontHandle = ::LoadFontToAtlas(fullPath.c_str(), font.size * scale);
+        ImFontConfig config{};
+        config.RasterizerDensity = dpiScale;
+        auto fontHandle = LoadFontToAtlas(fullPath.c_str(), font.size, &config);
         m_fonts.emplace(font, FontView{fontHandle, font.size});
         anyLoaded = true;
     }
