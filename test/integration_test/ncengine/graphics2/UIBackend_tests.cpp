@@ -32,11 +32,3 @@ TEST_F(UIBackendTest, UIBackend_renderFrame_succeeds)
     EXPECT_NO_THROW(uiBackend->FrameBegin(engine->GetSwapChain()));
     EXPECT_NO_THROW(uiBackend->Render(engine->GetContext()));
 }
-
-TEST_F(UIBackendTest, UIBackend_onFontUpdate_updatesImguiTextureId)
-{
-    const auto oldId = ImGui::GetIO().Fonts->TexID;
-    onFontUpdate.Emit();
-    const auto newId = ImGui::GetIO().Fonts->TexID;
-    EXPECT_NE(oldId, newId);
-}

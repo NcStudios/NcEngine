@@ -43,9 +43,16 @@ namespace nc::sample
           m_widgetCallback{},
           m_windowDimensions{window::GetDimensions()},
           m_screenExtent{window::GetScreenExtent()},
+          m_baseScreenExtent{nc::Vector2{1600.0f, 900.0f}},
+          m_contentScale{window::GetContentScale()},
           m_font{nc::asset::AcquireFont(font::ui)}
     {
         ui::SetDefaultUIStyle();
+        auto& style = ImGui::GetStyle();
+        const auto dpiScale = std::max(1.0f, std::max(m_contentScale.x, m_contentScale.y));
+        style.FontScaleDpi = dpiScale;
+        style.FontScaleMain = 1.0f;
+        UpdateFontSize();
     }
 
     SampleUI::~SampleUI() noexcept
@@ -54,7 +61,7 @@ namespace nc::sample
 
     void SampleUI::Draw()
     {
-        ImGui::PushFont(m_font.font);
+        ImGui::PushFont(m_font.font, m_targetFontSize);
         ImGui::SetNextWindowPos({ (m_windowDimensions.x-m_screenExtent.x)/2, m_windowDimensions.y - PanelHeight });
         ImGui::SetNextWindowSize({ m_screenExtent.x, PanelHeight });
         if (ImGui::Begin("SampleUI", nullptr, WindowFlags))
@@ -145,5 +152,24 @@ namespace nc::sample
     void SampleUI::SetWidgetCallback(std::function<void()> func)
     {
         m_widgetCallback = std::move(func);
+    }
+
+    void SampleUI::UpdateFontSize()
+    {
+        if (m_screenExtent.y <= std::numeric_limits<float>::epsilon())
+        {
+            m_targetFontSize = m_font.size;
+            return;
+        }
+
+        if (!m_font.font)
+        {
+            m_font = asset::AcquireFont(font::ui);
+        }
+
+        const auto resolutionScale = m_screenExtent.y / m_baseScreenExtent.y;
+        const auto dpiScale = std::max(1.0f, ImGui::GetStyle().FontScaleDpi);
+        const auto minimumLogicalSize = 12.0f / dpiScale;
+        m_targetFontSize = std::max(m_font.size * resolutionScale, minimumLogicalSize);
     }
 } //end namespace project::ui
