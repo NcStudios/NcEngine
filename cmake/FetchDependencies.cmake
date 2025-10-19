@@ -44,7 +44,7 @@ FetchContent_Declare(glfw
 # Dear ImGui
 FetchContent_Declare(imgui
                      GIT_REPOSITORY https://github.com/NcStudios/imgui.git
-                     GIT_TAG        v1.92.4+nc
+                     GIT_TAG        v1.92.2+nc
                      GIT_SHALLOW    TRUE
 )
 
