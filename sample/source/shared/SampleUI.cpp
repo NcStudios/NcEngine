@@ -52,6 +52,7 @@ namespace nc::sample
         const auto dpiScale = std::max(1.0f, std::max(m_contentScale.x, m_contentScale.y));
         style.FontScaleDpi = dpiScale;
         style.FontScaleMain = 1.0f;
+        UpdateFontSize();
     }
 
     SampleUI::~SampleUI() noexcept
@@ -60,7 +61,6 @@ namespace nc::sample
 
     void SampleUI::Draw()
     {
-        UpdateFontSize();
         ImGui::PushFont(m_font.font, m_targetFontSize);
         ImGui::SetNextWindowPos({ (m_windowDimensions.x-m_screenExtent.x)/2, m_windowDimensions.y - PanelHeight });
         ImGui::SetNextWindowSize({ m_screenExtent.x, PanelHeight });
