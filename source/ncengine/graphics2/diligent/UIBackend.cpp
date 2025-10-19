@@ -30,6 +30,8 @@ void UIBackend::OnFontUpdate()
 {
     // Font atlas updates are expressed to the Diligent backend by forcing all
     // cached ImGui textures to be recreated on the next frame.
+    // When Diligent provides support for it, we can update this to update a slice of the atlas rather than the entire cache,
+    // which is a new feature in ImGui 1.92+.
     m_imguiBackend.InvalidateDeviceObjects();
     m_imguiBackend.CreateDeviceObjects();
 }
