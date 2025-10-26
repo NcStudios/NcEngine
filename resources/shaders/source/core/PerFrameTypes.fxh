@@ -30,18 +30,23 @@ struct TransformData
 
 struct MaterialData
 {
-    float3 gradientStart;
-    uint diffuseTexIndex;
-    float3 gradientEnd;
-    uint normalTexIndex;
-    uint hatchTexIndex;
+    float4 gradientStart;
+    float4 gradientEnd;
+    float4 primaryColor;
+    float4 secondaryColor;
+    float4 tertiaryColor;
     float normalIntensity;
     float hatchTiling;
     float gradientAmount;
     float reflectivity;
-    uint useTextureNormals;
-    uint useFlatShading;
-    float padding1;
+    uint diffuseTexIndex;
+    uint normalTexIndex;
+    uint hatchTexIndex;
+    bool useTextureNormals;
+    bool useFlatShading;
+    bool useColorOverride;
+    bool useHatchTexture;
+    float padding;
 };
 
 struct BoneData

@@ -78,18 +78,23 @@ struct TransformData
 // Object model for MaterialInstance (type: StructuredBuffer element type).
 struct MaterialData
 {
-    Vector3 gradientStart = Vector3::Zero();
-    uint32_t diffuseTexIndex = std::numeric_limits<uint32_t>::max();
-    Vector3 gradientEnd = Vector3::One();
-    uint32_t normalTexIndex = std::numeric_limits<uint32_t>::max();
-    uint32_t hatchTexIndex = std::numeric_limits<uint32_t>::max();
+    Vector4 gradientStart = Vector4::Zero();
+    Vector4 gradientEnd = Vector4::One();
+    Vector4 primaryColor = Vector4::One();
+    Vector4 secondaryColor = Vector4::One();
+    Vector4 tertiaryColor = Vector4::One();
     float normalIntensity = 1.0f;
     float hatchTiling = 1.0f;
     float gradientAmount = 0.1f;
     float reflectivity = 0.0f;
-    uint32_t useTextureNormals = 0;
+    uint32_t diffuseTexIndex = std::numeric_limits<uint32_t>::max();
+    uint32_t normalTexIndex = std::numeric_limits<uint32_t>::max();
+    uint32_t hatchTexIndex = std::numeric_limits<uint32_t>::max();
+    uint32_t useTextureNormals = 1;
     uint32_t useFlatShading = 1;
-    float padding1 = 0.0f;
+    uint32_t useColorOverride = 0;
+    uint32_t useHatchTexture = 0;
+    float padding;
 };
 
 // Object model for animated bones (type: StructuredBuffer element type).

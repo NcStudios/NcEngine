@@ -101,23 +101,21 @@ auto MaterialTexturesWidget(nc::MaterialProperties& properties, nc::asset::NcAss
         properties.normalTex = nc::asset::AssetService<nc::asset::TextureView>::Get()->Acquire(normalTexPath);
     }
 
-    bool useTextureNormals = properties.useTextureNormals;
-    bool useFlatShading = properties.useFlatShading;
-    modified = nc::ui::Checkbox(useTextureNormals, "useTextureNormals") || modified;
-    modified = nc::ui::Checkbox(useFlatShading, "useFlatShading") || modified;
-
-    properties.useTextureNormals = useTextureNormals;
-    properties.useFlatShading = useFlatShading;
-
+    modified = nc::ui::Checkbox(properties.useTextureNormals, "useTextureNormals") || modified;
+    modified = nc::ui::Checkbox(properties.useFlatShading, "useFlatShading") || modified;
     modified = nc::ui::DragFloat(properties.normalIntensity, "normalIntensity", 0.01f, 0.0f, 50.0f) || modified;
 
-    if (nc::ui::Combobox(hatchTexPath, "hatch", textureAssets))
+    modified = nc::ui::Checkbox(properties.useHatchTexture, "useHatchTexture") || modified;
+    if (properties.useHatchTexture)
     {
-        modified = true;
-        properties.hatchTex = nc::asset::AssetService<nc::asset::TextureView>::Get()->Acquire(hatchTexPath);
-    }
+        if (nc::ui::Combobox(hatchTexPath, "hatch", textureAssets))
+        {
+            modified = true;
+            properties.hatchTex = nc::asset::AssetService<nc::asset::TextureView>::Get()->Acquire(hatchTexPath);
+        }
 
-    modified = nc::ui::DragFloat(properties.hatchTiling, "hatchTiling", 1.0f, 0.0f, 60.0f) || modified;
+        modified = nc::ui::DragFloat(properties.hatchTiling, "hatchTiling", 1.0f, 0.0f, 60.0f) || modified;
+    }
 
     modified = nc::ui::DragFloat(properties.reflectivity, "reflectivity", 0.001f, 0.0f, 1.0f) || modified;
 
@@ -127,9 +125,19 @@ auto MaterialTexturesWidget(nc::MaterialProperties& properties, nc::asset::NcAss
 auto MaterialGradientWidget(nc::MaterialProperties& properties) -> bool
 {
     auto modified = false;
-    modified = nc::ui::InputColor3(properties.gradientStart, "gradientStart");
+    modified = nc::ui::InputColor4(properties.gradientStart, "gradientStart");
     modified = nc::ui::DragFloat(properties.gradientAmount, "gradientAmount", 0.001f, 0.0f, 1.0f) || modified;
-    modified = nc::ui::InputColor3(properties.gradientEnd, "gradientEnd") || modified;
+    modified = nc::ui::InputColor4(properties.gradientEnd, "gradientEnd") || modified;
+    return modified;
+}
+
+auto MaterialColorWidget(nc::MaterialProperties& properties) -> bool
+{
+    auto modified = false;
+    modified = nc::ui::Checkbox(properties.useColorOverride, "useColorOverride") || modified;
+    modified = nc::ui::InputColor4(properties.primaryColor, "primaryColor") || modified;
+    modified = nc::ui::InputColor4(properties.secondaryColor, "secondaryColor")|| modified;
+    modified = nc::ui::InputColor4(properties.tertiaryColor, "tertiaryColor")|| modified;
     return modified;
 }
 
@@ -167,6 +175,13 @@ auto MaterialNodeWidget(nc::MeshBase& baseMesh, nc::asset::NcAsset& ncAsset)
         if (ImGui::TreeNodeEx("Textures"))
         {
             modified = MaterialTexturesWidget(properties, ncAsset) || modified;
+            ImGui::TreePop();
+        }
+
+        ImGui::Separator();
+        if (ImGui::TreeNodeEx("Color"))
+        {
+            modified = MaterialColorWidget(properties) || modified;
             ImGui::TreePop();
         }
 
