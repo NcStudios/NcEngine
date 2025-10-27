@@ -56,16 +56,24 @@ void DrawEnvironmentInfo(nc::NcGraphics* ncGraphics, nc::asset::NcAsset* ncAsset
 
     ImGui::Text("Color Override");
 
-    // auto modified = false;
-    // modified = nc::ui::Checkbox(properties.useColorOverride, "useColorOverride") || modified;
-    // if (properties.useColorOverride)
-    // {
-    //     modified = nc::ui::InputColor4(properties.primaryColor, "primaryColor") || modified;
-    //     modified = nc::ui::InputColor4(properties.secondaryColor, "secondaryColor")|| modified;
-    //     modified = nc::ui::InputColor4(properties.tertiaryColor, "tertiaryColor")|| modified;
-    // }
-    // return modified;
+    auto environment = ncGraphics->GetEnvironment();
+    auto modified = false;
+    modified = nc::ui::Checkbox(environment.useColorOverride, "useColorOverride") || modified;
+
+    if (environment.useColorOverride)
+    {
+        if (environment.useColorOverride)
+        {
+            modified = nc::ui::InputColor4(environment.primaryColor, "primaryColor") || modified;
+            modified = nc::ui::InputColor4(environment.secondaryColor, "secondaryColor")|| modified;
+            modified = nc::ui::InputColor4(environment.tertiaryColor, "tertiaryColor")|| modified;
+        }
+    }
     
+    if (modified)
+    {
+        ncGraphics->SetEnvironment(environment);
+    }
 }
 } // anonymous namespace
 
