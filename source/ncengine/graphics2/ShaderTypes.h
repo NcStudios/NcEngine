@@ -17,12 +17,16 @@ struct GlobalEnvironmentData
 {
     DirectX::XMMATRIX cameraViewProjection = DirectX::XMMatrixIdentity();
     DirectX::XMMATRIX cameraInvProjection = DirectX::XMMatrixIdentity();
+    Vector4 primaryColor = Vector4::One();
+    Vector4 secondaryColor = Vector4::One();
+    Vector4 tertiaryColor = Vector4::One();
     Vector3 cameraPosition = Vector3::One();
     uint32_t lightCount = 0;
     float nearClip = 0.1f;
     float farClip = 400.0f;
     uint32_t skyboxIndex = 0;
     uint32_t useSkybox = 0;
+    uint32_t useColorOverride = 0;
 };
 
 // Object model for outline pass properties used by post processing effects (type: constant buffer)

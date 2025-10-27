@@ -2,12 +2,16 @@ cbuffer EnvironmentProperties
 {
     float4x4 cameraViewProjection;
     float4x4 cameraInvProjection;
+    float4 primaryColor;
+    float4 secondaryColor;
+    float4 tertiaryColor;
     float3 cameraPosition;
     uint lightCount;
     float nearClip;
     float farClip;
     uint skyboxIndex;
     uint useSkybox;
+    bool useColorOverride;
 };
 
 struct StaticMeshInstanceData

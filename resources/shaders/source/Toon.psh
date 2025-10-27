@@ -14,7 +14,7 @@ struct PSInput
 
 struct PSOutput
 {
-    float4 Color : SV_TARGET;
+    float4 color : SV_TARGET;
 };
 
 Texture2D     Textures[];
@@ -41,23 +41,41 @@ void main(in  PSInput  PSIn, out PSOutput PSOut)
     // Get texture colors
     uint TexIndex = material.diffuseTexIndex;
     uint NormalIndex = material.normalTexIndex;
-    float4 Color = Textures[TexIndex].Sample(Textures_sampler, PSIn.UV);
+    float4 Diffuse = Textures[TexIndex].Sample(Textures_sampler, PSIn.UV);
     float4 Normals = Textures[NormalIndex].Sample(Textures_sampler, PSIn.UV);
 
+    float4 color = Diffuse;
+
     // Transform colors to limited scheme
-    if (material.useColorOverride)
+    if (useColorOverride) // Global
     {
-        if (Color.r > 0.8f)
+        if (Diffuse.r > 0.99f)
         {
-            Color = material.primaryColor;
+            color = primaryColor;
         }
-        else if (Color.g > 0.8f)
+        else if (Diffuse.g > 0.99f)
         {
-            Color = material.secondaryColor;
+            color = secondaryColor;
         }
-        else if (Color.b > 0.8f)
+        else if (Diffuse.b > 0.99f)
         {
-            Color = material.tertiaryColor;
+            color = tertiaryColor;
+        }
+    }
+
+    if (material.useColorOverride) // Per Material
+    {
+        if (Diffuse.r > 0.99f)
+        {
+            color = material.primaryColor;
+        }
+        else if (Diffuse.g > 0.99f)
+        {
+            color = material.secondaryColor;
+        }
+        else if (Diffuse.b > 0.99f)
+        {
+            color = material.tertiaryColor;
         }
     }
 
@@ -117,7 +135,7 @@ void main(in  PSInput  PSIn, out PSOutput PSOut)
         specularAmt = max(diffuseAmt * shadowFactor, 0.0f);
 
         // Apply lighting influences and shadows
-        result += ((diffuseAmt * influence.diffuseColor * Color.rgb) + (specularAmt * influence.specularColor * Color.rgb ));
+        result += ((diffuseAmt * influence.diffuseColor * color.rgb) + (specularAmt * influence.specularColor * color.rgb ));
         result4 = float4(result, 1.0f);
 
         // Apply hatching
@@ -146,5 +164,5 @@ void main(in  PSInput  PSIn, out PSOutput PSOut)
     float4 gradientApplied = lerp(result4, result4 + gradient, material.gradientAmount);
     float4 outputColor = lerp(gradientApplied, gradientApplied * gradient, 0.5f);
 
-    PSOut.Color = outputColor;
+    PSOut.color = outputColor;
 }

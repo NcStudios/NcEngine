@@ -40,7 +40,7 @@ void DrawEnvironmentInfo(nc::NcGraphics* ncGraphics, nc::asset::NcAsset* ncAsset
     {
         if (skyboxPath == noneOption)
         {
-            ncGraphics->ClearEnvironment();
+            ncGraphics->ClearSkybox();
         }
         else
         {
@@ -53,6 +53,19 @@ void DrawEnvironmentInfo(nc::NcGraphics* ncGraphics, nc::asset::NcAsset* ncAsset
     }   
 
     ImGui::Separator();
+
+    ImGui::Text("Color Override");
+
+    // auto modified = false;
+    // modified = nc::ui::Checkbox(properties.useColorOverride, "useColorOverride") || modified;
+    // if (properties.useColorOverride)
+    // {
+    //     modified = nc::ui::InputColor4(properties.primaryColor, "primaryColor") || modified;
+    //     modified = nc::ui::InputColor4(properties.secondaryColor, "secondaryColor")|| modified;
+    //     modified = nc::ui::InputColor4(properties.tertiaryColor, "tertiaryColor")|| modified;
+    // }
+    // return modified;
+    
 }
 } // anonymous namespace
 

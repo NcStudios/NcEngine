@@ -135,9 +135,12 @@ auto MaterialColorWidget(nc::MaterialProperties& properties) -> bool
 {
     auto modified = false;
     modified = nc::ui::Checkbox(properties.useColorOverride, "useColorOverride") || modified;
-    modified = nc::ui::InputColor4(properties.primaryColor, "primaryColor") || modified;
-    modified = nc::ui::InputColor4(properties.secondaryColor, "secondaryColor")|| modified;
-    modified = nc::ui::InputColor4(properties.tertiaryColor, "tertiaryColor")|| modified;
+    if (properties.useColorOverride)
+    {
+        modified = nc::ui::InputColor4(properties.primaryColor, "primaryColor") || modified;
+        modified = nc::ui::InputColor4(properties.secondaryColor, "secondaryColor")|| modified;
+        modified = nc::ui::InputColor4(properties.tertiaryColor, "tertiaryColor")|| modified;
+    }
     return modified;
 }
 
