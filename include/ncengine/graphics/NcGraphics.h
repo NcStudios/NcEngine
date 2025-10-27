@@ -91,8 +91,7 @@ struct NcGraphics : public Module
     /**
      * @brief Clears the active skybox.
      * 
-     * This is called automatically on scene changes. The main Camera
-     * is not cleared as it can be set on a persistent Entity.
+     * Clears the active skybox.
      */
     virtual void ClearSkybox() = 0;
 
@@ -109,7 +108,7 @@ struct NcGraphics : public Module
     virtual void SetEnvironment(const Environment& environment) = 0;
 
     /**
-     * @brief Clear all environment data.
+     * @brief Clears all environment data.
      * 
      * This is called automatically on scene changes. The main Camera
      * is not cleared as it can be set on a persistent Entity.
