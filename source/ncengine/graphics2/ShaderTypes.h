@@ -98,7 +98,7 @@ struct MaterialData
     uint32_t useFlatShading = 1;
     uint32_t useColorOverride = 0;
     uint32_t useHatchTexture = 0;
-    float padding;
+    float padding = 0;
 };
 
 // Object model for animated bones (type: StructuredBuffer element type).
