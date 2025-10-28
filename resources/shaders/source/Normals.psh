@@ -47,16 +47,16 @@ void main(in  PSInput  PSIn, out PSOutput PSOut)
 {
     float4 Color;
     float3 viewDir = normalize(cameraPosition - PSIn.WorldPos);
-    uint normalIndex = Materials[PSIn.MaterialIndex].normalTexIndex;
-    float3 textureNormals = normalize(Textures[normalIndex].Sample(Textures_sampler, PSIn.UV));
-    float3 vertexNormals = normalize(PSIn.Normal);
 
-    if (Materials[PSIn.MaterialIndex].useTextureNormals == 1)
+    if (Materials[PSIn.MaterialIndex].useTextureNormals)
     {
+        uint normalIndex = Materials[PSIn.MaterialIndex].normalTexIndex;
+        float3 textureNormals = normalize(Textures[normalIndex].Sample(Textures_sampler, PSIn.UV));
         Color = float4(normalize(textureNormals.xyz * float3(2.0) - float3(1.0)), 1.0f);
     }
     else
     {
+        float3 vertexNormals = normalize(PSIn.Normal);
         Color = float4(vertexNormals, 1.0f);
     }
 

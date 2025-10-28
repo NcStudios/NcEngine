@@ -65,17 +65,22 @@ void ReloadPrefabs()
 
     auto materialDefaults = MaterialProperties
     {
-        .gradientStart = Vector3{1.0f, 1.0f, 1.0f},
-        .diffuseTex = asset::AcquireTextureAsset(asset::DefaultBaseColor),
-        .gradientEnd = Vector3{1.0f, 1.0f, 1.0f},
-        .normalTex = asset::AcquireTextureAsset(asset::DefaultNormal),
-        .hatchTex = asset::AcquireTextureAsset(asset::DefaultBaseColor),
+        .gradientStart = Vector4::One(),
+        .gradientEnd = Vector4::One(),
+        .primaryColor = Vector4::One(),
+        .secondaryColor = Vector4::One(),
+        .tertiaryColor = Vector4::One(),
         .normalIntensity = 1.0f,
         .hatchTiling = 0.0f,
         .gradientAmount = 0.025f,
         .reflectivity = 0.0f,
+        .diffuseTex = asset::AcquireTextureAsset(asset::DefaultBaseColor),
+        .normalTex = asset::AcquireTextureAsset(asset::DefaultNormal),
+        .hatchTex = asset::AcquireTextureAsset(asset::DefaultBaseColor),
         .useTextureNormals = 0,
-        .useFlatShading = 0
+        .useFlatShading = 0,
+        .useColorOverride = 0,
+        .useHatchTexture = 0
     };
 
     material::blue.properties = materialDefaults;
@@ -101,8 +106,8 @@ void ReloadPrefabs()
     material::guy2.properties.hatchTiling = 16.0f;
     material::guy2.properties.reflectivity = 1.0f;
     material::guy2.properties.useTextureNormals = 1;
-    material::guy2.properties.gradientStart = Vector3{.985f, .401f, .401f};
-    material::guy2.properties.gradientEnd = Vector3{0.0f, 0.021f, 0.363f};
+    material::guy2.properties.gradientStart = Vector4{.985f, .401f, .401f, 1.0f};
+    material::guy2.properties.gradientEnd = Vector4{0.0f, 0.021f, 0.363f, 1.0f};
     material::guy2.properties.gradientAmount = 0.192f;
     material::guy2.properties.useFlatShading = 1;
 

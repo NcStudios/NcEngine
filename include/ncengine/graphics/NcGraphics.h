@@ -6,6 +6,7 @@
 
 #include "ncengine/ecs/EcsFwd.h"
 #include "ncengine/graphics/Camera.h"
+#include "ncengine/graphics/Environment.h"
 #include "ncengine/graphics/GraphicsUtility.h"
 #include "ncengine/graphics/PostProcess.h"
 #include "ncengine/module/Module.h"
@@ -76,19 +77,38 @@ struct NcGraphics : public Module
     virtual bool IsUiHovered() const noexcept = 0;
 
     /**
-     * @brief Set the current skybox.
-     * @param path A path to a skybox asset file.
-     */
-    virtual void SetSkybox(const std::string& path) = 0;
-
-    /**
      * @brief Gets the current skybox.
      * @return The AssetID of the current skybox, or NullAssetID if none set.
      */
     virtual auto GetSkybox() const -> nc::asset::AssetId = 0;
 
     /**
-     * @brief Clear all environment data (currently only the skybox).
+     * @brief Set the current skybox.
+     * @param path A path to a skybox asset file.
+     */
+    virtual void SetSkybox(const std::string& path) = 0;
+
+    /**
+     * @brief Clears the active skybox.
+     * 
+     * Clears the active skybox.
+     */
+    virtual void ClearSkybox() = 0;
+
+    /**
+     * @brief Gets the current environment properties.
+     * @return A struct containing environment properties.
+     */
+    virtual auto GetEnvironment() const -> const Environment& = 0;
+
+    /**
+     * @brief Set the current environment properties.
+     * @param environment Struct containing environment properties.
+     */
+    virtual void SetEnvironment(const Environment& environment) = 0;
+
+    /**
+     * @brief Clears all environment data.
      * 
      * This is called automatically on scene changes. The main Camera
      * is not cleared as it can be set on a persistent Entity.

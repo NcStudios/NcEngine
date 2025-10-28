@@ -10,6 +10,15 @@ TEST(MaterialRegistryTest, CreateInstance_constructsValidInstance)
         .name = "test",
         .passes = nc::MaterialPassFlag::Toon,
         .properties = nc::MaterialProperties{
+            .gradientStart = nc::Vector4{0.0f, 10.0f, 0.1f, 5.0f},
+            .gradientEnd = nc::Vector4{1.0f, 11.0f, 0.2f, 6.0f},
+            .primaryColor = nc::Vector4{2.0f, 12.0f, 0.3f, 7.0f},
+            .secondaryColor = nc::Vector4{3.0f, 13.0f, 0.4f, 8.0f},
+            .tertiaryColor = nc::Vector4{4.0f, 14.0f, 0.5f, 9.0f},
+            .normalIntensity = 3.5f,
+            .hatchTiling = 4.5f,
+            .gradientAmount = 5.5f,
+            .reflectivity = 6.0f,
             .diffuseTex = nc::asset::TextureView{
                 .id = 42,
                 .index = 2
@@ -22,8 +31,10 @@ TEST(MaterialRegistryTest, CreateInstance_constructsValidInstance)
                 .id = 17,
                 .index = 15
             },
-            .normalIntensity = 1.0f,
-            .hatchTiling = 2.0f
+            .useTextureNormals = true,
+            .useFlatShading = true,
+            .useColorOverride = true,
+            .useHatchTexture = true
         }
     };
 
