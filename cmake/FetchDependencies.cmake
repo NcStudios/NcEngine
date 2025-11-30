@@ -93,7 +93,7 @@ set(PROFILER_IN_DEBUG_AND_RELEASE OFF CACHE BOOL "" FORCE)
 set(ENABLE_INSTALL OFF CACHE BOOL "" FORCE)
 FetchContent_Declare(JoltPhysics
                      GIT_REPOSITORY https://github.com/jrouwe/JoltPhysics
-                     GIT_TAG        v5.3.0
+                     GIT_TAG        0ec24eb93ad8ebe01f7f095b544af8e122713123 # No release available yet with VS 2026 fixes yet
                      GIT_SHALLOW    TRUE
                      SOURCE_SUBDIR  "Build"
 )
@@ -192,6 +192,7 @@ if(NC_BUILD_NCCONVERT)
     set(ASSIMP_BUILD_FBX_IMPORTER ON CACHE BOOL "" FORCE)
     set(ASSIMP_BUILD_OBJ_IMPORTER ON CACHE BOOL "" FORCE)
     set(ASSIMP_INSTALL_PDB OFF CACHE BOOL "" FORCE)
+    set(ASSIMP_BUILD_USE_CCACHE OFF CACHE BOOL "" FORCE)
 
     FetchContent_Declare(assimp
                         GIT_REPOSITORY https://github.com/assimp/assimp
