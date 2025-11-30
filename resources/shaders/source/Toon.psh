@@ -14,7 +14,7 @@ struct PSInput
 
 struct PSOutput
 {
-    float4 Color : SV_TARGET;
+    float4 color : SV_TARGET;
 };
 
 Texture2D     Textures[];
@@ -36,22 +36,52 @@ float Band(float lightAmount)
 
 void main(in  PSInput  PSIn, out PSOutput PSOut)
 {
+    MaterialData material = Materials[PSIn.MaterialIndex];
+
     // Get texture colors
-    uint TexIndex = Materials[PSIn.MaterialIndex].diffuseTexIndex;
-    uint NormalIndex = Materials[PSIn.MaterialIndex].normalTexIndex;
-    float4 Color = Textures[TexIndex].Sample(Textures_sampler, PSIn.UV);
+    uint TexIndex = material.diffuseTexIndex;
+    uint NormalIndex = material.normalTexIndex;
+    float4 Diffuse = Textures[TexIndex].Sample(Textures_sampler, PSIn.UV);
     float4 Normals = Textures[NormalIndex].Sample(Textures_sampler, PSIn.UV);
 
-    // Get hatching texture and tiling property
-    uint hatchTexIndex = Materials[PSIn.MaterialIndex].hatchTexIndex;
-    float hatchTiling  = Materials[PSIn.MaterialIndex].hatchTiling;
-    float hatchLight   = Textures[hatchTexIndex].Sample(Textures_sampler, PSIn.UV * hatchTiling).r;
-    float hatchMedium  = Textures[hatchTexIndex].Sample(Textures_sampler, PSIn.UV * hatchTiling).g;
-    float hatchDark    = Textures[hatchTexIndex].Sample(Textures_sampler, PSIn.UV * hatchTiling).b;
+    float4 color = Diffuse;
+
+    // Transform colors to limited scheme
+    if (useColorOverride) // Global
+    {
+        if (Diffuse.r > 0.99f)
+        {
+            color = primaryColor;
+        }
+        else if (Diffuse.g > 0.99f)
+        {
+            color = secondaryColor;
+        }
+        else if (Diffuse.b > 0.99f)
+        {
+            color = tertiaryColor;
+        }
+    }
+
+    if (material.useColorOverride) // Per Material
+    {
+        if (Diffuse.r > 0.99f)
+        {
+            color = material.primaryColor;
+        }
+        else if (Diffuse.g > 0.99f)
+        {
+            color = material.secondaryColor;
+        }
+        else if (Diffuse.b > 0.99f)
+        {
+            color = material.tertiaryColor;
+        }
+    }
 
     // Get normals either from vertex normals or from the normal texture
     float3 normals = PSIn.Normal;
-    if (Materials[PSIn.MaterialIndex].useTextureNormals == 1)
+    if (material.useTextureNormals)
     {
         normals = normalize(Normals.xyz * float3(2.0) - float3(1.0));
     }
@@ -60,6 +90,8 @@ void main(in  PSInput  PSIn, out PSOutput PSOut)
     uint uniShadowMapIndex = 0u;
     uint pointShadowMapIndex = 0u;
     uint shadowCasterCount = 0u;
+    float4 result4 = float4(result, 1.0f);
+
     for (int i = 0; i < lightCount; i++)
     {
         LightInfluence influence = LightRadiance(Lights[i], PSIn.WorldPos.xyz, cameraPosition, normals);
@@ -67,15 +99,15 @@ void main(in  PSInput  PSIn, out PSOutput PSOut)
         float specularAmt = 0.0f;
 
         // Flat shading
-        if (Materials[PSIn.MaterialIndex].useFlatShading == 0)
+        if (!material.useFlatShading)
         {
             diffuseAmt = influence.diffuseAmt * influence.intensity;
-            specularAmt = influence.specularAmt * influence.intensity * Materials[PSIn.MaterialIndex].reflectivity;
+            specularAmt = influence.specularAmt * influence.intensity * material.reflectivity;
         }
         else // Smooth shading
         {
             diffuseAmt = Band(influence.diffuseAmt) * influence.intensity;
-            specularAmt = Band(influence.specularAmt ) * influence.intensity * Materials[PSIn.MaterialIndex].reflectivity;
+            specularAmt = Band(influence.specularAmt) * influence.intensity * material.reflectivity;
         }
 
         // Calculate shadow factor
@@ -103,26 +135,34 @@ void main(in  PSInput  PSIn, out PSOutput PSOut)
         specularAmt = max(diffuseAmt * shadowFactor, 0.0f);
 
         // Apply lighting influences and shadows
-        result += ((diffuseAmt * influence.diffuseColor * Color.rgb) + (specularAmt * influence.specularColor * Color.rgb ));
+        result += ((diffuseAmt * influence.diffuseColor * color.rgb) + (specularAmt * influence.specularColor * color.rgb ));
+        result4 = float4(result, 1.0f);
 
         // Apply hatching
-        if (Materials[PSIn.MaterialIndex].hatchTiling > 0.0f)
+        if (material.useHatchTexture)
         {
+            // Get hatching texture and tiling property
+            uint hatchTexIndex = material.hatchTexIndex;
+            float hatchTiling  = material.hatchTiling;
+            float hatchLight   = Textures[hatchTexIndex].Sample(Textures_sampler, PSIn.UV * hatchTiling).r;
+            float hatchMedium  = Textures[hatchTexIndex].Sample(Textures_sampler, PSIn.UV * hatchTiling).g;
+            float hatchDark    = Textures[hatchTexIndex].Sample(Textures_sampler, PSIn.UV * hatchTiling).b;
+
             if (influence.diffuseAmt < 0.05f)
             {
-                result.rgb = lerp(result.rgb, result.rgb * hatchDark, 1-(influence.diffuseAmt));
+                result4.rgb = lerp(result4.rgb, result4.rgb * hatchDark, 1-(influence.diffuseAmt));
             }
             else if (influence.diffuseAmt < 0.1f)
             {
-                result.rgb = lerp(result.rgb, result.rgb * hatchMedium, 1-(influence.diffuseAmt * 5));
+                result4.rgb = lerp(result4.rgb, result4.rgb * hatchMedium, 1-(influence.diffuseAmt * 5));
             }
         }
     }
 
     // Gradient
-    float3 gradient = lerp(Materials[PSIn.MaterialIndex].gradientStart, Materials[PSIn.MaterialIndex].gradientEnd, (normalize(PSIn.LocalPos).y + 1) * 0.5);
-    float4 gradientApplied = float4(lerp(result.rgb, result.rgb + gradient, Materials[PSIn.MaterialIndex].gradientAmount), 1.0f);
-    float4 outputColor = float4(lerp(gradientApplied, gradientApplied * gradient, 0.5f), 1.0f);
+    float4 gradient = lerp(material.gradientStart, material.gradientEnd, (normalize(PSIn.LocalPos).y + 1) * 0.5);
+    float4 gradientApplied = lerp(result4, result4 + gradient, material.gradientAmount);
+    float4 outputColor = lerp(gradientApplied, gradientApplied * gradient, 0.5f);
 
-    PSOut.Color = outputColor;
+    PSOut.color = outputColor;
 }

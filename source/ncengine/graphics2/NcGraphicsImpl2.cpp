@@ -1,9 +1,10 @@
 #include "NcGraphicsImpl2.h"
+#include "frontend/FrontendRenderState.h"
+
 #include "diligent/pass/MaterialPass.h"
 #include "diligent/pass/PassUtilities.h"
 #include "diligent/pass/WireframePass.h"
 #include "diligent/resource/SinkIndexBufferResource.h"
-#include "frontend/FrontendRenderState.h"
 
 #include "ncengine/asset/NcAsset.h"
 #include "ncengine/config/Config.h"
@@ -47,8 +48,11 @@ struct NcGraphicsStub2 : nc::NcGraphics
     auto GetCamera() noexcept -> nc::Camera* override { return nullptr; }
     void SetUi(nc::ui::IUI*) noexcept override {}
     bool IsUiHovered() const noexcept override { return false; }
-    void SetSkybox(const std::string&) override {}
     auto GetSkybox() const -> nc::asset::AssetId override { return nc::asset::NullAssetId; }
+    void SetSkybox(const std::string&) override {}
+    void ClearSkybox() override {}
+    auto GetEnvironment() const -> const nc::Environment& override { static auto dummy = nc::Environment{}; return dummy; }
+    void SetEnvironment(const nc::Environment&) override {}
     void ClearEnvironment() override {}
     auto IsPostProcessEffectEnabled(nc::PostProcessEffectId) const -> bool override { return false; }
     void SetPostProcessEffectEnabled(nc::PostProcessEffectId, bool) override {}
@@ -398,19 +402,34 @@ bool NcGraphicsImpl2::IsUiHovered() const noexcept
     return m_frontend.GetUISubsystem().IsHovered();
 }
 
-void NcGraphicsImpl2::SetSkybox(const std::string& path)
-{
-    m_frontend.GetEnvironmentSubsystem().SetSkybox(path);
-}
-
 auto NcGraphicsImpl2::GetSkybox() const -> nc::asset::AssetId
 {
     return m_frontend.GetEnvironmentSubsystem().GetSkybox();
 }
 
-void NcGraphicsImpl2::ClearEnvironment()
+void NcGraphicsImpl2::SetSkybox(const std::string& path)
+{
+    m_frontend.GetEnvironmentSubsystem().SetSkybox(path);
+}
+
+void NcGraphicsImpl2::ClearSkybox()
 {
     m_frontend.GetEnvironmentSubsystem().ClearSkybox();
+}
+
+auto NcGraphicsImpl2::GetEnvironment() const -> const Environment&
+{
+    return m_frontend.GetEnvironmentSubsystem().GetEnvironment();
+}
+
+void NcGraphicsImpl2::SetEnvironment(const Environment& environment)
+{
+    m_frontend.GetEnvironmentSubsystem().SetEnvironment(environment);
+};
+
+void NcGraphicsImpl2::ClearEnvironment()
+{
+    m_frontend.GetEnvironmentSubsystem().ClearEnvironment();
 }
 
 auto NcGraphicsImpl2::IsPostProcessEffectEnabled(PostProcessEffectId effectId) const -> bool

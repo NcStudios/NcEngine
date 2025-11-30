@@ -156,17 +156,22 @@ TEST(ComponentSerializationTests, RoundTrip_staticMesh_preservesValues)
     const auto expectedMaterialDesc = nc::MaterialDesc{
         .name = "mock",
         .properties = nc::MaterialProperties{
-            .gradientStart = nc::Vector3{1.0f, 1.5f, 2.0f},
-            .diffuseTex = nc::asset::g_mockTextureView,
-            .gradientEnd = nc::Vector3{2.5f, 3.0f, 3.5f},
-            .normalTex = nc::asset::g_mockTextureView,
-            .hatchTex = nc::asset::g_mockTextureView,
+            .gradientStart = nc::Vector4{0.0f, 10.0f, 0.1f, 5.0f},
+            .gradientEnd = nc::Vector4{1.0f, 11.0f, 0.2f, 6.0f},
+            .primaryColor = nc::Vector4{2.0f, 12.0f, 0.3f, 7.0f},
+            .secondaryColor = nc::Vector4{3.0f, 13.0f, 0.4f, 8.0f},
+            .tertiaryColor = nc::Vector4{4.0f, 14.0f, 0.5f, 9.0f},
             .normalIntensity = 3.5f,
             .hatchTiling = 4.5f,
             .gradientAmount = 5.5f,
             .reflectivity = 6.0f,
-            .useTextureNormals = 1,
-            .useFlatShading = 1
+            .diffuseTex = nc::asset::g_mockTextureView,
+            .normalTex = nc::asset::g_mockTextureView,
+            .hatchTex = nc::asset::g_mockTextureView,
+            .useTextureNormals = true,
+            .useFlatShading = true,
+            .useColorOverride = true,
+            .useHatchTexture = true
         }
     };
 
@@ -196,9 +201,14 @@ TEST(ComponentSerializationTests, RoundTrip_staticMesh_preservesValues)
     EXPECT_EQ(expectedMaterialDesc.properties.normalIntensity, actualMaterialProperties.normalIntensity);
     EXPECT_EQ(expectedMaterialDesc.properties.hatchTiling, actualMaterialProperties.hatchTiling);
     EXPECT_EQ(expectedMaterialDesc.properties.gradientAmount, actualMaterialProperties.gradientAmount);
+    EXPECT_EQ(expectedMaterialDesc.properties.primaryColor, actualMaterialProperties.primaryColor);
     EXPECT_EQ(expectedMaterialDesc.properties.reflectivity, actualMaterialProperties.reflectivity);
+    EXPECT_EQ(expectedMaterialDesc.properties.secondaryColor, actualMaterialProperties.secondaryColor);
     EXPECT_EQ(expectedMaterialDesc.properties.useTextureNormals, actualMaterialProperties.useTextureNormals);
+    EXPECT_EQ(expectedMaterialDesc.properties.tertiaryColor, actualMaterialProperties.tertiaryColor);
     EXPECT_EQ(expectedMaterialDesc.properties.useFlatShading, actualMaterialProperties.useFlatShading);
+    EXPECT_EQ(expectedMaterialDesc.properties.useColorOverride, actualMaterialProperties.useColorOverride);
+    EXPECT_EQ(expectedMaterialDesc.properties.useHatchTexture, actualMaterialProperties.useHatchTexture);
 }
 
 TEST(ComponentSerializationTests, RoundTrip_skinnedMesh_preservesValues)
@@ -212,17 +222,22 @@ TEST(ComponentSerializationTests, RoundTrip_skinnedMesh_preservesValues)
     const auto expectedMaterialDesc = nc::MaterialDesc{
         .name = "mock",
         .properties = nc::MaterialProperties{
-            .gradientStart = nc::Vector3{1.0f, 1.5f, 2.0f},
-            .diffuseTex = nc::asset::g_mockTextureView,
-            .gradientEnd = nc::Vector3{2.5f, 3.0f, 3.5f},
-            .normalTex = nc::asset::g_mockTextureView,
-            .hatchTex = nc::asset::g_mockTextureView,
+            .gradientStart = nc::Vector4{0.0f, 10.0f, 0.1f, 5.0f},
+            .gradientEnd = nc::Vector4{1.0f, 11.0f, 0.2f, 6.0f},
+            .primaryColor = nc::Vector4{2.0f, 12.0f, 0.3f, 7.0f},
+            .secondaryColor = nc::Vector4{3.0f, 13.0f, 0.4f, 8.0f},
+            .tertiaryColor = nc::Vector4{4.0f, 14.0f, 0.5f, 9.0f},
             .normalIntensity = 3.5f,
             .hatchTiling = 4.5f,
             .gradientAmount = 5.5f,
             .reflectivity = 6.0f,
-            .useTextureNormals = 1,
-            .useFlatShading = 1
+            .diffuseTex = nc::asset::g_mockTextureView,
+            .normalTex = nc::asset::g_mockTextureView,
+            .hatchTex = nc::asset::g_mockTextureView,
+            .useTextureNormals = true,
+            .useFlatShading = true,
+            .useColorOverride = true,
+            .useHatchTexture = true
         }
     };
 
@@ -252,9 +267,14 @@ TEST(ComponentSerializationTests, RoundTrip_skinnedMesh_preservesValues)
     EXPECT_EQ(expectedMaterialDesc.properties.normalIntensity, actualMaterialProperties.normalIntensity);
     EXPECT_EQ(expectedMaterialDesc.properties.hatchTiling, actualMaterialProperties.hatchTiling);
     EXPECT_EQ(expectedMaterialDesc.properties.gradientAmount, actualMaterialProperties.gradientAmount);
+    EXPECT_EQ(expectedMaterialDesc.properties.primaryColor, actualMaterialProperties.primaryColor);
     EXPECT_EQ(expectedMaterialDesc.properties.reflectivity, actualMaterialProperties.reflectivity);
+    EXPECT_EQ(expectedMaterialDesc.properties.secondaryColor, actualMaterialProperties.secondaryColor);
     EXPECT_EQ(expectedMaterialDesc.properties.useTextureNormals, actualMaterialProperties.useTextureNormals);
+    EXPECT_EQ(expectedMaterialDesc.properties.tertiaryColor, actualMaterialProperties.tertiaryColor);
     EXPECT_EQ(expectedMaterialDesc.properties.useFlatShading, actualMaterialProperties.useFlatShading);
+    EXPECT_EQ(expectedMaterialDesc.properties.useColorOverride, actualMaterialProperties.useColorOverride);
+    EXPECT_EQ(expectedMaterialDesc.properties.useHatchTexture, actualMaterialProperties.useHatchTexture);
 }
 
 TEST(ComponentSerializationTests, RoundTrip_particleEmitter_preservesValues)

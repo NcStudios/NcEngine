@@ -1,15 +1,18 @@
 #pragma once
 
+#include "frontend/GraphicsFrontend.h"
+
+#include "ncengine/ecs/Ecs.h"
+#include "ncengine/graphics/Environment.h"
+#include "ncengine/graphics/NcGraphics.h"
+#include "ncengine/module/ModuleProvider.h"
+#include "ncengine/window/WindowTypes.h"
+
 #include "diligent/DiligentEngine.h"
 #include "diligent/pass/PassBackend.h"
 #include "diligent/pass/PassManifest.h"
 #include "diligent/UIBackend.h"
 #include "diligent/resource/ShaderBindings.h"
-#include "frontend/GraphicsFrontend.h"
-#include "ncengine/ecs/Ecs.h"
-#include "ncengine/graphics/NcGraphics.h"
-#include "ncengine/module/ModuleProvider.h"
-#include "ncengine/window/WindowTypes.h"
 
 namespace nc
 {
@@ -37,9 +40,12 @@ class NcGraphicsImpl2 : public NcGraphics
         auto GetCamera() noexcept -> Camera* override;
         void SetUi(ui::IUI* ui) noexcept override;
         bool IsUiHovered() const noexcept override;
-        void SetSkybox(const std::string& path) override;
-        auto GetSkybox() const -> nc::asset::AssetId override;
+        auto GetEnvironment() const -> const Environment& override;
+        void SetEnvironment(const Environment& environment) override;
         void ClearEnvironment() override;
+        auto GetSkybox() const -> nc::asset::AssetId override;
+        void SetSkybox(const std::string& path) override;
+        void ClearSkybox() override;
         auto IsPostProcessEffectEnabled(PostProcessEffectId effectId) const -> bool override;
         void SetPostProcessEffectEnabled(PostProcessEffectId effectId, bool enabled) override;
         auto GetPostProcessEffectProperties(PostProcessEffectId effectId,
