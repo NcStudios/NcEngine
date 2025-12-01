@@ -279,17 +279,18 @@ TEST_F(SupportFunctionsTest, GetDistanceFromOrigin_CompoundShape_translatedRotat
         rotation
     };
 
-    EXPECT_FLOAT_EQ(2.0f, nc::GetWorldSupport(shape, nc::Vector3::Right()).x);
-    EXPECT_FLOAT_EQ(0.0f, nc::GetWorldSupport(shape, nc::Vector3::Left()).x);
-    EXPECT_FLOAT_EQ(2.5f, nc::GetWorldSupport(shape, nc::Vector3::Up()).y);
-    EXPECT_FLOAT_EQ(1.5f, nc::GetWorldSupport(shape, nc::Vector3::Down()).y);
-    EXPECT_FLOAT_EQ(4.5f, nc::GetWorldSupport(shape, nc::Vector3::Front()).z);
-    EXPECT_FLOAT_EQ(1.5f, nc::GetWorldSupport(shape, nc::Vector3::Back()).z);
+    constexpr auto epsilon = 1e-6f; // Account for floating-point error from quaternion calculations
+    EXPECT_NEAR(2.0f, nc::GetWorldSupport(shape, nc::Vector3::Right()).x, epsilon);
+    EXPECT_NEAR(0.0f, nc::GetWorldSupport(shape, nc::Vector3::Left()).x, epsilon);
+    EXPECT_NEAR(2.5f, nc::GetWorldSupport(shape, nc::Vector3::Up()).y, epsilon);
+    EXPECT_NEAR(1.5f, nc::GetWorldSupport(shape, nc::Vector3::Down()).y, epsilon);
+    EXPECT_NEAR(4.5f, nc::GetWorldSupport(shape, nc::Vector3::Front()).z, epsilon);
+    EXPECT_NEAR(1.5f, nc::GetWorldSupport(shape, nc::Vector3::Back()).z, epsilon);
 
-    EXPECT_FLOAT_EQ(1.0f, nc::GetHalfExtent(shape, nc::Vector3::Right()));
-    EXPECT_FLOAT_EQ(1.0f, nc::GetHalfExtent(shape, nc::Vector3::Left()));
-    EXPECT_FLOAT_EQ(0.5f, nc::GetHalfExtent(shape, nc::Vector3::Up()));
-    EXPECT_FLOAT_EQ(0.5f, nc::GetHalfExtent(shape, nc::Vector3::Down()));
-    EXPECT_FLOAT_EQ(1.5f, nc::GetHalfExtent(shape, nc::Vector3::Front()));
-    EXPECT_FLOAT_EQ(1.5f, nc::GetHalfExtent(shape, nc::Vector3::Back()));
+    EXPECT_NEAR(1.0f, nc::GetHalfExtent(shape, nc::Vector3::Right()), epsilon);
+    EXPECT_NEAR(1.0f, nc::GetHalfExtent(shape, nc::Vector3::Left()), epsilon);
+    EXPECT_NEAR(0.5f, nc::GetHalfExtent(shape, nc::Vector3::Up()), epsilon);
+    EXPECT_NEAR(0.5f, nc::GetHalfExtent(shape, nc::Vector3::Down()), epsilon);
+    EXPECT_NEAR(1.5f, nc::GetHalfExtent(shape, nc::Vector3::Front()), epsilon);
+    EXPECT_NEAR(1.5f, nc::GetHalfExtent(shape, nc::Vector3::Back()), epsilon);
 }
