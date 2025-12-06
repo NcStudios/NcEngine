@@ -2,6 +2,7 @@
 #include "graphics2/frontend/subsystem/CameraRenderState.h"
 #include "graphics2/frontend/subsystem/EnvironmentRenderState.h"
 #include "graphics2/frontend/subsystem/LightRenderState.h"
+#include "ncengine/graphics/Environment.h"
 
 namespace nc::graphics
 {
@@ -27,12 +28,16 @@ void EnvironmentBufferResource::Update(Diligent::IDeviceContext& context,
     const auto data = GlobalEnvironmentData{
         .cameraViewProjection = cameraState.viewProjection,
         .cameraInvProjection = cameraState.invProjection,
+        .primaryColor = environmentRenderState.primaryColor,
+        .secondaryColor = environmentRenderState.secondaryColor,
+        .tertiaryColor = environmentRenderState.tertiaryColor,
         .cameraPosition = cameraState.position,
         .lightCount = static_cast<uint32_t>(lightRenderState.lights.size()),
         .nearClip = cameraState.nearClip,
         .farClip = cameraState.farClip,
         .skyboxIndex = environmentRenderState.skyboxIndex,
-        .useSkybox = environmentRenderState.useSkybox
+        .useSkybox = environmentRenderState.useSkybox,
+        .useColorOverride = environmentRenderState.useColorOverride
     };
 
     m_buffer.Write(context, data);
