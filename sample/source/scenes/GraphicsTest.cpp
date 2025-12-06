@@ -175,7 +175,7 @@ void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
         .tag = "Camera child"
     });
 
-    auto emptyGrandChild = world.Emplace<Entity>(
+    world.Emplace<Entity>(
     {
         .position = Vector3::Zero(),
         .rotation = Quaternion::Identity(),
