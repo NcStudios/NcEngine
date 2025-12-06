@@ -93,8 +93,8 @@ set(PROFILER_IN_DEBUG_AND_RELEASE OFF CACHE BOOL "" FORCE)
 set(ENABLE_INSTALL OFF CACHE BOOL "" FORCE)
 FetchContent_Declare(JoltPhysics
                      GIT_REPOSITORY https://github.com/jrouwe/JoltPhysics
-                     GIT_TAG        0ec24eb93ad8ebe01f7f095b544af8e122713123 # No release available yet with VS 2026 fixes yet
-                     GIT_SHALLOW    TRUE
+                     GIT_TAG        db654de2a6098fd1ad78cb9a3e70f6a8a61c00b5 # No release available yet with VS 2026 fixes yet
+                     GIT_SHALLOW    FALSE
                      SOURCE_SUBDIR  "Build"
 )
 
