@@ -165,6 +165,25 @@ void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
         .tag = "Main Camera"
     });
 
+    // Grandchildren test
+    auto emptyChild = world.Emplace<Entity>(
+    {
+        .position = Vector3::Zero(),
+        .rotation = Quaternion::Identity(),
+        .scale = Vector3::One(),
+        .parent = cameraHandle,
+        .tag = "Camera child"
+    });
+
+    world.Emplace<Entity>(
+    {
+        .position = Vector3::Zero(),
+        .rotation = Quaternion::Identity(),
+        .scale = Vector3::One(),
+        .parent = emptyChild,
+        .tag = "Camera grand child"
+    });
+
     auto& camera = world.Emplace<SceneNavigationCamera>(cameraHandle);
     world.Emplace<FrameLogic>(cameraHandle, InvokeFreeComponent<SceneNavigationCamera>{});
     ncGraphics->SetCamera(&camera);

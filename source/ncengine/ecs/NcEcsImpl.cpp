@@ -99,26 +99,29 @@ void EcsModule::UpdateWorldSpaceMatrices()
         stack.emplace_back(&transform, hierarchy.children);
         while (!stack.empty())
         {
-            auto& children = stack.back().children;
-            if (children.empty())
+            if (stack.back().children.empty())
             {
                 stack.pop_back();
                 continue;
             }
 
-            if (!children.front().IsStatic())
+            if (!stack.back().children.front().IsStatic())
             {
-                auto& child = world.Get<Transform>(children.front());
+                auto& child = world.Get<Transform>(stack.back().children.front());
                 dirty = dirty || child.IsDirty();
                 if (dirty)
                     child.UpdateWorldMatrix(stack.back().transform->TransformationMatrix());
 
-                auto& childHierarchy = world.Get<Hierarchy>(children.front());
+                auto& childHierarchy = world.Get<Hierarchy>(stack.back().children.front());
                 if (!childHierarchy.children.empty())
+                {
+                    auto currentIndex = stack.size() - 1;  // Save index before push
                     stack.emplace_back(&child, childHierarchy.children);
+                    stack[currentIndex].children = stack[currentIndex].children.subspan(1);  // Advance using index
+                }
             }
 
-            children = children.subspan(1);
+            stack.back().children = stack.back().children.subspan(1);
         }
     }
 #else // debug update

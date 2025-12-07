@@ -27,16 +27,58 @@ void EcsModule::RunFrameLogic()
 void EcsModule::UpdateWorldSpaceMatrices()
 {
     auto world = Ecs{*m_registry};
+
+    struct ParentInfo
+    {
+        Transform* transform;
+        std::span<Entity> children;
+    };
+
+    auto stack = std::vector<ParentInfo>{};
     for (auto entity : world.GetAll<Entity>())
     {
+        if (entity.IsStatic())
+            continue;
+
         auto& hierarchy = world.Get<Hierarchy>(entity);
+        if (hierarchy.parent.Valid()) // process root nodes first
+            continue;
+
         auto& transform = world.Get<Transform>(entity);
-        if (!hierarchy.parent.Valid())
+        auto dirty = transform.IsDirty();
+        if (dirty)
             transform.UpdateWorldMatrix();
-        else
+
+        if (hierarchy.children.empty())
+            continue;
+
+        stack.emplace_back(&transform, hierarchy.children);
+        while (!stack.empty())
         {
-            auto& parentTransform = world.Get<Transform>(hierarchy.parent);
-            transform.UpdateWorldMatrix(parentTransform.TransformationMatrix());
+            if (stack.back().children.empty())
+            {
+                stack.pop_back();
+                continue;
+            }
+
+            if (!stack.back().children.front().IsStatic())
+            {
+                auto& child = world.Get<Transform>(stack.back().children.front());
+                dirty = dirty || child.IsDirty();
+                if (dirty)
+                    child.UpdateWorldMatrix(stack.back().transform->TransformationMatrix());
+
+                auto& childHierarchy = world.Get<Hierarchy>(stack.back().children.front());
+                if (!childHierarchy.children.empty())
+                {
+                    auto currentIndex = stack.size() - 1;  // Save index before push
+                    stack.emplace_back(&child, childHierarchy.children);
+                    stack[currentIndex].children = stack[currentIndex].children.subspan(1);  // Advance using index
+                    continue;
+                }
+            }
+
+            stack.back().children = stack.back().children.subspan(1);
         }
     }
 }
@@ -595,6 +637,25 @@ TEST_F(Transform_unit_tests, RotateAxisAngleOverload_CalledOnParent_OnlyWorldRot
     EXPECT_EQ(tChild.LocalPosition(), Vector3::Zero());
     EXPECT_EQ(tChild.LocalRotation(), Quaternion::Identity());
     EXPECT_EQ(tChild.LocalScale(), Vector3::One());
+}
+
+TEST_F(Transform_unit_tests, RunFrameLogic_HasGrandchild_ChildrenAndGrandChildrenHaveDefaultLocals)
+{
+    auto parent = world.Emplace<Entity>(EntityInfo{.position = testPos1, .scale = testScale1});
+    auto child = world.Emplace<Entity>(EntityInfo{.parent = parent});
+    auto grandChild = world.Emplace<Entity>(EntityInfo{.parent = child});
+    auto& tChild = world.Get<Transform>(child);
+    auto& tGrandChild = world.Get<Transform>(grandChild);
+
+    ecsModule.RunFrameLogic();
+
+    EXPECT_EQ(tChild.LocalPosition(), Vector3::Zero());
+    EXPECT_EQ(tChild.LocalRotation(), Quaternion::Identity());
+    EXPECT_EQ(tChild.LocalScale(), Vector3::One());
+
+    EXPECT_EQ(tGrandChild.LocalPosition(), Vector3::Zero());
+    EXPECT_EQ(tGrandChild.LocalRotation(), Quaternion::Identity());
+    EXPECT_EQ(tGrandChild.LocalScale(), Vector3::One());
 }
 
 int main(int argc, char ** argv)
