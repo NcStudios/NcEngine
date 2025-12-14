@@ -76,6 +76,7 @@ void EcsModule::UpdateWorldSpaceMatrices()
     {
         Transform* transform;
         std::span<Entity> children;
+        size_t childIndex = 0;
     };
 
     auto stack = std::vector<ParentInfo>{};
@@ -96,32 +97,38 @@ void EcsModule::UpdateWorldSpaceMatrices()
         if (hierarchy.children.empty())
             continue;
 
-        stack.emplace_back(&transform, hierarchy.children);
+        stack.emplace_back(&transform, hierarchy.children, 0);
+
         while (!stack.empty())
         {
-            if (stack.back().children.empty())
+            auto& current = stack.back();
+            auto& children = current.children;
+
+            if (current.childIndex >= children.size())
             {
                 stack.pop_back();
                 continue;
             }
 
-            if (!stack.back().children.front().IsStatic())
-            {
-                auto& child = world.Get<Transform>(stack.back().children.front());
-                dirty = dirty || child.IsDirty();
-                if (dirty)
-                    child.UpdateWorldMatrix(stack.back().transform->TransformationMatrix());
+            auto childEntity = children[current.childIndex];
+            current.childIndex++;
 
-                auto& childHierarchy = world.Get<Hierarchy>(stack.back().children.front());
-                if (!childHierarchy.children.empty())
-                {
-                    auto currentIndex = stack.size() - 1;  // Save index before push
-                    stack.emplace_back(&child, childHierarchy.children);
-                    stack[currentIndex].children = stack[currentIndex].children.subspan(1);  // Advance using index
-                }
+            if (childEntity.IsStatic())
+            {
+                continue;
             }
 
-            stack.back().children = stack.back().children.subspan(1);
+            auto& childTransform = world.Get<Transform>(childEntity);
+            dirty = dirty || childTransform.IsDirty();
+
+            if (dirty)
+                childTransform.UpdateWorldMatrix(current.transform->TransformationMatrix());
+
+            auto& childHierarchy = world.Get<Hierarchy>(childEntity);
+            if (!childHierarchy.children.empty())
+            {
+                stack.emplace_back(&childTransform, childHierarchy.children, 0);
+            }
         }
     }
 #else // debug update
