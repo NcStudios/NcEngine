@@ -102,7 +102,7 @@ void NcAssetImpl::LoadAssets(const AssetMap& assets)
         m_textureManager->Load(assets.at(asset::AssetType::Texture));
 }
 
-auto NcAssetImpl::GetLoadedAssets() const noexcept -> AssetMap
+auto NcAssetImpl::GetLoadedAssets(bool serializableOnly) const noexcept -> AssetMap
 {
     const auto managers = std::array<IAssetServiceBase*, 7>
     {
@@ -116,9 +116,9 @@ auto NcAssetImpl::GetLoadedAssets() const noexcept -> AssetMap
     };
 
     auto out = AssetMap{};
-    std::ranges::for_each(managers, [&out](auto manager) mutable
+    std::ranges::for_each(managers, [&out, serializableOnly](auto manager) mutable
     {
-        auto assets = manager->GetAllLoaded()
+        auto assets = manager->GetAllLoaded(serializableOnly)
             | std::views::transform([](auto&& name){ return std::string{name}; });
 
         out.emplace(manager->GetAssetType(), std::vector<std::string>{assets.begin(), assets.end()});

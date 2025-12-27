@@ -15,9 +15,9 @@ class IAssetServiceBase
     public:
         virtual ~IAssetServiceBase() = default;
 
-        virtual auto GetAllLoaded()        const -> std::vector<std::string_view> = 0;
-        virtual auto GetPath(AssetId hash) const -> std::string_view              = 0;
-        virtual auto GetAssetType()        const -> asset::AssetType              = 0;
+        virtual auto GetAllLoaded(bool serializableOnly = false) const -> std::vector<std::string_view> = 0;
+        virtual auto GetPath(AssetId hash)                       const -> std::string_view              = 0;
+        virtual auto GetAssetType()                              const -> asset::AssetType              = 0;
 };
 
 /** Interface for services that manage assets. */

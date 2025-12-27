@@ -80,7 +80,7 @@ void SmokeTest::Load(ecs::Ecs world, ModuleProvider modules)
             {
                 isSecondPass = true;
                 auto ncAsset = modules.Get<asset::NcAsset>();
-                ::SaveScene(world, ncAsset->GetLoadedAssets());
+                ::SaveScene(world, ncAsset->GetLoadedAssets(true));
                 auto ncScene = modules.Get<NcScene>();
                 ncScene->Queue(std::make_unique<SmokeTest>(quit));
                 ncScene->ScheduleTransition();

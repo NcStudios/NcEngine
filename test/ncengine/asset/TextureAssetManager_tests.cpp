@@ -276,3 +276,107 @@ TEST_F(TextureAssetManager_tests, LoadFromMemory_MixedWithFileLoad_CorrectIndice
     EXPECT_EQ(view2.index, 1u);
     EXPECT_EQ(view3.index, 2u);
 }
+
+TEST_F(TextureAssetManager_tests, GetAllLoaded_Default_IncludesRuntimeTextures)
+{
+    assetManager->Load(Texture_base);
+    std::vector<uint8_t> rgbaData(16, 255);
+    assetManager->LoadFromRGBA("runtime_tex", rgbaData, 2, 2);
+
+    auto all = assetManager->GetAllLoaded();
+    EXPECT_EQ(all.size(), 2u);
+}
+
+TEST_F(TextureAssetManager_tests, GetAllLoaded_SerializableOnly_ExcludesRuntimeTextures)
+{
+    assetManager->Load(Texture_base);
+    std::vector<uint8_t> rgbaData(16, 255);
+    assetManager->LoadFromRGBA("runtime_tex", rgbaData, 2, 2);
+
+    auto serializable = assetManager->GetAllLoaded(true);
+    EXPECT_EQ(serializable.size(), 1u);
+    EXPECT_EQ(serializable[0], Texture_base);
+}
+
+TEST_F(TextureAssetManager_tests, GetAllLoaded_OnlyRuntimeTextures_SerializableReturnsEmpty)
+{
+    std::vector<uint8_t> rgbaData(16, 255);
+    assetManager->LoadFromRGBA("runtime1", rgbaData, 2, 2);
+    assetManager->LoadFromRGBA("runtime2", rgbaData, 2, 2);
+
+    auto serializable = assetManager->GetAllLoaded(true);
+    auto all = assetManager->GetAllLoaded(false);
+
+    EXPECT_EQ(serializable.size(), 0u);
+    EXPECT_EQ(all.size(), 2u);
+}
+
+TEST_F(TextureAssetManager_tests, IsLoaded_RuntimeTexture_ReturnsTrueWithOriginalKey)
+{
+    std::vector<uint8_t> rgbaData(16, 255);
+    assetManager->LoadFromRGBA("my_runtime_tex", rgbaData, 2, 2);
+
+    EXPECT_TRUE(assetManager->IsLoaded("my_runtime_tex"));
+}
+
+TEST_F(TextureAssetManager_tests, GetPath_RuntimeTexture_ReturnsUnprefixedKey)
+{
+    std::vector<uint8_t> rgbaData(16, 255);
+    assetManager->LoadFromRGBA("test_runtime", rgbaData, 2, 2);
+
+    auto view = assetManager->Acquire("test_runtime");
+    auto path = assetManager->GetPath(view.id);
+
+    EXPECT_FALSE(path.starts_with(RuntimeKey));
+    EXPECT_NE(path.find("test_runtime"), std::string_view::npos);
+}
+
+TEST_F(TextureAssetManager_tests, UnloadAll_ClearsRuntimeTextures)
+{
+    assetManager->Load(Texture_base);
+    std::vector<uint8_t> rgbaData(16, 255);
+    assetManager->LoadFromRGBA("runtime_tex", rgbaData, 2, 2);
+
+    assetManager->UnloadAll();
+
+    EXPECT_FALSE(assetManager->IsLoaded(Texture_base));
+    EXPECT_FALSE(assetManager->IsLoaded("runtime_tex"));
+}
+
+TEST_F(TextureAssetManager_tests, Unload_RuntimeTexture_DoesNotAffectFileTextures)
+{
+    assetManager->Load(Texture_base);
+    std::vector<uint8_t> rgbaData(16, 255);
+    assetManager->LoadFromRGBA("runtime_tex", rgbaData, 2, 2);
+
+    assetManager->Unload("runtime_tex");
+
+    EXPECT_TRUE(assetManager->IsLoaded(Texture_base));
+    EXPECT_FALSE(assetManager->IsLoaded("runtime_tex"));
+}
+
+TEST_F(TextureAssetManager_tests, Unload_FileTexture_DoesNotAffectRuntimeTextures)
+{
+    assetManager->Load(Texture_base);
+    std::vector<uint8_t> rgbaData(16, 255);
+    assetManager->LoadFromRGBA("runtime_tex", rgbaData, 2, 2);
+
+    assetManager->Unload(Texture_base);
+
+    EXPECT_FALSE(assetManager->IsLoaded(Texture_base));
+    EXPECT_TRUE(assetManager->IsLoaded("runtime_tex"));
+}
+
+TEST_F(TextureAssetManager_tests, LoadFromMemory_ExceedsMaxTextures_Throws)
+{
+    auto smallManager = std::make_unique<TextureAssetManager>(NC_TEST_COLLATERAL_DIRECTORY, 2);
+    smallManager->Load(Texture_base);
+
+    std::vector<uint8_t> rgbaData(16, 255);
+    EXPECT_THROW(smallManager->LoadFromRGBA("runtime_tex", rgbaData, 2, 2), nc::NcError);
+}
+
+TEST_F(TextureAssetManager_tests, Acquire_NotLoaded_Throws)
+{
+    EXPECT_THROW(assetManager->Acquire("nonexistent"), nc::NcError);
+}

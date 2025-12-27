@@ -43,7 +43,7 @@ class NcAssetImpl : public NcAsset
         auto OnMeshColliderUpdate() noexcept -> Signal<const MeshColliderUpdateEventData&>& override;
         auto OnFontUpdate() noexcept -> Signal<>& override;
         void LoadAssets(const AssetMap& assets) override;
-        auto GetLoadedAssets() const noexcept -> AssetMap override;
+        auto GetLoadedAssets(bool serializableOnly = false) const noexcept -> AssetMap override;
         auto GetAssetPath(AssetType type, size_t id) const -> std::string_view override;
 
     private:

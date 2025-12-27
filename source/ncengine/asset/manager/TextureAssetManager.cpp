@@ -5,8 +5,25 @@
 
 #include "ncasset/Import.h"
 
+#include <algorithm>
+#include <cstring>
 #include <ranges>
+#include <string>
 
+namespace
+{
+template<class T, class Proj>
+auto GetSerializableAssetPaths(const std::vector<T>& vec, Proj&& proj) -> std::vector<std::string_view>
+{
+    auto out = std::vector<std::string_view>{};
+    out.reserve(vec.size());
+
+    auto view = vec | std::ranges::views::filter([](const auto& item) { return !item.contains(nc::asset::RuntimeKey); })
+                    | std::ranges::views::transform(std::forward<Proj>(proj));
+
+    return std::vector<std::string_view>(view.begin(), view.end());
+}
+}
 namespace nc::asset
 {
 TextureAssetManager::TextureAssetManager(const std::string& texturesAssetDirectory, uint32_t maxTextures)
@@ -74,6 +91,7 @@ auto TextureAssetManager::Load(std::span<const std::string> paths) -> bool
 
 auto TextureAssetManager::LoadFromMemory(const std::string& key, Texture texture) -> bool
 {
+    auto runtimeTextureKey = RuntimeKey + key;
     if (m_table.size() + 1 >= m_maxTextureCount)
     {
         throw NcError("Cannot exceed max texture count.");
@@ -84,8 +102,8 @@ auto TextureAssetManager::LoadFromMemory(const std::string& key, Texture texture
         return false;
     }
 
-    auto textureWithId = TextureWithId{std::move(texture), m_table.hash(key)};
-    m_table.emplace(key);
+    auto textureWithId = TextureWithId{std::move(texture), m_table.hash(runtimeTextureKey)};
+    m_table.emplace(runtimeTextureKey);
     m_onUpdate.Emit(TextureUpdateEventData{
         UpdateAction::Load,
         std::span<const TextureWithId>{&textureWithId, 1}
@@ -111,7 +129,9 @@ auto TextureAssetManager::LoadFromRGBA(const std::string& key,
 
 auto TextureAssetManager::Unload(const std::string& path) -> bool
 {
-    if (!m_table.erase(path))
+    auto runtimeTextureKey = RuntimeKey + path;
+
+    if (!m_table.erase(path) && !m_table.erase(runtimeTextureKey))
         return false;
 
     m_onUpdate.Emit(TextureUpdateEventData{
@@ -133,7 +153,15 @@ void TextureAssetManager::UnloadAll()
 
 auto TextureAssetManager::Acquire(const std::string& path) const -> TextureView
 {
-    NC_ASSERT(m_table.contains(path), fmt::format("Texture is not loaded: '{}'", path));
+    auto runtimeTextureKey = RuntimeKey + path;
+    if (!m_table.contains(path))
+    {
+        if (!m_table.contains(runtimeTextureKey))
+        {
+            throw nc::NcError("Texture is not loaded: '{}'", path);
+        }
+        return Acquire(m_table.hash(runtimeTextureKey));
+    }
     return Acquire(m_table.hash(path));
 }
 
@@ -147,11 +175,29 @@ auto TextureAssetManager::Acquire(AssetId id) const -> TextureView
     };
 }
 
-auto TextureAssetManager::GetAllLoaded() const -> std::vector<std::string_view>
+auto TextureAssetManager::GetAllLoaded(bool serializableOnly) const -> std::vector<std::string_view>
 {
+    if (serializableOnly)
+    {
+        return GetSerializableAssetPaths(m_table.keys(), [](const auto& data)
+        {
+            return std::string_view{data};
+        });
+    }
+
     return GetPaths(m_table.keys(), [](const auto& data)
     {
         return std::string_view{data};
     });
+}
+
+auto TextureAssetManager::GetPath(AssetId id) const -> std::string_view
+{
+    auto path = m_table.at(m_table.index(id));
+    if (path.starts_with(RuntimeKey))
+    {
+        path.remove_prefix(RuntimeKeyLength);
+    }
+    return path;
 }
 } // namespace nc::asset

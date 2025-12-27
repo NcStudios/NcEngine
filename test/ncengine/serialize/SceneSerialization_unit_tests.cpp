@@ -30,8 +30,9 @@ class NcAssetMock : public NcAsset
             m_assets.insert(std::cbegin(assets), std::cend(assets));
         }
 
-        auto GetLoadedAssets() const noexcept -> AssetMap override
+        auto GetLoadedAssets(bool serializableOnly) const noexcept -> AssetMap override
         {
+            (void)serializableOnly;
             return m_assets;
         }
 

@@ -229,8 +229,9 @@ auto ShaderAssetManager::IsLoaded(const std::string& path) const -> bool
     return std::ranges::any_of(m_shaderFlyweights.begin(), m_shaderFlyweights.end(), [path](const auto& view) { return view.uid == path; });
 }
 
-auto ShaderAssetManager::GetAllLoaded() const -> std::vector<std::string_view>
+auto ShaderAssetManager::GetAllLoaded(bool serializableOnly) const -> std::vector<std::string_view>
 {
+    (void)serializableOnly;
     return GetPaths(m_shaderFlyweights, [](const auto& item)
     {
         return std::string_view{item.uid};

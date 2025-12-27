@@ -104,8 +104,9 @@ auto ConvexHullAssetManager::Acquire(AssetId id) const -> ConvexHullView
     return ConvexHullView{id};
 }
 
-auto ConvexHullAssetManager::GetAllLoaded() const -> std::vector<std::string_view>
+auto ConvexHullAssetManager::GetAllLoaded(bool serializableOnly) const -> std::vector<std::string_view>
 {
+    (void)serializableOnly;
     return GetPaths(m_map.keys());
 }
 } // namespace nc::asset
