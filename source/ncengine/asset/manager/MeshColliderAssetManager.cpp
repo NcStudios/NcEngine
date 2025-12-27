@@ -104,8 +104,9 @@ auto MeshColliderAssetManager::Acquire(AssetId id) const -> MeshColliderView
     return MeshColliderView{id};
 }
 
-auto MeshColliderAssetManager::GetAllLoaded() const -> std::vector<std::string_view>
+auto MeshColliderAssetManager::GetAllLoaded(bool serializableOnly) const -> std::vector<std::string_view>
 {
+    (void)serializableOnly;
     return GetPaths(m_map.keys());
 }
 } // namespace nc::asset

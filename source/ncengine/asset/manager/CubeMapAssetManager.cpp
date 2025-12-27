@@ -117,8 +117,9 @@ auto CubeMapAssetManager::Acquire(AssetId id) const -> CubeMapView
     };
 }
 
-auto CubeMapAssetManager::GetAllLoaded() const -> std::vector<std::string_view>
+auto CubeMapAssetManager::GetAllLoaded(bool serializableOnly) const -> std::vector<std::string_view>
 {
+    (void)serializableOnly;
     return GetPaths(m_cubeMapIds.keys());
 }
 } // namespace nc::asset

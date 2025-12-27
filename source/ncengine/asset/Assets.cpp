@@ -1,5 +1,8 @@
 #include "asset/Assets.h"
 #include "AssetService.h"
+#include "RuntimeTextureLoader.h"
+
+#include "ncasset/Assets.h"
 
 namespace nc::asset
 {
@@ -191,6 +194,20 @@ bool LoadTextureAsset(const std::string& path)
 bool LoadTextureAssets(std::span<const std::string> paths)
 {
     return AssetService<TextureView>::Get()->Load(paths);
+}
+
+bool LoadTextureFromMemory(const std::string& key, Texture texture)
+{
+    return RuntimeTextureLoaderService::Get()->LoadFromMemory(key, std::move(texture));
+}
+
+bool LoadTextureFromRGBA(const std::string& key,
+                         std::span<const uint8_t> rgbaData,
+                         uint32_t width,
+                         uint32_t height,
+                         TextureFormat format)
+{
+    return RuntimeTextureLoaderService::Get()->LoadFromRGBA(key, rgbaData, width, height, format);
 }
 
 bool UnloadTextureAsset(const std::string& path)

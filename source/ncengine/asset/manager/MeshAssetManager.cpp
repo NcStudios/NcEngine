@@ -174,8 +174,9 @@ auto MeshAssetManager::Acquire(AssetId id) const -> MeshView
     return m_accessors.at(index);
 }
 
-auto MeshAssetManager::GetAllLoaded() const -> std::vector<std::string_view>
+auto MeshAssetManager::GetAllLoaded(bool serializableOnly) const -> std::vector<std::string_view>
 {
+    (void)serializableOnly;
     return GetPaths(m_accessors.keys());
 }
 } // namespace nc::asset

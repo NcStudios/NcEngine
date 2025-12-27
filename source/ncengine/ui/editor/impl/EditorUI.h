@@ -31,6 +31,8 @@ class EditorUI
         SceneGraph m_sceneGraph;
         Inspector m_inspector;
         bool m_open = false;
+        ImTextureRef m_runtimeTextureTest;
+        bool m_runtimeTextureLoaded = false;
 
         // overlays
         FpsOverlay m_fpsOverlay;

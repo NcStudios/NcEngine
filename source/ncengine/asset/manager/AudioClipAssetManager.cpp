@@ -72,8 +72,9 @@ auto AudioClipAssetManager::Acquire(AssetId id) const -> AudioClipView
     };
 }
 
-auto AudioClipAssetManager::GetAllLoaded() const -> std::vector<std::string_view>
+auto AudioClipAssetManager::GetAllLoaded(bool serializableOnly) const -> std::vector<std::string_view>
 {
+    (void)serializableOnly;
     return GetPaths(m_audioClips.keys());
 }
 } //namespace nc::asset

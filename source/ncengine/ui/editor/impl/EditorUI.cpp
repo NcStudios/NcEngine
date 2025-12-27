@@ -45,6 +45,19 @@ void ToolbarLayout()
     const auto pos = ImVec2{xPadding + screenExtent.x * g_pivotCenter.x, yPadding};
     ImGui::SetNextWindowPos(pos, ImGuiCond_FirstUseEver, g_pivotCenter);
 }
+
+// For runtime texture test
+void LoadBlackTexture()
+{
+    std::vector<uint8_t> blackPixels;
+    blackPixels.reserve(64);
+    for (int i = 0; i < 16; ++i)
+    {
+        blackPixels.insert(blackPixels.end(), {0, 0, 0, 255});
+    }
+
+    nc::asset::LoadTextureFromRGBA("editor::black", blackPixels, 4, 4);
+}
 } // anonymous namespace
 
 namespace nc::ui::editor
@@ -58,10 +71,19 @@ EditorUI::EditorUI(EditorContext& ctx)
       m_postProcessDialog{},
       m_environmentDialog{}
 {
+    LoadBlackTexture();
 }
 
 void EditorUI::Draw(EditorContext& ctx)
 {
+    if (!m_runtimeTextureLoaded)
+    {
+        auto& ncGraphics = *ctx.modules.Get<NcGraphics>();
+        auto blackTextureAsset = nc::asset::AcquireTextureAsset("editor::black");
+        m_runtimeTextureTest = static_cast<ImTextureRef>(ncGraphics.GetTextureView(nc::TextureViewType::Asset, blackTextureAsset.index));
+        m_runtimeTextureLoaded = true;
+    }
+
     ctx.dimensions = ImVec2{window::GetDimensions()};
     DrawOverlays(ctx.dimensions);
     auto& ncAsset = *ctx.modules.Get<asset::NcAsset>();
@@ -128,7 +150,7 @@ auto EditorUI::ProcessInput(const EditorHotkeys& hotkeys, asset::NcAsset& ncAsse
     if (KeyDown(hotkeys.openNewSceneDialog))
         m_newSceneDialog.Open();
     else if (KeyDown(hotkeys.openSaveSceneDialog))
-        m_saveSceneDialog.Open(ncAsset.GetLoadedAssets());
+        m_saveSceneDialog.Open(ncAsset.GetLoadedAssets(true));
     else if (KeyDown(hotkeys.openLoadSceneDialog))
         m_loadSceneDialog.Open();
 
@@ -166,7 +188,7 @@ void EditorUI::DrawMenu(EditorContext& ctx)
             if (ImGui::MenuItem("New"))
                 m_newSceneDialog.Open();
             if (ImGui::MenuItem("Save"))
-                m_saveSceneDialog.Open(ctx.modules.Get<asset::NcAsset>()->GetLoadedAssets());
+                m_saveSceneDialog.Open(ctx.modules.Get<asset::NcAsset>()->GetLoadedAssets(true));
             if (ImGui::MenuItem("Load"))
                 m_loadSceneDialog.Open();
 
@@ -188,6 +210,7 @@ void EditorUI::DrawMenu(EditorContext& ctx)
             }
             if (ImGui::BeginMenu("NcGraphics"))
             {
+                ImGui::Image(m_runtimeTextureTest, ImVec2{5, 5});
                 if (ImGui::MenuItem("Post Process FX"))
                 {
                     m_postProcessDialog.Open(ctx.modules.Get<NcGraphics>(), ctx.modules.Get<asset::NcAsset>());

@@ -121,8 +121,9 @@ auto FontAssetManager::IsLoaded(const FontInfo& font) const -> bool
     return m_fonts.contains(font);
 }
 
-auto FontAssetManager::GetAllLoaded() const -> std::vector<std::string_view>
+auto FontAssetManager::GetAllLoaded(bool serializableOnly) const -> std::vector<std::string_view>
 {
+    (void)serializableOnly;
     auto out = std::vector<std::string_view>{};
     out.reserve(m_fonts.size());
     std::ranges::transform(m_fonts, std::back_inserter(out), [](const auto& pair)

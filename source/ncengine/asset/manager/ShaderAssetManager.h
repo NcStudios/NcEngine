@@ -20,16 +20,16 @@ class ShaderAssetManager final : public IAssetService<ShaderView, std::string>
     public:
         explicit ShaderAssetManager(const std::string& assetDirectory);
 
-        auto Load(const std::string& path)                 -> bool                          override;
-        auto Load(std::span<const std::string> paths)      -> bool                          override;
-        auto Unload(const std::string& path)               -> bool                          override;
-        void UnloadAll()                                                                    override;
-        auto Acquire(const std::string& path)        const -> ShaderView                    override;
-        auto Acquire(AssetId)                        const -> ShaderView                    override { throw NcError{"Not Implemented"}; }
-        auto IsLoaded(const std::string& path)       const -> bool                          override;
-        auto GetAllLoaded()                          const -> std::vector<std::string_view> override;
-        auto GetPath(AssetId)                        const -> std::string_view              override { throw NcError{"Not Implemented"}; }
-        auto GetAssetType()                          const -> asset::AssetType              override { return asset::AssetType::Shader; }
+        auto Load(const std::string& path)                         -> bool                          override;
+        auto Load(std::span<const std::string> paths)              -> bool                          override;
+        auto Unload(const std::string& path)                       -> bool                          override;
+        void UnloadAll()                                                                            override;
+        auto Acquire(const std::string& path)                const -> ShaderView                    override;
+        auto Acquire(AssetId)                                const -> ShaderView                    override { throw NcError{"Not Implemented"}; }
+        auto IsLoaded(const std::string& path)               const -> bool                          override;
+        auto GetAllLoaded(bool serializableOnly = false)     const -> std::vector<std::string_view> override;
+        auto GetPath(AssetId)                                const -> std::string_view              override { throw NcError{"Not Implemented"}; }
+        auto GetAssetType()                                  const -> asset::AssetType              override { return asset::AssetType::Shader; }
 
     private:
         std::vector<ShaderFlyweight> m_shaderFlyweights;

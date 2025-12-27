@@ -61,8 +61,10 @@ class NcAsset : public Module
         /** @brief Load assets from an AssetMap. */
         virtual void LoadAssets(const AssetMap& assets) = 0;
 
-        /** @brief Get the names of all loaded assets as an AssetMap. */
-        virtual auto GetLoadedAssets() const noexcept -> AssetMap = 0;
+        /** @brief Get the names of all loaded assets as an AssetMap.
+         * @param serializableOnly If true, excludes runtime assets that are not from disk and cannot survive serialization.
+        */
+        virtual auto GetLoadedAssets(bool serializableOnly = false) const noexcept -> AssetMap = 0;
 
         /** @brief Get the path to a loaded asset given its id. */
         virtual auto GetAssetPath(AssetType type, size_t id) const -> std::string_view = 0;

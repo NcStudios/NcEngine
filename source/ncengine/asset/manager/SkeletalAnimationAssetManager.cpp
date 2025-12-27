@@ -113,8 +113,9 @@ auto SkeletalAnimationAssetManager::Acquire(AssetId id) const -> SkeletalAnimati
     };
 }
 
-auto SkeletalAnimationAssetManager::GetAllLoaded() const -> std::vector<std::string_view>
+auto SkeletalAnimationAssetManager::GetAllLoaded(bool serializableOnly) const -> std::vector<std::string_view>
 {
+    (void)serializableOnly;
     return GetPaths(m_table.keys());
 }
 } // namespace nc::asset
