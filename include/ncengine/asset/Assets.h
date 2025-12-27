@@ -1,10 +1,18 @@
+/**
+ * @file Assets.h
+ * @copyright Jaremie Romer and McCallister Romer 2025
+ */
+
 #pragma once
 
 #include "ncasset/AssetType.h"
 #include "ncengine/asset/AssetViews.h"
 
+#include <span>
+
 namespace nc::asset
 {
+struct Texture;
 /** Assets must be loaded before dependent objects are created and should be unloaded only
  *  when they are no longer in use.
  * 
@@ -55,11 +63,17 @@ void UnloadAllMeshAssets();
 auto AcquireMeshAsset(const std::string& path) -> MeshView;
 auto AcquireMeshAsset(AssetId id) -> MeshView;
 
-/** Supported file types: .nca 
+/** Supported file types: .nca
  *  @note Unloading textures invalidates all TextureViews. It is intended
  *  to be done on scene change. */
 bool LoadTextureAsset(const std::string& path);
 bool LoadTextureAssets(std::span<const std::string> paths);
+bool LoadTextureFromMemory(const std::string& key, Texture texture);
+bool LoadTextureFromRGBA(const std::string& key,
+                         std::span<const uint8_t> rgbaData,
+                         uint32_t width,
+                         uint32_t height,
+                         TextureFormat format = TextureFormat::RGBA8_UNORM);
 bool UnloadTextureAsset(const std::string& path);
 void UnloadAllTextureAssets();
 auto AcquireTextureAsset(const std::string& path) -> TextureView;

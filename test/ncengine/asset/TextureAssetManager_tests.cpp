@@ -2,8 +2,11 @@
 #include "asset/AssetData.h"
 #include "asset/manager/TextureAssetManager.h"
 
+#include "ncasset/Assets.h"
+
 #include <array>
 #include <string>
+#include <vector>
 
 using namespace nc::asset;
 
@@ -160,4 +163,116 @@ TEST_F(TextureAssetManager_tests, GetPath_NotLoaded_Throws)
     const auto view = assetManager->Acquire(expected);
     assetManager->UnloadAll();
     EXPECT_THROW(assetManager->GetPath(view.id), nc::NcError);
+}
+
+TEST_F(TextureAssetManager_tests, LoadFromMemory_NotLoaded_ReturnsTrue)
+{
+    auto texture = Texture{
+        .format = TextureFormat::RGBA8_UNORM,
+        .width = 2,
+        .height = 2,
+        .pixelData = std::vector<unsigned char>(16, 255)
+    };
+    auto actual = assetManager->LoadFromMemory("test_key", std::move(texture));
+    EXPECT_TRUE(actual);
+}
+
+TEST_F(TextureAssetManager_tests, LoadFromMemory_IsLoaded_ReturnsFalse)
+{
+    auto texture1 = Texture{
+        .format = TextureFormat::RGBA8_UNORM,
+        .width = 2,
+        .height = 2,
+        .pixelData = std::vector<unsigned char>(16, 255)
+    };
+    auto texture2 = Texture{
+        .format = TextureFormat::RGBA8_UNORM,
+        .width = 2,
+        .height = 2,
+        .pixelData = std::vector<unsigned char>(16, 128)
+    };
+    assetManager->LoadFromMemory("test_key", std::move(texture1));
+    auto actual = assetManager->LoadFromMemory("test_key", std::move(texture2));
+    EXPECT_FALSE(actual);
+}
+
+TEST_F(TextureAssetManager_tests, LoadFromMemory_CanAcquire)
+{
+    auto texture = Texture{
+        .format = TextureFormat::RGBA8_UNORM,
+        .width = 2,
+        .height = 2,
+        .pixelData = std::vector<unsigned char>(16, 255)
+    };
+    assetManager->LoadFromMemory("test_key", std::move(texture));
+    auto view = assetManager->Acquire("test_key");
+    EXPECT_NE(view.id, NullAssetId);
+    EXPECT_EQ(view.index, 0u);
+}
+
+TEST_F(TextureAssetManager_tests, LoadFromRGBA_NotLoaded_ReturnsTrue)
+{
+    std::vector<uint8_t> rgbaData(16, 255);
+    auto actual = assetManager->LoadFromRGBA("test_key", rgbaData, 2, 2);
+    EXPECT_TRUE(actual);
+}
+
+TEST_F(TextureAssetManager_tests, LoadFromRGBA_IsLoaded_ReturnsFalse)
+{
+    std::vector<uint8_t> rgbaData(16, 255);
+    assetManager->LoadFromRGBA("test_key", rgbaData, 2, 2);
+    auto actual = assetManager->LoadFromRGBA("test_key", rgbaData, 2, 2);
+    EXPECT_FALSE(actual);
+}
+
+TEST_F(TextureAssetManager_tests, LoadFromRGBA_CanAcquire)
+{
+    std::vector<uint8_t> rgbaData(16, 255);
+    assetManager->LoadFromRGBA("test_key", rgbaData, 2, 2);
+    auto view = assetManager->Acquire("test_key");
+    EXPECT_NE(view.id, NullAssetId);
+    EXPECT_EQ(view.index, 0u);
+}
+
+TEST_F(TextureAssetManager_tests, LoadFromRGBA_WithFormat_CanAcquire)
+{
+    std::vector<uint8_t> rgbaData(16, 255);
+    assetManager->LoadFromRGBA("test_key", rgbaData, 2, 2, TextureFormat::RGBA8_UNORM_SRGB);
+    auto view = assetManager->Acquire("test_key");
+    EXPECT_NE(view.id, NullAssetId);
+}
+
+TEST_F(TextureAssetManager_tests, LoadFromMemory_CanUnload)
+{
+    auto texture = Texture{
+        .format = TextureFormat::RGBA8_UNORM,
+        .width = 2,
+        .height = 2,
+        .pixelData = std::vector<unsigned char>(16, 255)
+    };
+    assetManager->LoadFromMemory("test_key", std::move(texture));
+    auto actual = assetManager->Unload("test_key");
+    EXPECT_TRUE(actual);
+    EXPECT_FALSE(assetManager->IsLoaded("test_key"));
+}
+
+TEST_F(TextureAssetManager_tests, LoadFromMemory_MixedWithFileLoad_CorrectIndices)
+{
+    assetManager->Load(Texture_base);
+    auto texture = Texture{
+        .format = TextureFormat::RGBA8_UNORM,
+        .width = 2,
+        .height = 2,
+        .pixelData = std::vector<unsigned char>(16, 255)
+    };
+    assetManager->LoadFromMemory("memory_texture", std::move(texture));
+    assetManager->Load(Texture_normal);
+
+    auto view1 = assetManager->Acquire(Texture_base);
+    auto view2 = assetManager->Acquire("memory_texture");
+    auto view3 = assetManager->Acquire(Texture_normal);
+
+    EXPECT_EQ(view1.index, 0u);
+    EXPECT_EQ(view2.index, 1u);
+    EXPECT_EQ(view3.index, 2u);
 }

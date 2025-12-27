@@ -72,6 +72,43 @@ auto TextureAssetManager::Load(std::span<const std::string> paths) -> bool
     return true;
 }
 
+auto TextureAssetManager::LoadFromMemory(const std::string& key, Texture texture) -> bool
+{
+    if (m_table.size() + 1 >= m_maxTextureCount)
+    {
+        throw NcError("Cannot exceed max texture count.");
+    }
+
+    if (IsLoaded(key))
+    {
+        return false;
+    }
+
+    auto textureWithId = TextureWithId{std::move(texture), m_table.hash(key)};
+    m_table.emplace(key);
+    m_onUpdate.Emit(TextureUpdateEventData{
+        UpdateAction::Load,
+        std::span<const TextureWithId>{&textureWithId, 1}
+    });
+
+    return true;
+}
+
+auto TextureAssetManager::LoadFromRGBA(const std::string& key,
+                                       std::span<const uint8_t> rgbaData,
+                                       uint32_t width,
+                                       uint32_t height,
+                                       TextureFormat format) -> bool
+{
+    auto texture = Texture{
+        .format = format,
+        .width = width,
+        .height = height,
+        .pixelData = std::vector<unsigned char>(rgbaData.begin(), rgbaData.end())
+    };
+    return LoadFromMemory(key, std::move(texture));
+}
+
 auto TextureAssetManager::Unload(const std::string& path) -> bool
 {
     if (!m_table.erase(path))
