@@ -65,6 +65,8 @@ struct ParticleData
     uint textureIndex;
 };
 
+static const uint MAX_CASCADE_COUNT = 4;
+
 struct LightData
 {
     float3 diffuseColor;
@@ -78,12 +80,22 @@ struct LightData
     float intensity;
     int castsShadows;
     uint lightMatrixIndex;
-    uint padding;
+    uint cascadeStartIndex;  // Index into CascadeData buffer (CSM)
+    uint cascadeCount;       // 0 = legacy single shadow map, >0 = CSM
+    uint padding[3];
 };
 
 struct LightMatrix
 {
     float4x4 viewProjection;
+};
+
+struct CascadeData
+{
+    float4x4 viewProjection;
+    float splitDepth;        // View-space far depth for this cascade
+    float texelSize;         // World-space texel size for bias calculation
+    float2 padding;
 };
 
 cbuffer WireframeProperties

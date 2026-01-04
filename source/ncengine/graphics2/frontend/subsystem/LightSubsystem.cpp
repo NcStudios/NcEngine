@@ -59,8 +59,9 @@ auto LightSubsystem::BuildState(ecs::ExplicitEcs<DirectionalLight, PointLight, S
             if (light.castsShadows && m_cascadedShadowMap)
             {
                 // Update CSM with current camera
+                auto invViewProj = DirectX::XMMatrixInverse(nullptr, cameraState.viewProjection);
                 m_cascadedShadowMap->Update(
-                    cameraState.invProjection,
+                    invViewProj,
                     direction,
                     0.1f,   // Near clip
                     400.0f  // Far clip

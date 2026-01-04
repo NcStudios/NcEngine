@@ -1,173 +1,197 @@
-#include "core/PerFrameTypes.fxh"
-#include "core/Lighting.fxh"
+  #include "core/PerFrameTypes.fxh"
+  #include "core/Lighting.fxh"
 
-struct PSInput
-{
-    float4 Pos           : SV_POSITION;
-    float3 Normal        : NORMAL;
-    float2 UV            : TEX_COORD;
-    uint   MaterialIndex;
-    float4 WorldPos;
-    float3 LocalPos;
-    float3 ViewDir;
-};
+  struct PSInput
+  {
+      float4 Pos           : SV_POSITION;
+      float3 Normal        : NORMAL;
+      float2 UV            : TEX_COORD;
+      uint   MaterialIndex;
+      float4 WorldPos;
+      float3 LocalPos;
+      float3 ViewDir;
+  };
 
-struct PSOutput
-{
-    float4 color : SV_TARGET;
-};
+  struct PSOutput
+  {
+      float4 color : SV_TARGET;
+  };
 
-Texture2D     Textures[];
-SamplerState  Textures_sampler; // By convention, texture samplers must use the '_sampler' suffix
+  Texture2D     Textures[];
+  SamplerState  Textures_sampler; // By convention, texture samplers must use the '_sampler' suffix
 
-StructuredBuffer<MaterialData> Materials : register(t1);
+  StructuredBuffer<MaterialData> Materials : register(t1);
 
-const float Epsilon = 1e-10;
+  const float Epsilon = 1e-10;
 
-float Band(float lightAmount)
-{
-    if (lightAmount * 100 < 0.05f)
-    {
-        return 0.0f;
-    }
+  float Band(float lightAmount)
+  {
+      if (lightAmount * 100 < 0.05f)
+      {
+          return 0.0f;
+      }
 
-    return 1.0f;
-}
+      return 1.0f;
+  }
 
-void main(in  PSInput  PSIn, out PSOutput PSOut)
-{
-    MaterialData material = Materials[PSIn.MaterialIndex];
+  void main(in  PSInput  PSIn, out PSOutput PSOut)
+  {
+      MaterialData material = Materials[PSIn.MaterialIndex];
 
-    // Get texture colors
-    uint TexIndex = material.diffuseTexIndex;
-    uint NormalIndex = material.normalTexIndex;
-    float4 Diffuse = Textures[TexIndex].Sample(Textures_sampler, PSIn.UV);
-    float4 Normals = Textures[NormalIndex].Sample(Textures_sampler, PSIn.UV);
+      // Get texture colors
+      uint TexIndex = material.diffuseTexIndex;
+      uint NormalIndex = material.normalTexIndex;
+      float4 Diffuse = Textures[TexIndex].Sample(Textures_sampler, PSIn.UV);
+      float4 Normals = Textures[NormalIndex].Sample(Textures_sampler, PSIn.UV);
 
-    float4 color = Diffuse;
+      float4 color = Diffuse;
 
-    // Transform colors to limited scheme
-    if (useColorOverride) // Global
-    {
-        if (Diffuse.r > 0.99f)
-        {
-            color = primaryColor;
-        }
-        else if (Diffuse.g > 0.99f)
-        {
-            color = secondaryColor;
-        }
-        else if (Diffuse.b > 0.99f)
-        {
-            color = tertiaryColor;
-        }
-    }
+      // Transform colors to limited scheme
+      if (useColorOverride) // Global
+      {
+          if (Diffuse.r > 0.99f)
+          {
+              color = primaryColor;
+          }
+          else if (Diffuse.g > 0.99f)
+          {
+              color = secondaryColor;
+          }
+          else if (Diffuse.b > 0.99f)
+          {
+              color = tertiaryColor;
+          }
+      }
 
-    if (material.useColorOverride) // Per Material
-    {
-        if (Diffuse.r > 0.99f)
-        {
-            color = material.primaryColor;
-        }
-        else if (Diffuse.g > 0.99f)
-        {
-            color = material.secondaryColor;
-        }
-        else if (Diffuse.b > 0.99f)
-        {
-            color = material.tertiaryColor;
-        }
-    }
+      if (material.useColorOverride) // Per Material
+      {
+          if (Diffuse.r > 0.99f)
+          {
+              color = material.primaryColor;
+          }
+          else if (Diffuse.g > 0.99f)
+          {
+              color = material.secondaryColor;
+          }
+          else if (Diffuse.b > 0.99f)
+          {
+              color = material.tertiaryColor;
+          }
+      }
 
-    // Get normals either from vertex normals or from the normal texture
-    float3 normals = PSIn.Normal;
-    if (material.useTextureNormals)
-    {
-        normals = normalize(Normals.xyz * float3(2.0) - float3(1.0));
-    }
+      // Get normals either from vertex normals or from the normal texture
+      float3 normals = PSIn.Normal;
+      if (material.useTextureNormals)
+      {
+          normals = normalize(Normals.xyz * float3(2.0) - float3(1.0));
+      }
 
-    float3 result = 0.0f;
-    uint uniShadowMapIndex = 0u;
-    uint pointShadowMapIndex = 0u;
-    uint shadowCasterCount = 0u;
-    float4 result4 = float4(result, 1.0f);
+      float3 result = 0.0f;
+      uint uniShadowMapIndex = 0u;
+      uint pointShadowMapIndex = 0u;
+      uint shadowCasterCount = 0u;
+      float4 result4 = float4(result, 1.0f);
 
-    for (int i = 0; i < lightCount; i++)
-    {
-        LightInfluence influence = LightRadiance(Lights[i], PSIn.WorldPos.xyz, cameraPosition, normals);
-        float diffuseAmt = 0.0f;
-        float specularAmt = 0.0f;
+      // Compute view depth for CSM cascade selection
+      float viewDepth = length(PSIn.WorldPos.xyz - cameraPosition);
 
-        // Flat shading
-        if (!material.useFlatShading)
-        {
-            diffuseAmt = influence.diffuseAmt * influence.intensity;
-            specularAmt = influence.specularAmt * influence.intensity * material.reflectivity;
-        }
-        else // Smooth shading
-        {
-            diffuseAmt = Band(influence.diffuseAmt) * influence.intensity;
-            specularAmt = Band(influence.specularAmt) * influence.intensity * material.reflectivity;
-        }
+      for (int i = 0; i < lightCount; i++)
+      {
+          LightInfluence influence = LightRadiance(Lights[i], PSIn.WorldPos.xyz, cameraPosition, normals);
+          float diffuseAmt = 0.0f;
+          float specularAmt = 0.0f;
 
-        // Calculate shadow factor
-        float shadowFactor = 1.0f;
-        if (Lights[i].castsShadows)
-        {
-            if (Lights[i].type == 1)
-            {
-                TextureCube depthTex = PointShadowMapSinks[pointShadowMapIndex];
-                float rawShadow = PointShadowCalculation(PSIn.WorldPos, Lights[i].position,  depthTex, normals);
-                shadowFactor += (rawShadow);
-                pointShadowMapIndex++;
-            }
-            else
-            {
-                Texture2D depthTex = UniShadowMapSinks[uniShadowMapIndex];
+          // Flat shading
+          if (!material.useFlatShading)
+          {
+              diffuseAmt = influence.diffuseAmt * influence.intensity;
+              specularAmt = influence.specularAmt * influence.intensity * material.reflectivity;
+          }
+          else // Smooth shading
+          {
+              diffuseAmt = Band(influence.diffuseAmt) * influence.intensity;
+              specularAmt = Band(influence.specularAmt) * influence.intensity * material.reflectivity;
+          }
 
-                // Calculate light direction for bias computation
-                float3 lightDir = (Lights[i].type == 0)
-                    ? normalize(-Lights[i].direction)
-                    : normalize(Lights[i].position - PSIn.WorldPos.xyz);
-                float rawShadow = UniShadowCalculation(Lights[i].type == 0, mul(mul(PSIn.WorldPos, LightMatrices[Lights[i].lightMatrixIndex].viewProjection), biasMat), depthTex, normals, lightDir);
-                shadowFactor += (rawShadow);
-                uniShadowMapIndex++;
-            }
-        }
+          // Calculate shadow factor
+          float shadowFactor = 1.0f;
+          if (Lights[i].castsShadows)
+          {
+              if (Lights[i].type == 1) // Point light
+              {
+                  TextureCube depthTex = PointShadowMapSinks[pointShadowMapIndex];
+                  float rawShadow = PointShadowCalculation(PSIn.WorldPos, Lights[i].position,  depthTex, normals);
+                  shadowFactor = 1.0 - rawShadow;
+                  pointShadowMapIndex++;
+              }
+              else if (Lights[i].type == 0 && Lights[i].cascadeCount > 0) // Directional light with CSM
+              {
+                  // Calculate light direction for bias computation
+                  float3 lightDir = normalize(-Lights[i].direction);
 
-        shadowFactor = min((1-shadowFactor) + 1.0f, 1.0f);
-        diffuseAmt = max(diffuseAmt * shadowFactor, 0.0f);
-        specularAmt = max(diffuseAmt * shadowFactor, 0.0f);
+                  float rawShadow = CascadedShadowCalculation(
+                      PSIn.WorldPos.xyz,
+                      normals,
+                      lightDir,
+                      viewDepth,
+                      Lights[i].cascadeStartIndex,
+                      Lights[i].cascadeCount,
+                      uniShadowMapIndex
+                  );
+                  shadowFactor = 1.0 - rawShadow;
+                  uniShadowMapIndex += Lights[i].cascadeCount;
+              }
+              else // Spot light or directional without CSM (legacy path)
+              {
+                  Texture2D depthTex = UniShadowMapSinks[uniShadowMapIndex];
 
-        // Apply lighting influences and shadows
-        result += ((diffuseAmt * influence.diffuseColor * color.rgb) + (specularAmt * influence.specularColor * color.rgb ));
-        result4 = float4(result, 1.0f);
+                  // Calculate light direction for bias computation
+                  float3 lightDir = (Lights[i].type == 0)
+                      ? normalize(-Lights[i].direction)
+                      : normalize(Lights[i].position - PSIn.WorldPos.xyz);
+                  float rawShadow = UniShadowCalculation(Lights[i].type == 0, mul(mul(PSIn.WorldPos, LightMatrices[Lights[i].lightMatrixIndex].viewProjection), biasMat), depthTex, normals, lightDir);
+                  shadowFactor = 1.0 - rawShadow;
+                  uniShadowMapIndex++;
+              }
+          }
+        //   else
+        //   {
+        //       shadowFactor = 0.0f;
+        //   }
 
-        // Apply hatching
-        if (material.useHatchTexture)
-        {
-            // Get hatching texture and tiling property
-            uint hatchTexIndex = material.hatchTexIndex;
-            float hatchTiling  = material.hatchTiling;
-            float hatchLight   = Textures[hatchTexIndex].Sample(Textures_sampler, PSIn.UV * hatchTiling).r;
-            float hatchMedium  = Textures[hatchTexIndex].Sample(Textures_sampler, PSIn.UV * hatchTiling).g;
-            float hatchDark    = Textures[hatchTexIndex].Sample(Textures_sampler, PSIn.UV * hatchTiling).b;
+          shadowFactor = saturate(shadowFactor);
+          diffuseAmt = max(diffuseAmt * shadowFactor, 0.0f);
+          specularAmt = max(specularAmt * shadowFactor, 0.0f);
 
-            if (influence.diffuseAmt < 0.05f)
-            {
-                result4.rgb = lerp(result4.rgb, result4.rgb * hatchDark, 1-(influence.diffuseAmt));
-            }
-            else if (influence.diffuseAmt < 0.1f)
-            {
-                result4.rgb = lerp(result4.rgb, result4.rgb * hatchMedium, 1-(influence.diffuseAmt * 5));
-            }
-        }
-    }
+          // Apply lighting influences and shadows
+          result += ((diffuseAmt * influence.diffuseColor * color.rgb) + (specularAmt * influence.specularColor * color.rgb ));
+          result4 = float4(result, 1.0f);
 
-    // Gradient
-    float4 gradient = lerp(material.gradientStart, material.gradientEnd, (normalize(PSIn.LocalPos).y + 1) * 0.5);
-    float4 gradientApplied = lerp(result4, result4 + gradient, material.gradientAmount);
-    float4 outputColor = lerp(gradientApplied, gradientApplied * gradient, 0.5f);
+          // Apply hatching
+          if (material.useHatchTexture)
+          {
+              // Get hatching texture and tiling property
+              uint hatchTexIndex = material.hatchTexIndex;
+              float hatchTiling  = material.hatchTiling;
+              float hatchLight   = Textures[hatchTexIndex].Sample(Textures_sampler, PSIn.UV * hatchTiling).r;
+              float hatchMedium  = Textures[hatchTexIndex].Sample(Textures_sampler, PSIn.UV * hatchTiling).g;
+              float hatchDark    = Textures[hatchTexIndex].Sample(Textures_sampler, PSIn.UV * hatchTiling).b;
 
-    PSOut.color = outputColor;
-}
+              if (influence.diffuseAmt < 0.05f)
+              {
+                  result4.rgb = lerp(result4.rgb, result4.rgb * hatchDark, 1-(influence.diffuseAmt));
+              }
+              else if (influence.diffuseAmt < 0.1f)
+              {
+                  result4.rgb = lerp(result4.rgb, result4.rgb * hatchMedium, 1-(influence.diffuseAmt * 5));
+              }
+          }
+      }
+
+      // Gradient
+      float4 gradient = lerp(material.gradientStart, material.gradientEnd, (normalize(PSIn.LocalPos).y + 1) * 0.5);
+      float4 gradientApplied = lerp(result4, result4 + gradient, material.gradientAmount);
+      float4 outputColor = lerp(gradientApplied, gradientApplied * gradient, 0.5f);
+
+      PSOut.color = outputColor;
+  }

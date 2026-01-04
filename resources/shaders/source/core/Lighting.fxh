@@ -5,6 +5,7 @@ TextureCube   PointShadowMapSinks[];
 
 StructuredBuffer<LightData> Lights : register(t2);
 StructuredBuffer<LightMatrix> LightMatrices;
+StructuredBuffer<CascadeData> Cascades;
 
 struct LightInfluence
 {
@@ -145,6 +146,93 @@ float UniShadowCalculation(bool isDirectional, float4 fragPosLightSpace, Texture
     return shadow;
 }
 
+// CSM helper: Select cascade based on view-space depth
+uint SelectCascade(float viewDepth, uint cascadeStartIndex, uint cascadeCount)
+{
+    for (uint i = 0; i < cascadeCount; ++i)
+    {
+        if (viewDepth < Cascades[cascadeStartIndex + i].splitDepth)
+        {
+            return i;
+        }
+    }
+    return cascadeCount - 1;
+}
+
+// CSM shadow calculation for directional lights
+float CascadedShadowCalculation(
+    float3 worldPos,
+    float3 normal,
+    float3 lightDir,
+    float viewDepth,
+    uint cascadeStartIndex,
+    uint cascadeCount,
+    uint shadowMapBaseIndex)
+{
+    // Select appropriate cascade
+    uint cascadeIndex = SelectCascade(viewDepth, cascadeStartIndex, cascadeCount);
+    uint shadowMapIndex = shadowMapBaseIndex + cascadeIndex;
+
+    CascadeData cascade = Cascades[cascadeStartIndex + cascadeIndex];
+
+    // Transform world position to light space for selected cascade
+    float4 lightSpacePos = mul(float4(worldPos, 1.0), cascade.viewProjection);
+    lightSpacePos = mul(lightSpacePos, biasMat);
+
+    // Perspective divide
+    float3 projCoords = lightSpacePos.xyz / lightSpacePos.w;
+
+    // Early out if outside shadow map
+    if (projCoords.z > 1.0 || projCoords.z < 0.0)
+    {
+        return 0.0;
+    }
+
+    // Flip Y for DirectX texture coordinates
+    projCoords.y = 1.0 - projCoords.y;
+
+    // Adaptive bias based on surface orientation and cascade texel size
+    float cosTheta = saturate(dot(normal, lightDir));
+    float slopeBias = 0.005 * sqrt(1.0 - cosTheta * cosTheta) / max(cosTheta, 0.01);
+
+    // Scale bias by cascade texel size (larger cascades need more bias)
+    float texelBias = cascade.texelSize * 2.0;
+    float bias = clamp(slopeBias + texelBias, 0.001, 0.03);
+
+    float distance = projCoords.z - bias;
+
+    // PCF 3x3 sampling
+    float shadow = 0.0;
+    float2 texelSize = float2(1.0 / 2048.0, 1.0 / 2048.0);
+
+    [unroll]
+    for (int x = -1; x <= 1; ++x)
+    {
+        [unroll]
+        for (int y = -1; y <= 1; ++y)
+        {
+            float2 offset = float2(x, y) * texelSize;
+            shadow += UniShadowMapSinks[shadowMapIndex].SampleCmpLevelZero(
+                UniShadowMapSinks_sampler,
+                projCoords.xy + offset,
+                distance
+            );
+        }
+    }
+    shadow /= 9.0;
+
+    // Invert: SampleCmp returns 1 when pass (lit), we want shadow amount
+    shadow = 1.0 - shadow;
+
+    // Edge falloff
+    float2 center = float2(0.5, 0.5);
+    float distFromCenter = length(projCoords.xy - center);
+    float falloff = 1.0 - smoothstep(0.4, 0.5, distFromCenter);
+    shadow *= falloff;
+
+    return shadow;
+}
+
 float PointShadowCalculation(float4 fragPosWorldSpace, float3 lightPosWorldSpace, TextureCube depthTex, float3 normal)
 {
     // Get sample vector (light to frag dir)
@@ -152,7 +240,7 @@ float PointShadowCalculation(float4 fragPosWorldSpace, float3 lightPosWorldSpace
     float distance = length(lightToFrag);
 
     // Normalize the distance based on the far plane (Keep in sync with LightSubsystem.cpp)
-    float farPlane = 150.0f; 
+    float farPlane = 150.0f;
     distance = distance / farPlane;
     float3 sampleDir = -normalize(lightToFrag);
 
@@ -165,10 +253,10 @@ float PointShadowCalculation(float4 fragPosWorldSpace, float3 lightPosWorldSpace
 
     float totalSamples = 0.0f;
     [unroll]
-    for (float x = -offset; x <= offset; x += offset / (sampleCount * 0.5f)) 
+    for (float x = -offset; x <= offset; x += offset / (sampleCount * 0.5f))
     {
         [unroll]
-        for (float y = -offset; y <= offset; y += offset / (sampleCount * 0.5f)) 
+        for (float y = -offset; y <= offset; y += offset / (sampleCount * 0.5f))
         {
             [unroll]
             for (float z = -offset; z <= offset; z += offset / (sampleCount * 0.5f))

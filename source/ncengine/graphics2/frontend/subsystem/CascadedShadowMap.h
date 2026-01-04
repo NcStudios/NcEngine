@@ -40,7 +40,9 @@
       [[nodiscard]] auto CalculateFrustumCornersWorldSpace(
           DirectX::FXMMATRIX invViewProj,
           float nearDepth,
-          float farDepth
+          float farDepth,
+          float cameraNear,
+          float cameraFar
       ) const -> FrustumCorners;
 
       void StabilizeCascadeMatrix(DirectX::XMMATRIX& viewProj) const;

@@ -59,5 +59,5 @@ void main(in VSInput VSIn, uint InstanceID : SV_InstanceID, out PSInput PSIn)
     float4 worldPos = mul(pos, Transforms[transformIndex].model);
 
     LightData light = Lights[lightIndex];
-    PSIn.Pos = mul(worldPos, LightMatrices[light.lightMatrixIndex].viewProjection);
+    PSIn.Pos = mul(worldPos, LightMatrices[light.lightMatrixIndex + lightFaceIndex].viewProjection);
 }

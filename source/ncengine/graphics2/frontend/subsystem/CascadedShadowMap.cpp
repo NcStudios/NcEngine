@@ -47,7 +47,7 @@
           const float cascadeFar = m_splitDepths[i + 1];
 
           auto frustumCorners = CalculateFrustumCornersWorldSpace(
-              invViewProj, cascadeNear, cascadeFar
+              invViewProj, cascadeNear, cascadeFar, cameraNear, cameraFar
           );
 
           // Calculate frustum center
@@ -106,7 +106,9 @@
   auto CascadedShadowMap::CalculateFrustumCornersWorldSpace(
       DirectX::FXMMATRIX invViewProj,
       float nearDepth,
-      float farDepth) const -> FrustumCorners
+      float farDepth,
+      float cameraNear,
+      float cameraFar) const -> FrustumCorners
   {
       // NDC corners (RH: z goes from 0 to 1 in Vulkan/DX12)
       constexpr std::array<DirectX::XMVECTOR, 8> ndcCorners = {
@@ -128,17 +130,24 @@
           result.corners[i] = corner;
       }
 
+      // Normalize depths to 0-1 range for interpolation
+      const float depthRange = cameraFar - cameraNear;
+      const float nearT = (nearDepth - cameraNear) / depthRange;
+      const float farT = (farDepth - cameraNear) / depthRange;
+
       // Interpolate near/far planes to desired depths
       for (size_t i = 0; i < 4; ++i)
       {
-          const auto ray = DirectX::XMVectorSubtract(result.corners[i + 4], result.corners[i]);
+          const auto nearCorner = result.corners[i];
+          const auto farCorner = result.corners[i + 4];
+          const auto ray = DirectX::XMVectorSubtract(farCorner, nearCorner);
           result.corners[i] = DirectX::XMVectorAdd(
-              result.corners[i],
-              DirectX::XMVectorScale(ray, nearDepth)
+              nearCorner,
+              DirectX::XMVectorScale(ray, nearT)
           );
           result.corners[i + 4] = DirectX::XMVectorAdd(
-              result.corners[i],
-              DirectX::XMVectorScale(ray, farDepth)
+              nearCorner,
+              DirectX::XMVectorScale(ray, farT)
           );
       }
 
