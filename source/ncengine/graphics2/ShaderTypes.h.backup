@@ -132,18 +132,14 @@ struct LightData
               const float intensity_,
               const Vector3& dir,
               int32_t enableShadows,
-              uint32_t viewProjIndex_,
-              uint32_t cascadeStartIndex_,
-              uint32_t cascadeCount_)
+              uint32_t viewProjIndex_)
         : diffuseColor{diffuseCol},
           type{LightType::Directional},
           specularColor{specularCol},
           direction{dir},
           intensity{intensity_},
           castsShadows{enableShadows},
-          viewProjIndex{viewProjIndex_},
-          cascadeStartIndex{cascadeStartIndex_},
-          cascadeCount{cascadeCount_}
+          viewProjIndex{viewProjIndex_}
     {
     }
 
@@ -202,29 +198,7 @@ struct LightData
     float intensity = 1.0f;
     int castsShadows = 0;
     uint32_t viewProjIndex = 0;
-    uint32_t cascadeStartIndex = 0u;   // Index into CascadeData buffer
-    uint32_t cascadeCount = 0u;        // 0 = legacy single shadow map, >0 = CSM
-    uint32_t padding[3] = {1u, 1u, 1u};
-};
-
-constexpr uint32_t MaxCascadeCount = 4u;
-
-struct CascadeData
-{
-    DirectX::XMMATRIX viewProjection = DirectX::XMMATRIX{};
-    float splitDepth = 0.0f;           // View-space far depth for this cascade
-    float texelSize = 0.0f;            // World-space texel size for bias
-    float padding[2] = {0.0f, 0.0f};
-};
-
-struct CascadeShadowConfig
-{
-    uint32_t cascadeCount = 4u;
-    float shadowDistance = 200.0f;     // Max shadow distance (less than camera far)
-    float splitLambda = 0.75f;         // PSSM split scheme blend factor
-    float blendRegion = 0.1f;          // Cascade overlap percentage
-    float shadowMapResolution = 2048.0f;
-    bool stabilizeCascades = true;
+    uint32_t padding = 0;
 };
 
 // Object model for light projection matrix for shadow mapping (type: StructuredBuffer element type)

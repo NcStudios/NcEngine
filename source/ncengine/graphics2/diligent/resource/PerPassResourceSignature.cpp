@@ -16,6 +16,7 @@ PerPassResourceSignature::PerPassResourceSignature(Diligent::IRenderDevice& devi
                                                    const SinkBufferDesc& depthSinksDesc,
                                                    const SinkBufferDesc& postProcessSinksDesc,
                                                    const SinkBufferDesc& uniShadowMapSinksDesc,
+                                                   const StructuredBufferDesc& cascadeDataBufferDesc,
                                                    const CubeSinkBufferDesc& pointShadowMapSinksDesc,
                                                    const UniformBufferDesc& postProcessPassPropertiesDesc,
                                                    const UniformBufferDesc& sinkIndexDesc)
@@ -31,6 +32,7 @@ PerPassResourceSignature::PerPassResourceSignature(Diligent::IRenderDevice& devi
         ToPipelineResourceDesc(sinkIndexDesc),
         ToPipelineResourceDesc(postProcessPassPropertiesDesc),
         ToPipelineResourceDesc(uniShadowMapSinksDesc),
+        ToPipelineResourceDesc(cascadeDataBufferDesc),
         ToPipelineResourceDesc(pointShadowMapSinksDesc)
     };
 
@@ -97,6 +99,13 @@ PerPassResourceSignature::PerPassResourceSignature(Diligent::IRenderDevice& devi
         MakeUniShadowSinkBufferDesc(uniShadowMapSinksDesc.maxElementCount)
     );
     m_uniShadowMapSinksResource->Update();
+
+    m_cascadeDataBufferResource = std::make_unique<StructuredBuffer<CascadeData>>(
+        context,
+        device,
+        GetVariable(cascadeDataBufferDesc, m_srb),
+        cascadeDataBufferDesc
+    );
 
     m_pointShadowMapSinksResource = std::make_unique<CubeSinkBufferResource>(
         GetVariable(pointShadowMapSinksDesc.shaderType, pointShadowMapSinksDesc.resourceKey.data(), m_srb),

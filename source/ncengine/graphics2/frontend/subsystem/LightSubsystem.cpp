@@ -1,5 +1,5 @@
 #include "LightSubsystem.h"
-
+#include "CascadedShadowMap.h"
 #include "ncengine/ecs/Ecs.h"
 #include "ncengine/ecs/Transform.h"
 #include "ncengine/graphics/Light.h"
@@ -35,10 +35,11 @@ auto CalculateLightViewProjectionMatrix(const DirectX::XMMATRIX& transformMatrix
 }
 namespace nc::graphics
 {
-auto LightSubsystem::BuildState(ecs::ExplicitEcs<DirectionalLight, PointLight, SpotLight, Transform> ecs) -> LightRenderState
+auto LightSubsystem::BuildState(ecs::ExplicitEcs<DirectionalLight, PointLight, SpotLight, Transform> ecs, const CameraRenderState& cameraState) -> LightRenderState
 {
     m_lightData.clear();
     m_lightMatrixData.clear();
+    m_cascadeData.clear();
     auto lightMatrixIndex = 0u;
 
     { // Directional Lights
@@ -46,6 +47,47 @@ auto LightSubsystem::BuildState(ecs::ExplicitEcs<DirectionalLight, PointLight, S
         for (auto [entity, light] : std::views::zip(pool.GetEntityPool(), pool.GetComponents()))
         {
             auto& transform = ecs.Get<Transform>(entity);
+            const auto lightMatrixStartIndex = static_cast<uint32_t>(m_lightMatrixData.size());
+            const auto cascadeStartIndex = static_cast<uint32_t>(m_cascadeData.size());
+
+            // Get light direction from transform
+            const auto direction = DirectX::XMVector3TransformNormal(
+                DirectX::g_XMIdentityR2,
+                transform.TransformationMatrix()
+            );
+
+            if (light.castsShadows && m_cascadedShadowMap)
+            {
+                // Update CSM with current camera
+                m_cascadedShadowMap->Update(
+                    cameraState.invProjection,
+                    direction,
+                    0.1f,   // Near clip
+                    400.0f  // Far clip
+                );
+
+                // Copy cascade data
+                for (const auto& cascade : m_cascadedShadowMap->GetCascadeData())
+                {
+                    m_cascadeData.push_back(cascade);
+                    m_lightMatrixData.push_back(LightMatrixData{
+                        .viewProjection = cascade.viewProjection
+                    });
+                }
+                lightMatrixIndex++;
+            }
+            else if (light.castsShadows)
+            {
+                // Legacy single shadow map fallback
+                m_lightMatrixData.push_back(LightMatrixData{
+                    .viewProjection = directionallight::CalculateLightViewProjectionMatrix(
+                        transform.TransformationMatrix(),
+                        m_directionalLightProjection,
+                        m_sceneExtentY
+                    )
+                });
+                lightMatrixIndex++;
+            }
 
             m_lightData.emplace_back(
                 light.diffuseColor,
@@ -53,14 +95,10 @@ auto LightSubsystem::BuildState(ecs::ExplicitEcs<DirectionalLight, PointLight, S
                 light.intensity,
                 transform.Forward(),
                 light.castsShadows,
-                lightMatrixIndex
+                lightMatrixStartIndex,
+                cascadeStartIndex,
+                m_cascadedShadowMap ? m_cascadedShadowMap->GetCascadeCount() : 0u
             );
-
-            if (light.castsShadows)
-            {
-                m_lightMatrixData.push_back(LightMatrixData{.viewProjection = directionallight::CalculateLightViewProjectionMatrix(transform.TransformationMatrix(), m_directionalLightProjection, m_sceneExtentY)});
-                lightMatrixIndex++;
-            }
         }
     }
 
@@ -155,7 +193,7 @@ auto LightSubsystem::BuildState(ecs::ExplicitEcs<DirectionalLight, PointLight, S
             }
         }
     }
-    return LightRenderState{m_lightData, m_lightMatrixData};
+    return LightRenderState{m_lightData, m_lightMatrixData, m_cascadeData};
 }
 
 void LightSubsystem::OnBeforeSceneLoad(const nc::Vector3& extents)
@@ -164,5 +202,30 @@ void LightSubsystem::OnBeforeSceneLoad(const nc::Vector3& extents)
     m_directionalLightProjection = DirectX::XMMatrixOrthographicRH(extents.x, extents.y, 1.0f, extents.z);
     m_pointLightProjection = DirectX::XMMatrixPerspectiveFovLH(DirectX::XM_PIDIV2, 1.0f, 1.0f, extents.z); // LH is needed for cubemap projection
     // Spot light projection is computed based on light properties
+
+    // Initialize CSM with default config
+    CascadeShadowConfig config{
+          .cascadeCount = 4u,
+          .shadowDistance = std::min(200.0f, extents.z),
+          .splitLambda = 0.75f,
+          .blendRegion = 0.1f,
+          .shadowMapResolution = 2048.0f,
+          .stabilizeCascades = true
+    };
+    m_cascadedShadowMap = std::make_unique<CascadedShadowMap>(config);
+}
+
+void LightSubsystem::SetCascadeConfig(const CascadeShadowConfig& config)
+{
+    if (m_cascadedShadowMap)
+    {
+        m_cascadedShadowMap->SetConfig(config);
+    }
+}
+
+const CascadeShadowConfig& LightSubsystem::GetCascadeConfig() const
+{
+    static CascadeShadowConfig defaultConfig{};
+    return m_cascadedShadowMap ? m_cascadedShadowMap->GetConfig() : defaultConfig;
 }
 } // namespace nc::graphics

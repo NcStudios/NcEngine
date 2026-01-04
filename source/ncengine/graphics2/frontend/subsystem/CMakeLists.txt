@@ -1,6 +1,7 @@
 target_sources(${NC_ENGINE_LIB}
     PRIVATE
         CameraSubsystem.cpp
+        CascadedShadowMap.cpp
         LightSubsystem.cpp
         MaterialRegistry.cpp
         MeshSubsystem.cpp

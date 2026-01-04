@@ -234,6 +234,40 @@ void PassBackend::RenderShadowPass(IDeviceContext& context,
 
         if (staticPass.flag & MaterialPassFlag::UniShadow && light.type != LightType::Point)
         {
+            // if (light.type == LightType::Directional)
+            // {
+            //     if (light.cascadeCount > 0)
+            //     {
+            //         // CSM: Render each cascade as a separate layer
+            //         for (uint32_t cascadeIdx = 0; cascadeIdx < light.cascadeCount; ++cascadeIdx)
+            //         {
+            //             // Update sink index to select cascade layer
+            //             m_sinkIndexBuffer.Update(context, SinkIndexData{
+            //                 .lightIndex = static_cast<uint32_t>(lightIdx),
+            //                 .cascadeIndex = cascadeIdx
+            //             });
+
+            //             // Bind cascade shadow map render target (texture array layer)
+            //             BindCascadeShadowMapRenderTarget(
+            //                 context,
+            //                 uniShadowMapIndex + cascadeIdx
+            //             );
+            //             ClearDepthTarget(context);
+
+            //             // Render static geometry
+            //             if (auto staticPass = GetPass(MaterialPassFlag::UniShadow))
+            //             {
+            //                 ExecuteDrawCalls(context, staticPass, staticDrawCalls);
+            //             }
+
+            //             // Render skinned geometry
+            //             if (auto skinnedPass = GetPass(MaterialPassFlag::UniShadowSkinned))
+            //             {
+            //                 ExecuteDrawCalls(context, skinnedPass, skinnedDrawCalls);
+            //             }
+            //         }
+            //         uniShadowMapIndex += light.cascadeCount;
+            // }
             sinkIndexBuffer.Update(context, std::vector<uint32_t>{}, std::vector<uint32_t>{}, false, lightIndex);
             perPassResourceSignature.Commit(context);
 

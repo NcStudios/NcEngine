@@ -10,5 +10,6 @@ struct LightRenderState
 {
     std::span<const LightData> lights;
     std::span<const LightMatrixData> lightMatrices;
+    std::span<const CascadeData> cascades;
 };
 } // namespace nc::graphics

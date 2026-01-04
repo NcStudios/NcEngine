@@ -94,5 +94,22 @@ void ShaderBindings::Update(Diligent::IDeviceContext& context,
             boneData
         );
     }
+
+    // Update cascade buffer
+    if (!renderState.lightRenderState.cascades.empty())
+    {
+        auto cascadeBufferUpdateInfo = BufferUpdateInfo<CascadeData>{
+            .instances = renderState.lightRenderState.cascades,
+            .dirtyRanges = {{0, renderState.lightRenderState.cascades.size()}}
+        };
+
+        m_perPassSignature.GetCascadeDataBufferResource().Update(
+            context, device,
+            BufferUpdateInfo<CascadeData>{
+                .instances = renderState.lightRenderState.cascades,
+                .dirtyRanges = {{0, renderState.lightRenderState.cascades.size()}}
+            }
+        );
+    }
 }
 } // namespace nc::graphics
