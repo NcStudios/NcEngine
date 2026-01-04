@@ -191,13 +191,14 @@ float CascadedShadowCalculation(
     // Flip Y for DirectX texture coordinates
     projCoords.y = 1.0 - projCoords.y;
 
-    // Adaptive bias based on surface orientation and cascade texel size
+    // Adaptive slope-based bias for shadow acne prevention
     float cosTheta = saturate(dot(normal, lightDir));
-    float slopeBias = 0.005 * sqrt(1.0 - cosTheta * cosTheta) / max(cosTheta, 0.01);
+    float slopeBias = 0.002 * tan(acos(cosTheta));
+    slopeBias = clamp(slopeBias, 0.0, 0.005);
 
-    // Scale bias by cascade texel size (larger cascades need more bias)
-    float texelBias = cascade.texelSize * 2.0;
-    float bias = clamp(slopeBias + texelBias, 0.001, 0.03);
+    // Small constant bias
+    float constBias = 0.0005;
+    float bias = constBias + slopeBias;
 
     float distance = projCoords.z - bias;
 

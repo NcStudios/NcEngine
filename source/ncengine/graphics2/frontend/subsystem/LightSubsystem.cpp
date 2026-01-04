@@ -63,8 +63,8 @@ auto LightSubsystem::BuildState(ecs::ExplicitEcs<DirectionalLight, PointLight, S
                 m_cascadedShadowMap->Update(
                     invViewProj,
                     direction,
-                    0.1f,   // Near clip
-                    400.0f  // Far clip
+                    cameraState.nearClip,
+                    cameraState.farClip
                 );
 
                 // Copy cascade data
@@ -205,12 +205,13 @@ void LightSubsystem::OnBeforeSceneLoad(const nc::Vector3& extents)
     // Spot light projection is computed based on light properties
 
     // Initialize CSM with default config
+    // splitLambda: 0.0 = uniform distribution, 1.0 = logarithmic (more detail near camera)
     CascadeShadowConfig config{
           .cascadeCount = 4u,
           .shadowDistance = std::min(200.0f, extents.z),
-          .splitLambda = 0.75f,
+          .splitLambda = 0.5f,  // More balanced distribution
           .blendRegion = 0.1f,
-          .shadowMapResolution = 2048.0f,
+          .shadowMapResolution = 512.0f,
           .stabilizeCascades = true
     };
     m_cascadedShadowMap = std::make_unique<CascadedShadowMap>(config);

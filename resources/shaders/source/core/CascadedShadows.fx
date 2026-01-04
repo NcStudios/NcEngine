@@ -76,31 +76,18 @@ float CascadedShadowCalculation(
     float cosTheta = saturate(dot(normal, lightDir));
     float slopeBias = 0.005 * sqrt(1.0 - cosTheta * cosTheta) / max(cosTheta, 0.01);
 
-    // Scale bias by cascade texel size (larger cascades need more bias)
+    // Scale bias by cascade texel size
     float texelBias = cascade.texelSize * 2.0;
     float bias = clamp(slopeBias + texelBias, 0.001, 0.03);
 
     float distance = projCoords.z - bias;
 
-    // PCF sampling (2x2)
-    float shadow = 0.0;
-    float2 texelSize = float2(1.0 / 2048.0, 1.0 / 2048.0); // Match shadow map resolution
-
-    [unroll]
-    for (int x = -1; x <= 1; ++x)
-    {
-        [unroll]
-        for (int y = -1; y <= 1; ++y)
-        {
-            float2 offset = float2(x, y) * texelSize;
-            shadow += shadowMaps[shadowMapIndex].SampleCmpLevelZero(
-                shadowSampler,
-                projCoords.xy + offset,
-                distance
-            );
-        }
-    }
-    shadow /= 9.0;
+    // Single sample (no PCF)
+    float shadow = shadowMaps[shadowMapIndex].SampleCmpLevelZero(
+        shadowSampler,
+        projCoords.xy,
+        distance
+    );
 
     // Invert: SampleCmp returns 1 when pass (lit), we want shadow factor
     shadow = 1.0 - shadow;

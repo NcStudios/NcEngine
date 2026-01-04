@@ -22,6 +22,15 @@
 
   StructuredBuffer<MaterialData> Materials : register(t1);
 
+  // Debug: Set to true to visualize CSM cascades with colors
+  static const bool DEBUG_CSM_CASCADES = true;
+  static const float3 CASCADE_COLORS[4] = {
+      float3(1.0, 0.0, 0.0),  // Cascade 0: Red (nearest)
+      float3(0.0, 1.0, 0.0),  // Cascade 1: Green
+      float3(0.0, 0.0, 1.0),  // Cascade 2: Blue
+      float3(1.0, 1.0, 0.0)   // Cascade 3: Yellow (farthest)
+  };
+
   const float Epsilon = 1e-10;
 
   float Band(float lightAmount)
@@ -92,8 +101,13 @@
       uint shadowCasterCount = 0u;
       float4 result4 = float4(result, 1.0f);
 
-      // Compute view depth for CSM cascade selection
-      float viewDepth = length(PSIn.WorldPos.xyz - cameraPosition);
+      // Compute linear view depth for CSM cascade selection
+      // Linearize the depth buffer value using near/far clip planes
+      float viewDepth = (nearClip * farClip) / (farClip - PSIn.Pos.z * (farClip - nearClip));
+
+      // Debug: track cascade index for visualization
+      uint debugCascadeIndex = 0u;
+      bool hasCSMLight = false;
 
       for (int i = 0; i < lightCount; i++)
       {
@@ -126,7 +140,7 @@
               }
               else if (Lights[i].type == 0 && Lights[i].cascadeCount > 0) // Directional light with CSM
               {
-                  // Calculate light direction for bias computation
+                  // Calculate light direction for bias computation (direction TO the light)
                   float3 lightDir = normalize(-Lights[i].direction);
 
                   float rawShadow = CascadedShadowCalculation(
@@ -139,6 +153,11 @@
                       uniShadowMapIndex
                   );
                   shadowFactor = 1.0 - rawShadow;
+
+                  // Track cascade for debug visualization
+                  debugCascadeIndex = SelectCascade(viewDepth, Lights[i].cascadeStartIndex, Lights[i].cascadeCount);
+                  hasCSMLight = true;
+
                   uniShadowMapIndex += Lights[i].cascadeCount;
               }
               else // Spot light or directional without CSM (legacy path)
@@ -192,6 +211,12 @@
       float4 gradient = lerp(material.gradientStart, material.gradientEnd, (normalize(PSIn.LocalPos).y + 1) * 0.5);
       float4 gradientApplied = lerp(result4, result4 + gradient, material.gradientAmount);
       float4 outputColor = lerp(gradientApplied, gradientApplied * gradient, 0.5f);
+
+      // Debug: CSM cascade visualization
+      if (DEBUG_CSM_CASCADES && hasCSMLight)
+      {
+          outputColor.rgb = lerp(outputColor.rgb, CASCADE_COLORS[min(debugCascadeIndex, 3u)], 0.2);
+      }
 
       PSOut.color = outputColor;
   }
