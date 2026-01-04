@@ -2,6 +2,7 @@
 #include "graphics2/frontend/subsystem/CameraRenderState.h"
 #include "graphics2/frontend/subsystem/EnvironmentRenderState.h"
 #include "graphics2/frontend/subsystem/LightRenderState.h"
+#include "ncengine/config/Config.h"
 #include "ncengine/graphics/Environment.h"
 
 namespace nc::graphics
@@ -37,7 +38,8 @@ void EnvironmentBufferResource::Update(Diligent::IDeviceContext& context,
         .farClip = cameraState.farClip,
         .skyboxIndex = environmentRenderState.skyboxIndex,
         .useSkybox = environmentRenderState.useSkybox,
-        .useColorOverride = environmentRenderState.useColorOverride
+        .useColorOverride = environmentRenderState.useColorOverride,
+        .shadowMapResolution = static_cast<float>(config::GetGraphicsSettings().shadowMapResolution)
     };
 
     m_buffer.Write(context, data);

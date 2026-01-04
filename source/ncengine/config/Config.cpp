@@ -76,6 +76,10 @@ constexpr auto ShadowMapResolutionKey = "shadow_map_resolution"sv;
 constexpr auto AntialiasingKey = "antialiasing"sv;
 constexpr auto InitialBatchSize = "initial_batch_size"sv;
 constexpr auto UseValidationLayersKey = "use_validation_layers"sv;
+constexpr auto CsmCascadeCountKey = "csm_cascade_count"sv;
+constexpr auto CsmShadowDistanceKey = "csm_shadow_distance"sv;
+constexpr auto CsmSplitLambdaKey = "csm_split_lambda"sv;
+constexpr auto CsmStabilizeKey = "csm_stabilize"sv;
 
 // audio
 constexpr auto AudioEnabledKey = "audio_enabled"sv;
@@ -235,6 +239,10 @@ auto BuildFromConfigMap(const std::unordered_map<std::string, std::string>& kvPa
         ParseValueIfExists(out.antialiasing, AntialiasingKey, kvPairs);
         ParseValueIfExists(out.initialBatchSize, InitialBatchSize, kvPairs);
         ParseValueIfExists(out.useValidationLayers, UseValidationLayersKey, kvPairs);
+        ParseValueIfExists(out.csmCascadeCount, CsmCascadeCountKey, kvPairs);
+        ParseValueIfExists(out.csmShadowDistance, CsmShadowDistanceKey, kvPairs);
+        ParseValueIfExists(out.csmSplitLambda, CsmSplitLambdaKey, kvPairs);
+        ParseValueIfExists(out.csmStabilize, CsmStabilizeKey, kvPairs);
     }
     else if constexpr (std::same_as<Struct_t, nc::config::PhysicsSettings>)
     {
@@ -403,6 +411,10 @@ void Write(std::ostream& stream, const Config& config, bool writeSections)
     ::WriteKVPair(stream, AntialiasingKey, config.graphicsSettings.antialiasing);
     ::WriteKVPair(stream, InitialBatchSize, config.graphicsSettings.initialBatchSize);
     ::WriteKVPair(stream, UseValidationLayersKey, config.graphicsSettings.useValidationLayers);
+    ::WriteKVPair(stream, CsmCascadeCountKey, config.graphicsSettings.csmCascadeCount);
+    ::WriteKVPair(stream, CsmShadowDistanceKey, config.graphicsSettings.csmShadowDistance);
+    ::WriteKVPair(stream, CsmSplitLambdaKey, config.graphicsSettings.csmSplitLambda);
+    ::WriteKVPair(stream, CsmStabilizeKey, config.graphicsSettings.csmStabilize);
 
     if (writeSections) stream << "[audio_settings]\n";
     ::WriteKVPair(stream, AudioEnabledKey, config.audioSettings.enabled);

@@ -12,6 +12,8 @@ cbuffer EnvironmentProperties
     uint skyboxIndex;
     uint useSkybox;
     bool useColorOverride;
+    float shadowMapResolution;
+    float2 envPadding;
 };
 
 struct StaticMeshInstanceData

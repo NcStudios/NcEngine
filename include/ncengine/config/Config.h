@@ -79,6 +79,10 @@ struct GraphicsSettings
     unsigned antialiasing = 8u;          ///< the number of samples for MSAA
     unsigned initialBatchSize = 1u;      ///< default instance capacity for render batch allocation (size hint - can grow beyond this)
     bool useValidationLayers = false;    ///< turn on validation layers in debug builds
+    unsigned csmCascadeCount = 4u;       ///< number of shadow cascades (1-4)
+    float csmShadowDistance = 200.0f;    ///< max shadow distance from camera
+    float csmSplitLambda = 0.5f;         ///< cascade split distribution (0=uniform, 1=logarithmic)
+    bool csmStabilize = true;            ///< stabilize cascades to reduce shimmer
 };
 
 /** @brief Options for configuring NcPhysics. */

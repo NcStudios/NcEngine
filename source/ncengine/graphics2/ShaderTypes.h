@@ -27,6 +27,8 @@ struct GlobalEnvironmentData
     uint32_t skyboxIndex = 0;
     uint32_t useSkybox = 0;
     uint32_t useColorOverride = 0;
+    float shadowMapResolution = 2048.0f;
+    float padding[2] = {0.0f, 0.0f}; // Align to 16 bytes
 };
 
 // Object model for outline pass properties used by post processing effects (type: constant buffer)

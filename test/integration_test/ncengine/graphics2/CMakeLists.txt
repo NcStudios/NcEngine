@@ -62,6 +62,7 @@ add_graphics_test(EnvironmentBufferResource_tests)
 target_sources(EnvironmentBufferResource_tests
     PRIVATE
         EnvironmentBufferResource_tests.cpp
+        ${NC_SOURCE_DIR}/config/Config.cpp
         ${NC_SOURCE_DIR}/graphics2/diligent/resource/EnvironmentBufferResource.cpp
         ${NC_SOURCE_DIR}/graphics2/diligent/resource/ResourceTypes.cpp
         ${NC_SOURCE_DIR}/graphics2/diligent/resource/base/DynamicUniformBuffer.cpp

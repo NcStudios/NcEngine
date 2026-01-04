@@ -204,7 +204,7 @@ float CascadedShadowCalculation(
 
     // PCF 3x3 sampling
     float shadow = 0.0;
-    float2 texelSize = float2(1.0 / 2048.0, 1.0 / 2048.0);
+    float2 texelSize = float2(1.0 / shadowMapResolution, 1.0 / shadowMapResolution);
 
     [unroll]
     for (int x = -1; x <= 1; ++x)

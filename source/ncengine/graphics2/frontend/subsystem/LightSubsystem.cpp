@@ -1,5 +1,6 @@
 #include "LightSubsystem.h"
 #include "CascadedShadowMap.h"
+#include "ncengine/config/Config.h"
 #include "ncengine/ecs/Ecs.h"
 #include "ncengine/ecs/Transform.h"
 #include "ncengine/graphics/Light.h"
@@ -204,17 +205,17 @@ void LightSubsystem::OnBeforeSceneLoad(const nc::Vector3& extents)
     m_pointLightProjection = DirectX::XMMatrixPerspectiveFovLH(DirectX::XM_PIDIV2, 1.0f, 1.0f, extents.z); // LH is needed for cubemap projection
     // Spot light projection is computed based on light properties
 
-    // Initialize CSM with default config
-    // splitLambda: 0.0 = uniform distribution, 1.0 = logarithmic (more detail near camera)
-    CascadeShadowConfig config{
-          .cascadeCount = 4u,
-          .shadowDistance = std::min(200.0f, extents.z),
-          .splitLambda = 0.5f,  // More balanced distribution
+    // Initialize CSM from graphics config
+    const auto& graphicsSettings = config::GetGraphicsSettings();
+    CascadeShadowConfig csmConfig{
+          .cascadeCount = graphicsSettings.csmCascadeCount,
+          .shadowDistance = std::min(graphicsSettings.csmShadowDistance, extents.z),
+          .splitLambda = graphicsSettings.csmSplitLambda,
           .blendRegion = 0.1f,
-          .shadowMapResolution = 512.0f,
-          .stabilizeCascades = true
+          .shadowMapResolution = static_cast<float>(graphicsSettings.shadowMapResolution),
+          .stabilizeCascades = graphicsSettings.csmStabilize
     };
-    m_cascadedShadowMap = std::make_unique<CascadedShadowMap>(config);
+    m_cascadedShadowMap = std::make_unique<CascadedShadowMap>(csmConfig);
 }
 
 void LightSubsystem::SetCascadeConfig(const CascadeShadowConfig& config)
