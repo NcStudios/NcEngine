@@ -113,7 +113,7 @@ static const float4x4 biasMat = float4x4(
     0.5, 0.5, 0.0, 1.0
 );
 
-float UniShadowCalculation(bool isDirectional, float4 fragPosLightSpace, Texture2D depthTex)
+float UniShadowCalculation(bool isDirectional, float4 fragPosLightSpace, Texture2D depthTex, float3 normal, float3 lightDir)
 {
     // Perform perspective divide
     float3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
@@ -126,8 +126,14 @@ float UniShadowCalculation(bool isDirectional, float4 fragPosLightSpace, Texture
     // Flip Y
     projCoords.y = 1-projCoords.y;
 
+    // Calculate adaptive bias based on surface orientation to light
+    // Surfaces at grazing angles need more bias to avoid shadow acne
+    float cosTheta = saturate(dot(normal, lightDir));
+    float bias = 0.005 * sqrt(1.0 - cosTheta * cosTheta) / max(cosTheta, 0.01);
+    bias = clamp(bias, 0.001, 0.02);
+
     // Get depth of current fragment from light's perspective
-    float distance = projCoords.z;
+    float distance = projCoords.z - bias;
     float shadow = 1-depthTex.SampleCmpLevelZero(UniShadowMapSinks_sampler, projCoords.xy, distance);
 
     // Falloff as edge of UV Shadow Map is reached

@@ -124,7 +124,12 @@ void main(in  PSInput  PSIn, out PSOutput PSOut)
             else
             {
                 Texture2D depthTex = UniShadowMapSinks[uniShadowMapIndex];
-                float rawShadow = UniShadowCalculation(Lights[i].type == 0, mul(mul(PSIn.WorldPos, LightMatrices[Lights[i].lightMatrixIndex].viewProjection), biasMat), depthTex);
+
+                // Calculate light direction for bias computation
+                float3 lightDir = (Lights[i].type == 0)
+                    ? normalize(-Lights[i].direction)
+                    : normalize(Lights[i].position - PSIn.WorldPos.xyz);
+                float rawShadow = UniShadowCalculation(Lights[i].type == 0, mul(mul(PSIn.WorldPos, LightMatrices[Lights[i].lightMatrixIndex].viewProjection), biasMat), depthTex, normals, lightDir);
                 shadowFactor += (rawShadow);
                 uniShadowMapIndex++;
             }
