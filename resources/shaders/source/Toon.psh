@@ -134,7 +134,7 @@
               if (Lights[i].type == 1) // Point light
               {
                   TextureCube depthTex = PointShadowMapSinks[pointShadowMapIndex];
-                  float rawShadow = PointShadowCalculation(PSIn.WorldPos, Lights[i].position,  depthTex, normals);
+                  float rawShadow = PointShadowCalculation(PSIn.WorldPos, Lights[i].position, Lights[i].radius, depthTex, normals);
                   shadowFactor = 1.0 - rawShadow;
                   pointShadowMapIndex++;
               }

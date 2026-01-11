@@ -18,6 +18,8 @@ StructuredBuffer<StaticMeshInstanceData> StaticInstances;
 
 void main(in PSInput PSIn, out PSOutput PSOut)
 {
-    float3 lightVec = PSIn.WorldPos.xyz - Lights[lightIndex].position;
-    PSOut.Color = length(lightVec) / 150.0f;
+    LightData light = Lights[lightIndex];
+    float3 lightVec = PSIn.WorldPos.xyz - light.position;
+    // Normalize distance by light radius (must match Lighting.fxh PointShadowCalculation)
+    PSOut.Color = length(lightVec) / light.radius;
 }

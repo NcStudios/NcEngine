@@ -137,12 +137,6 @@ float UniShadowCalculation(bool isDirectional, float4 fragPosLightSpace, Texture
     float distance = projCoords.z - bias;
     float shadow = 1-depthTex.SampleCmpLevelZero(UniShadowMapSinks_sampler, projCoords.xy, distance);
 
-    // Falloff as edge of UV Shadow Map is reached
-    float2 center = float2(0.5, 0.5);
-    float distFromCenter = length(projCoords.xy - center);
-    float falloff = 1.0 - smoothstep(0.1, 0.5, distFromCenter);
-    shadow *= falloff;
-
     return shadow;
 }
 
@@ -283,15 +277,14 @@ float CascadedShadowCalculation(
     return shadow;
 }
 
-float PointShadowCalculation(float4 fragPosWorldSpace, float3 lightPosWorldSpace, TextureCube depthTex, float3 normal)
+float PointShadowCalculation(float4 fragPosWorldSpace, float3 lightPosWorldSpace, float lightRadius, TextureCube depthTex, float3 normal)
 {
     // Get sample vector (light to frag dir)
     float3 lightToFrag = lightPosWorldSpace - fragPosWorldSpace.xyz;
     float distance = length(lightToFrag);
 
-    // Normalize the distance based on the far plane (Keep in sync with LightSubsystem.cpp)
-    float farPlane = 150.0f;
-    distance = distance / farPlane;
+    // Normalize the distance based on the light's radius (far plane of shadow projection)
+    distance = distance / lightRadius;
     float3 sampleDir = -normalize(lightToFrag);
 
     // PCF and bias

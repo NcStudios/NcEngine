@@ -23,15 +23,16 @@ auto CalculateLightViewProjectionMatrix(DirectX::FXMMATRIX transformMatrix, Dire
 
 namespace spotlight2
 {
-auto CalculateLightViewProjectionMatrix(const DirectX::XMMATRIX& transformMatrix, float outerAngle, float farClip) -> DirectX::XMMATRIX
+auto CalculateLightViewProjectionMatrix(const DirectX::XMMATRIX& transformMatrix, float outerAngleRadians, float farClip) -> DirectX::XMMATRIX
 {
-    // Compute the effective outer angle in radians
-    float lightFieldOfView = 2 * outerAngle;
+    // The outer angle is the half-angle of the cone, so FOV is 2x that
+    const float lightFieldOfView = 2.0f * outerAngleRadians;
+    constexpr float nearClip = 0.1f;
 
-    // Create a perspective projection matrix that matches the cone
-    auto projectionMatrix = DirectX::XMMatrixPerspectiveRH(lightFieldOfView, 2.0f, 1.0f, farClip);
+    // Use FOV-based perspective projection with 1:1 aspect ratio (square shadow map)
+    auto projectionMatrix = DirectX::XMMatrixPerspectiveFovRH(lightFieldOfView, 1.0f, nearClip, farClip);
     const auto look = DirectX::XMVector3TransformNormal(DirectX::g_XMIdentityR2, transformMatrix);
-    return DirectX::XMMatrixLookAtRH(transformMatrix.r[3], look, DirectX::g_XMNegIdentityR1) * projectionMatrix;
+    return DirectX::XMMatrixLookAtRH(transformMatrix.r[3], DirectX::XMVectorAdd(transformMatrix.r[3], look), DirectX::g_XMNegIdentityR1) * projectionMatrix;
 }
 }
 namespace nc::graphics
@@ -41,7 +42,6 @@ auto LightSubsystem::BuildState(ecs::ExplicitEcs<DirectionalLight, PointLight, S
     m_lightData.clear();
     m_lightMatrixData.clear();
     m_cascadeData.clear();
-    auto lightMatrixIndex = 0u;
 
     { // Directional Lights
         const auto& pool = ecs.GetPool<DirectionalLight>();
@@ -76,7 +76,6 @@ auto LightSubsystem::BuildState(ecs::ExplicitEcs<DirectionalLight, PointLight, S
                         .viewProjection = cascade.viewProjection
                     });
                 }
-                lightMatrixIndex++;
             }
             else if (light.castsShadows)
             {
@@ -88,7 +87,6 @@ auto LightSubsystem::BuildState(ecs::ExplicitEcs<DirectionalLight, PointLight, S
                         m_sceneExtentY
                     )
                 });
-                lightMatrixIndex++;
             }
 
             m_lightData.emplace_back(
@@ -109,6 +107,8 @@ auto LightSubsystem::BuildState(ecs::ExplicitEcs<DirectionalLight, PointLight, S
         for (auto [entity, light] : std::views::zip(pool.GetEntityPool(), pool.GetComponents()))
         {
             auto& transform = ecs.Get<Transform>(entity);
+            const auto lightMatrixStartIndex = static_cast<uint32_t>(m_lightMatrixData.size());
+
             m_lightData.emplace_back(
                 light.diffuseColor,
                 light.specularColor,
@@ -116,53 +116,52 @@ auto LightSubsystem::BuildState(ecs::ExplicitEcs<DirectionalLight, PointLight, S
                 transform.Position(),
                 light.castsShadows,
                 light.radius,
-                lightMatrixIndex
+                lightMatrixStartIndex
             );
 
             if (light.castsShadows)
             {
+                // Create per-light projection constrained to light's radius
+                constexpr float nearClip = 0.1f;
+                const auto pointLightProjection = DirectX::XMMatrixPerspectiveFovLH(
+                    DirectX::XM_PIDIV2, 1.0f, nearClip, light.radius
+                );
+
                 // Positive X
                 {
                     const auto look = DirectX::XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f);
                     auto viewMatrix = DirectX::XMMatrixLookAtLH(transform.PositionXM(), DirectX::XMVectorAdd(transform.PositionXM(),look), DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f));
-                    m_lightMatrixData.push_back(LightMatrixData{.viewProjection = DirectX::XMMatrixMultiply(viewMatrix, m_pointLightProjection)});
-                    lightMatrixIndex++;
+                    m_lightMatrixData.push_back(LightMatrixData{.viewProjection = DirectX::XMMatrixMultiply(viewMatrix, pointLightProjection)});
                 }
                 // Negative X
                 {
                     const auto look = DirectX::XMVectorSet(-1.0f, 0.0f, 0.0f, 0.0f);
                     auto viewMatrix = DirectX::XMMatrixLookAtLH(transform.PositionXM(), DirectX::XMVectorAdd(transform.PositionXM(),look), DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f));
-                    m_lightMatrixData.push_back(LightMatrixData{.viewProjection = DirectX::XMMatrixMultiply(viewMatrix, m_pointLightProjection)});
-                    lightMatrixIndex++;
+                    m_lightMatrixData.push_back(LightMatrixData{.viewProjection = DirectX::XMMatrixMultiply(viewMatrix, pointLightProjection)});
                 }
                 // Positive Y
                 {
                     const auto look = DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
                     auto viewMatrix = DirectX::XMMatrixLookAtLH(transform.PositionXM(),  DirectX::XMVectorAdd(transform.PositionXM(),look), DirectX::XMVectorSet(0.0f, 0.0f, -1.0f, 0.0f));
-                    m_lightMatrixData.push_back(LightMatrixData{.viewProjection = DirectX::XMMatrixMultiply(viewMatrix, m_pointLightProjection)});
-                    lightMatrixIndex++;
+                    m_lightMatrixData.push_back(LightMatrixData{.viewProjection = DirectX::XMMatrixMultiply(viewMatrix, pointLightProjection)});
                 }
-                    // Negative Y
+                // Negative Y
                 {
                     const auto look = DirectX::XMVectorSet(0.0f, -1.0f, 0.0f, 0.0f);
                     auto viewMatrix = DirectX::XMMatrixLookAtLH(transform.PositionXM(),  DirectX::XMVectorAdd(transform.PositionXM(),look), DirectX::XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f));
-                    m_lightMatrixData.push_back(LightMatrixData{.viewProjection = DirectX::XMMatrixMultiply(viewMatrix, m_pointLightProjection)});
-                    lightMatrixIndex++;
+                    m_lightMatrixData.push_back(LightMatrixData{.viewProjection = DirectX::XMMatrixMultiply(viewMatrix, pointLightProjection)});
                 }
- 
                 // Positive Z
                 {
                     const auto look = DirectX::XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f);
                     auto viewMatrix = DirectX::XMMatrixLookAtLH(transform.PositionXM(), DirectX::XMVectorAdd(transform.PositionXM(),look), DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f));
-                    m_lightMatrixData.push_back(LightMatrixData{.viewProjection = DirectX::XMMatrixMultiply(viewMatrix, m_pointLightProjection)});
-                    lightMatrixIndex++;
+                    m_lightMatrixData.push_back(LightMatrixData{.viewProjection = DirectX::XMMatrixMultiply(viewMatrix, pointLightProjection)});
                 }
                 // Negative Z
                 {
                     const auto look = DirectX::XMVectorSet(0.0f, 0.0f, -1.0f, 0.0f);
                     auto viewMatrix = DirectX::XMMatrixLookAtLH(transform.PositionXM(), DirectX::XMVectorAdd(transform.PositionXM(),look), DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f));
-                    m_lightMatrixData.push_back(LightMatrixData{.viewProjection = DirectX::XMMatrixMultiply(viewMatrix, m_pointLightProjection)});
-                    lightMatrixIndex++;
+                    m_lightMatrixData.push_back(LightMatrixData{.viewProjection = DirectX::XMMatrixMultiply(viewMatrix, pointLightProjection)});
                 }
             }
         }
@@ -172,8 +171,10 @@ auto LightSubsystem::BuildState(ecs::ExplicitEcs<DirectionalLight, PointLight, S
         const auto& pool = ecs.GetPool<SpotLight>();
         for (auto [entity, light] : std::views::zip(pool.GetEntityPool(), pool.GetComponents()))
         {
-            float outerAngle = cos(std::max(light.outerAngle, 0.0001f)) * (1 - light.radius * 0.01f);
+            // Compute cosine-based angles for shader attenuation
+            float outerAngleCos = cos(std::max(light.outerAngle, 0.0001f)) * (1 - light.radius * 0.01f);
             auto& transform = ecs.Get<Transform>(entity);
+            const auto lightMatrixStartIndex = static_cast<uint32_t>(m_lightMatrixData.size());
 
             m_lightData.emplace_back(
                 light.diffuseColor,
@@ -182,16 +183,16 @@ auto LightSubsystem::BuildState(ecs::ExplicitEcs<DirectionalLight, PointLight, S
                 transform.Position(),
                 cos(std::max(light.innerAngle, 0.0001f)) * (1 - light.radius * 0.01f),
                 transform.Forward(),
-                outerAngle,
+                outerAngleCos,
                 light.radius,
                 light.castsShadows,
-                lightMatrixIndex
+                lightMatrixStartIndex
             );
 
             if (light.castsShadows)
             {
-                m_lightMatrixData.push_back(LightMatrixData{.viewProjection = spotlight2::CalculateLightViewProjectionMatrix(transform.TransformationMatrix(), (1-outerAngle) * 1.75f, light.radius)});
-                lightMatrixIndex++;
+                // Pass the actual outer angle (radians) for FOV-based projection
+                m_lightMatrixData.push_back(LightMatrixData{.viewProjection = spotlight2::CalculateLightViewProjectionMatrix(transform.TransformationMatrix(), light.outerAngle, light.radius)});
             }
         }
     }
@@ -202,8 +203,7 @@ void LightSubsystem::OnBeforeSceneLoad(const nc::Vector3& extents)
 {
     m_sceneExtentY = extents.y;
     m_directionalLightProjection = DirectX::XMMatrixOrthographicRH(extents.x, extents.y, 1.0f, extents.z);
-    m_pointLightProjection = DirectX::XMMatrixPerspectiveFovLH(DirectX::XM_PIDIV2, 1.0f, 1.0f, extents.z); // LH is needed for cubemap projection
-    // Spot light projection is computed based on light properties
+    // Point light and spot light projections are computed per-light based on their radius
 
     // Initialize CSM from graphics config
     const auto& graphicsSettings = config::GetGraphicsSettings();

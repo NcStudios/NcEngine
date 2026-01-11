@@ -34,7 +34,6 @@ class LightSubsystem
         std::vector<CascadeData> m_cascadeData;
 
         DirectX::XMMATRIX m_directionalLightProjection;
-        DirectX::XMMATRIX m_pointLightProjection;
         float m_sceneExtentY = 1.0f;
         std::unique_ptr<CascadedShadowMap> m_cascadedShadowMap;
 };
