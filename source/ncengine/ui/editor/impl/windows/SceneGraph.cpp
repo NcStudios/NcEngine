@@ -165,15 +165,6 @@ void SceneGraph::SetEntitySelection(EditorContext& ctx, Entity entity)
         ? entity
         : Entity::Null();
 
-    const bool isCamera = entity.Valid() && ctx.world.Contains<Camera>(entity);
-    ctx.world.Get<WireframeRenderer>(m_selectedCameraWireframe).target = isCamera ? entity : Entity::Null();
-
-    // Set the selected camera entity in graphics for debug visualizations (e.g., CSM cascade colors)
-    if (auto* graphics = ctx.modules.Get<NcGraphics>())
-    {
-        graphics->SetSelectedCameraEntity(isCamera ? entity : Entity::Null());
-    }
-
     ctx.world.Get<WireframeRenderer>(m_selectedSpotLightWireframe).target =
         (entity.Valid() && ctx.world.Contains<SpotLight>(entity))
         ? entity
