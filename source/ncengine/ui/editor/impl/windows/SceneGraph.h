@@ -27,6 +27,9 @@ class SceneGraph
         Entity m_selectedEntityWireframe = Entity::Null();
         Entity m_selectedColliderWireframe = Entity::Null();
         Entity m_selectedCameraWireframe = Entity::Null();
+        Entity m_selectedSpotLightWireframe = Entity::Null();
+        Entity m_selectedPointLightWireframe = Entity::Null();
+        Entity m_selectedDirectionalLightWireframe = Entity::Null();
         ImGuiTextFilter m_tagFilter;
 
         void SetEntitySelection(EditorContext& ctx, Entity entity);

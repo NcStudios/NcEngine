@@ -10,6 +10,9 @@ class Camera;
 class StaticMesh;
 class Transform;
 class RigidBody;
+struct DirectionalLight;
+struct PointLight;
+struct SpotLight;
 struct WireframeRenderer;
 
 namespace graphics
@@ -21,7 +24,10 @@ class WireframeRendererSubsystem
                                          WireframeRenderer,
                                          StaticMesh,
                                          RigidBody,
-                                         Camera> worldView) -> WireframeRendererRenderState;
+                                         Camera,
+                                         DirectionalLight,
+                                         PointLight,
+                                         SpotLight> worldView) -> WireframeRendererRenderState;
 };
 } // namespace graphics
 } // namespace nc

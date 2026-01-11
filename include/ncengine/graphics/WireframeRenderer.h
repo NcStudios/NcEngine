@@ -17,7 +17,10 @@ enum class WireframeSource
     Internal,
     Renderer,
     Collider,
-    Camera
+    Camera,
+    SpotLight,
+    PointLight,
+    DirectionalLight
 };
 
 /**

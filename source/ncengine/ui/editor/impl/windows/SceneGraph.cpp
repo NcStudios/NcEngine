@@ -5,6 +5,8 @@
 #include "ncengine/ecs/Tag.h"
 #include "ncengine/ecs/Transform.h"
 #include "ncengine/graphics/Camera.h"
+#include "ncengine/graphics/Light.h"
+#include "ncengine/graphics/NcGraphics.h"
 #include "ncengine/graphics/WireframeRenderer.h"
 #include "ncengine/physics/RigidBody.h"
 #include "ncengine/ui/ImGuiUtility.h"
@@ -64,6 +66,60 @@ auto MakeSelectedCameraWireFrame(nc::ecs::Ecs world, nc::Entity parent) -> nc::E
 
     return entity;
 }
+
+auto MakeSelectedSpotLightWireFrame(nc::ecs::Ecs world, nc::Entity parent) -> nc::Entity
+{
+    const auto entity = world.Emplace<nc::Entity>({
+        .parent = parent,
+        .tag = "SelectedSpotLight",
+        .flags = nc::ui::editor::EditorObjectFlags
+    });
+
+    world.Emplace<nc::WireframeRenderer>(
+        entity,
+        nc::WireframeSource::SpotLight,
+        nc::Entity::Null(),
+        nc::Vector4{1.0f, 0.5f, 0.0f, 1.0f}  // Orange for spot light
+    );
+
+    return entity;
+}
+
+auto MakeSelectedPointLightWireFrame(nc::ecs::Ecs world, nc::Entity parent) -> nc::Entity
+{
+    const auto entity = world.Emplace<nc::Entity>({
+        .parent = parent,
+        .tag = "SelectedPointLight",
+        .flags = nc::ui::editor::EditorObjectFlags
+    });
+
+    world.Emplace<nc::WireframeRenderer>(
+        entity,
+        nc::WireframeSource::PointLight,
+        nc::Entity::Null(),
+        nc::Vector4{0.0f, 1.0f, 1.0f, 1.0f}  // Cyan for point light
+    );
+
+    return entity;
+}
+
+auto MakeSelectedDirectionalLightWireFrame(nc::ecs::Ecs world, nc::Entity parent) -> nc::Entity
+{
+    const auto entity = world.Emplace<nc::Entity>({
+        .parent = parent,
+        .tag = "SelectedDirectionalLight",
+        .flags = nc::ui::editor::EditorObjectFlags
+    });
+
+    world.Emplace<nc::WireframeRenderer>(
+        entity,
+        nc::WireframeSource::DirectionalLight,
+        nc::Entity::Null(),
+        nc::Vector4{1.0f, 1.0f, 0.5f, 1.0f}  // Light yellow for directional light
+    );
+
+    return entity;
+}
 } // anonymous namespace
 
 namespace nc::ui::editor
@@ -71,7 +127,10 @@ namespace nc::ui::editor
 SceneGraph::SceneGraph(EditorContext& ctx)
     : m_selectedEntityWireframe{::MakeSelectedEntityWireFrame(ctx.world, ctx.objectBucket)},
       m_selectedColliderWireframe{::MakeSelectedColliderWireFrame(ctx.world, ctx.objectBucket)},
-      m_selectedCameraWireframe{::MakeSelectedCameraWireFrame(ctx.world, ctx.objectBucket)}
+      m_selectedCameraWireframe{::MakeSelectedCameraWireFrame(ctx.world, ctx.objectBucket)},
+      m_selectedSpotLightWireframe{::MakeSelectedSpotLightWireFrame(ctx.world, ctx.objectBucket)},
+      m_selectedPointLightWireframe{::MakeSelectedPointLightWireFrame(ctx.world, ctx.objectBucket)},
+      m_selectedDirectionalLightWireframe{::MakeSelectedDirectionalLightWireFrame(ctx.world, ctx.objectBucket)}
 {
 }
 
@@ -105,8 +164,26 @@ void SceneGraph::SetEntitySelection(EditorContext& ctx, Entity entity)
         (entity.Valid() && ctx.world.Contains<RigidBody>(entity))
         ? entity
         : Entity::Null();
-    ctx.world.Get<WireframeRenderer>(m_selectedCameraWireframe).target =
-        (entity.Valid() && ctx.world.Contains<Camera>(entity))
+
+    const bool isCamera = entity.Valid() && ctx.world.Contains<Camera>(entity);
+    ctx.world.Get<WireframeRenderer>(m_selectedCameraWireframe).target = isCamera ? entity : Entity::Null();
+
+    // Set the selected camera entity in graphics for debug visualizations (e.g., CSM cascade colors)
+    if (auto* graphics = ctx.modules.Get<NcGraphics>())
+    {
+        graphics->SetSelectedCameraEntity(isCamera ? entity : Entity::Null());
+    }
+
+    ctx.world.Get<WireframeRenderer>(m_selectedSpotLightWireframe).target =
+        (entity.Valid() && ctx.world.Contains<SpotLight>(entity))
+        ? entity
+        : Entity::Null();
+    ctx.world.Get<WireframeRenderer>(m_selectedPointLightWireframe).target =
+        (entity.Valid() && ctx.world.Contains<PointLight>(entity))
+        ? entity
+        : Entity::Null();
+    ctx.world.Get<WireframeRenderer>(m_selectedDirectionalLightWireframe).target =
+        (entity.Valid() && ctx.world.Contains<DirectionalLight>(entity))
         ? entity
         : Entity::Null();
 }
