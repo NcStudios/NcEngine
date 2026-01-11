@@ -19,7 +19,7 @@ constexpr float MinExtentDimension = 1.0f;
 class Scene
 {
     public:
-        Scene(Vector3 extents = Vector3{150.0f, 150.0f, 150.0f})
+        Scene(Vector3 extents = Vector3{100.0f, 100.0f, 100.0f})
         : m_extents{Vector3{std::max(MinExtentDimension, extents.x), std::max(MinExtentDimension, extents.y), std::max(MinExtentDimension, extents.z)}}
         {}
 

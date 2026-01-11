@@ -185,6 +185,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .layoutElements = VertexAttribute::Pos,
                     .shaderPaths = ShaderPaths{.vertexShaderPath = shader::UniShadowMapVertex},
                     .shadowMapSink = ShadowMapTarget::Uni,
+                    .cullMode = CullMode::Front,
                     .isMsaa = false,
                     .useDepthTest = true
                 },

@@ -90,6 +90,13 @@ enum class VertexAttribute : uint8_t
     All         = Texturing | Skinning
 }; DEFINE_BITWISE_OPERATORS(VertexAttribute);
 
+enum class CullMode : uint8_t
+{
+    None  = 0,
+    Front = 1,
+    Back  = 2
+};
+
 struct PassDesc
 {
     uint64_t flag = 0;
@@ -104,6 +111,7 @@ struct PassDesc
     DepthTarget depthSink = DepthTarget::None;
     ShadowMapTarget shadowMapSink = ShadowMapTarget::None;
     PostProcessTarget postProcessSink = PostProcessTarget::None;
+    CullMode cullMode = CullMode::Back;
     bool isMsaa = true;
     bool useDepthTest = true;
 };

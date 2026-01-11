@@ -211,7 +211,7 @@ void LightSubsystem::OnBeforeSceneLoad(const nc::Vector3& extents)
           .cascadeCount = graphicsSettings.csmCascadeCount,
           .shadowDistance = std::min(graphicsSettings.csmShadowDistance, extents.z),
           .splitLambda = graphicsSettings.csmSplitLambda,
-          .blendRegion = 0.1f,
+          .blendRegion = 0.3f, // Keep in sync with shader
           .shadowMapResolution = static_cast<float>(graphicsSettings.shadowMapResolution),
           .stabilizeCascades = graphicsSettings.csmStabilize
     };

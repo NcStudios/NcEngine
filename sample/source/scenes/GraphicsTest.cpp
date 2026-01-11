@@ -184,7 +184,12 @@ void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
         .tag = "Camera grand child"
     });
 
-    auto& camera = world.Emplace<SceneNavigationCamera>(cameraHandle);
+    auto& camera = world.Emplace<SceneNavigationCamera>(cameraHandle, 
+    CameraProperties
+    {
+        .nearClip = 0.1f,
+        .farClip = 60.0f
+    });
     world.Emplace<FrameLogic>(cameraHandle, InvokeFreeComponent<SceneNavigationCamera>{});
     ncGraphics->SetCamera(&camera);
     ncGraphics->SetPostProcessEffectEnabled(nc::OutlinedToonEffectId, true);

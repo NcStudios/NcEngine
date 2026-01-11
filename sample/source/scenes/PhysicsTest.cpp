@@ -132,7 +132,11 @@ struct FollowCamera : public Camera
                  float initialHeight = 12.0f,
                  float initialDistance = -12.0f,
                  float initialSpeed = 75.0f)
-        : Camera{self},
+        : Camera{self, CameraProperties
+            {
+                .nearClip = 0.1f,
+                .farClip = 150.0f
+            }},
           target{target_},
           followHeight{initialHeight},
           followDistance{initialDistance},
@@ -1283,7 +1287,7 @@ void PhysicsTest::Load(ecs::Ecs world, ModuleProvider modules)
     world.Emplace<DirectionalLight>(
         world.Emplace<Entity>({
             .position = Vector3{0.0f, 40.0f, 0.0f},
-            .rotation = nc::Quaternion::FromEulerAngles(0.2f, 0.0f, 0.0f),
+            .rotation = nc::Quaternion::FromEulerAngles(0.765f, -1.0f, -0.1f),
             .tag = "Directional Light"
         }),
         Vector3{1.0f, 1.0f, 1.0f},

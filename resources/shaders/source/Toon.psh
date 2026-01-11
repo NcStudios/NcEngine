@@ -23,7 +23,7 @@
   StructuredBuffer<MaterialData> Materials : register(t1);
 
   // Debug: Set to true to visualize CSM cascades with colors
-  static const bool DEBUG_CSM_CASCADES = false;
+  static const bool DEBUG_CSM_CASCADES = true;
   static const float3 CASCADE_COLORS[4] = {
       float3(1.0, 0.0, 0.0),  // Cascade 0: Red (nearest)
       float3(0.0, 1.0, 0.0),  // Cascade 1: Green

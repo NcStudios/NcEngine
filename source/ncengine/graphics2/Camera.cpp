@@ -56,7 +56,10 @@ auto Camera::CastToNearAndFarPlanes(const Vector2& normalizedDeviceCoords) const
 
 void Camera::UpdateViewMatrix(DirectX::FXMMATRIX transformationMatrix)
 {
+    // Get the +z (forward) vector in world space of the camera.
     const auto look = DirectX::XMVector3Transform(DirectX::g_XMIdentityR2, transformationMatrix);
+
+    // Generate the view matrix that transforms points from world space into the view space of the camera.
     m_view = DirectX::XMMatrixLookAtRH(transformationMatrix.r[3], look, DirectX::g_XMNegIdentityR1);
 }
 

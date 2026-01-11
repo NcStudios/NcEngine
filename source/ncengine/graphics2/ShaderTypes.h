@@ -27,7 +27,7 @@ struct GlobalEnvironmentData
     uint32_t skyboxIndex = 0;
     uint32_t useSkybox = 0;
     uint32_t useColorOverride = 0;
-    float shadowMapResolution = 2048.0f;
+    float shadowMapResolution = 512.0f;
     float padding[2] = {0.0f, 0.0f}; // Align to 16 bytes
 };
 
@@ -225,7 +225,7 @@ struct CascadeShadowConfig
     float shadowDistance = 200.0f;     // Max shadow distance (less than camera far)
     float splitLambda = 0.75f;         // PSSM split scheme blend factor
     float blendRegion = 0.1f;          // Cascade overlap percentage
-    float shadowMapResolution = 2048.0f;
+    float shadowMapResolution = 512.0f;
     bool stabilizeCascades = true;
 };
 

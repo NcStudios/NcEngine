@@ -159,24 +159,28 @@ uint SelectCascade(float viewDepth, uint cascadeStartIndex, uint cascadeCount)
     return cascadeCount - 1;
 }
 
-// CSM shadow calculation for directional lights
-float CascadedShadowCalculation(
+// Helper: Sample shadow from a specific cascade
+float SampleCascadeShadow(
     float3 worldPos,
     float3 normal,
     float3 lightDir,
-    float viewDepth,
-    uint cascadeStartIndex,
-    uint cascadeCount,
-    uint shadowMapBaseIndex)
+    uint cascadeDataIndex,
+    uint shadowMapIndex)
 {
-    // Select appropriate cascade
-    uint cascadeIndex = SelectCascade(viewDepth, cascadeStartIndex, cascadeCount);
-    uint shadowMapIndex = shadowMapBaseIndex + cascadeIndex;
+    CascadeData cascade = Cascades[cascadeDataIndex];
 
-    CascadeData cascade = Cascades[cascadeStartIndex + cascadeIndex];
+    // Normal offset: Move sampling position along the normal to handle grazing angles
+    // This prevents peter panning at extreme light angles better than depth bias alone
+    float cosTheta = saturate(dot(normal, lightDir));
+    float sinTheta = sqrt(1.0 - cosTheta * cosTheta);
+
+    // Scale normal offset by texel size (stored in cascade data) for consistent results
+    // At grazing angles (sinTheta -> 1), we need more offset
+    float normalOffsetScale = cascade.texelSize * sinTheta * 2.5f;
+    float3 offsetPos = worldPos + normal * normalOffsetScale;
 
     // Transform world position to light space for selected cascade
-    float4 lightSpacePos = mul(float4(worldPos, 1.0), cascade.viewProjection);
+    float4 lightSpacePos = mul(float4(offsetPos, 1.0), cascade.viewProjection);
     lightSpacePos = mul(lightSpacePos, biasMat);
 
     // Perspective divide
@@ -191,21 +195,20 @@ float CascadedShadowCalculation(
     // Flip Y for DirectX texture coordinates
     projCoords.y = 1.0 - projCoords.y;
 
-    // Adaptive slope-based bias for shadow acne prevention
-    float cosTheta = saturate(dot(normal, lightDir));
-    float slopeBias = 0.002 * tan(acos(cosTheta));
-    slopeBias = clamp(slopeBias, 0.0, 0.005);
+    // Small constant depth bias (normal offset handles most of the work now)
+    float constBias = 0.003;
 
-    // Small constant bias
-    float constBias = 0.0005;
+    // Minimal slope bias for remaining acne at moderate angles
+    float slopeBias = 0.0005 * sinTheta / max(cosTheta, 0.1);
+    slopeBias = clamp(slopeBias, 0.0, 0.001);
+
     float bias = constBias + slopeBias;
 
     float distance = projCoords.z - bias;
 
-    // PCF 3x3 sampling
     float shadow = 0.0;
+    // PCF 3x3 sampling for far cascades
     float2 texelSize = float2(1.0 / shadowMapResolution, 1.0 / shadowMapResolution);
-
     [unroll]
     for (int x = -1; x <= 1; ++x)
     {
@@ -225,11 +228,57 @@ float CascadedShadowCalculation(
     // Invert: SampleCmp returns 1 when pass (lit), we want shadow amount
     shadow = 1.0 - shadow;
 
-    // Edge falloff
-    float2 center = float2(0.5, 0.5);
-    float distFromCenter = length(projCoords.xy - center);
-    float falloff = 1.0 - smoothstep(0.4, 0.5, distFromCenter);
-    shadow *= falloff;
+    // // Edge falloff
+    // float2 center = float2(0.5, 0.5);
+    // float distFromCenter = length(projCoords.xy - center);
+    // float falloff = 1.0 - smoothstep(0.4, 0.5, distFromCenter);
+    // shadow *= falloff;
+
+    return shadow;
+}
+
+// CSM shadow calculation for directional lights with cascade blending
+float CascadedShadowCalculation(
+    float3 worldPos,
+    float3 normal,
+    float3 lightDir,
+    float viewDepth,
+    uint cascadeStartIndex,
+    uint cascadeCount,
+    uint shadowMapBaseIndex)
+{
+    // Select appropriate cascade
+    uint cascadeIndex = SelectCascade(viewDepth, cascadeStartIndex, cascadeCount);
+
+    // Sample shadow from current cascade
+    float shadow = SampleCascadeShadow(
+        worldPos, normal, lightDir,
+        cascadeStartIndex + cascadeIndex,
+        shadowMapBaseIndex + cascadeIndex
+    );
+
+    // Blend with next cascade near the boundary
+    if (cascadeIndex < cascadeCount - 1)
+    {
+        float currentSplitDepth = Cascades[cascadeStartIndex + cascadeIndex].splitDepth;
+        float blendRegion = currentSplitDepth * 0.3; // blend region
+
+        if (viewDepth > currentSplitDepth - blendRegion)
+        {
+            // Sample from next cascade
+            float nextShadow = SampleCascadeShadow(
+                worldPos, normal, lightDir,
+                cascadeStartIndex + cascadeIndex + 1,
+                shadowMapBaseIndex + cascadeIndex + 1
+            );
+
+            // Blend factor: 0 at start of blend region, 1 at cascade boundary
+            float blendFactor = (viewDepth - (currentSplitDepth - blendRegion)) / blendRegion;
+            blendFactor = smoothstep(0.0, 1.0, blendFactor);
+
+            shadow = lerp(shadow, nextShadow, blendFactor);
+        }
+    }
 
     return shadow;
 }
