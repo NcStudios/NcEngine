@@ -16,7 +16,8 @@ enum class WireframeSource
 {
     Internal,
     Renderer,
-    Collider
+    Collider,
+    Camera
 };
 
 /**

@@ -4,6 +4,7 @@
 #include "ncasset/DefaultAssets.h"
 #include "ncengine/ecs/Tag.h"
 #include "ncengine/ecs/Transform.h"
+#include "ncengine/graphics/Camera.h"
 #include "ncengine/graphics/WireframeRenderer.h"
 #include "ncengine/physics/RigidBody.h"
 #include "ncengine/ui/ImGuiUtility.h"
@@ -45,13 +46,32 @@ auto MakeSelectedColliderWireFrame(nc::ecs::Ecs world, nc::Entity parent) -> nc:
 
     return entity;
 }
+
+auto MakeSelectedCameraWireFrame(nc::ecs::Ecs world, nc::Entity parent) -> nc::Entity
+{
+    const auto entity = world.Emplace<nc::Entity>({
+        .parent = parent,
+        .tag = "SelectedCamera",
+        .flags = nc::ui::editor::EditorObjectFlags
+    });
+
+    world.Emplace<nc::WireframeRenderer>(
+        entity,
+        nc::WireframeSource::Camera,
+        nc::Entity::Null(),
+        nc::Vector4{1.0f, 1.0f, 0.0f, 1.0f}  // Yellow for camera frustum
+    );
+
+    return entity;
+}
 } // anonymous namespace
 
 namespace nc::ui::editor
 {
 SceneGraph::SceneGraph(EditorContext& ctx)
     : m_selectedEntityWireframe{::MakeSelectedEntityWireFrame(ctx.world, ctx.objectBucket)},
-      m_selectedColliderWireframe{::MakeSelectedColliderWireFrame(ctx.world, ctx.objectBucket)}
+      m_selectedColliderWireframe{::MakeSelectedColliderWireFrame(ctx.world, ctx.objectBucket)},
+      m_selectedCameraWireframe{::MakeSelectedCameraWireFrame(ctx.world, ctx.objectBucket)}
 {
 }
 
@@ -83,6 +103,10 @@ void SceneGraph::SetEntitySelection(EditorContext& ctx, Entity entity)
     ctx.world.Get<WireframeRenderer>(m_selectedEntityWireframe).target = entity;
     ctx.world.Get<WireframeRenderer>(m_selectedColliderWireframe).target =
         (entity.Valid() && ctx.world.Contains<RigidBody>(entity))
+        ? entity
+        : Entity::Null();
+    ctx.world.Get<WireframeRenderer>(m_selectedCameraWireframe).target =
+        (entity.Valid() && ctx.world.Contains<Camera>(entity))
         ? entity
         : Entity::Null();
 }

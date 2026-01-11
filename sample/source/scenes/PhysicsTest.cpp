@@ -134,6 +134,7 @@ struct FollowCamera : public Camera
                  float initialSpeed = 75.0f)
         : Camera{self, CameraProperties
             {
+                .fov = 1.5701f,
                 .nearClip = 0.1f,
                 .farClip = 150.0f
             }},

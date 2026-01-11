@@ -6,6 +6,7 @@
 
 namespace nc
 {
+class Camera;
 class StaticMesh;
 class Transform;
 class RigidBody;
@@ -19,7 +20,8 @@ class WireframeRendererSubsystem
         auto BuildState(ecs::ExplicitEcs<Transform,
                                          WireframeRenderer,
                                          StaticMesh,
-                                         RigidBody> worldView) -> WireframeRendererRenderState;
+                                         RigidBody,
+                                         Camera> worldView) -> WireframeRendererRenderState;
 };
 } // namespace graphics
 } // namespace nc

@@ -102,4 +102,33 @@ auto Camera::CalculateFrustum() const noexcept -> Frustum
 
     return out;
 }
+
+auto Camera::CalculateFrustumCorners() const noexcept -> FrustumCorners
+{
+    using namespace DirectX;
+
+    const auto viewProj = XMMatrixMultiply(m_view, m_projection);
+    const auto viewProjInv = XMMatrixInverse(nullptr, viewProj);
+
+    auto unproject = [&](float x, float y, float z) -> Vector3
+    {
+        auto ndc = XMVectorSet(x, y, z, 1.0f);
+        auto world = XMVector4Transform(ndc, viewProjInv);
+        world = XMVectorDivide(world, XMVectorSplatW(world));
+        return ToVector3(world);
+    };
+
+    // NDC corners: x,y in [-1,1], z=0 for near, z=1 for far
+    FrustumCorners corners;
+    corners.nearTopLeft     = unproject(-1.0f,  1.0f, 0.0f);
+    corners.nearTopRight    = unproject( 1.0f,  1.0f, 0.0f);
+    corners.nearBottomLeft  = unproject(-1.0f, -1.0f, 0.0f);
+    corners.nearBottomRight = unproject( 1.0f, -1.0f, 0.0f);
+    corners.farTopLeft      = unproject(-1.0f,  1.0f, 1.0f);
+    corners.farTopRight     = unproject( 1.0f,  1.0f, 1.0f);
+    corners.farBottomLeft   = unproject(-1.0f, -1.0f, 1.0f);
+    corners.farBottomRight  = unproject( 1.0f, -1.0f, 1.0f);
+
+    return corners;
+}
 } // namespace nc

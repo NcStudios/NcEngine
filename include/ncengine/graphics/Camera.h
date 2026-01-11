@@ -33,6 +33,19 @@ struct NearFarPoints
     Vector3 farPoint = Vector3::Zero();
 };
 
+/** @brief The 8 corners of the camera frustum in world space. */
+struct FrustumCorners
+{
+    Vector3 nearTopLeft;
+    Vector3 nearTopRight;
+    Vector3 nearBottomLeft;
+    Vector3 nearBottomRight;
+    Vector3 farTopLeft;
+    Vector3 farTopRight;
+    Vector3 farBottomLeft;
+    Vector3 farBottomRight;
+};
+
 /** @brief Get a default view matrix. */
 auto MakeDefaultViewMatrix() -> DirectX::XMMATRIX;
 
@@ -79,6 +92,12 @@ class Camera : public FreeComponent
          * @return Frustum
          */
         auto CalculateFrustum() const noexcept -> Frustum;
+
+        /**
+         * @brief Calculate the 8 corners of the camera's frustum in world space.
+         * @return FrustumCorners
+         */
+        auto CalculateFrustumCorners() const noexcept -> FrustumCorners;
 
         /** @brief Construct a new view matrix based on the current transform. */
         virtual void UpdateViewMatrix(DirectX::FXMMATRIX transformationMatrix);

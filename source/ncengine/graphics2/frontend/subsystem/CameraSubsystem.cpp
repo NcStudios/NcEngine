@@ -5,17 +5,6 @@
 #include "ncengine/graphics/Camera.h"
 #include "ncengine/window/Window.h"
 
-namespace
-{
-auto MakeDefaultViewProjection() -> DirectX::XMMATRIX
-{
-    return DirectX::XMMatrixMultiply(
-        nc::MakeDefaultViewMatrix(),
-        nc::MakeDefaultProjectionMatrix()
-    );
-}
-} // anonymous namespace
-
 namespace nc::graphics
 {
 auto CameraSubsystem::BuildState(ecs::ExplicitEcs<Transform> ecs) -> CameraRenderState
@@ -38,8 +27,10 @@ auto CameraSubsystem::BuildState(ecs::ExplicitEcs<Transform> ecs) -> CameraRende
         };
     }
 
-    auto viewProj = MakeDefaultViewProjection();
-    auto inverseProj = DirectX::XMMatrixInverse(nullptr, viewProj);
+    auto view = MakeDefaultViewMatrix();
+    auto proj = MakeDefaultProjectionMatrix();
+    auto viewProj = DirectX::XMMatrixMultiply(view, proj);
+    auto inverseProj = DirectX::XMMatrixInverse(nullptr, proj);
 
     return CameraRenderState{
         .viewProjection = viewProj,
