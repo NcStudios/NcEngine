@@ -9,7 +9,9 @@ option(NC_BUILD_TESTS "Enable building tests." OFF)
 option(NC_BUILD_INTEGRATION_TESTS "Enable building integration tests." OFF)
 option(NC_BUILD_NCCONVERT "Enable building nc-convert asset converter." ON)
 option(NC_RUNTIME_SHADER_COMPILATION "Enable compiling shaders at runtime" ON)
-option(NC_PROFILING_ENABLED "Enable profiling with Optick" OFF)
+option(NC_PROFILING_ENABLED "Enable profiling" OFF)
+set(NC_PROFILER "Tracy" CACHE STRING "Profiler to use (Tracy or Optick)")
+set_property(CACHE NC_PROFILER PROPERTY STRINGS "Tracy" "Optick")
 option(NC_PROD_BUILD "Only build NcEngine production binaries." OFF)
 
 # Variables
@@ -59,6 +61,11 @@ endif()
 
 if(NC_PROFILING_ENABLED)
     list(APPEND NC_COMPILE_DEFINITIONS NC_PROFILING_ENABLED)
+    if(NC_PROFILER STREQUAL "Tracy")
+        list(APPEND NC_COMPILE_DEFINITIONS NC_USE_TRACY)
+    elseif(NC_PROFILER STREQUAL "Optick")
+        list(APPEND NC_COMPILE_DEFINITIONS NC_USE_OPTICK)
+    endif()
 endif()
 
 # Get dependencies

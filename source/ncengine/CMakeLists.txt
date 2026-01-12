@@ -30,6 +30,13 @@ set_target_properties(${NC_ENGINE_LIB}
     PROPERTIES CMAKE_DEBUG_POSTFIX d
 )
 
+# Profiler library selection
+if(NC_PROFILING_ENABLED AND NC_PROFILER STREQUAL "Tracy")
+    set(NC_PROFILER_LIB TracyClient)
+else()
+    set(NC_PROFILER_LIB OptickCore)
+endif()
+
 # Link libraries
 target_link_libraries(${NC_ENGINE_LIB}
     PUBLIC
@@ -40,7 +47,7 @@ target_link_libraries(${NC_ENGINE_LIB}
         glfw
         imgui
         Taskflow
-        OptickCore
+        ${NC_PROFILER_LIB}
         RtAudio
         ${DILIGENT_LIBRARIES}
 )

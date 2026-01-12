@@ -100,7 +100,7 @@ void ParticleSubsystem::Emit(Entity entity, size_t count)
 
 void ParticleSubsystem::Update(Camera* mainCamera)
 {
-    NC_PROFILE_TASK("ParticleSubystem::Update()", Optick::Category::VFX);
+    NC_PROFILE_TASK("ParticleSubystem::Update()", ProfileCategory::VFX);
     CommitPendingChanges();
     const float dt = time::DeltaTime();
     const auto [camPosition, camRotation, camForward] = GetCameraProperties(m_world, mainCamera);
@@ -124,7 +124,7 @@ void ParticleSubsystem::Update(Camera* mainCamera)
 
 void ParticleSubsystem::CommitPendingChanges()
 {
-    NC_PROFILE_SCOPE("ParticleSubsystem::CommitPendingChanges()", Optick::Category::VFX);
+    NC_PROFILE_SCOPE("ParticleSubsystem::CommitPendingChanges()", ProfileCategory::VFX);
     m_emitterStates.insert(
         m_emitterStates.cend(),
         std::make_move_iterator(m_toAdd.begin()),
@@ -170,7 +170,7 @@ void ParticleSubsystem::Clear() noexcept
 
 void ParticleSubsystem::SortEmitters(DirectX::FXMVECTOR cameraPosition)
 {
-    NC_PROFILE_SCOPE("ParticleSubsystem::SortEmitters()", Optick::Category::VFX);
+    NC_PROFILE_SCOPE("ParticleSubsystem::SortEmitters()", ProfileCategory::VFX);
 
     // Build up an index array for sorting to help minimize number of swaps and distance calculations
     auto permutation = std::vector<PermutationData>{};

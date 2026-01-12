@@ -72,7 +72,7 @@ FetchContent_Declare(taskflow
 
 # Optick
 set(OPTICK_INSTALL_TARGETS OFF CACHE BOOL "" FORCE)
-if(${NC_PROFILING_ENABLED})
+if(NC_PROFILING_ENABLED AND NC_PROFILER STREQUAL "Optick")
     set(OPTICK_ENABLED ON CACHE BOOL "" FORCE)
 else()
     set(OPTICK_ENABLED OFF CACHE BOOL "" FORCE)
@@ -81,6 +81,20 @@ endif()
 FetchContent_Declare(optick
                      GIT_REPOSITORY https://github.com/NcStudios/optick.git
                      GIT_TAG        v1.3.0+nc.2
+                     GIT_SHALLOW    TRUE
+)
+
+# Tracy
+if(NC_PROFILING_ENABLED AND NC_PROFILER STREQUAL "Tracy")
+    set(TRACY_ENABLE ON CACHE BOOL "" FORCE)
+else()
+    set(TRACY_ENABLE OFF CACHE BOOL "" FORCE)
+endif()
+set(TRACY_ON_DEMAND ON CACHE BOOL "" FORCE)
+
+FetchContent_Declare(tracy
+                     GIT_REPOSITORY https://github.com/wolfpld/tracy.git
+                     GIT_TAG        v0.11.1
                      GIT_SHALLOW    TRUE
 )
 
@@ -156,7 +170,7 @@ FetchContent_Declare(fmt
 )
 
 # Fetch all required sources
-FetchContent_MakeAvailable(taskflow optick JoltPhysics DirectXMath fmt DiligentCore DiligentTools)
+FetchContent_MakeAvailable(taskflow optick tracy JoltPhysics DirectXMath fmt DiligentCore DiligentTools)
 
 # Silence warnings
 disable_warnings_for_headers(Taskflow)
@@ -172,8 +186,13 @@ disable_warnings_for_target(Diligent-Imgui)
 if(NC_PROFILING_ENABLED AND NOT CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     target_compile_definitions(Jolt
         PUBLIC
-            -DJPH_EXTERNAL_PROFILE
+            JPH_EXTERNAL_PROFILE
     )
+endif()
+
+# Silence Tracy warnings
+if(NC_PROFILING_ENABLED AND NC_PROFILER STREQUAL "Tracy")
+    disable_warnings_for_headers(TracyClient)
 endif()
 
 # Optional Dependencies
