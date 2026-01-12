@@ -5,6 +5,8 @@
 #include "ncengine/ecs/Transform.h"
 #include "ncengine/graphics/Light.h"
 
+#include <algorithm>
+#include <cmath>
 #include <ranges>
 
 namespace directionallight
@@ -26,13 +28,28 @@ namespace spotlight2
 auto CalculateLightViewProjectionMatrix(const DirectX::XMMATRIX& transformMatrix, float outerAngleRadians, float farClip) -> DirectX::XMMATRIX
 {
     // The outer angle is the half-angle of the cone, so FOV is 2x that
-    const float lightFieldOfView = 2.0f * outerAngleRadians;
-    constexpr float nearClip = 0.1f;
+    // Clamp FOV to slightly less than 180 degrees to avoid invalid projection matrix
+    constexpr float maxFov = DirectX::XM_PI * 0.95f; // ~171 degrees
+    const float lightFieldOfView = std::min(2.0f * outerAngleRadians, maxFov);
+    constexpr float nearClip = 0.5f;
 
     // Use FOV-based perspective projection with 1:1 aspect ratio (square shadow map)
     auto projectionMatrix = DirectX::XMMatrixPerspectiveFovRH(lightFieldOfView, 1.0f, nearClip, farClip);
-    const auto look = DirectX::XMVector3TransformNormal(DirectX::g_XMIdentityR2, transformMatrix);
-    return DirectX::XMMatrixLookAtRH(transformMatrix.r[3], DirectX::XMVectorAdd(transformMatrix.r[3], look), DirectX::g_XMNegIdentityR1) * projectionMatrix;
+
+    // Get forward direction from transform
+    const auto forward = DirectX::XMVector3TransformNormal(DirectX::g_XMIdentityR2, transformMatrix);
+    const auto position = transformMatrix.r[3];
+    const auto target = DirectX::XMVectorAdd(position, forward);
+
+    // Use world up by default, but switch to world right if looking straight up/down
+    DirectX::XMVECTOR up = DirectX::g_XMIdentityR1; // (0, 1, 0)
+    const float dotUp = std::abs(DirectX::XMVectorGetX(DirectX::XMVector3Dot(forward, up)));
+    if (dotUp > 0.99f)
+    {
+        up = DirectX::g_XMIdentityR0; // (1, 0, 0)
+    }
+
+    return DirectX::XMMatrixLookAtRH(position, target, up) * projectionMatrix;
 }
 }
 namespace nc::graphics
@@ -172,7 +189,10 @@ auto LightSubsystem::BuildState(ecs::ExplicitEcs<DirectionalLight, PointLight, S
         for (auto [entity, light] : std::views::zip(pool.GetEntityPool(), pool.GetComponents()))
         {
             // Compute cosine-based angles for shader attenuation
-            float outerAngleCos = cos(std::max(light.outerAngle, 0.0001f)) * (1 - light.radius * 0.01f);
+            // The (1 - radius * 0.01f) factor widens the cone
+            // Clamp to prevent negative values (which would flip the cone) for radius > 100
+            const float radiusFactor = std::max(1.0f - light.radius * 0.01f, 0.1f);
+            float outerAngleCos = cos(std::max(light.outerAngle, 0.0001f)) * radiusFactor;
             auto& transform = ecs.Get<Transform>(entity);
             const auto lightMatrixStartIndex = static_cast<uint32_t>(m_lightMatrixData.size());
 
@@ -181,7 +201,7 @@ auto LightSubsystem::BuildState(ecs::ExplicitEcs<DirectionalLight, PointLight, S
                 light.specularColor,
                 light.intensity,
                 transform.Position(),
-                cos(std::max(light.innerAngle, 0.0001f)) * (1 - light.radius * 0.01f),
+                cos(std::max(light.innerAngle, 0.0001f)) * radiusFactor,
                 transform.Forward(),
                 outerAngleCos,
                 light.radius,
@@ -191,8 +211,10 @@ auto LightSubsystem::BuildState(ecs::ExplicitEcs<DirectionalLight, PointLight, S
 
             if (light.castsShadows)
             {
-                // Pass the actual outer angle (radians) for FOV-based projection
-                m_lightMatrixData.push_back(LightMatrixData{.viewProjection = spotlight2::CalculateLightViewProjectionMatrix(transform.TransformationMatrix(), light.outerAngle, light.radius)});
+                // Compute the outer angle that matches the shader's cone
+                // The shader uses outerAngleCos which has radiusFactor applied
+                const float effectiveOuterAngle = std::acos(std::clamp(outerAngleCos, -1.0f, 1.0f));
+                m_lightMatrixData.push_back(LightMatrixData{.viewProjection = spotlight2::CalculateLightViewProjectionMatrix(transform.TransformationMatrix(), effectiveOuterAngle, light.radius)});
             }
         }
     }

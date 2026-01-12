@@ -137,6 +137,15 @@ float UniShadowCalculation(bool isDirectional, float4 fragPosLightSpace, Texture
     float distance = projCoords.z - bias;
     float shadow = 1-depthTex.SampleCmpLevelZero(UniShadowMapSinks_sampler, projCoords.xy, distance);
 
+    // Edge falloff for spotlight shadows (not needed for directional)
+    if (!isDirectional)
+    {
+        float2 center = float2(0.5, 0.5);
+        float distFromCenter = length(projCoords.xy - center);
+        float falloff = 1.0 - smoothstep(0.4, 0.5, distFromCenter);
+        shadow *= falloff;
+    }
+
     return shadow;
 }
 

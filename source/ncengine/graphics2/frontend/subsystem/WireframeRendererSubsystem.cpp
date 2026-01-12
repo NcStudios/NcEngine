@@ -407,7 +407,12 @@ auto WireframeRendererSubsystem::BuildState(ecs::ExplicitEcs<Transform,
                 }
 
                 const auto& light = worldView.Get<SpotLight>(renderer.target);
-                const auto edgeMatrices = GenerateSpotLightEdgeMatrices(transform, light.outerAngle, light.radius);
+                // Compute outer angle to match the actual lit cone
+                // This matches the calculation in LightSubsystem.cpp
+                const float radiusFactor = std::max(1.0f - light.radius * 0.01f, 0.1f);
+                const float outerAngleCos = std::cos(std::max(light.outerAngle, 0.0001f)) * radiusFactor;
+                const float effectiveOuterAngle = std::acos(std::clamp(outerAngleCos, -1.0f, 1.0f));
+                const auto edgeMatrices = GenerateSpotLightEdgeMatrices(transform, effectiveOuterAngle, light.radius);
 
                 for (const auto& matrix : edgeMatrices)
                 {
