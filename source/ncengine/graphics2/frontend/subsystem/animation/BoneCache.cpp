@@ -1,5 +1,6 @@
 #include "BoneCache.h"
 
+#include "ncengine/debug/Profile.h"
 #include "ncutility/NcError.h"
 
 #include <cstring>
@@ -119,6 +120,7 @@ void BoneCacheStaging::Purge()
 
 void BoneCache::CommitPendingChanges()
 {
+    NC_PROFILE_SCOPE("BoneCache::CommitPendingChanges", ProfileCategory::Animation);
     std::ranges::fill(m_data, BoneData{});
     const auto newCapacity = m_staging.GetCapacity();
     if (newCapacity > m_data.size())
@@ -129,6 +131,7 @@ void BoneCache::CommitPendingChanges()
 
 void BoneCache::UpdateRegion(BoneCacheHandle boneIndex, std::span<const BoneData> bones)
 {
+    NC_PROFILE_SCOPE("BoneCache::UpdateRegion", ProfileCategory::Animation);
     NC_ASSERT(m_data.size() >= bones.size() + boneIndex, "BoneCache write out of bounds");
     std::memcpy(m_data.data() + boneIndex, bones.data(), bones.size() * sizeof(BoneData));
 }
@@ -143,6 +146,7 @@ auto BoneCache::BuildUpdateInfo() -> BufferUpdateInfo<BoneData>
 
 void BoneCache::Purge()
 {
+    NC_PROFILE_SCOPE("BoneCache::Purge", ProfileCategory::Animation);
     m_staging.Purge();
     m_data.resize(m_staging.GetCapacity());
     m_data.shrink_to_fit();

@@ -1,5 +1,6 @@
 #include "SinkBufferResource.h"
 #include "graphics2/diligent/pass/PassTypes.h"
+#include "ncengine/debug/Profile.h"
 #include "ResourceTypes.h"
 
 #include "ncutility/NcError.h"
@@ -210,6 +211,7 @@ void SinkBufferResource::Clear()
 
 void SinkBufferResource::Update()
 {
+    NC_PROFILE_SCOPE("SinkBufferResource::Update", ProfileCategory::Rendering);
     SetArrayRegion(m_variable, std::span<Diligent::IDeviceObject*>(m_shaderResourceViews), 0u, m_shaderResourceViews.size());
 }
 } // namespace nc::graphics

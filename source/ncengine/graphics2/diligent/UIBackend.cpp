@@ -1,5 +1,6 @@
 #include "UIBackend.h"
 
+#include "ncengine/debug/Profile.h"
 #include "imgui.h"
 #include "ImGuizmo.h"
 
@@ -16,6 +17,7 @@ UIBackend::UIBackend(Diligent::IRenderDevice& device,
 
 void UIBackend::FrameBegin(Diligent::ISwapChain& swapChain)
 {
+    NC_PROFILE_SCOPE("UIBackend::FrameBegin", ProfileCategory::Rendering);
     const auto& scDesc = swapChain.GetDesc();
     m_imguiBackend.NewFrame(scDesc.Width, scDesc.Height, scDesc.PreTransform);
     ImGuizmo::BeginFrame();
@@ -23,6 +25,7 @@ void UIBackend::FrameBegin(Diligent::ISwapChain& swapChain)
 
 void UIBackend::Render(Diligent::IDeviceContext& context)
 {
+    NC_PROFILE_SCOPE("UIBackend::Render", ProfileCategory::Rendering);
     m_imguiBackend.Render(&context);
 }
 

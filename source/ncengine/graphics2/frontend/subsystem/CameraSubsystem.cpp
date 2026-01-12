@@ -1,6 +1,7 @@
 #include "CameraSubsystem.h"
 #include "CameraRenderState.h"
 
+#include "ncengine/debug/Profile.h"
 #include "ncengine/ecs/Ecs.h"
 #include "ncengine/graphics/Camera.h"
 #include "ncengine/window/Window.h"
@@ -20,6 +21,7 @@ namespace nc::graphics
 {
 auto CameraSubsystem::BuildState(ecs::ExplicitEcs<Transform> ecs) -> CameraRenderState
 {
+    NC_PROFILE_SCOPE("CameraSubsystem::BuildState", ProfileCategory::Rendering);
     if (m_mainCamera)
     {
         const auto& transform = ecs.Get<Transform>(m_mainCamera->ParentEntity());

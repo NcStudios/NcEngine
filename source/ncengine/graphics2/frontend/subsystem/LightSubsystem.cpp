@@ -1,5 +1,6 @@
 #include "LightSubsystem.h"
 
+#include "ncengine/debug/Profile.h"
 #include "ncengine/ecs/Ecs.h"
 #include "ncengine/ecs/Transform.h"
 #include "ncengine/graphics/Light.h"
@@ -37,6 +38,7 @@ namespace nc::graphics
 {
 auto LightSubsystem::BuildState(ecs::ExplicitEcs<DirectionalLight, PointLight, SpotLight, Transform> ecs) -> LightRenderState
 {
+    NC_PROFILE_SCOPE("LightSubsystem::BuildState", ProfileCategory::Rendering);
     m_lightData.clear();
     m_lightMatrixData.clear();
     auto lightMatrixIndex = 0u;

@@ -1,4 +1,5 @@
 #include "TextureBufferResource.h"
+#include "ncengine/debug/Profile.h"
 #include "ResourceTypes.h"
 
 #include "TextureLoader.h"
@@ -31,6 +32,7 @@ void TextureBufferResource::Load(std::span<const asset::TextureWithId> textures,
                                  Diligent::IDeviceContext& context,
                                  Diligent::IRenderDevice& device)
 {
+    NC_PROFILE_SCOPE("TextureBufferResource::Load", ProfileCategory::Rendering);
     if (!m_initialLoadComplete)
     {
         InitializeArray(context, device, m_variable, m_maxTextures);

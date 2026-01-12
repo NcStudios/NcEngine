@@ -145,6 +145,7 @@ void ParticleSubsystem::CommitPendingChanges()
 
 auto ParticleSubsystem::BuildState() -> ParticleRenderState
 {
+    NC_PROFILE_SCOPE("ParticleSubsystem::BuildState", ProfileCategory::VFX);
     const auto count = std::min(static_cast<uint32_t>(m_particleDataHostBuffer.size()), m_maxParticles); // we don't want to crash when exceeding maxParticles, just discard
     const auto updateInfo = count > 0u
         ? BufferUpdateInfo<ParticleData>{m_particleDataHostBuffer, { {0, count} }}

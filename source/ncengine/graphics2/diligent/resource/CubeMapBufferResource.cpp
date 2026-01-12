@@ -1,4 +1,5 @@
 #include "CubeMapBufferResource.h"
+#include "ncengine/debug/Profile.h"
 #include "ResourceTypes.h"
 
 #include "TextureLoader.h"
@@ -36,6 +37,7 @@ void CubeMapBufferResource::Load(std::span<const asset::CubeMapWithId> cubeMaps,
                               IDeviceContext& context,
                               IRenderDevice& device)
 {
+    NC_PROFILE_SCOPE("CubeMapBufferResource::Load", ProfileCategory::Rendering);
     const auto cubeMapCount = cubeMaps.size();
     if (cubeMapCount == 0)
     {

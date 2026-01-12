@@ -129,6 +129,7 @@ void SkeletalAnimationSubsystem::CalculateBoneMatrices()
 
 void SkeletalAnimationSubsystem::CommitPendingChanges()
 {
+    NC_PROFILE_SCOPE("SkeletalAnimationSubsystem::CommitPendingChanges", ProfileCategory::Animation);
     m_stateOrchestrator.Remove(m_removed);
     m_removed.clear();
     m_boneCache.CommitPendingChanges();
@@ -136,6 +137,7 @@ void SkeletalAnimationSubsystem::CommitPendingChanges()
 
 auto SkeletalAnimationSubsystem::BuildState() -> SkeletalAnimationRenderState
 {
+    NC_PROFILE_SCOPE("SkeletalAnimationSubsystem::BuildState", ProfileCategory::Animation);
     return SkeletalAnimationRenderState{m_boneCache.BuildUpdateInfo()};
 }
 

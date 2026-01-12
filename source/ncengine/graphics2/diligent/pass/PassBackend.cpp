@@ -212,6 +212,7 @@ void PassBackend::RenderShadowPass(IDeviceContext& context,
                                    const std::vector<Batch>& skinnedBatches,
                                    const std::span<const LightData>& lights)
 {
+    NC_PROFILE_SCOPE("PassBackend::RenderShadowPass", ProfileCategory::Rendering);
     auto& sinkIndexBuffer = perPassResourceSignature.GetSinkIndexBufferResource();
     auto& uniShadowMapsBuffer = perPassResourceSignature.GetUniShadowMapSinksResource();
     auto& pointShadowMapsBuffer = perPassResourceSignature.GetPointShadowMapSinksResource();
@@ -418,8 +419,8 @@ void PassBackend::RenderParticle(IDeviceContext& context,
                                  PerPassResourceSignature& perPassResourceSignature,
                                  const ParticleRenderState& state,
                                  const Viewport& viewport)
-
 {
+    NC_PROFILE_SCOPE("PassBackend::RenderParticle", ProfileCategory::Rendering);
     if (state.particleData.instances.empty() || !m_particlePass)
     {
         return;

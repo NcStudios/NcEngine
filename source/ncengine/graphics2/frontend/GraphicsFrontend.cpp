@@ -1,11 +1,13 @@
 #include "GraphicsFrontend.h"
 #include "FrontendRenderState.h"
+#include "ncengine/debug/Profile.h"
 #include "ncengine/ecs/Ecs.h"
 
 namespace nc::graphics
 {
 auto GraphicsFrontend::BuildRenderState(ecs::Ecs world) -> FrontendRenderState
 {
+    NC_PROFILE_SCOPE("GraphicsFrontend::BuildRenderState", ProfileCategory::Rendering);
     return FrontendRenderState{
         .cameraState = m_cameraSystem.BuildState(world),
         .environmentRenderState = m_environmentSystem.BuildState(),

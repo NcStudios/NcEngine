@@ -87,7 +87,7 @@ auto WireframeRendererSubsystem::BuildState(ecs::ExplicitEcs<Transform,
                                                              StaticMesh,
                                                              RigidBody> worldView) -> WireframeRendererRenderState
 {
-    NC_PROFILE_SCOPE("WireframeRendererSubsystem::Execute", ProfileCategory::Rendering);
+    NC_PROFILE_SCOPE("WireframeRendererSubsystem::BuildState", ProfileCategory::Rendering);
     auto state = WireframeRendererRenderState{};
 
     for (auto& renderer : worldView.GetAll<WireframeRenderer>())

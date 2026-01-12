@@ -33,6 +33,7 @@ void TransformCache::RemoveInstance(TransformDataHandle instance)
 
 void TransformCache::CommitPendingChanges()
 {
+    NC_PROFILE_SCOPE("TransformCache::CommitPendingChanges", ProfileCategory::Rendering);
     m_buffer.CommitPendingChanges();
 }
 

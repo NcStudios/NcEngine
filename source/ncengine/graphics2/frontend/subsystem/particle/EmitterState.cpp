@@ -1,5 +1,6 @@
 #include "EmitterState.h"
 #include "math/Random.h"
+#include "ncengine/debug/Profile.h"
 #include "ncmath/Math.h"
 
 #include <ranges>
@@ -106,6 +107,7 @@ void EmitterState::Update(DirectX::FXMVECTOR position,
                           DirectX::FXMVECTOR camForward,
                           float dt)
 {
+    NC_PROFILE_SCOPE("EmitterState::Update", ProfileCategory::VFX);
     if (m_needsResize)
     {
         // We can't just reserve because the capacity is logically important. In the case of shrinking, we'd need
