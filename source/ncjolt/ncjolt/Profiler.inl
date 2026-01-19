@@ -24,7 +24,7 @@ ExternalProfileMeasurement::ExternalProfileMeasurement([[maybe_unused]] const ch
 #elif defined(NC_USE_OPTICK)
     // Optick macros use a static variable to hold a description and a local variable to start/stop. We need to manually
     // build a description based on the given name and emplace an event over our user data to take ownership.
-   constexpr auto category = Optick::Category::Physics;
+    constexpr auto category = Optick::Category::Physics;
     static const auto color = Optick::Category::GetColor(category);
     static const auto filter = Optick::Category::GetMask(category);
     // note: The use case for CreateShared is to make a copy of the string, which we don't care about, but it also
