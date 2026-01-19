@@ -57,8 +57,7 @@ struct TaskMeasurement
 
 namespace nc
 {
-/** @brief Color and filter for a profile event. */
-using ProfileCategory = ProfileCategory;
+using ProfileCategory = Optick::Category;
 
 /** @cond internal */
 namespace detail
