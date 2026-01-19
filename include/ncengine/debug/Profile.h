@@ -12,18 +12,6 @@
 
 namespace nc
 {
-/** @brief Color and filter for a profile event (unused with Tracy, kept for API compatibility). */
-struct ProfileCategory
-{
-    static constexpr int None = 0;
-    static constexpr int Rendering = 1;
-    static constexpr int Physics = 2;
-    static constexpr int Audio = 3;
-    static constexpr int GameLogic = 4;
-    static constexpr int Animation = 5;
-    static constexpr int VFX = 6;
-};
-
 /** @cond internal */
 namespace detail
 {
