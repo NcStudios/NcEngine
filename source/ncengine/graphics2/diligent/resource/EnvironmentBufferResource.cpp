@@ -1,5 +1,6 @@
 #include "EnvironmentBufferResource.h"
 #include "graphics2/frontend/subsystem/CameraRenderState.h"
+#include "ncengine/debug/Profile.h"
 #include "graphics2/frontend/subsystem/EnvironmentRenderState.h"
 #include "graphics2/frontend/subsystem/LightRenderState.h"
 #include "ncengine/graphics/Environment.h"
@@ -25,6 +26,7 @@ void EnvironmentBufferResource::Update(Diligent::IDeviceContext& context,
                                        const LightRenderState& lightRenderState,
                                        const EnvironmentRenderState& environmentRenderState)
 {
+    NC_PROFILE_SCOPE("EnvironmentBufferResource::Update", ProfileCategory::Rendering);
     const auto data = GlobalEnvironmentData{
         .cameraViewProjection = cameraState.viewProjection,
         .cameraInvProjection = cameraState.invProjection,

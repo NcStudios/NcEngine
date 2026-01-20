@@ -532,7 +532,7 @@ void NcGraphicsImpl2::OnBuildTaskGraph(task::UpdateTasks& update, task::RenderTa
 
 void NcGraphicsImpl2::Run()
 {
-    NC_PROFILE_TASK("Render", Optick::Category::Rendering);
+    NC_PROFILE_TASK("Render", ProfileCategory::Rendering);
 
     if (m_resizeNeeded)
     {

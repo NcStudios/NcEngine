@@ -9,7 +9,7 @@
 #include "utility/Log.h"
 #include "window/Window.h"
 
-#include "optick.h"
+#include "ncengine/debug/Profile.h"
 
 #include <sstream>
 #include <thread>
@@ -171,7 +171,7 @@ void NcEngineImpl::Run()
     auto* ncScene = m_modules->Get<NcScene>();
     auto update = [this, ncWindow = m_modules->Get<window::NcWindow>()](float dt)
     {
-        OPTICK_FRAME("Main Thread");
+        NC_PROFILE_FRAME("Main Thread");
         time::SetDeltaTime(dt);
         input::Flush();
         ncWindow->ProcessSystemMessages();

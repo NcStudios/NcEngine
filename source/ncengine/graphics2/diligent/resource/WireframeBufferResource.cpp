@@ -1,4 +1,5 @@
 #include "WireframeBufferResource.h"
+#include "ncengine/debug/Profile.h"
 
 namespace nc::graphics
 {
@@ -19,6 +20,7 @@ WireframeBufferResource::WireframeBufferResource(Diligent::IDeviceContext& conte
 void WireframeBufferResource::Update(Diligent::IDeviceContext& context,
                                      const WireframeData& data)
 {
+    NC_PROFILE_SCOPE("WireframeBufferResource::Update", ProfileCategory::Rendering);
     m_buffer.Write(context, data);
 }
 } // namespace nc::graphics

@@ -133,6 +133,7 @@ void InstanceCache<T>::CommitPendingChanges()
 template<class T>
 auto InstanceCache<T>::BuildState() -> BufferUpdateInfo<T>
 {
+    NC_PROFILE_SCOPE("InstanceCache::BuildState", ProfileCategory::Rendering);
     // For simplicity, we're only tracking one dirty range from the first modified index to the buffer
     // end. This can result in more copies than necessary for non-shifting insertions and removals, but the
     // data is pretty cheap to copy.
@@ -181,6 +182,7 @@ auto InstanceCache<T>::BuildBatches(std::span<const MaterialPassFlag::type> pass
 template<class T>
 void InstanceCache<T>::Purge() noexcept
 {
+    NC_PROFILE_SCOPE("InstanceCache::Purge", ProfileCategory::Rendering);
     CommitPendingChanges();
     m_dirtyBegin = 0u;
     auto bufferEnd = 0u;

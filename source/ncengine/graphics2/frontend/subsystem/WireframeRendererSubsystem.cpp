@@ -9,7 +9,7 @@
 #include "asset/AssetService.h"
 
 #include "ncmath/MatrixUtilities.h"
-#include "optick.h"
+#include "ncengine/debug/Profile.h"
 
 namespace
 {
@@ -87,7 +87,7 @@ auto WireframeRendererSubsystem::BuildState(ecs::ExplicitEcs<Transform,
                                                              StaticMesh,
                                                              RigidBody> worldView) -> WireframeRendererRenderState
 {
-    OPTICK_CATEGORY("WireframeRendererSubsystem::Execute", Optick::Category::Rendering);
+    NC_PROFILE_SCOPE("WireframeRendererSubsystem::BuildState", ProfileCategory::Rendering);
     auto state = WireframeRendererRenderState{};
 
     for (auto& renderer : worldView.GetAll<WireframeRenderer>())

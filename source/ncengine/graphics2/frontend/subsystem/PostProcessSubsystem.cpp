@@ -1,4 +1,5 @@
 #include "PostProcessSubsystem.h"
+#include "ncengine/debug/Profile.h"
 #include "ncengine/graphics/GraphicsUtility.h"
 
 #include "ncutility/NcError.h"
@@ -121,6 +122,7 @@ void PostProcessSubsystem::SetProperties(PostProcessEffectId effectId,
 
 auto PostProcessSubsystem::BuildState() -> PostProcessState
 {
+    NC_PROFILE_SCOPE("PostProcessSubsystem::BuildState", ProfileCategory::Rendering);
     return PostProcessState{
         .toggledEffects = std::move(m_toggledEffects),
         .modifiedProperties = std::move(m_modifiedProperties)

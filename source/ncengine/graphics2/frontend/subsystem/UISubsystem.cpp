@@ -1,5 +1,6 @@
 #include "UISubsystem.h"
 
+#include "ncengine/debug/Profile.h"
 #include "ncengine/ui/IUI.h"
 #include "ncengine/ui/editor/Editor.h"
 
@@ -26,6 +27,7 @@ void UISubsystem::SetClientUI(ui::IUI* ui) noexcept
 
 void UISubsystem::UpdateUI(ecs::Ecs world)
 {
+    NC_PROFILE_SCOPE("UISubsystem::UpdateUI", ProfileCategory::Rendering);
     m_editor->Draw(world);
     if (m_clientUI)
     {
