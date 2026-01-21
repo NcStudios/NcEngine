@@ -2,16 +2,16 @@
 
 struct VSInput
 {
-    float3 Pos         : ATTRIB0;
-    float2 UV          : ATTRIB1;
+    float3 Pos : POSITION;
+    float2 UV  : TEXCOORD0;
 };
 
 struct PSOutput
 {
     float4 Pos           : SV_POSITION;
     float2 UV            : TEX_COORD;
-    float4 Color;
-    uint   TextureIndex;
+    float4 Color         : COLOR;
+    uint   TextureIndex  : TEX_INDEX;
 };
 
 StructuredBuffer<ParticleData> Particles;

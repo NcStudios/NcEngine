@@ -32,7 +32,7 @@ float SampleNormalizeDepth(Texture2D tex, SamplerState smplr, float2 uv)
 {
     float rawDepth = tex.Sample(smplr, uv).r;
     float3 ndc = float3(uv * 2.0 - 1.0, rawDepth);
-    float4 view = cameraInvProjection * float4(ndc, 1.0);
+    float4 view = mul(float4(ndc, 1.0), cameraInvProjection);
     view.xyz /= view.w;
     float linearDepth = -view.z;
     return (linearDepth - nearClip) / (farClip - nearClip);
@@ -64,10 +64,10 @@ float OutlineDepth(Texture2D depthTex, float viewDirDepthOffset, SamplerState sm
 float OutlineNormals(Texture2D normalsTex, float intensity, SamplerState smplr, float2 LLUV, float2 URUV, float2 LRUV, float2 ULUV)
 {
     // Sample normals texture at four corners
-    float3 normalsLL = normalsTex.Sample(smplr, LLUV);
-    float3 normalsUR = normalsTex.Sample(smplr, URUV);
-    float3 normalsLR = normalsTex.Sample(smplr, LRUV);
-    float3 normalsUL = normalsTex.Sample(smplr, ULUV);
+    float3 normalsLL = normalsTex.Sample(smplr, LLUV).xyz;
+    float3 normalsUR = normalsTex.Sample(smplr, URUV).xyz;
+    float3 normalsLR = normalsTex.Sample(smplr, LRUV).xyz;
+    float3 normalsUL = normalsTex.Sample(smplr, ULUV).xyz;
 
     // Get the difference between the diagonals
     float3 normalsDiagDif0 = (normalsUR - normalsLL) * intensity;

@@ -39,9 +39,9 @@ void main(in PSInput PSIn, out PSOutput PSOut)
     colorTex.GetDimensions(screenWidth, screenHeight);
     float2 texelSize = float2(1.0 / screenWidth, 1.0 / screenHeight);
 
-    /***********************
-    / Get edge luminance
-    /***********************/
+    //
+    // Get edge luminance
+    //
     // Get luminance for four texels in a cross shape surrounding the current texel
     float curLuma   = RgbToLuma(colorTex.Sample(smplr, PSIn.UV).rgb);
     float downLuma  = RgbToLuma(colorTex.Sample(smplr, PSIn.UV + (float2( 0, -1) * texelSize)).rgb);
@@ -75,9 +75,9 @@ void main(in PSInput PSIn, out PSOutput PSOut)
     float rightCornerLuma = LRLuma   + URLuma;
     float upCornerLuma    = URLuma   + ULLuma;
 
-    /**********************
-    / Get edge orientation
-    /**********************/
+    //
+    // Get edge orientation
+    //
     // Get an estimated gradient along the horizontal and vertical axes.
     float edgeHoriz = abs(-2.0 * leftLuma + leftCornerLuma) + abs(-2.0 * curLuma + downUpLuma) * 2.0    + abs(-2.0 * rightLuma + rightCornerLuma);
     float edgeVert  = abs(-2.0 * upLuma + upCornerLuma)     + abs(-2.0 * curLuma + leftRightLuma) * 2.0 + abs(-2.0 * downLuma + downCornerLuma);
@@ -95,9 +95,9 @@ void main(in PSInput PSIn, out PSOutput PSOut)
     bool isGradient1Steepest = abs(gradient1) >= abs(gradient2);
     float scaledGradient = 0.25 * max(abs(gradient1), abs(gradient2));
 
-    /******************************
-    / Average luma values at edge
-    /******************************/
+    //
+    // Average luma values at edge
+    //
     float stepLength = isHorizontalEdge ? texelSize.y : texelSize.x;
     float localAvgLuma = 0.0;
 
@@ -123,9 +123,9 @@ void main(in PSInput PSIn, out PSOutput PSOut)
         currentUV.x += stepLength * 0.5;
     }
 
-    /************************
-    / Explore bounds of edge
-    /************************/
+    //
+    // Explore bounds of edge
+    //
     float2 offset = isHorizontalEdge ? float2(texelSize.x, 0.0) : float2(0.0, texelSize.y);
     float2 newUV1 = currentUV - offset;
     float2 newUV2 = currentUV + offset;
@@ -187,9 +187,9 @@ void main(in PSInput PSIn, out PSOutput PSOut)
         }
     }
 
-    /*****************
-    / Estimate offset
-    /*****************/
+    //
+    // Estimate offset
+    //
     float distance1 = isHorizontalEdge ? (PSIn.UV.x - newUV1.x) : (PSIn.UV.y - newUV1.y);
     float distance2 = isHorizontalEdge ? (newUV2.x - PSIn.UV.x) : (newUV2.y - PSIn.UV.y);
 
@@ -206,9 +206,9 @@ void main(in PSInput PSIn, out PSOutput PSOut)
     bool correctVariation = ((isDirection1 ? endLuma1 : endLuma2) < 0.0) != isCurLumaSmaller;
     float finalOffset = correctVariation ? pixelOffset : 0.0;
 
-    /***********************
-    / Subpixel antialiasing
-    /***********************/
+    //
+    // Subpixel antialiasing
+    //
     // Get full weighted luminance average over 3x3 neighborhood
     float iterationsF = float(Iterations);
     float averageLuma = (1.0 / iterationsF) * (2.0 * (downUpLuma + leftRightLuma) + leftCornerLuma + rightCornerLuma);

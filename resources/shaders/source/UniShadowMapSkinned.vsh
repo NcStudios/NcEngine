@@ -14,9 +14,9 @@ struct PSInput
     float4 Pos           : SV_POSITION;
     float3 Normal        : NORMAL;
     float2 UV            : TEX_COORD;
-    uint   MaterialIndex;
-    float3 WorldPos;
-    float3 LocalPos;
+    uint   MaterialIndex : MAT_INDEX;
+    float3 WorldPos      : WORLD_POS;
+    float3 LocalPos      : LOCAL_POS;
 };
 
 StructuredBuffer<TransformData> Transforms;

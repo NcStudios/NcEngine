@@ -6,8 +6,8 @@ struct PSInput
     float4 Pos           : SV_POSITION;
     float3 Normal        : NORMAL;
     float2 UV            : TEX_COORD; 
-    uint   MaterialIndex;
-    float4 WorldPos;
+    uint   MaterialIndex : MAT_INDEX;
+    float4 WorldPos      : WORLD_POS;
 };
 
 struct PSOutput
@@ -20,16 +20,14 @@ SamplerState  Textures_sampler; // By convention, texture samplers must use the 
 
 StructuredBuffer<MaterialData> Materials : register(t1);
 
-const float Epsilon = 1e-10;
-
-float3 RGBtoHSV(in float3 RGB)
+float3 RGBtoHSV(in float3 RGB, float epsilon)
 {
     float4 P = (RGB.g < RGB.b) ? float4(RGB.bg, -1.0, 2.0/3.0) : float4(RGB.gb, 0.0, -1.0/3.0);
     float4 Q = (RGB.r < P.x) ? float4(P.xyw, RGB.r) : float4(RGB.r, P.yzx);
     float C = Q.x - min(Q.w, Q.y);
-    float H = abs((Q.w - Q.y) / (6.0 * C + Epsilon) + Q.z);
+    float H = abs((Q.w - Q.y) / (6.0 * C + epsilon) + Q.z);
     float3 HCV = float3(H, C, Q.x);
-    float S = HCV.y / (HCV.z + Epsilon);
+    float S = HCV.y / (HCV.z + epsilon);
     return float3(HCV.x, S, HCV.z);
 }
 
@@ -45,14 +43,16 @@ float3 HSVtoRGB(in float3 HSV)
 
 void main(in  PSInput  PSIn, out PSOutput PSOut)
 {
+    const float Epsilon = 1e-10;
+
     float4 Color;
-    float3 viewDir = normalize(cameraPosition - PSIn.WorldPos);
+    float3 viewDir = normalize(cameraPosition - PSIn.WorldPos.xyz);
 
     if (Materials[PSIn.MaterialIndex].useTextureNormals)
     {
         uint normalIndex = Materials[PSIn.MaterialIndex].normalTexIndex;
-        float3 textureNormals = normalize(Textures[normalIndex].Sample(Textures_sampler, PSIn.UV));
-        Color = float4(normalize(textureNormals.xyz * float3(2.0) - float3(1.0)), 1.0f);
+        float3 textureNormals = normalize(Textures[normalIndex].Sample(Textures_sampler, PSIn.UV)).xyz;
+        Color = float4(normalize(textureNormals.xyz * float3(2.0, 2.0, 2.0) - float3(1.0, 1.0, 1.0)), 1.0f);
     }
     else
     {
@@ -60,7 +60,7 @@ void main(in  PSInput  PSIn, out PSOutput PSOut)
         Color = float4(vertexNormals, 1.0f);
     }
 
-    float3 colHsv = RGBtoHSV(float3(Color.r, Color.g, Color.b));
+    float3 colHsv = RGBtoHSV(float3(Color.r, Color.g, Color.b), Epsilon);
     colHsv.y *=  Materials[PSIn.MaterialIndex].normalIntensity;
     Color.rgb = HSVtoRGB(colHsv.rgb);
 
