@@ -7,8 +7,8 @@ struct VSInput
 
 struct PSInput 
 {
-    float4 Pos           : SV_POSITION;
-    float3 UVW;
+    float4 Pos : SV_POSITION;
+    float3 UVW : U_V_W;
 };
 
 static float4x4 localModelMatrix = float4x4(

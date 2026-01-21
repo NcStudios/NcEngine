@@ -70,6 +70,7 @@ DiligentEngine::DiligentEngine(const Diligent::EngineCreateInfo& engineCreateInf
     }
 
     auto engineCI = EngineVkCreateInfo{engineCreateInfo};
+    engineCI.Features.ShaderResourceRuntimeArrays = DEVICE_FEATURE_STATE_ENABLED;
     pFactoryVk->CreateDeviceAndContextsVk(engineCI, &m_pDevice, &m_pImmediateContext);
     if (!m_pDevice || !m_pImmediateContext)
     {

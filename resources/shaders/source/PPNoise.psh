@@ -37,15 +37,15 @@ void main(in PSInput PSIn, out PSOutput PSOut)
     SamplerState smplr = ColorSinks_sampler;
     Texture2D sceneColorTex = PostProcessSinks[0];
     Texture2D noiseTex = Textures[noiseTexIndex];
-    float3 sceneColor = sceneColorTex.Sample(smplr, PSIn.UV);
-    float3 noiseColor = noiseTex.Sample(smplr, PSIn.UV * noiseTexTiling);
+    float3 sceneColor = sceneColorTex.Sample(smplr, PSIn.UV).xyz;
+    float3 noiseColor = noiseTex.Sample(smplr, PSIn.UV * noiseTexTiling).xyz;
 
     // Gradient for mask
     float3 gradient = lerp(gradientStart, gradientEnd, PSIn.UV.y);
     float4 gradientApplied = float4(lerp(sceneColor, sceneColor + gradient, gradientAmount), 1.0f);
 
     // Noise
-    float3 luma = RgbToLuma(gradientApplied);
+    float3 luma = RgbToLuma(gradientApplied.xyz);
     float3 noiseApplied = lerp(sceneColor, sceneColor + noiseColor, (1-luma.r) * noiseTexAmount);
 
     PSOut.Color = float4(noiseApplied, 1.0f);

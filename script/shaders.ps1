@@ -13,15 +13,11 @@ param
 [bool]$DebugMode = $false
 )
 
-$Compiler = $Env:VULKAN_SDK + "\Bin\glslangValidator.exe"
+$Compiler = $Env:VULKAN_SDK + "\Bin\dxc.exe"
 $Optimizer = $Env:VULKAN_SDK + "\Bin\spirv-opt.exe"
-$Preamble = "#pragma pack_matrix(row_major)"
 
 if ($DebugMode) {
-    $CompilerOutputDir = Join-Path $OutputDir "debug"
-    if (-not (Test-Path -Path $OutputDir)) {
-        New-Item -Path $OutputDir -ItemType Directory | Out-Null
-    }
+    $CompilerOutputDir = $OutputDir
 }
 else {
     $CompilerOutputDir = Join-Path $OutputDir "temp"
@@ -37,10 +33,10 @@ Write-Host "--Compiling Shaders--"
 Get-ChildItem -Path $InputDir | Where-Object { $_.Extension -eq '.psh' -or $_.Extension -eq '.vsh' } |
 ForEach-Object {
     if ($_.Extension -eq '.psh') {
-        $Stage = 'frag'
+        $Profile = 'ps_6_6'
         $FileName = "$($_.BaseName)Pixel.spv"
     } elseif ($_.Extension -eq '.vsh') {
-        $Stage = 'vert'
+        $Profile = 'vs_6_6'
         $FileName = "$($_.BaseName)Vertex.spv"
     } else {
         return
@@ -50,18 +46,20 @@ ForEach-Object {
     $InputFile = Join-Path $InputDir $_.Name
     $OutputFile = Join-Path $CompilerOutputDir $FileName
     $Args = @(
-        '-V',                    # create SPIRV binary w/ Vulkan semantics
-        '-D',                    # input is HLSL
-        "-P$Preamble",           # prepended our definitions to each source file
-        '-e', 'main',            # entry point
-        '-fhlsl_functionality1', # enable functionality1 extension
-        "-S", $Stage,            # explicitly specify shader stage
-        "-o", $OutputFile,
+        '-spirv',                                         # generate SPIR-V for Vulkan
+        '-fspv-target-env=vulkan1.2',                     # target Vulkan 1.2
+        '-fspv-extension=SPV_GOOGLE_hlsl_functionality1', # SPIR-V HLSL semantics
+        '-fspv-extension=SPV_KHR_non_semantic_info',      # SPIR-V HLSL semantics
+        '-fspv-extension=SPV_EXT_descriptor_indexing',    # Allow for descriptor indexing
+        '-Zpr',                                           # pack matrices in row-major order
+        '-E', 'main',                                     # entry point
+        '-T', $Profile,                                   # shader profile (vs_6_0, ps_6_0)
+        '-Fo', $OutputFile,             # output file
         $InputFile
     )
 
     if ($DebugMode) {
-        $Args = @('-g') + $Args
+        $Args = @('-Zi', '-fspv-debug=line') + $Args
     }
 
     & $Compiler @Args

@@ -4,13 +4,13 @@
 
 struct VSInput
 {
-    float3 Pos    : ATTRIB0;
+    float3 Pos : ATTRIB0;
 };
 
 struct PSInput 
 {
-    float4 Pos : SV_POSITION;
-    float4 WorldPos;
+    float4 Pos      : SV_POSITION;
+    float4 WorldPos : WORLD_POS;
 };
 
 StructuredBuffer<TransformData> Transforms;
