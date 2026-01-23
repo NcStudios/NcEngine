@@ -54,22 +54,6 @@ auto MakeCubeDepthSinkBufferDesc(uint32_t maxTextures) -> CubeSinkBufferResource
     };
 }
 
-auto MakeCubeShadowSinkBufferDesc(uint32_t maxTextures) -> CubeSinkBufferResourceDesc
-{
-    return CubeSinkBufferResourceDesc{
-        .name = "Shadow Render Target",
-        .viewType = TEXTURE_VIEW_RENDER_TARGET,
-        .format = OffScreenShadowMapRTFormat,
-        .bindFlags = BIND_SHADER_RESOURCE | BIND_RENDER_TARGET,
-        .clearValue = OptimizedClearValue{
-            .Format = OffScreenShadowMapRTFormat,
-            .Color = {0.0f, 0.0f, 0.0f, 0.0f},
-            .DepthStencil = DepthStencilClearValue{}
-        },
-        .maxTextures = maxTextures
-    };
-}
-
 auto CubeSinkBufferResource::MakeShadowSamplerDesc(std::string_view variableName) -> ImmutableSamplerDesc
 {
     auto samplerDesc = SamplerDesc{};

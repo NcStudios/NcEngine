@@ -59,14 +59,11 @@ void ClearPointShadowMapRenderTarget(Diligent::IDeviceContext& context,
                                      uint32_t lightIndex,
                                      uint32_t faceIndex)
 {
-    Diligent::ITextureView* pRTV = shadowMapSinkBufferResource.GetRenderTargetView((lightIndex * 6) + faceIndex);
-    if (pRTV)
+    Diligent::ITextureView* pDSV = shadowMapSinkBufferResource.GetDepthTargetView((lightIndex * 6) + faceIndex);
+    if (pDSV)
     {
-        context.ClearRenderTarget(pRTV, &ClearColor.x, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
+        context.ClearDepthStencil(pDSV, Diligent::CLEAR_DEPTH_FLAG, 1.f, 0, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
     }
-
-    Diligent::ITextureView* pDSV = shadowMapSinkBufferResource.GetDepthTargetView(0);
-    context.ClearDepthStencil(pDSV, Diligent::CLEAR_DEPTH_FLAG, 1.f, 0, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
 }
 
 void ClearUniShadowMapRenderTarget(Diligent::IDeviceContext& context,
@@ -106,9 +103,8 @@ void BindPointShadowMapRenderTarget(Diligent::IDeviceContext& context,
                                     uint32_t lightIndex,
                                     uint32_t faceIndex)
 {
-    Diligent::ITextureView* pRTV = shadowMapSinkBufferResource.GetRenderTargetView((lightIndex *6)+ faceIndex);
-    Diligent::ITextureView* pDSV = shadowMapSinkBufferResource.GetDepthTargetView(0);
-    context.SetRenderTargets(1, &pRTV, pDSV, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
+    Diligent::ITextureView* pDSV = shadowMapSinkBufferResource.GetDepthTargetView((lightIndex *6)+ faceIndex);
+    context.SetRenderTargets(0, nullptr, pDSV, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
 }
 
 void BindUniShadowMapRenderTarget(Diligent::IDeviceContext& context,

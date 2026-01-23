@@ -1,5 +1,5 @@
 SamplerComparisonState  UniShadowMapSinks_sampler; // By convention, texture samplers must use the '_sampler' suffix
-SamplerState  PointShadowMapSinks_sampler; // By convention, texture samplers must use the '_sampler' suffix
+SamplerComparisonState  PointShadowMapSinks_sampler; // By convention, texture samplers must use the '_sampler' suffix
 Texture2D     UniShadowMapSinks[];
 TextureCube   PointShadowMapSinks[];
 
@@ -141,43 +141,26 @@ float UniShadowCalculation(bool isDirectional, float4 fragPosLightSpace, Texture
 
 float PointShadowCalculation(float4 fragPosWorldSpace, float3 lightPosWorldSpace, TextureCube depthTex, float3 normal)
 {
-    // Get sample vector (light to frag dir)
-    float3 lightToFrag = lightPosWorldSpace - fragPosWorldSpace.xyz;
-    float distance = length(lightToFrag);
+    float3 lightToFrag = fragPosWorldSpace.xyz - lightPosWorldSpace;
+    float linearDistance = length(lightToFrag);
 
-    // Normalize the distance based on the far plane (Keep in sync with LightSubsystem.cpp)
-    float farPlane = 150.0f; 
-    distance = distance / farPlane;
-    float3 sampleDir = -normalize(lightToFrag);
+    // MUST match LightSubsystem.cpp m_pointLightProjection!
+    const float nearPlane = 1.0f;
+    const float farPlane = 40.0f;
 
-    // PCF and bias
-    float shadow = 0.0f;
-    const float sampleCount = 4.0f;
-    const float offset = 0.005f;
-    float bias = 0.005f * (1.0f - dot(normal, -sampleDir));
-    bias = clamp(bias, 0.001f, 0.01f);
+    float3 sampleDir = normalize(lightToFrag);
 
-    float totalSamples = 0.0f;
-    [unroll]
-    for (float x = -offset; x <= offset; x += offset / (sampleCount * 0.5f)) 
-    {
-        [unroll]
-        for (float y = -offset; y <= offset; y += offset / (sampleCount * 0.5f)) 
-        {
-            [unroll]
-            for (float z = -offset; z <= offset; z += offset / (sampleCount * 0.5f))
-            {
-                float closestDepth = depthTex.Sample(PointShadowMapSinks_sampler, sampleDir + float3(x, y, z)).r;
-                if (distance - bias > closestDepth)
-                {
-                    shadow += 1.0f;
-                }
-                totalSamples += 1.0f;
-            }
-        }
-    }
+    // Convert our linear distance to perspective depth (what the hardware depth buffer stores)
+    // Inverse of: linearDepth = near*far / (far - perspDepth*(far-near))
+    // Solving for perspDepth: perspDepth = (far - near*far/linearDistance) / (far - near)
+    float perspectiveDepth = (farPlane - (nearPlane * farPlane) / linearDistance) / (farPlane - nearPlane);
+    perspectiveDepth = saturate(perspectiveDepth);
 
-    // Normalize the shadow value
-    shadow /= totalSamples;
-    return shadow;
+    // Bias in perspective space
+    float bias = max(0.002f * (1.0f - dot(normal, -sampleDir)), 0.001f);
+
+    // Hardware comparison with SamplerComparisonState - returns 0 if in shadow, 1 if lit
+    float lit = depthTex.SampleCmpLevelZero(PointShadowMapSinks_sampler, sampleDir, perspectiveDepth - bias);
+
+    return 1.0f - lit;  // Return shadow amount (1 = shadowed, 0 = lit)
 }

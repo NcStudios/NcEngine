@@ -203,7 +203,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .name = "PointShadow",
                     .type = PassType::Material,
                     .layoutElements = VertexAttribute::Pos,
-                    .shaderPaths = ShaderPaths{shader::PointShadowMapPixel, shader::PointShadowMapVertex},
+                    .shaderPaths = ShaderPaths{.vertexShaderPath = shader::PointShadowMapVertex},
                     .shadowMapSink = ShadowMapTarget::Point,
                     .isMsaa = false,
                     .useDepthTest = true
@@ -213,7 +213,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .name = "PointShadowSkinned",
                     .type = PassType::SkinnedMaterial,
                     .layoutElements = VertexAttribute::Skinning,
-                    .shaderPaths = ShaderPaths{shader::PointShadowMapPixel, shader::PointShadowMapSkinnedVertex},
+                    .shaderPaths = ShaderPaths{.vertexShaderPath = shader::PointShadowMapSkinnedVertex},
                     .shadowMapSink = ShadowMapTarget::Point,
                     .isMsaa = false,
                     .useDepthTest = true
