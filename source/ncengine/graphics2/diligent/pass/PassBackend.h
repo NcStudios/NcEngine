@@ -11,6 +11,7 @@
 #include "PostProcessPass.h"
 #include "SkyboxPass.h"
 #include "WireframePass.h"
+#include "ncengine/scene/NcScene.h"
 #include "ncengine/window/WindowTypes.h"
 
 #include "Graphics/GraphicsEngine/interface/DeviceContext.h"
@@ -44,10 +45,13 @@ class PassBackend
                              const config::MemorySettings& memorySettings,
                              uint32_t numSamples = 1u);
 
-        void Update(const PostProcessState& postProcessState);
+        void Update(Diligent::IRenderDevice& device,
+                    Diligent::IDeviceContext& context,
+                    const PostProcessState& postProcessState);
+
+        void OnBeforeSceneLoad(const Scene& sceneToLoad);
 
         void RenderShadowPass(Diligent::IDeviceContext& context,
-                              PerPassResourceSignature& perPassResourceSignature,
                               const MaterialPass& staticPass,
                               const MaterialPass& skinnedPass,
                               const std::vector<Batch>& staticBatches,
@@ -56,13 +60,11 @@ class PassBackend
 
         void RenderSkybox(Diligent::IDeviceContext& context,
                           Diligent::ISwapChain& swapChain,
-                          PerPassResourceSignature& perPassResourceSignature,
                           const nc::graphics::EnvironmentRenderState& environmentRenderState,
                           const Viewport& viewport);
 
         void RenderMaterial(Diligent::IDeviceContext& context,
                             Diligent::ISwapChain& swapChain,
-                            PerPassResourceSignature& perPassResourceSignature,
                             const std::vector<std::vector<Batch>>& staticPassBatches,
                             const std::vector<std::vector<Batch>>& skinnedPassBatches,
                             const std::span<const LightData>& lights,
@@ -70,23 +72,19 @@ class PassBackend
 
         void RenderWireframe(Diligent::IDeviceContext& context,
                              Diligent::ISwapChain& swapChain,
-                             PerPassResourceSignature& perPassResourceSignature,
                              const WireframeRendererRenderState& state,
                              const Viewport& viewport);
 
         void RenderParticle(Diligent::IDeviceContext& context,
                             Diligent::ISwapChain& swapChain,
-                            PerPassResourceSignature& perPassResourceSignature,
                             const ParticleRenderState& state,
                             const Viewport& viewport);
 
         void RenderPostProcess(Diligent::IDeviceContext& context,
-                               Diligent::ISwapChain& swapChain,
-                               PerPassResourceSignature& perPassResourceSignature);
+                               Diligent::ISwapChain& swapChain);
 
         void RenderOutputToSwapchain(Diligent::IDeviceContext& context,
-                                     Diligent::ISwapChain& swapChain,
-                                     PerPassResourceSignature& perPassResourceSignature);
+                                     Diligent::ISwapChain& swapChain);
 
     private:
         void MakePassesAndPipelines(Diligent::IRenderDevice& device,
@@ -105,6 +103,14 @@ class PassBackend
         uint32_t m_numSamples;
         std::optional<uint32_t> m_finalColorTarget;
         std::optional<uint32_t> m_finalPostProcessTarget;
+        PerPassResourceSignature* m_perPassResourceSignature;
+        bool m_castsShadows = false;
+        uint32_t m_shadowMapResX = 512;
+        uint32_t m_maxPointLights = 10;
+        uint32_t m_maxDirectionalLights = 10;
+        uint32_t m_maxSpotLights = 10;
+        uint32_t m_pointSinksToCreate = 0u;
+        uint32_t m_uniSinksToCreate = 0u;
 };
 } // namespace graphics
 } // namespace nc

@@ -42,8 +42,11 @@ class CubeSinkBufferResource
         void Clear();
         void Update();
 
-        auto GetRenderTargetView(uint32_t index) -> Diligent::ITextureView* { return static_cast<Diligent::ITextureView*>(m_renderTargetViews.at(index).RawPtr()); }
-        auto GetDepthTargetView(uint32_t index)  -> Diligent::ITextureView* { return static_cast<Diligent::ITextureView*>(m_depthRenderTargetViews.at(index).RawPtr()); }
+        // Get depth-stencil view for a specific face (index = cubeIndex * 6 + faceIndex)
+        auto GetDepthTargetView(uint32_t index) -> Diligent::ITextureView*
+        {
+            return static_cast<Diligent::ITextureView*>(m_depthRenderTargetViews.at(index).RawPtr());
+        }
         auto GetTexture(uint32_t index)          -> Diligent::ITexture*     { return m_cubeTextures.at(index); }
         auto GetSinkCount() const                -> uint32_t                { return static_cast<uint32_t>(m_cubeTextures.size()); }
         auto GetTextureView(uint32_t index) -> void*
@@ -53,11 +56,9 @@ class CubeSinkBufferResource
         }
 
     private:
-        std::vector<Diligent::RefCntAutoPtr<Diligent::ITexture>> m_cubeTextures; 
-        std::vector<Diligent::RefCntAutoPtr<Diligent::ITexture>> m_depthTextures;
-        std::vector<Diligent::RefCntAutoPtr<Diligent::IDeviceObject>> m_renderTargetViews; // Render target (one per face)
-        std::vector<Diligent::RefCntAutoPtr<Diligent::IDeviceObject>> m_depthRenderTargetViews; // Depth Render target
-        std::vector<Diligent::RefCntAutoPtr<Diligent::IDeviceObject>> m_shaderResourceViews; // Shader resource (one per cube map)
+        std::vector<Diligent::RefCntAutoPtr<Diligent::ITexture>> m_cubeTextures;  // Depth cubemaps
+        std::vector<Diligent::RefCntAutoPtr<Diligent::IDeviceObject>> m_depthRenderTargetViews; // DSV per face (6 per cubemap)
+        std::vector<Diligent::RefCntAutoPtr<Diligent::IDeviceObject>> m_shaderResourceViews; // SRV for sampling (one per cubemap)
         Diligent::IShaderResourceVariable* m_variable;
         CubeSinkBufferResourceDesc m_desc;
         bool m_initialLoadComplete;

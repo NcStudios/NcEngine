@@ -31,7 +31,7 @@ auto CreatePipeline(Diligent::IRenderDevice& device,
     ci.GraphicsPipeline.NumRenderTargets                  = passDesc.colorSink == ColorTarget::None ? 0 : 1;
     ci.GraphicsPipeline.RTVFormats[0]                     = passDesc.colorSink == ColorTarget::None ? TEX_FORMAT_UNKNOWN : OffScreenColorRTFormat;
     ci.GraphicsPipeline.DSVFormat                         = passDesc.depthSink == DepthTarget::None ? TEX_FORMAT_UNKNOWN : OffScreenDepthRTFormat;
-    ci.GraphicsPipeline.RasterizerDesc.CullMode           = CULL_MODE_BACK;
+    ci.GraphicsPipeline.RasterizerDesc.CullMode           = ToDiligentCullMode(passDesc.cullMode);
     ci.GraphicsPipeline.DepthStencilDesc.DepthEnable      = passDesc.useDepthTest;
     ci.GraphicsPipeline.DepthStencilDesc.DepthWriteEnable = false;
     ci.GraphicsPipeline.InputLayout.LayoutElements        = layoutElements.data();

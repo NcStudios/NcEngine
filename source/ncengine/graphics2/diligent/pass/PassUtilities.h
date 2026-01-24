@@ -21,6 +21,7 @@ constexpr auto ClearColor = nc::Vector4{0.050f, 0.050f, 0.050f, 1.0f};
 auto ToPassBaseId(const ShaderPaths& shaderPaths, std::string_view name) -> size_t;
 auto GetSinks(const PassManifest& passManifest, const PassDesc& passDesc) -> Sinks;
 auto GetSources(const PassManifest& passManifest, const PassDesc& passDesc) -> Sources;
+auto ToDiligentCullMode(CullMode cullMode) -> Diligent::CULL_MODE;
 auto HasAnyColorSources(const Sources& sources) -> bool;
 auto HasAnyDepthSources(const Sources& sources) -> bool;
 
@@ -74,10 +75,6 @@ auto ToDepthRenderTargetView(Diligent::ISwapChain& swapChain,
 auto ToPostProcessRenderTargetView(Diligent::ISwapChain& swapChain,
                                    SinkBufferResource& postProcessSinkBufferResource,
                                    uint32_t index) -> Diligent::ITextureView*;
-
-auto ToPostProcessCubeRenderTargetView(Diligent::ISwapChain& swapChain,
-                                       CubeSinkBufferResource& postProcessSinkBufferResource,
-                                       uint32_t index) -> Diligent::ITextureView*;
 
 auto ToColorRenderTargetView(Diligent::ISwapChain& swapChain,
                              SinkBufferResource& colorSinkBufferResource,

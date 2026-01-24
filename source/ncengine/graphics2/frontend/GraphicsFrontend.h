@@ -36,6 +36,7 @@ class GraphicsFrontend
                          uint32_t maxBones,
                          uint32_t maxParticles,
                          uint32_t initialBatchSize,
+                         uint32_t shadowMapResX,
                          Signal<const asset::CubeMapUpdateEventData&>& onCubeMapEvent,
                          Signal<const asset::TextureUpdateEventData&>& onTextureEvent,
                          Signal<const asset::MeshUpdateEventData&>& onMeshEvent,
@@ -69,7 +70,8 @@ class GraphicsFrontend
               m_particleSystem{
                 world,
                 maxParticles
-              }
+              },
+              m_lightSubsystem{shadowMapResX}
         {
         }
 

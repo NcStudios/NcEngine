@@ -1,5 +1,5 @@
 SamplerComparisonState  UniShadowMapSinks_sampler; // By convention, texture samplers must use the '_sampler' suffix
-SamplerComparisonState  PointShadowMapSinks_sampler; // By convention, texture samplers must use the '_sampler' suffix
+SamplerState  PointShadowMapSinks_sampler; // By convention, texture samplers must use the '_sampler' suffix
 Texture2D     UniShadowMapSinks[];
 TextureCube   PointShadowMapSinks[];
 
@@ -142,25 +142,23 @@ float UniShadowCalculation(bool isDirectional, float4 fragPosLightSpace, Texture
 float PointShadowCalculation(float4 fragPosWorldSpace, float3 lightPosWorldSpace, TextureCube depthTex, float3 normal)
 {
     float3 lightToFrag = fragPosWorldSpace.xyz - lightPosWorldSpace;
-    float linearDistance = length(lightToFrag);
-
-    // MUST match LightSubsystem.cpp m_pointLightProjection!
-    const float nearPlane = 1.0f;
-    const float farPlane = 40.0f;
-
     float3 sampleDir = normalize(lightToFrag);
 
-    // Convert our linear distance to perspective depth (what the hardware depth buffer stores)
-    // Inverse of: linearDepth = near*far / (far - perspDepth*(far-near))
-    // Solving for perspDepth: perspDepth = (far - near*far/linearDistance) / (far - near)
-    float perspectiveDepth = (farPlane - (nearPlane * farPlane) / linearDistance) / (farPlane - nearPlane);
+    // The depth buffer stores depth along each face's axis.
+    // For cubemap face selection, the dominant axis determines the face.
+    // The depth is the distance along that dominant axis.
+    float3 absDir = abs(lightToFrag);
+    float dominantAxisDist = max(absDir.x, max(absDir.y, absDir.z));
+
+    // Convert axis-aligned distance to perspective depth [0,1]
+    // Formula: depth = (z - near) * far / (z * (far - near))
+    float perspectiveDepth = (dominantAxisDist - nearZ) * farZ / (dominantAxisDist * (farZ - nearZ));
     perspectiveDepth = saturate(perspectiveDepth);
 
-    // Bias in perspective space
-    float bias = max(0.002f * (1.0f - dot(normal, -sampleDir)), 0.001f);
+    // Bias based on surface angle
+    float bias = max(0.004f * (1.0f - dot(normal, -sampleDir)), 0.003f);
 
-    // Hardware comparison with SamplerComparisonState - returns 0 if in shadow, 1 if lit
-    float lit = depthTex.SampleCmpLevelZero(PointShadowMapSinks_sampler, sampleDir, perspectiveDepth - bias);
-
-    return 1.0f - lit;  // Return shadow amount (1 = shadowed, 0 = lit)
+    // Hardware comparison: returns 1 if lit (reference < sampled), 0 if shadowed
+    float shadow = 1.0f - depthTex.Sample(PointShadowMapSinks_sampler, sampleDir - bias).r;
+    return shadow;
 }

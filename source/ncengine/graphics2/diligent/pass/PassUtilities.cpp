@@ -209,20 +209,16 @@ auto ToPostProcessRenderTargetView(Diligent::ISwapChain& swapChain, SinkBufferRe
     return postProcessSinkBufferResource.GetRenderTargetView(0);
 }
 
-auto ToPostProcessCubeRenderTargetView(Diligent::ISwapChain& swapChain, CubeSinkBufferResource& postProcessSinkBufferResource, uint32_t postProcessRenderTargetIndex) -> Diligent::ITextureView*
-{
-    if (postProcessRenderTargetIndex == SwapChainTarget)
-    {
-        return swapChain.GetCurrentBackBufferRTV();
-    }
-
-    if (postProcessRenderTargetIndex == NoTarget)
-    {
-        return nullptr;
-    }
-
-    return postProcessSinkBufferResource.GetRenderTargetView(0);
-}
-
 auto SingleSource(uint32_t target) -> std::vector<uint32_t> { return std::vector<uint32_t>{target}; }
+
+auto ToDiligentCullMode(CullMode cullMode) -> Diligent::CULL_MODE
+{
+    switch (cullMode)
+    {
+        case CullMode::None:  return Diligent::CULL_MODE_NONE;
+        case CullMode::Front: return Diligent::CULL_MODE_FRONT;
+        case CullMode::Back:  return Diligent::CULL_MODE_BACK;
+    }
+    return Diligent::CULL_MODE_BACK;
+}
 } // namespace nc::graphics

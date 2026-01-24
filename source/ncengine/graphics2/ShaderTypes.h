@@ -27,6 +27,8 @@ struct GlobalEnvironmentData
     uint32_t skyboxIndex = 0;
     uint32_t useSkybox = 0;
     uint32_t useColorOverride = 0;
+    float nearZ = 1.0f;
+    float farZ = 40.0f;
 };
 
 // Object model for outline pass properties used by post processing effects (type: constant buffer)
@@ -132,14 +134,16 @@ struct LightData
               const float intensity_,
               const Vector3& dir,
               int32_t enableShadows,
-              uint32_t viewProjIndex_)
+              uint32_t viewProjIndex_,
+              uint32_t mapResolutionX_)
         : diffuseColor{diffuseCol},
           type{LightType::Directional},
           specularColor{specularCol},
           direction{dir},
           intensity{intensity_},
           castsShadows{enableShadows},
-          viewProjIndex{viewProjIndex_}
+          viewProjIndex{viewProjIndex_},
+          mapResolutionX{mapResolutionX_}
     {
     }
 
@@ -150,7 +154,8 @@ struct LightData
               const Vector3& pos,
               int32_t enableShadows,
               float rad,
-              uint32_t viewProjIndex_)
+              uint32_t viewProjIndex_,
+              uint32_t mapResolutionX_)
         : diffuseColor{diffuseCol},
           type{LightType::Point},
           specularColor{specularCol},
@@ -158,7 +163,8 @@ struct LightData
           position{pos},
           intensity{intensity_},
           castsShadows{enableShadows},
-          viewProjIndex{viewProjIndex_}
+          viewProjIndex{viewProjIndex_},
+          mapResolutionX{mapResolutionX_}
     {
     }
 
@@ -172,7 +178,8 @@ struct LightData
               float outAngle,
               float rad,
               int32_t enableShadows,
-              uint32_t viewProjIndex_)
+              uint32_t viewProjIndex_,
+              uint32_t mapResolutionX_)
         : diffuseColor{diffuseCol},
           type{LightType::Spot},
           specularColor{specularCol},
@@ -183,7 +190,8 @@ struct LightData
           outerAngle{outAngle},
           intensity{intensity_},
           castsShadows{enableShadows},
-          viewProjIndex{viewProjIndex_}
+          viewProjIndex{viewProjIndex_},
+          mapResolutionX{mapResolutionX_}
     {
     }
 
@@ -198,7 +206,7 @@ struct LightData
     float intensity = 1.0f;
     int castsShadows = 0;
     uint32_t viewProjIndex = 0;
-    uint32_t padding = 0;
+    uint32_t mapResolutionX = 512u;
 };
 
 // Object model for light projection matrix for shadow mapping (type: StructuredBuffer element type)

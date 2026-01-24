@@ -55,7 +55,8 @@ auto LightSubsystem::BuildState(ecs::ExplicitEcs<DirectionalLight, PointLight, S
                 light.intensity,
                 transform.Forward(),
                 light.castsShadows,
-                lightMatrixIndex
+                lightMatrixIndex,
+                m_shadowMapResX
             );
 
             if (light.castsShadows)
@@ -78,7 +79,8 @@ auto LightSubsystem::BuildState(ecs::ExplicitEcs<DirectionalLight, PointLight, S
                 transform.Position(),
                 light.castsShadows,
                 light.radius,
-                lightMatrixIndex
+                lightMatrixIndex,
+                m_shadowMapResX
             );
 
             if (light.castsShadows)
@@ -147,7 +149,8 @@ auto LightSubsystem::BuildState(ecs::ExplicitEcs<DirectionalLight, PointLight, S
                 outerAngle,
                 light.radius,
                 light.castsShadows,
-                lightMatrixIndex
+                lightMatrixIndex,
+                m_shadowMapResX
             );
 
             if (light.castsShadows)
@@ -157,14 +160,16 @@ auto LightSubsystem::BuildState(ecs::ExplicitEcs<DirectionalLight, PointLight, S
             }
         }
     }
-    return LightRenderState{m_lightData, m_lightMatrixData};
+    return LightRenderState{m_lightData, m_lightMatrixData, m_nearZ, m_farZ};
 }
 
 void LightSubsystem::OnBeforeSceneLoad(const nc::Vector3& extents)
 {
     m_sceneExtentY = extents.y;
-    m_directionalLightProjection = DirectX::XMMatrixOrthographicRH(extents.x, extents.y, 1.0f, extents.z);
-    m_pointLightProjection = DirectX::XMMatrixPerspectiveFovLH(DirectX::XM_PIDIV2, 1.0f, 1.0f, extents.z); // LH is needed for cubemap projection
+    m_nearZ = 1.0f;
+    m_farZ = extents.z;
+    m_directionalLightProjection = DirectX::XMMatrixOrthographicRH(extents.x, extents.y, m_nearZ, m_farZ);
+    m_pointLightProjection = DirectX::XMMatrixPerspectiveFovLH(DirectX::XM_PIDIV2, 1.0f, m_nearZ, m_farZ); // LH is needed for cubemap projection
     // Spot light projection is computed based on light properties
 }
 } // namespace nc::graphics

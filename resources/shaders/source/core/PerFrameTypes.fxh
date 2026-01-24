@@ -12,6 +12,8 @@ cbuffer EnvironmentProperties
     uint skyboxIndex;
     uint useSkybox;
     bool useColorOverride;
+    float nearZ;
+    float farZ;
 };
 
 struct StaticMeshInstanceData
@@ -78,7 +80,7 @@ struct LightData
     float intensity;
     int castsShadows;
     uint lightMatrixIndex;
-    uint padding;
+    uint mapResolutionX;
 };
 
 struct LightMatrix

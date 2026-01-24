@@ -205,6 +205,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .layoutElements = VertexAttribute::Pos,
                     .shaderPaths = ShaderPaths{.vertexShaderPath = shader::PointShadowMapVertex},
                     .shadowMapSink = ShadowMapTarget::Point,
+                    .cullMode = CullMode::Front,
                     .isMsaa = false,
                     .useDepthTest = true
                 },
@@ -215,6 +216,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .layoutElements = VertexAttribute::Skinning,
                     .shaderPaths = ShaderPaths{.vertexShaderPath = shader::PointShadowMapSkinnedVertex},
                     .shadowMapSink = ShadowMapTarget::Point,
+                    .cullMode = CullMode::Front,
                     .isMsaa = false,
                     .useDepthTest = true
                 },
@@ -362,6 +364,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
             memorySettings.maxBones,
             memorySettings.maxParticles,
             graphicsSettings.initialBatchSize,
+            graphicsSettings.shadowMapResolution,
             modules.Get<asset::NcAsset>()->OnCubeMapUpdate(),
             modules.Get<asset::NcAsset>()->OnTextureUpdate(),
             modules.Get<asset::NcAsset>()->OnMeshUpdate(),
@@ -493,6 +496,7 @@ auto NcGraphicsImpl2::GetTextureView(TextureViewType type, uint32_t index) -> vo
 void NcGraphicsImpl2::OnBeforeSceneLoad(const Scene& sceneToLoad)
 {
     m_frontend.OnBeforeSceneLoad(sceneToLoad);
+    m_passBackend.OnBeforeSceneLoad(sceneToLoad);
 }
 
 void NcGraphicsImpl2::Clear() noexcept
@@ -553,12 +557,14 @@ void NcGraphicsImpl2::Run()
     auto& device = m_engine.GetDevice();
     auto& swapChain = m_engine.GetSwapChain();
 
+    context.Flush();
+
     m_ui.FrameBegin(swapChain);
     m_frontend.GetUISubsystem().UpdateUI(m_world);
 
     auto renderState = m_frontend.BuildRenderState(m_world);
 
-    m_passBackend.Update(renderState.postProcessState);
+    m_passBackend.Update(device, context, renderState.postProcessState);
     m_shaderBindings.Update(context, device, renderState);
     m_shaderBindings.GetPerFrameSignature().Commit(context);
     m_shaderBindings.GetPerPassSignature().Commit(context);
@@ -567,7 +573,6 @@ void NcGraphicsImpl2::Run()
     m_passBackend.RenderMaterial(
         context,
         swapChain,
-        m_shaderBindings.GetPerPassSignature(),
         renderState.meshRenderState.staticMeshBatches,
         renderState.meshRenderState.skinnedMeshBatches,
         renderState.lightRenderState.lights,
@@ -577,27 +582,23 @@ void NcGraphicsImpl2::Run()
     m_passBackend.RenderSkybox(
         context,
         swapChain,
-        m_shaderBindings.GetPerPassSignature(),
         renderState.environmentRenderState,
         m_viewport
     );
 
     m_passBackend.RenderPostProcess(
         context,
-        swapChain,
-        m_shaderBindings.GetPerPassSignature()
+        swapChain
     );
 
     m_passBackend.RenderOutputToSwapchain(
         context,
-        swapChain,
-        m_shaderBindings.GetPerPassSignature()
+        swapChain
     );
 
     m_passBackend.RenderWireframe(
         context,
         swapChain,
-        m_shaderBindings.GetPerPassSignature(),
         renderState.wireframeRenderState,
         m_viewport
     );
@@ -605,7 +606,6 @@ void NcGraphicsImpl2::Run()
     m_passBackend.RenderParticle(
         context,
         swapChain,
-        m_shaderBindings.GetPerPassSignature(),
         renderState.particleRenderState,
         m_viewport
     );
