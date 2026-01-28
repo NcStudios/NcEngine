@@ -42,13 +42,14 @@ namespace nc::graphics
 auto MakeCubeDepthSinkBufferDesc(uint32_t maxTextures) -> CubeSinkBufferResourceDesc
 {
     return CubeSinkBufferResourceDesc{
-        .name = "Depth Render Target",
-        .viewType = TEXTURE_VIEW_DEPTH_STENCIL,
-        .format = OffScreenDepthRTFormat,
-        .bindFlags = BIND_SHADER_RESOURCE | BIND_DEPTH_STENCIL,
+        .name = "Shadow Render Target",
+        .viewType = TEXTURE_VIEW_RENDER_TARGET,
+        .format = OffScreenShadowMapRTFormat,
+        .bindFlags = BIND_SHADER_RESOURCE | BIND_RENDER_TARGET,
         .clearValue = OptimizedClearValue{
-            .Format = OffScreenDepthRTFormat,
-            .DepthStencil = DepthStencilClearValue{1.0f, 0}
+            .Format = OffScreenShadowMapRTFormat,
+            .Color = {0.0f, 0.0f, 0.0f, 0.0f},
+            .DepthStencil = DepthStencilClearValue{}
         },
         .maxTextures = maxTextures
     };
@@ -64,10 +65,9 @@ auto CubeSinkBufferResource::MakeShadowSamplerDesc(std::string_view variableName
     samplerDesc.BorderColor[1] = 1.0f;
     samplerDesc.BorderColor[2] = 1.0f;
     samplerDesc.BorderColor[3] = 1.0f;
-    samplerDesc.MagFilter = FILTER_TYPE::FILTER_TYPE_COMPARISON_LINEAR;
-    samplerDesc.MinFilter = FILTER_TYPE::FILTER_TYPE_COMPARISON_LINEAR;
-    samplerDesc.MipFilter = FILTER_TYPE::FILTER_TYPE_COMPARISON_LINEAR;
-    samplerDesc.ComparisonFunc = COMPARISON_FUNC_LESS;
+    samplerDesc.MagFilter = FILTER_TYPE::FILTER_TYPE_LINEAR;
+    samplerDesc.MinFilter = FILTER_TYPE::FILTER_TYPE_LINEAR;
+    samplerDesc.MipFilter = FILTER_TYPE::FILTER_TYPE_LINEAR;
 
     return ImmutableSamplerDesc{
         SHADER_TYPE_VS_PS,

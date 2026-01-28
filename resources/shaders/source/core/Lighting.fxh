@@ -143,14 +143,13 @@ float UniShadowCalculation(bool isDirectional, float4 fragPosLightSpace, Texture
 float PointShadowCalculation(float4 fragPosWorldSpace, float3 lightPosWorldSpace, TextureCube depthTex, float3 normal)
 {
     float3 fragToLight = fragPosWorldSpace.xyz - lightPosWorldSpace;
-    float3 sampleDir = normalize(fragToLight);
+    float closestDepth = depthTex.Sample(PointShadowMapSinks_sampler, fragToLight).r;
 
-    float closestDepth = depthTex.Sample(PointShadowMapSinks_sampler, sampleDir).r;
     closestDepth *= farZ;
 
     float currentDepth = length(fragToLight);
 
-    float bias = max(0.004f * (1.0f - dot(normal, -sampleDir)), 0.003f);
+    // float bias = max(0.004f * (1.0f - dot(normal, -sampleDir)), 0.003f);
 
-    return currentDepth - bias > closestDepth ? 0.0 : 1.0f;
+    return 1.0f - (currentDepth > closestDepth ? 1.0 : 0.0f);
 }
