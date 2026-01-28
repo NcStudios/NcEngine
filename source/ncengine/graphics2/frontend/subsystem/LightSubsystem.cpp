@@ -169,7 +169,7 @@ void LightSubsystem::OnBeforeSceneLoad(const nc::Vector3& extents)
     m_nearZ = 1.0f;
     m_farZ = extents.z;
     m_directionalLightProjection = DirectX::XMMatrixOrthographicRH(extents.x, extents.y, m_nearZ, m_farZ);
-    m_pointLightProjection = DirectX::XMMatrixPerspectiveFovLH(DirectX::XM_PIDIV2, 1.0f, m_nearZ, m_farZ); // LH is needed for cubemap projection
+    m_pointLightProjection = DirectX::XMMatrixPerspectiveFovLH(DirectX::XM_PIDIV2, 1.0f, m_farZ, m_nearZ); // LH is needed for cubemap projection
     // Spot light projection is computed based on light properties
 }
 } // namespace nc::graphics

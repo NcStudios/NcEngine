@@ -76,6 +76,10 @@ auto ToPostProcessRenderTargetView(Diligent::ISwapChain& swapChain,
                                    SinkBufferResource& postProcessSinkBufferResource,
                                    uint32_t index) -> Diligent::ITextureView*;
 
+auto ToPostProcessCubeRenderTargetView(Diligent::ISwapChain& swapChain,
+                                       CubeSinkBufferResource& postProcessSinkBufferResource,
+                                       uint32_t index) -> Diligent::ITextureView*;
+
 auto ToColorRenderTargetView(Diligent::ISwapChain& swapChain,
                              SinkBufferResource& colorSinkBufferResource,
                              uint32_t index,

@@ -59,11 +59,14 @@ void ClearPointShadowMapRenderTarget(Diligent::IDeviceContext& context,
                                      uint32_t lightIndex,
                                      uint32_t faceIndex)
 {
-    Diligent::ITextureView* pDSV = shadowMapSinkBufferResource.GetDepthTargetView((lightIndex * 6) + faceIndex);
-    if (pDSV)
+    Diligent::ITextureView* pRTV = shadowMapSinkBufferResource.GetRenderTargetView((lightIndex * 6) + faceIndex);
+    if (pRTV)
     {
-        context.ClearDepthStencil(pDSV, Diligent::CLEAR_DEPTH_FLAG, 1.f, 0, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
+        context.ClearRenderTarget(pRTV, &ClearColor.x, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
     }
+
+    Diligent::ITextureView* pDSV = shadowMapSinkBufferResource.GetDepthTargetView(0);
+    context.ClearDepthStencil(pDSV, Diligent::CLEAR_DEPTH_FLAG, 1.f, 0, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
 }
 
 void ClearUniShadowMapRenderTarget(Diligent::IDeviceContext& context,
@@ -103,8 +106,9 @@ void BindPointShadowMapRenderTarget(Diligent::IDeviceContext& context,
                                     uint32_t lightIndex,
                                     uint32_t faceIndex)
 {
-    Diligent::ITextureView* pDSV = shadowMapSinkBufferResource.GetDepthTargetView((lightIndex *6)+ faceIndex);
-    context.SetRenderTargets(0, nullptr, pDSV, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
+    Diligent::ITextureView* pRTV = shadowMapSinkBufferResource.GetRenderTargetView((lightIndex * 6)+ faceIndex);
+    Diligent::ITextureView* pDSV = shadowMapSinkBufferResource.GetDepthTargetView(0);
+    context.SetRenderTargets(1, &pRTV, pDSV, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
 }
 
 void BindUniShadowMapRenderTarget(Diligent::IDeviceContext& context,
@@ -195,6 +199,21 @@ auto ToDepthRenderTargetView(Diligent::ISwapChain& swapChain, SinkBufferResource
 }
 
 auto ToPostProcessRenderTargetView(Diligent::ISwapChain& swapChain, SinkBufferResource& postProcessSinkBufferResource, uint32_t postProcessRenderTargetIndex) -> Diligent::ITextureView*
+{
+    if (postProcessRenderTargetIndex == SwapChainTarget)
+    {
+        return swapChain.GetCurrentBackBufferRTV();
+    }
+
+    if (postProcessRenderTargetIndex == NoTarget)
+    {
+        return nullptr;
+    }
+
+    return postProcessSinkBufferResource.GetRenderTargetView(0);
+}
+
+auto ToPostProcessCubeRenderTargetView(Diligent::ISwapChain& swapChain, CubeSinkBufferResource& postProcessSinkBufferResource, uint32_t postProcessRenderTargetIndex) -> Diligent::ITextureView*
 {
     if (postProcessRenderTargetIndex == SwapChainTarget)
     {

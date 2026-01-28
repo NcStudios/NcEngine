@@ -42,7 +42,7 @@ namespace nc::graphics
 auto MakeCubeDepthSinkBufferDesc(uint32_t maxTextures) -> CubeSinkBufferResourceDesc
 {
     return CubeSinkBufferResourceDesc{
-        .name = "Depth Cubemap",
+        .name = "Depth Render Target",
         .viewType = TEXTURE_VIEW_DEPTH_STENCIL,
         .format = OffScreenDepthRTFormat,
         .bindFlags = BIND_SHADER_RESOURCE | BIND_DEPTH_STENCIL,
@@ -91,7 +91,7 @@ void CubeSinkBufferResource::Add(IRenderDevice& device,
         return;
     }
 
-    auto numDepthViews = numCubeMaps * 6;
+    auto numRenderTargetViews = numCubeMaps * 6;
 
     if (numCubeMaps + m_cubeTextures.size() > maxTextures)
     {
@@ -99,59 +99,62 @@ void CubeSinkBufferResource::Add(IRenderDevice& device,
     }
 
     m_cubeTextures.reserve(m_cubeTextures.size() + numCubeMaps);
-    m_depthRenderTargetViews.reserve(m_depthRenderTargetViews.size() + numDepthViews);
+    m_renderTargetViews.reserve(m_renderTargetViews.size() + numRenderTargetViews);
     m_shaderResourceViews.reserve(m_shaderResourceViews.size() + numCubeMaps);
 
-    // Create depth cubemap descriptor (D32_FLOAT format)
-    TextureDesc depthCubeDesc{};
-    depthCubeDesc.Type = RESOURCE_DIM_TEX_CUBE;
-    depthCubeDesc.Width = renderTargetWidth;
-    depthCubeDesc.Height = renderTargetHeight;
-    depthCubeDesc.ArraySize = 6;
-    depthCubeDesc.MipLevels = 1;
-    depthCubeDesc.Format = OffScreenDepthRTFormat;
-    depthCubeDesc.BindFlags = BIND_SHADER_RESOURCE | BIND_DEPTH_STENCIL;
-    depthCubeDesc.ClearValue.Format = OffScreenDepthRTFormat;
-    depthCubeDesc.ClearValue.DepthStencil.Depth = 1.0f;
-    depthCubeDesc.ClearValue.DepthStencil.Stencil = 0;
-    depthCubeDesc.SampleCount = 1;
+    auto renderTargetDesc = ToTextureCubeDesc(m_desc, renderTargetWidth, renderTargetHeight);
+    auto depthTargetDesc = MakeTextureDesc(MakeCubeDepthSinkBufferDesc(m_desc.maxTextures), renderTargetWidth, renderTargetHeight);
 
     for (auto i = 0u; i < numCubeMaps; i++)
     {
-        // Create depth cubemap texture
-        const auto depthCubeName = fmt::format("DepthCube {} : {}", m_desc.name, i);
-        depthCubeDesc.Name = depthCubeName.data();
-        auto& depthCubeTexture = m_cubeTextures.emplace_back(MakeTexture(device, depthCubeDesc));
+        // Create cube texture (one for the entire cube map)
+        const auto rtName = fmt::format("Cube {} : {}", m_desc.name, i);
+        renderTargetDesc.Name = rtName.data();
+        auto& renderTargetTexture = m_cubeTextures.emplace_back(MakeTexture(device, renderTargetDesc));
 
-        // Create a depth-stencil view for each face of the cubemap
+        // Create depth texture (one per face, but only need one as it'll be reused for each face)
+        const auto depthRTName = fmt::format("Depth {} : {}", m_desc.name, i);
+        depthTargetDesc.Name = depthRTName.data();
+        auto& depthTargetTexture = m_depthTextures.emplace_back(MakeTexture(device, depthTargetDesc));
+
+        // Create the render target view for the depth texture for the faces (one per face, but only need one as it'll be reused for each face)
+        const auto depthRTVName = fmt::format("Depth RTV for CubeMap {}", m_desc.name);
+        auto depthRenderTargetViewDesc = TextureViewDesc{depthRTVName.c_str(), TEXTURE_VIEW_DEPTH_STENCIL, RESOURCE_DIM_TEX_2D};
+        depthRenderTargetViewDesc.MostDetailedMip = 0;
+        depthRenderTargetViewDesc.NumArraySlices = 1;
+        RefCntAutoPtr<ITextureView> depthRTV;
+        depthTargetTexture->CreateView(depthRenderTargetViewDesc, &depthRTV);
+        NC_ASSERT(depthRTV, "Error creating the depth render target view.");
+        m_depthRenderTargetViews.push_back(std::move(depthRTV));
+
+        // Create a render target view for each face of the cube map
         for (auto face = 0u; face < 6; face++)
         {
-            const auto faceName = fmt::format("DSV for DepthCube {}: Face {}", m_desc.name, face);
-            auto depthViewDesc = TextureViewDesc{faceName.c_str(), TEXTURE_VIEW_DEPTH_STENCIL, RESOURCE_DIM_TEX_2D_ARRAY};
-            depthViewDesc.MostDetailedMip = 0;
-            depthViewDesc.FirstArraySlice = face;
-            depthViewDesc.NumArraySlices = 1;
-            RefCntAutoPtr<ITextureView> depthDsv;
-            depthCubeTexture->CreateView(depthViewDesc, &depthDsv);
+            const auto faceName = fmt::format("RTV for CubeMap {}: Face {}", m_desc.name, face);
+            auto renderTargetViewDesc = TextureViewDesc{faceName.c_str(), TEXTURE_VIEW_RENDER_TARGET, RESOURCE_DIM_TEX_2D_ARRAY};
+            renderTargetViewDesc.MostDetailedMip = 0;
+            renderTargetViewDesc.FirstArraySlice = face;
+            renderTargetViewDesc.NumArraySlices = 1;
+            RefCntAutoPtr<ITextureView> cubeMapRtv;
+            renderTargetTexture->CreateView(renderTargetViewDesc, &cubeMapRtv);
 
-            NC_ASSERT(depthDsv, "Error creating the depth cubemap face DSV.");
-            m_depthRenderTargetViews.push_back(std::move(depthDsv));
+            NC_ASSERT(cubeMapRtv, "Error creating the cube map face render target view.");
+            m_renderTargetViews.push_back(std::move(cubeMapRtv));
         }
 
-        // Create the shader resource view for sampling the entire depth cubemap
-        const auto srvName = fmt::format("SRV for DepthCube {}", m_desc.name);
-        auto shaderResourceViewDesc = TextureViewDesc{srvName.c_str(), TEXTURE_VIEW_SHADER_RESOURCE, RESOURCE_DIM_TEX_CUBE};
+        // Create the shader resource view for the entire cube map
+        const auto cubeMapSrvName = fmt::format("SRV for CubeMap {}", m_desc.name);
+        auto shaderResourceViewDesc = TextureViewDesc{cubeMapSrvName.c_str(), TEXTURE_VIEW_SHADER_RESOURCE, RESOURCE_DIM_TEX_CUBE};
         shaderResourceViewDesc.NumArraySlices = 6;
         RefCntAutoPtr<ITextureView> cubeMapSrv;
-        depthCubeTexture->CreateView(shaderResourceViewDesc, &cubeMapSrv);
-        NC_ASSERT(cubeMapSrv, "Error creating the depth cubemap SRV.");
+        renderTargetTexture->CreateView(shaderResourceViewDesc, &cubeMapSrv);
+        NC_ASSERT(cubeMapSrv, "Error creating the cube map shader resource view.");
         m_shaderResourceViews.push_back(std::move(cubeMapSrv));
     }
-
     std::vector<IDeviceObject*> rawPointers;
     rawPointers.reserve(m_shaderResourceViews.size());
     for (const auto& srv : m_shaderResourceViews) {
-        rawPointers.push_back(srv.RawPtr());
+        rawPointers.push_back(srv.RawPtr()); // Get raw pointer, RefCntAutoPtr keeps ownership
     }
     SetArrayRegion(m_variable, std::span<IDeviceObject*>(rawPointers), 0u, rawPointers.size());
 }
@@ -169,6 +172,8 @@ void CubeSinkBufferResource::Resize(IRenderDevice& device,
 void CubeSinkBufferResource::Clear()
 {
     m_cubeTextures.clear();
+    m_depthTextures.clear();
+    m_renderTargetViews.clear();
     m_depthRenderTargetViews.clear();
     m_shaderResourceViews.clear();
 }

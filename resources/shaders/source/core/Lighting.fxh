@@ -145,9 +145,12 @@ float PointShadowCalculation(float4 fragPosWorldSpace, float3 lightPosWorldSpace
     float3 fragToLight = fragPosWorldSpace.xyz - lightPosWorldSpace;
     float3 sampleDir = normalize(fragToLight);
 
-    // Bias based on surface angle
+    float closestDepth = depthTex.Sample(PointShadowMapSinks_sampler, sampleDir).r;
+    closestDepth *= farZ;
+
+    float currentDepth = length(fragToLight);
+
     float bias = max(0.004f * (1.0f - dot(normal, -sampleDir)), 0.003f);
 
-    float shadow = 1.0f - depthTex.Sample(PointShadowMapSinks_sampler, sampleDir - bias).r;
-    return shadow > 0.0f ? 1.0f : 0.0f;
+    return currentDepth - bias > closestDepth ? 0.0 : 1.0f;
 }
