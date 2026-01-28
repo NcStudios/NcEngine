@@ -139,26 +139,15 @@ float UniShadowCalculation(bool isDirectional, float4 fragPosLightSpace, Texture
     return shadow;
 }
 
+
 float PointShadowCalculation(float4 fragPosWorldSpace, float3 lightPosWorldSpace, TextureCube depthTex, float3 normal)
 {
-    float3 lightToFrag = fragPosWorldSpace.xyz - lightPosWorldSpace;
-    float3 sampleDir = normalize(lightToFrag);
-
-    // The depth buffer stores depth along each face's axis.
-    // For cubemap face selection, the dominant axis determines the face.
-    // The depth is the distance along that dominant axis.
-    float3 absDir = abs(lightToFrag);
-    float dominantAxisDist = max(absDir.x, max(absDir.y, absDir.z));
-
-    // Convert axis-aligned distance to perspective depth [0,1]
-    // Formula: depth = (z - near) * far / (z * (far - near))
-    float perspectiveDepth = (dominantAxisDist - nearZ) * farZ / (dominantAxisDist * (farZ - nearZ));
-    perspectiveDepth = saturate(perspectiveDepth);
+    float3 fragToLight = fragPosWorldSpace.xyz - lightPosWorldSpace;
+    float3 sampleDir = normalize(fragToLight);
 
     // Bias based on surface angle
     float bias = max(0.004f * (1.0f - dot(normal, -sampleDir)), 0.003f);
 
-    // Hardware comparison: returns 1 if lit (reference < sampled), 0 if shadowed
     float shadow = 1.0f - depthTex.Sample(PointShadowMapSinks_sampler, sampleDir - bias).r;
-    return shadow;
+    return shadow > 0.0f ? 1.0f : 0.0f;
 }
