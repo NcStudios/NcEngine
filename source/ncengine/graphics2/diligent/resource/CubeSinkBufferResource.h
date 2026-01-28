@@ -12,7 +12,7 @@
 
 namespace nc::graphics
 {
-auto MakeCubeDepthSinkBufferDesc(uint32_t maxTextures) -> CubeSinkBufferResourceDesc;
+auto MakeCubeShadowSinkBufferDesc(uint32_t maxTextures) -> CubeSinkBufferResourceDesc;
 
 class CubeSinkBufferResource
 {

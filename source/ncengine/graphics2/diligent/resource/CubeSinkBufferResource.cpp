@@ -39,7 +39,7 @@ auto MakeTexture(IRenderDevice& device,
 
 namespace nc::graphics
 {
-auto MakeCubeDepthSinkBufferDesc(uint32_t maxTextures) -> CubeSinkBufferResourceDesc
+auto MakeCubeShadowSinkBufferDesc(uint32_t maxTextures) -> CubeSinkBufferResourceDesc
 {
     return CubeSinkBufferResourceDesc{
         .name = "Shadow Render Target",
