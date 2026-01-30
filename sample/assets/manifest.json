@@ -48,10 +48,6 @@
     ],
     "mesh": [
         {
-            "sourcePath": "raw/model/cave.fbx",
-            "assetName": "mesh/cave"
-        },
-        {
             "sourcePath": "raw/model/guy2.fbx",
             "assetName": "mesh/guy2"
         },

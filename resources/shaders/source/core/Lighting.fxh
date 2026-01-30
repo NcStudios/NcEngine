@@ -138,60 +138,51 @@ float UniShadowCalculation(bool isDirectional, float4 fragPosLightSpace, Texture
 
     return shadow;
 }
+
+static const float3 sampleOffsetDirections[40] =
+{
+    float3( 1,  1,  1), float3( 1, -1,  1), float3(-1, -1,  1), float3(-1,  1,  1),
+    float3( 1,  1, -1), float3( 1, -1, -1), float3(-1, -1, -1), float3(-1,  1, -1),
+    float3( 1,  1,  0), float3( 1, -1,  0), float3(-1, -1,  0), float3(-1,  1,  0),
+    float3( 1,  0,  1), float3(-1,  0,  1), float3( 1,  0, -1), float3(-1,  0, -1),
+    float3( 0,  1,  1), float3( 0, -1,  1), float3( 0, -1, -1), float3( 0,  1, -1),
+    float3( 1.5,  1.5,  1.5), float3( 1.5, -1.5,  1.5), float3(-1.5, -1.5,  1.5), float3(-1.5,  1.5,  1.5),
+    float3( 1.5,  1.5, -1.5), float3( 1.5, -1.5, -1.5), float3(-1.5, -1.5, -1.5), float3(-1.5,  1.5, -1.5),
+    float3( 1.5,  1.5,  0), float3( 1.5, -1.5,  0), float3(-1.5, -1.5,  0), float3(-1.5,  1.5,  0),
+    float3( 1.5,  0,  1.5), float3(-1.5,  0,  1.5), float3( 1.5,  0, -1.5), float3(-1.5,  0, -1.5),
+    float3( 0,  1.5,  1.5), float3( 0, -1.5,  1.5), float3( 0, -1.5, -1.5), float3( 0,  1.5, -1.5),
+};
+
 float PointShadowCalculation(float4 fragPosWorldSpace, float3 lightPosWorldSpace, TextureCube depthTex, float3 normal)
 {
-    // Get sample vector (light to frag dir)
-    float3 lightToFrag = lightPosWorldSpace - fragPosWorldSpace.xyz;
-    float distance = length(lightToFrag);
+    // Get sample vector (frag to light dir)
+    float3 fragToLight = fragPosWorldSpace.xyz - lightPosWorldSpace;
+    float distance = length(fragToLight);
 
-    // Normalize the distance based on the far plane (Keep in sync with LightSubsystem.cpp)
+    // Linearize depth
     float farPlane = farZ; 
     distance = distance / farPlane;
-    float3 sampleDir = -normalize(lightToFrag);
+    float3 sampleDir = normalize(fragToLight);
 
-    // PCF and bias
-    float shadow = 0.0f;
-    const float sampleCount = 4.0f;
-    const float offset = 0.005f;
     float bias = 0.005f * (1.0f - dot(normal, -sampleDir));
     bias = clamp(bias, 0.001f, 0.01f);
 
-    float totalSamples = 0.0f;
-    [unroll]
-    for (float x = -offset; x <= offset; x += offset / (sampleCount * 0.5f)) 
+    // PCF
+    float shadow = 0.0f;
+    const int sampleCount = 30;
+    float viewDistance = length(cameraPosition - fragPosWorldSpace.xyz);
+    float diskRadius = (1.0f + (viewDistance)) / 200.0f;
+
+    for (int i = 0; i < sampleCount; ++i)
     {
-        [unroll]
-        for (float y = -offset; y <= offset; y += offset / (sampleCount * 0.5f)) 
+        float closestDepth = depthTex.Sample(PointShadowMapSinks_sampler, fragToLight + sampleOffsetDirections[i] * diskRadius).r;
+        if (distance - bias > closestDepth)
         {
-            [unroll]
-            for (float z = -offset; z <= offset; z += offset / (sampleCount * 0.5f))
-            {
-                float closestDepth = depthTex.Sample(PointShadowMapSinks_sampler, sampleDir + float3(x, y, z)).r;
-                if (distance - bias > closestDepth)
-                {
-                    shadow += 1.0f;
-                }
-                totalSamples += 1.0f;
-            }
+            shadow += 1.0f;
         }
     }
 
     // Normalize the shadow value
-    shadow /= totalSamples;
+    shadow /= float(sampleCount);
     return shadow;
 }
-
-// float PointShadowCalculation(float4 fragPosWorldSpace, float3 lightPosWorldSpace, TextureCube depthTex, float3 normal)
-// {
-//     float3 fragToLight = fragPosWorldSpace.xyz - lightPosWorldSpace;
-//     float distance = length(fragToLight);
-
-//     distance /= farZ; 
-//     float3 sampleDir = normalize(fragToLight);
-
-//     float closestDepth = depthTex.Sample(PointShadowMapSinks_sampler, sampleDir).r;
-
-//     // float bias = max(0.004f * (1.0f - dot(normal, -sampleDir)), 0.003f);
-
-//     return 1.0f - (distance > closestDepth ? 1.0 : 0.0f);
-// }

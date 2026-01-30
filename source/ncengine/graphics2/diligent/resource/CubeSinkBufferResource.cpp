@@ -39,6 +39,21 @@ auto MakeTexture(IRenderDevice& device,
 
 namespace nc::graphics
 {
+auto MakeCubeDepthSinkBufferDesc(uint32_t maxTextures) -> CubeSinkBufferResourceDesc
+{
+    return CubeSinkBufferResourceDesc{
+        .name = "Depth Render Target",
+        .viewType = TEXTURE_VIEW_DEPTH_STENCIL,
+        .format = OffScreenDepthRTFormat,
+        .bindFlags = BIND_SHADER_RESOURCE | BIND_DEPTH_STENCIL,
+        .clearValue = OptimizedClearValue{
+            .Format = OffScreenDepthRTFormat,
+            .DepthStencil = DepthStencilClearValue{1.0f, 0}
+        },
+        .maxTextures = maxTextures
+    };
+}
+
 auto MakeCubeShadowSinkBufferDesc(uint32_t maxTextures) -> CubeSinkBufferResourceDesc
 {
     return CubeSinkBufferResourceDesc{
