@@ -205,6 +205,11 @@ void PassBackend::Update(IRenderDevice& device,
     m_finalColorTarget = std::nullopt;
     m_finalPostProcessTarget = std::nullopt;
 
+    if (m_pointSinksToCreate > 0 || m_uniSinksToCreate > 0)
+    {
+        context.WaitForIdle();
+    }
+
     if (m_pointSinksToCreate > 0)
     {
         auto& pointShadowMapSinks = m_perPassResourceSignature->GetPointShadowMapSinksResource();

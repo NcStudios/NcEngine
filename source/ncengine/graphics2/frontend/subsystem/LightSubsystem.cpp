@@ -166,7 +166,7 @@ auto LightSubsystem::BuildState(ecs::ExplicitEcs<DirectionalLight, PointLight, S
 void LightSubsystem::OnBeforeSceneLoad(const nc::Vector3& extents)
 {
     m_sceneExtentY = extents.y;
-    m_nearZ = 1.0f;
+    m_nearZ = 0.5f;
     m_farZ = extents.z;
     m_directionalLightProjection = DirectX::XMMatrixOrthographicRH(extents.x, extents.y, m_nearZ, m_farZ);
     m_pointLightProjection = DirectX::XMMatrixPerspectiveFovLH(DirectX::XM_PIDIV2, 1.0f, m_nearZ, m_farZ); // LH is needed for cubemap projection

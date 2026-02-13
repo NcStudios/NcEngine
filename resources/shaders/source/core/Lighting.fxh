@@ -159,14 +159,14 @@ float PointShadowCalculation(float4 fragPosWorldSpace, float3 lightPosWorldSpace
     distance = distance / farPlane;
     float3 sampleDir = normalize(fragToLight);
 
-    float bias = 0.005f * (1.0f - dot(normal, sampleDir));
+    float bias = 0.0025f * (1.0f - dot(normal, sampleDir));
     bias = clamp(bias, 0.001f, 0.01f);
 
     // PCF
     float shadow = 0.0f;
     const int sampleCount = 20;
     float viewDistance = length(cameraPosition - fragPosWorldSpace.xyz);
-    float diskRadius = clamp(viewDistance / 500.0f, 0.015f, 0.05f);
+    float diskRadius = clamp(viewDistance / 500.0f, 0.015f, 0.03f);
 
     for (int i = 0; i < sampleCount; ++i)
     {

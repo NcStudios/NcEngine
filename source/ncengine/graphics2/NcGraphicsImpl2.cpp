@@ -557,8 +557,6 @@ void NcGraphicsImpl2::Run()
     auto& device = m_engine.GetDevice();
     auto& swapChain = m_engine.GetSwapChain();
 
-    context.Flush();
-
     m_ui.FrameBegin(swapChain);
     m_frontend.GetUISubsystem().UpdateUI(m_world);
 
