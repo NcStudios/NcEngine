@@ -205,7 +205,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .layoutElements = VertexAttribute::Pos,
                     .shaderPaths = ShaderPaths{.pixelShaderPath = shader::PointShadowMapPixel, .vertexShaderPath = shader::PointShadowMapVertex},
                     .shadowMapSink = ShadowMapTarget::Point,
-                    .cullMode = CullMode::Front,
+                    .cullMode = CullMode::Back,
                     .isMsaa = false,
                     .useDepthTest = true
                 },
@@ -216,7 +216,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .layoutElements = VertexAttribute::Skinning,
                     .shaderPaths = ShaderPaths{ .pixelShaderPath = shader::PointShadowMapPixel, .vertexShaderPath = shader::PointShadowMapSkinnedVertex},
                     .shadowMapSink = ShadowMapTarget::Point,
-                    .cullMode = CullMode::Front,
+                    .cullMode = CullMode::Back,
                     .isMsaa = false,
                     .useDepthTest = true
                 },

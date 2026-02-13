@@ -110,7 +110,7 @@ void main(in  PSInput  PSIn, out PSOutput PSOut)
         }
 
         // Calculate shadow factor
-        float shadowFactor = 1.0f;
+        float shadowFactor = 0.0f;
         TextureCube pointDepthTex;
         Texture2D  uniDepthTex;
         if (Lights[i].castsShadows)
@@ -131,7 +131,7 @@ void main(in  PSInput  PSIn, out PSOutput PSOut)
             }
         }
 
-        shadowFactor = min((1-shadowFactor) + 1.0f, 1.0f);
+        shadowFactor = 1.0f - clamp(shadowFactor, 0.0f, 1.0f);
         diffuseAmt = max(diffuseAmt * shadowFactor, 0.0f);
         maxLightContribution = max(diffuseAmt, maxLightContribution);
         specularAmt = max(specularAmt * shadowFactor, 0.0f);

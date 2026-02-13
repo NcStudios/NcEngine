@@ -139,18 +139,13 @@ float UniShadowCalculation(bool isDirectional, float4 fragPosLightSpace, Texture
     return shadow;
 }
 
-static const float3 sampleOffsetDirections[40] =
+static const float3 sampleOffsetDirections[20] =
 {
     float3( 1,  1,  1), float3( 1, -1,  1), float3(-1, -1,  1), float3(-1,  1,  1),
     float3( 1,  1, -1), float3( 1, -1, -1), float3(-1, -1, -1), float3(-1,  1, -1),
     float3( 1,  1,  0), float3( 1, -1,  0), float3(-1, -1,  0), float3(-1,  1,  0),
     float3( 1,  0,  1), float3(-1,  0,  1), float3( 1,  0, -1), float3(-1,  0, -1),
-    float3( 0,  1,  1), float3( 0, -1,  1), float3( 0, -1, -1), float3( 0,  1, -1),
-    float3( 1.5,  1.5,  1.5), float3( 1.5, -1.5,  1.5), float3(-1.5, -1.5,  1.5), float3(-1.5,  1.5,  1.5),
-    float3( 1.5,  1.5, -1.5), float3( 1.5, -1.5, -1.5), float3(-1.5, -1.5, -1.5), float3(-1.5,  1.5, -1.5),
-    float3( 1.5,  1.5,  0), float3( 1.5, -1.5,  0), float3(-1.5, -1.5,  0), float3(-1.5,  1.5,  0),
-    float3( 1.5,  0,  1.5), float3(-1.5,  0,  1.5), float3( 1.5,  0, -1.5), float3(-1.5,  0, -1.5),
-    float3( 0,  1.5,  1.5), float3( 0, -1.5,  1.5), float3( 0, -1.5, -1.5), float3( 0,  1.5, -1.5),
+    float3( 0,  1,  1), float3( 0, -1,  1), float3( 0, -1, -1), float3( 0,  1, -1)
 };
 
 float PointShadowCalculation(float4 fragPosWorldSpace, float3 lightPosWorldSpace, TextureCube depthTex, float3 normal)
@@ -164,14 +159,14 @@ float PointShadowCalculation(float4 fragPosWorldSpace, float3 lightPosWorldSpace
     distance = distance / farPlane;
     float3 sampleDir = normalize(fragToLight);
 
-    float bias = 0.005f * (1.0f - dot(normal, -sampleDir));
+    float bias = 0.005f * (1.0f - dot(normal, sampleDir));
     bias = clamp(bias, 0.001f, 0.01f);
 
     // PCF
     float shadow = 0.0f;
-    const int sampleCount = 30;
+    const int sampleCount = 20;
     float viewDistance = length(cameraPosition - fragPosWorldSpace.xyz);
-    float diskRadius = (1.0f + (viewDistance)) / 200.0f;
+    float diskRadius = clamp(viewDistance / 500.0f, 0.015f, 0.05f);
 
     for (int i = 0; i < sampleCount; ++i)
     {
@@ -184,5 +179,9 @@ float PointShadowCalculation(float4 fragPosWorldSpace, float3 lightPosWorldSpace
 
     // Normalize the shadow value
     shadow /= float(sampleCount);
+
+    // Falloff as edge of UV Shadow Map is reached
+    float falloff = 1.0 - smoothstep(0.1, 0.8, distance);
+    shadow *= falloff;
     return shadow;
 }
