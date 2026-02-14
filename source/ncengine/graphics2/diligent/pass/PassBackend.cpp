@@ -146,9 +146,9 @@ PassBackend::PassBackend(IRenderDevice& device,
       m_perPassResourceSignature{&shaderBindings.GetPerPassSignature()},
       m_castsShadows{graphicsSettings.useShadows},
       m_shadowMapResX{graphicsSettings.shadowMapResolution},
+      m_maxPointLights{memorySettings.maxPointLights},
       m_maxDirectionalLights{memorySettings.maxDirectionalLights},
-      m_maxSpotLights{memorySettings.maxSpotLights},
-      m_maxPointLights{memorySettings.maxPointLights}
+      m_maxSpotLights{memorySettings.maxSpotLights}
 {
     // Get sink buffers
     auto& colorSinks = m_perPassResourceSignature->GetColorSinksResource();
