@@ -29,7 +29,6 @@ extern asset::FontInfo ui;
 namespace material
 {
 extern MaterialDesc blue;
-extern MaterialDesc cave;
 extern MaterialDesc green;
 extern MaterialDesc guy2;
 extern MaterialDesc ogre;

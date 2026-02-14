@@ -121,10 +121,6 @@
     "texture" : {
         "diffuse" : [
             {
-                "sourcePath": "raw/image/diffuse/cave.png",
-                "assetName": "texture/diffuse/cave"
-            },
-            {
                 "sourcePath": "raw/image/diffuse/guy.png",
                 "assetName": "texture/diffuse/guy"
             },
@@ -166,10 +162,6 @@
             }
         ],
         "normal" : [
-            {
-                "sourcePath": "raw/image/normal/cave.png",
-                "assetName": "texture/normal/cave"
-            },
             {
                 "sourcePath": "raw/image/normal/guy.png",
                 "assetName": "texture/normal/guy.nca"
