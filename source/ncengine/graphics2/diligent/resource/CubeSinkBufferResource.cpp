@@ -1,5 +1,6 @@
 #include "CubeSinkBufferResource.h"
 #include "graphics2/diligent/pass/PassTypes.h"
+#include "graphics2/diligent/resource/ResourceTypes.h"
 
 #include "ncutility/NcError.h"
 
@@ -92,7 +93,7 @@ auto CubeSinkBufferResource::MakeShadowSamplerDesc(std::string_view variableName
 }
 
 void CubeSinkBufferResource::Add(IRenderDevice& device,
-                             IDeviceContext& ,
+                             IDeviceContext& context,
                              uint32_t numCubeMaps,
                              uint32_t renderTargetWidth,
                              uint32_t renderTargetHeight)
@@ -100,6 +101,8 @@ void CubeSinkBufferResource::Add(IRenderDevice& device,
     using namespace Diligent;
 
     auto maxTextures = m_desc.maxTextures;
+
+    InitializeCubeArray(context, device, m_variable, maxTextures, true);
 
     if (numCubeMaps == 0)
     {

@@ -153,6 +153,8 @@ PassBackend::PassBackend(IRenderDevice& device,
     // Get sink buffers
     auto& colorSinks = m_perPassResourceSignature->GetColorSinksResource();
     auto& depthSinks = m_perPassResourceSignature->GetDepthSinksResource();
+    auto& uniShadowMapSinks = m_perPassResourceSignature->GetUniShadowMapSinksResource();
+    auto& pointShadowMapSinks = m_perPassResourceSignature->GetPointShadowMapSinksResource();
 
     // Get swapchain width and height to create screen-sized render targets
     auto screenWidth = swapChain.GetDesc().Width;
@@ -177,6 +179,10 @@ PassBackend::PassBackend(IRenderDevice& device,
         auto& postProcessSink = m_perPassResourceSignature->GetPostProcessSinkResource(i);
         postProcessSink.Add(device, context, 1, screenWidth, screenHeight);
     }
+
+    // Make all the dummy shadow map render targets that will be used by the passes
+    uniShadowMapSinks.Add(device, context, memorySettings.maxSpotLights + memorySettings.maxDirectionalLights, 1, 1);
+    pointShadowMapSinks.Add(device, context, memorySettings.maxPointLights, 1, 1);
 
     // Make the pass and pipeline objects
     MakePassesAndPipelines(device, swapChain, shaderFactory, shaderBindings, passManifest);
