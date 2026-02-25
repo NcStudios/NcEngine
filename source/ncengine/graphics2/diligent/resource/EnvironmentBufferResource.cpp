@@ -39,7 +39,9 @@ void EnvironmentBufferResource::Update(Diligent::IDeviceContext& context,
         .farClip = cameraState.farClip,
         .skyboxIndex = environmentRenderState.skyboxIndex,
         .useSkybox = environmentRenderState.useSkybox,
-        .useColorOverride = environmentRenderState.useColorOverride
+        .useColorOverride = environmentRenderState.useColorOverride,
+        .nearZ = lightRenderState.nearZ,
+        .farZ = lightRenderState.farZ
     };
 
     m_buffer.Write(context, data);

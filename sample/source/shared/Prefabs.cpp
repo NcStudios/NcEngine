@@ -18,7 +18,6 @@ asset::FontInfo ui{"SourceCodePro-Regular.ttf", 16.0f};
 namespace material
 {
 MaterialDesc blue{"BlueMaterial"};
-MaterialDesc cave{"CaveMaterial"};
 MaterialDesc green{"GreenMaterial"};
 MaterialDesc guy2{"Guy2Material"};
 MaterialDesc ogre{"OgreMaterial"};
@@ -86,11 +85,6 @@ void ReloadPrefabs()
     material::blue.properties = materialDefaults;
     material::blue.properties.diffuseTex = texture::diffuse_blue;
     material::blue.properties.normalIntensity = .220f;
-
-    material::cave.properties = materialDefaults;
-    material::cave.properties.diffuseTex = texture::diffuse_cave;
-    material::cave.properties.normalIntensity = .420f;
-    material::cave.properties.useFlatShading = 1;
 
     material::white.properties = materialDefaults;
 

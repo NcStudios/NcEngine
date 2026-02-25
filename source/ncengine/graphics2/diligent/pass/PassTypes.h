@@ -51,6 +51,13 @@ enum class ShadowMapTarget : uint8_t
     Point
 };
 
+enum class CullMode : uint8_t
+{
+    None,
+    Front,
+    Back
+};
+
 struct Sources
 {
     std::vector<uint32_t> color = std::vector<uint32_t>();
@@ -104,6 +111,7 @@ struct PassDesc
     DepthTarget depthSink = DepthTarget::None;
     ShadowMapTarget shadowMapSink = ShadowMapTarget::None;
     PostProcessTarget postProcessSink = PostProcessTarget::None;
+    CullMode cullMode = CullMode::Back;
     bool isMsaa = true;
     bool useDepthTest = true;
 };

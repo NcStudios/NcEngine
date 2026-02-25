@@ -76,7 +76,6 @@ const auto g_paths = std::array{
     std::string{path::default_capsule},
     std::string{path::default_wheel},
     std::string{path::default_skybox},
-    std::string{path::cave},
     std::string{path::guy2},
     std::string{path::halfpipe},
     std::string{path::ogre},
@@ -90,7 +89,6 @@ nc::asset::MeshView default_sphere{};
 nc::asset::MeshView default_capsule{};
 nc::asset::MeshView default_wheel{};
 nc::asset::MeshView default_skybox{};
-nc::asset::MeshView cave{};
 nc::asset::MeshView guy2{};
 nc::asset::MeshView halfpipe{};
 nc::asset::MeshView ogre{};
@@ -110,7 +108,6 @@ void Acquire()
     default_capsule = nc::asset::AcquireMeshAsset(path::default_capsule);
     default_wheel = nc::asset::AcquireMeshAsset(path::default_wheel);
     default_skybox = nc::asset::AcquireMeshAsset(path::default_skybox);
-    cave = nc::asset::AcquireMeshAsset(path::cave);
     guy2 = nc::asset::AcquireMeshAsset(path::guy2);
     halfpipe = nc::asset::AcquireMeshAsset(path::halfpipe);
     ogre = nc::asset::AcquireMeshAsset(path::ogre);
@@ -173,7 +170,6 @@ namespace texture
 nc::asset::TextureView default_color{};
 nc::asset::TextureView default_normal{};
 nc::asset::TextureView default_particle{};
-nc::asset::TextureView diffuse_cave{};
 nc::asset::TextureView diffuse_guy{};
 nc::asset::TextureView diffuse_ogre{};
 nc::asset::TextureView diffuse_skeleton{};
@@ -186,7 +182,6 @@ nc::asset::TextureView diffuse_teal{};
 nc::asset::TextureView diffuse_yellow{};
 nc::asset::TextureView effect_linear_hatch{};
 nc::asset::TextureView effect_noise{};
-nc::asset::TextureView normal_cave{};
 nc::asset::TextureView normal_guy{};
 nc::asset::TextureView normal_ogre{};
 nc::asset::TextureView normal_skeleton{};
@@ -195,7 +190,6 @@ const auto g_paths = std::array{
     std::string{path::default_color},
     std::string{path::default_normal},
     std::string{path::default_particle},
-    std::string{path::diffuse_cave},
     std::string{path::diffuse_guy},
     std::string{path::diffuse_ogre},
     std::string{path::diffuse_skeleton},
@@ -208,7 +202,6 @@ const auto g_paths = std::array{
     std::string{path::diffuse_yellow},
     std::string{path::effect_linear_hatch},
     std::string{path::effect_noise},
-    std::string{path::normal_cave},
     std::string{path::normal_guy},
     std::string{path::normal_ogre},
     std::string{path::normal_skeleton},
@@ -224,7 +217,6 @@ void Acquire()
     default_color = nc::asset::AcquireTextureAsset(path::default_color);
     default_normal = nc::asset::AcquireTextureAsset(path::default_normal);
     default_particle = nc::asset::AcquireTextureAsset(path::default_particle);
-    diffuse_cave = nc::asset::AcquireTextureAsset(path::diffuse_cave);
     diffuse_guy = nc::asset::AcquireTextureAsset(path::diffuse_guy);
     diffuse_ogre = nc::asset::AcquireTextureAsset(path::diffuse_ogre);
     diffuse_skeleton = nc::asset::AcquireTextureAsset(path::diffuse_skeleton);
@@ -237,7 +229,6 @@ void Acquire()
     diffuse_yellow = nc::asset::AcquireTextureAsset(path::diffuse_yellow);
     effect_linear_hatch = nc::asset::AcquireTextureAsset(path::effect_linear_hatch);
     effect_noise = nc::asset::AcquireTextureAsset(path::effect_noise);
-    normal_cave = nc::asset::AcquireTextureAsset(path::normal_cave);
     normal_guy = nc::asset::AcquireTextureAsset(path::normal_guy);
     normal_ogre = nc::asset::AcquireTextureAsset(path::normal_ogre);
     normal_skeleton = nc::asset::AcquireTextureAsset(path::normal_skeleton);

@@ -106,7 +106,7 @@ void BindPointShadowMapRenderTarget(Diligent::IDeviceContext& context,
                                     uint32_t lightIndex,
                                     uint32_t faceIndex)
 {
-    Diligent::ITextureView* pRTV = shadowMapSinkBufferResource.GetRenderTargetView((lightIndex *6)+ faceIndex);
+    Diligent::ITextureView* pRTV = shadowMapSinkBufferResource.GetRenderTargetView((lightIndex * 6)+ faceIndex);
     Diligent::ITextureView* pDSV = shadowMapSinkBufferResource.GetDepthTargetView(0);
     context.SetRenderTargets(1, &pRTV, pDSV, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
 }
@@ -229,4 +229,15 @@ auto ToPostProcessCubeRenderTargetView(Diligent::ISwapChain& swapChain, CubeSink
 }
 
 auto SingleSource(uint32_t target) -> std::vector<uint32_t> { return std::vector<uint32_t>{target}; }
+
+auto ToDiligentCullMode(CullMode cullMode) -> Diligent::CULL_MODE
+{
+    switch (cullMode)
+    {
+        case CullMode::None:  return Diligent::CULL_MODE_NONE;
+        case CullMode::Front: return Diligent::CULL_MODE_FRONT;
+        case CullMode::Back:  return Diligent::CULL_MODE_BACK;
+    }
+    return Diligent::CULL_MODE_BACK;
+}
 } // namespace nc::graphics

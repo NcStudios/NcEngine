@@ -53,7 +53,7 @@ auto CreatePipeline(Diligent::IRenderDevice& device,
     ci.GraphicsPipeline.NumRenderTargets                  = static_cast<uint8_t>(numColorTargets);
     ci.GraphicsPipeline.RTVFormats[0]                     = colorFormat;
     ci.GraphicsPipeline.DSVFormat                         = depthFormat;
-    ci.GraphicsPipeline.RasterizerDesc.CullMode           = CULL_MODE_BACK;
+    ci.GraphicsPipeline.RasterizerDesc.CullMode           = ToDiligentCullMode(passDesc.cullMode);
     ci.GraphicsPipeline.RasterizerDesc.DepthClipEnable    = passDesc.shadowMapSink != ShadowMapTarget::None ? false : true;
     ci.GraphicsPipeline.DepthStencilDesc.DepthEnable      = passDesc.useDepthTest;
     ci.GraphicsPipeline.DepthStencilDesc.DepthWriteEnable = passDesc.depthSink != DepthTarget::None || passDesc.shadowMapSink != ShadowMapTarget::None;

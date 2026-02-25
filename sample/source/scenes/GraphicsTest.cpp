@@ -33,10 +33,10 @@ void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
     auto ncWindow = modules.Get<window::NcWindow>();
     ncGraphics->SetSkybox(cube_map::path::night_sky);
     ncWindow->SetViewport(nc::Viewport{.Size = nc::Vector2{0.8f, 0.8f}, .TopLeft = nc::Vector2{0.1f, 0.00f}});
-    
+
     // Lights
     auto lvHandle = world.Emplace<Entity>({.position = Vector3{3.1f, 6.2f, 4.5f}, .tag = "Point Light 1"});
-    world.Emplace<PointLight>(lvHandle, Vector3(1.0f, 1.0f, 1.0f), Vector3(1.0f, 1.0f, 1.0f), 1.0f, 45.0f);
+    world.Emplace<PointLight>(lvHandle, Vector3(1.0f, 1.0f, 1.0f), Vector3(1.0f, 1.0f, 1.0f), 1.0f, 100.0f);
 
     const auto guy2 = world.Emplace<Entity>({
         .position = Vector3{6.0f, 1.8f, 4.0f},
@@ -148,20 +148,20 @@ void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
         });
     }
 
-    // Cave
-    const auto cave_floor = world.Emplace<Entity>({
+    // floor
+    const auto floor = world.Emplace<Entity>({
         .position = Vector3{0.0f, 0.0f, 0.0f},
-        .rotation = Quaternion::FromEulerAngles(0.0f, 1.5708f, 0.0f),
-        .scale = Vector3{1.5f, 1.5f, 1.5f},
-        .tag = "cave_floor"
+        .rotation = Quaternion::FromEulerAngles(0.0f, 0.0f, 0.0f),
+        .scale = Vector3{100.0f, 1.0f, 100.0f},
+        .tag = "floor"
     });
 
-    world.Emplace<StaticMesh>(cave_floor, mesh::cave, material::cave);
+    world.Emplace<StaticMesh>(floor, mesh::default_cube, material::red);
 
     // Camera
     auto cameraHandle = world.Emplace<Entity>({
-        .position = Vector3{0.137f, 5.291f, 1.245f},
-        .rotation = Quaternion::FromEulerAngles(0.549f, 1.116f, 0.146f),
+        .position = Vector3{0.0f, 12.0f, -12.0f},
+        .rotation = Quaternion::FromEulerAngles(0.7f, 0.0f, 0.0f),
         .tag = "Main Camera"
     });
 
@@ -199,10 +199,10 @@ void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
     ncGraphics->SetPostProcessEffectProperties(nc::OutlinedToonEffectId, PostProcessPassFlag::Noise, NoisePassProperties
     {
         .maskGradientStart = Vector3{1.0f, 1.0f, 1.0f},
-        .maskGradientAmount = 1.0f,
+        .maskGradientAmount = 0.3f,
         .maskGradientEnd = Vector3{0.0f, 0.0f, 0.0f},
         .noiseTex = texture::effect_noise,
-        .noiseTexAmount = 0.24f,
+        .noiseTexAmount = 0.01f,
         .noiseTexTiling = 1.0f,
     });
 }

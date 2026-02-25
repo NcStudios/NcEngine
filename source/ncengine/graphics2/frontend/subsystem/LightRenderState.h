@@ -10,5 +10,7 @@ struct LightRenderState
 {
     std::span<const LightData> lights;
     std::span<const LightMatrixData> lightMatrices;
+    float nearZ = 1.0f;
+    float farZ = 40.0f;
 };
 } // namespace nc::graphics

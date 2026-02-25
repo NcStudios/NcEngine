@@ -1,5 +1,6 @@
 #include "CubeSinkBufferResource.h"
 #include "graphics2/diligent/pass/PassTypes.h"
+#include "graphics2/diligent/resource/ResourceTypes.h"
 
 #include "ncutility/NcError.h"
 
@@ -63,7 +64,7 @@ auto MakeCubeShadowSinkBufferDesc(uint32_t maxTextures) -> CubeSinkBufferResourc
         .bindFlags = BIND_SHADER_RESOURCE | BIND_RENDER_TARGET,
         .clearValue = OptimizedClearValue{
             .Format = OffScreenShadowMapRTFormat,
-            .Color = {0.0f, 0.0f, 0.0f, 0.0f},
+            .Color = {1.0f, 1.0f, 1.0f, 1.0f},
             .DepthStencil = DepthStencilClearValue{}
         },
         .maxTextures = maxTextures
@@ -76,14 +77,13 @@ auto CubeSinkBufferResource::MakeShadowSamplerDesc(std::string_view variableName
     samplerDesc.AddressU = TEXTURE_ADDRESS_BORDER;
     samplerDesc.AddressV = TEXTURE_ADDRESS_BORDER;
     samplerDesc.AddressW = TEXTURE_ADDRESS_BORDER;
-    samplerDesc.BorderColor[0] = 1.0f;
-    samplerDesc.BorderColor[1] = 1.0f;
-    samplerDesc.BorderColor[2] = 1.0f;
-    samplerDesc.BorderColor[3] = 1.0f;
-    samplerDesc.MagFilter = FILTER_TYPE::FILTER_TYPE_COMPARISON_LINEAR;
-    samplerDesc.MinFilter = FILTER_TYPE::FILTER_TYPE_COMPARISON_LINEAR;
-    samplerDesc.MipFilter = FILTER_TYPE::FILTER_TYPE_COMPARISON_LINEAR;
-    samplerDesc.ComparisonFunc = COMPARISON_FUNC_LESS;
+    samplerDesc.BorderColor[0] = 0.0f;
+    samplerDesc.BorderColor[1] = 0.0f;
+    samplerDesc.BorderColor[2] = 0.0f;
+    samplerDesc.BorderColor[3] = 0.0f;
+    samplerDesc.MagFilter = FILTER_TYPE::FILTER_TYPE_LINEAR;
+    samplerDesc.MinFilter = FILTER_TYPE::FILTER_TYPE_LINEAR;
+    samplerDesc.MipFilter = FILTER_TYPE::FILTER_TYPE_LINEAR;
 
     return ImmutableSamplerDesc{
         SHADER_TYPE_VS_PS,
@@ -93,7 +93,7 @@ auto CubeSinkBufferResource::MakeShadowSamplerDesc(std::string_view variableName
 }
 
 void CubeSinkBufferResource::Add(IRenderDevice& device,
-                             IDeviceContext& ,
+                             IDeviceContext& context,
                              uint32_t numCubeMaps,
                              uint32_t renderTargetWidth,
                              uint32_t renderTargetHeight)
@@ -101,6 +101,8 @@ void CubeSinkBufferResource::Add(IRenderDevice& device,
     using namespace Diligent;
 
     auto maxTextures = m_desc.maxTextures;
+
+    InitializeCubeArray(context, device, m_variable, maxTextures, true);
 
     if (numCubeMaps == 0)
     {

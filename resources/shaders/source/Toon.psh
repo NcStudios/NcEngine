@@ -88,7 +88,8 @@ void main(in  PSInput  PSIn, out PSOutput PSOut)
     uint uniShadowMapIndex = 0u;
     uint pointShadowMapIndex = 0u;
     uint shadowCasterCount = 0u;
-    float4 result4 = float4(result, 1.0f);
+    float4 litColor = float4(result, 1.0f);
+    float maxLightContribution = 0.0f;
 
     for (int i = 0; i < lightCount; i++)
     {
@@ -109,7 +110,7 @@ void main(in  PSInput  PSIn, out PSOutput PSOut)
         }
 
         // Calculate shadow factor
-        float shadowFactor = 1.0f;
+        float shadowFactor = 0.0f;
         TextureCube pointDepthTex;
         Texture2D  uniDepthTex;
         if (Lights[i].castsShadows)
@@ -130,13 +131,14 @@ void main(in  PSInput  PSIn, out PSOutput PSOut)
             }
         }
 
-        shadowFactor = min((1-shadowFactor) + 1.0f, 1.0f);
+        shadowFactor = 1.0f - clamp(shadowFactor, 0.0f, 1.0f);
         diffuseAmt = max(diffuseAmt * shadowFactor, 0.0f);
+        maxLightContribution = max(diffuseAmt, maxLightContribution);
         specularAmt = max(specularAmt * shadowFactor, 0.0f);
 
         // Apply lighting influences and shadows
         result += ((diffuseAmt * influence.diffuseColor * color.rgb) + (specularAmt * influence.specularColor * color.rgb ));
-        result4 = float4(result, 1.0f);
+        litColor = float4(result, 1.0f);
 
         // Apply hatching
         if (material.useHatchTexture)
@@ -150,19 +152,20 @@ void main(in  PSInput  PSIn, out PSOutput PSOut)
 
             if (influence.diffuseAmt < 0.05f)
             {
-                result4.rgb = lerp(result4.rgb, result4.rgb * hatchDark, 1-(influence.diffuseAmt));
+                litColor.rgb = lerp(litColor.rgb, litColor.rgb * hatchDark, 1-(influence.diffuseAmt));
             }
             else if (influence.diffuseAmt < 0.1f)
             {
-                result4.rgb = lerp(result4.rgb, result4.rgb * hatchMedium, 1-(influence.diffuseAmt * 5));
+                litColor.rgb = lerp(litColor.rgb, litColor.rgb * hatchMedium, 1-(influence.diffuseAmt * 5));
             }
         }
     }
 
     // Gradient
     float4 gradient = lerp(material.gradientStart, material.gradientEnd, (normalize(PSIn.LocalPos).y + 1) * 0.5);
-    float4 gradientApplied = lerp(result4, result4 + gradient, material.gradientAmount);
-    float4 outputColor = lerp(gradientApplied, gradientApplied * gradient, 0.5f);
+    float4 gradientApplied = lerp(litColor, litColor * gradient, material.gradientAmount);
+    float4 gradientCappedByLight = lerp(gradientApplied, gradientApplied*maxLightContribution, 0.8f);
+    float4 outputColor = gradientCappedByLight;
 
     PSOut.color = outputColor;
 }
