@@ -4,6 +4,9 @@
 
 using namespace nc;
 
+// Ensure we can use our generator with std lib algorithms
+static_assert(std::uniform_random_bit_generator<Xoshiro256ss>);
+
 TEST(Random_unit_tests, Fork_NewInstanceSeededFromNextValue)
 {
     constexpr size_t seed = 12345;
