@@ -36,7 +36,7 @@ class Random : public Module
          * @brief Construct a new Random object from a seed.
          * @param seed A 64 bit seed value
          */
-        explicit Random(size_t seed) noexcept
+        explicit Random(uint64_t seed) noexcept
             : Module{NcRandomId},
               m_seed{seed},
               m_generator{m_seed},
@@ -46,7 +46,7 @@ class Random : public Module
 
         /**
          * @brief Returns a new Random instance seeded with the next generator value.
-         * @return size_t
+         * @return uint64_t
          */
         auto Fork() noexcept { return Random{GetU64()}; }
 
@@ -54,13 +54,19 @@ class Random : public Module
          * @brief Seed the generator
          * @param seed A 64 bit seed value.
          */
-        void Seed(size_t seed) noexcept { *this = Random{seed}; }
+        void Seed(uint64_t seed) noexcept { *this = Random{seed}; }
 
         /**
          * @brief Get the current seed.
-         * @return size_t
+         * @return uint64_t
          */
         auto Seed() const noexcept { return m_seed; }
+
+        /**
+         * @brief Get the underlying generator.
+         * @return Xoshiro256ss (statisfies std::uniform_random_bit_generator)
+         */
+        auto GetGenerator() -> Xoshiro256ss& { return m_generator; }
 
         /**
          * @brief Generate a random float in the range [0, 1].
@@ -69,10 +75,10 @@ class Random : public Module
         auto Get() noexcept -> float { return m_distribution(m_generator); }
 
         /**
-         * @brief Generate a random size_t in the range [0, std::numeric_limits<size_t>::max()].
-         * @return size_t
+         * @brief Generate a random uint64_t in the range [0, std::numeric_limits<uint64_t>::max()].
+         * @return uint64_t
          */
-        auto GetU64() noexcept -> size_t { return m_generator(); }
+        auto GetU64() noexcept -> uint64_t { return m_generator(); }
 
         /**
          * @brief Generate a random Vector2 with components in the range [0, 1].
@@ -101,16 +107,15 @@ class Random : public Module
         auto Between(float min, float max) noexcept -> float { return Get() * (max - min) + min; }
 
         /**
-         * @brief Generate a random size_t in the range [min, max].
+         * @brief Generate a random uint64_t in the range [min, max].
          * @param min The minimum range value.
          * @param max The maximum range value.
-         * @return size_t
+         * @return uint64_t
          */
-        auto Between(size_t min, size_t max) noexcept -> size_t
+        auto Between(uint64_t min, uint64_t max) noexcept -> uint64_t
         {
-            const auto minFloat = static_cast<float>(min);
-            const auto maxFloat = static_cast<float>(max);
-            return static_cast<size_t>(Get() * (maxFloat - minFloat) + minFloat);
+            auto distribution = std::uniform_int_distribution<uint64_t>{min, max};
+            return distribution(m_generator);
         }
 
         /**
@@ -150,7 +155,7 @@ class Random : public Module
         friend bool operator!=(const Random& lhs, const Random& rhs) noexcept { return lhs.m_generator != rhs.m_generator; }
 
     private:
-        size_t m_seed;
+        uint64_t m_seed;
         Xoshiro256ss m_generator;
         std::uniform_real_distribution<float> m_distribution;
 };
