@@ -168,4 +168,5 @@ void main(in  PSInput  PSIn, out PSOutput PSOut)
     float4 outputColor = gradientCappedByLight;
 
     PSOut.color = outputColor;
+    PSOut.color.a = Diffuse.a;
 }

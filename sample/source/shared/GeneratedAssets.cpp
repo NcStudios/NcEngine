@@ -81,6 +81,8 @@ const auto g_paths = std::array{
     std::string{path::ogre},
     std::string{path::ramp},
     std::string{path::skeleton},
+    std::string{path::env_tree},
+    std::string{path::env_tree_leaves},
 };
 
 nc::asset::MeshView default_plane{};
@@ -94,6 +96,8 @@ nc::asset::MeshView halfpipe{};
 nc::asset::MeshView ogre{};
 nc::asset::MeshView ramp{};
 nc::asset::MeshView skeleton{};
+nc::asset::MeshView env_tree{};
+nc::asset::MeshView env_tree_leaves{};
 
 void Load()
 {
@@ -113,6 +117,8 @@ void Acquire()
     ogre = nc::asset::AcquireMeshAsset(path::ogre);
     ramp = nc::asset::AcquireMeshAsset(path::ramp);
     skeleton = nc::asset::AcquireMeshAsset(path::skeleton);
+    env_tree = nc::asset::AcquireMeshAsset(path::env_tree);
+    env_tree_leaves = nc::asset::AcquireMeshAsset(path::env_tree_leaves);
 }
 
 } // namespace mesh
@@ -180,11 +186,14 @@ nc::asset::TextureView diffuse_purple{};
 nc::asset::TextureView diffuse_red{};
 nc::asset::TextureView diffuse_teal{};
 nc::asset::TextureView diffuse_yellow{};
+nc::asset::TextureView diffuse_tree{};
+nc::asset::TextureView diffuse_tree_leaves{};
 nc::asset::TextureView effect_linear_hatch{};
 nc::asset::TextureView effect_noise{};
 nc::asset::TextureView normal_guy{};
 nc::asset::TextureView normal_ogre{};
 nc::asset::TextureView normal_skeleton{};
+nc::asset::TextureView normal_tree{};
 
 const auto g_paths = std::array{
     std::string{path::default_color},
@@ -200,11 +209,14 @@ const auto g_paths = std::array{
     std::string{path::diffuse_red},
     std::string{path::diffuse_teal},
     std::string{path::diffuse_yellow},
+    std::string{path::diffuse_tree},
+    std::string{path::diffuse_tree_leaves},
     std::string{path::effect_linear_hatch},
     std::string{path::effect_noise},
     std::string{path::normal_guy},
     std::string{path::normal_ogre},
     std::string{path::normal_skeleton},
+    std::string{path::normal_tree},
 };
 
 void Load()
@@ -227,11 +239,14 @@ void Acquire()
     diffuse_red = nc::asset::AcquireTextureAsset(path::diffuse_red);
     diffuse_teal = nc::asset::AcquireTextureAsset(path::diffuse_teal);
     diffuse_yellow = nc::asset::AcquireTextureAsset(path::diffuse_yellow);
+    diffuse_tree = nc::asset::AcquireTextureAsset(path::diffuse_tree);
+    diffuse_tree_leaves = nc::asset::AcquireTextureAsset(path::diffuse_tree_leaves);
     effect_linear_hatch = nc::asset::AcquireTextureAsset(path::effect_linear_hatch);
     effect_noise = nc::asset::AcquireTextureAsset(path::effect_noise);
     normal_guy = nc::asset::AcquireTextureAsset(path::normal_guy);
     normal_ogre = nc::asset::AcquireTextureAsset(path::normal_ogre);
     normal_skeleton = nc::asset::AcquireTextureAsset(path::normal_skeleton);
+    normal_tree = nc::asset::AcquireTextureAsset(path::normal_tree);
 }
 
 } // namespace texture

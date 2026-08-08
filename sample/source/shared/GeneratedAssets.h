@@ -63,6 +63,8 @@ constexpr auto halfpipe = "halfpipe.nca";
 constexpr auto ogre = "ogre.nca";
 constexpr auto ramp = "ramp.nca";
 constexpr auto skeleton = "skeleton.nca";
+constexpr auto env_tree = "env/tree.nca";
+constexpr auto env_tree_leaves = "env/tree_leaves.nca";
 } // namespace path
 
 extern nc::asset::MeshView default_plane;
@@ -76,6 +78,8 @@ extern nc::asset::MeshView halfpipe;
 extern nc::asset::MeshView ogre;
 extern nc::asset::MeshView ramp;
 extern nc::asset::MeshView skeleton;
+extern nc::asset::MeshView env_tree;
+extern nc::asset::MeshView env_tree_leaves;
 
 void Load();
 void Acquire();
@@ -140,11 +144,14 @@ constexpr auto diffuse_purple = "diffuse/purple.nca";
 constexpr auto diffuse_red = "diffuse/red.nca";
 constexpr auto diffuse_teal = "diffuse/teal.nca";
 constexpr auto diffuse_yellow = "diffuse/yellow.nca";
+constexpr auto diffuse_tree = "diffuse/tree.nca";
+constexpr auto diffuse_tree_leaves = "diffuse/tree_leaves.nca";
 constexpr auto effect_linear_hatch = "effect/linear_hatch.nca";
 constexpr auto effect_noise = "effect/noise.nca";
 constexpr auto normal_guy = "normal/guy.nca";
 constexpr auto normal_ogre = "normal/ogre.nca";
 constexpr auto normal_skeleton = "normal/skeleton.nca";
+constexpr auto normal_tree = "normal/tree.nca";
 } // namespace path
 
 extern nc::asset::TextureView default_color;
@@ -160,11 +167,14 @@ extern nc::asset::TextureView diffuse_purple;
 extern nc::asset::TextureView diffuse_red;
 extern nc::asset::TextureView diffuse_teal;
 extern nc::asset::TextureView diffuse_yellow;
+extern nc::asset::TextureView diffuse_tree;
+extern nc::asset::TextureView diffuse_tree_leaves;
 extern nc::asset::TextureView effect_linear_hatch;
 extern nc::asset::TextureView effect_noise;
 extern nc::asset::TextureView normal_guy;
 extern nc::asset::TextureView normal_ogre;
 extern nc::asset::TextureView normal_skeleton;
+extern nc::asset::TextureView normal_tree;
 
 void Load();
 void Acquire();

@@ -21,6 +21,8 @@ MaterialDesc blue{"BlueMaterial"};
 MaterialDesc green{"GreenMaterial"};
 MaterialDesc guy2{"Guy2Material"};
 MaterialDesc ogre{"OgreMaterial"};
+MaterialDesc tree{"TreeMaterial"};
+MaterialDesc tree_leaves{"TreeLeaves"};
 MaterialDesc orange{"OrangeMaterial"};
 MaterialDesc purple{"PurpleMaterial"};
 MaterialDesc red{"RedMaterial"};
@@ -131,6 +133,13 @@ void ReloadPrefabs()
 
     material::yellow.properties = materialDefaults;
     material::yellow.properties.diffuseTex = texture::diffuse_yellow;
+
+    material::tree.properties = materialDefaults;
+    material::tree.properties.diffuseTex = texture::diffuse_tree;
+    material::tree.properties.diffuseTex = texture::normal_tree;
+
+    material::tree_leaves.properties = materialDefaults;
+    material::tree_leaves.properties.diffuseTex = texture::diffuse_tree_leaves;
 
     post_process::outline = OutlinePassProperties
     {

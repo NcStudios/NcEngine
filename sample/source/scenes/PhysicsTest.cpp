@@ -1288,7 +1288,7 @@ void PhysicsTest::Load(ecs::Ecs world, ModuleProvider modules)
         }),
         Vector3{1.0f, 1.0f, 1.0f},
         Vector3{1.0f, 1.0f, 1.0f},
-        5.0f
+        15.0f
     );
 }
 
