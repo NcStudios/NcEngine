@@ -158,6 +158,7 @@ float PointShadowCalculation(float4 fragPosWorldSpace, float3 lightPosWorldSpace
     {
         return 0.0f;
     }
+
     float3 sampleDir = normalize(fragToLight);
 
     // Normalize from shadow map
@@ -178,23 +179,15 @@ float PointShadowCalculation(float4 fragPosWorldSpace, float3 lightPosWorldSpace
     float diskRadius = 0.025f;
     for (int i = 0; i < sampleCount; ++i)
     {
-        float3 offsetDir =
-            normalize(
-                sampleDir +
-                sampleOffsetDirections[i] * diskRadius
-            );
-
-        float closestDepth =
-            depthTex.Sample(
-                PointShadowMapSinks_sampler,
-                offsetDir
-            ).r;
+        float3 offsetDir = normalize(sampleDir + sampleOffsetDirections[i] * diskRadius);
+        float closestDepth = depthTex.Sample(PointShadowMapSinks_sampler, offsetDir).r;
 
         if (currentDepth - bias > closestDepth)
         {
             shadow += 1.0f;
         }
     }
+
     shadow /= float(sampleCount);
     return shadow;
 }
