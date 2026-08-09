@@ -172,23 +172,29 @@ float PointShadowCalculation(float4 fragPosWorldSpace, float3 lightPosWorldSpace
     float closestDepth = depthTex.Sample(PointShadowMapSinks_sampler, sampleDir).r;
     return currentDepth - bias > closestDepth ? 1.0f : 0.0f;
 
-    // // PCF
-    // float shadow = 0.0f;
-    // const int sampleCount = 20;
-    // float viewDistance = length(cameraPosition - fragPosWorldSpace.xyz);
-    // float diskRadius = clamp(viewDistance / 500.0f, 0.015f, 0.03f);
+    // PCF
+    float shadow = 0.0f;
+    const int sampleCount = 20;
+    float diskRadius = 0.025f;
+    for (int i = 0; i < sampleCount; ++i)
+    {
+        float3 offsetDir =
+            normalize(
+                sampleDir +
+                sampleOffsetDirections[i] * diskRadius
+            );
 
-    // for (int i = 0; i < sampleCount; ++i)
-    // {
-    //     float3 offsetDir = normalize(sampleDir + sampleOffsetDirections[i] * diskRadius);
-    //     float closestDepth = depthTex.Sample(PointShadowMapSinks_sampler, offsetDir).r;
-    //     if (currentDepth - bias > closestDepth)
-    //     {
-    //         shadow += 1.0f;
-    //     }
-    // }
+        float closestDepth =
+            depthTex.Sample(
+                PointShadowMapSinks_sampler,
+                offsetDir
+            ).r;
 
-    // // Normalize the shadow value
-    // shadow /= float(sampleCount);
-    // return shadow;
+        if (currentDepth - bias > closestDepth)
+        {
+            shadow += 1.0f;
+        }
+    }
+    shadow /= float(sampleCount);
+    return shadow;
 }

@@ -135,11 +135,8 @@ void ReloadPrefabs()
     material::yellow.properties.diffuseTex = texture::diffuse_yellow;
 
     material::tree.properties = materialDefaults;
-    material::tree.properties.diffuseTex = texture::diffuse_tree;
-    material::tree.properties.diffuseTex = texture::normal_tree;
 
     material::tree_leaves.properties = materialDefaults;
-    material::tree_leaves.properties.diffuseTex = texture::diffuse_tree_leaves;
 
     post_process::outline = OutlinePassProperties
     {

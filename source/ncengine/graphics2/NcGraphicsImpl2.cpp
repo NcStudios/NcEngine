@@ -228,7 +228,8 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .shaderPaths = ShaderPaths{.vertexShaderPath = shader::ToonVertex},
                     .depthSink = DepthTarget::Main,
                     .isMsaa = false,
-                    .useDepthTest = true
+                    .useDepthTest = true,
+                    .alphaBlend = true
                 },
                 PassDesc{
                     .flag = MaterialPassFlag::Depth,
@@ -238,7 +239,8 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .shaderPaths = ShaderPaths{.vertexShaderPath = shader::ToonSkinnedVertex},
                     .depthSink = DepthTarget::Main,
                     .isMsaa = false,
-                    .useDepthTest = true
+                    .useDepthTest = true,
+                    .alphaBlend = true
                 },
                 PassDesc{
                     .flag = MaterialPassFlag::Toon,
@@ -248,7 +250,8 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .shaderPaths = ShaderPaths{shader::ToonPixel, shader::ToonVertex},
                     .colorSink = ColorTarget::Main,
                     .depthSink = DepthTarget::Main,
-                    .useDepthTest = true
+                    .useDepthTest = true,
+                    .alphaBlend = true
                 },
                 PassDesc{
                     .flag = MaterialPassFlag::Toon,
@@ -258,7 +261,8 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .shaderPaths = ShaderPaths{shader::ToonPixel, shader::ToonSkinnedVertex},
                     .colorSink = ColorTarget::Main,
                     .depthSink = DepthTarget::Main,
-                    .useDepthTest = true
+                    .useDepthTest = true,
+                    .alphaBlend = true
                 },
                 PassDesc{
                     .flag = MaterialPassFlag::Normals,
@@ -268,7 +272,8 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .shaderPaths = ShaderPaths{shader::NormalsPixel, shader::ToonVertex},
                     .colorSink = ColorTarget::Normals,
                     .depthSink = DepthTarget::Main,
-                    .useDepthTest = true
+                    .useDepthTest = true,
+                    .alphaBlend = true
                 },
                 PassDesc{
                     .flag = MaterialPassFlag::Normals,
@@ -278,7 +283,8 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .shaderPaths = ShaderPaths{shader::NormalsPixel, shader::ToonSkinnedVertex},
                     .colorSink = ColorTarget::Normals,
                     .depthSink = DepthTarget::Main,
-                    .useDepthTest = true
+                    .useDepthTest = true,
+                    .alphaBlend = true
                 },
                 PassDesc{
                     .flag = PostProcessPassFlag::Outline,
@@ -332,7 +338,8 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .shaderPaths = ShaderPaths{shader::ParticlePixel, shader::ParticleVertex},
                     .colorSink = ColorTarget::Swapchain,
                     .depthSink = DepthTarget::Main,
-                    .useDepthTest = true
+                    .useDepthTest = true,
+                    .alphaBlend = true
                 },
             },
             GetMaterialPassFlags(),

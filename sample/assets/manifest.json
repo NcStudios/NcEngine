@@ -66,14 +66,6 @@
         {
             "sourcePath": "raw/model/skeleton.fbx",
             "assetName": "mesh/skeleton"
-        },
-        {
-            "sourcePath": "raw\\model\\tree.fbx",
-            "assetName": "mesh\\env\\tree"
-        },
-        {
-            "sourcePath": "raw\\model\\tree_leaves.fbx",
-            "assetName": "mesh\\env\\tree_leaves"
         }
     ],
     "mesh-collider": [
@@ -167,14 +159,6 @@
             {
                 "sourcePath": "raw/image/diffuse/yellow.png",
                 "assetName": "texture/diffuse/yellow"
-            },
-            {
-                "sourcePath": "raw/image/diffuse/tree.png",
-                "assetName": "texture/diffuse/tree"
-            },
-            {
-                "sourcePath": "raw/image/diffuse/tree_leaves.png",
-                "assetName": "texture/diffuse/tree_leaves"
             }
         ],
         "normal" : [
@@ -190,10 +174,6 @@
             {
                 "sourcePath": "raw/image/normal/skeleton.png",
                 "assetName": "texture/normal/skeleton"
-            },
-            {
-                "sourcePath": "raw/image/normal/tree.png",
-                "assetName": "texture/normal/tree"
             }
         ],
         "particle" : [
