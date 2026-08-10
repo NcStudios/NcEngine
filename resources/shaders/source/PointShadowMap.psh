@@ -18,6 +18,14 @@ StructuredBuffer<StaticMeshInstanceData> StaticInstances;
 
 void main(in PSInput PSIn, out PSOutput PSOut)
 {
-    float3 lightVec = PSIn.WorldPos.xyz - Lights[lightIndex].position;
-    PSOut.Color = length(lightVec) / farZ;
+    // Radial distance from the point light to the fragment.
+    float3 lightToFragment = PSIn.WorldPos.xyz - Lights[lightIndex].position;
+    float distanceToLight = length(lightToFragment);
+
+    // Store linear radial depth in [0, 1].
+    // The lighting pass must perform the exact same conversion
+    // before comparing against this texture.
+    float depth = saturate(distanceToLight / farZ);
+
+    PSOut.Color = float4(depth, 0.0f, 0.0f, 1.0f);
 }

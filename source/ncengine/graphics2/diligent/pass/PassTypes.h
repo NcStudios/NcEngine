@@ -114,5 +114,6 @@ struct PassDesc
     CullMode cullMode = CullMode::Back;
     bool isMsaa = true;
     bool useDepthTest = true;
+    bool alphaBlend = false;
 };
 } // namespace nc::graphics

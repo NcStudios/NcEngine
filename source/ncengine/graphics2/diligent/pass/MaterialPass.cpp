@@ -60,8 +60,20 @@ auto CreatePipeline(Diligent::IRenderDevice& device,
     ci.GraphicsPipeline.InputLayout.LayoutElements        = layoutElements.data();
     ci.GraphicsPipeline.InputLayout.NumElements           = static_cast<uint32_t>(layoutElements.size());
 
-    ci.GraphicsPipeline.SmplDesc.Count               = passDesc.isMsaa ? static_cast<uint8_t>(numSamples) : static_cast<uint8_t>(1);
-    ci.GraphicsPipeline.PrimitiveTopology            = PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+     if (passDesc.alphaBlend)
+    {
+        auto& renderTarget          = ci.GraphicsPipeline.BlendDesc.RenderTargets[0];
+        renderTarget.BlendEnable    = true;
+        renderTarget.SrcBlend       = BLEND_FACTOR_SRC_ALPHA;
+        renderTarget.DestBlend      = BLEND_FACTOR_INV_SRC_ALPHA;
+        renderTarget.BlendOp        = BLEND_OPERATION_ADD;
+        renderTarget.SrcBlendAlpha  = BLEND_FACTOR_ONE;
+        renderTarget.DestBlendAlpha = BLEND_FACTOR_INV_SRC_ALPHA;
+        renderTarget.BlendOpAlpha   = BLEND_OPERATION_ADD;
+    }
+
+    ci.GraphicsPipeline.SmplDesc.Count    = passDesc.isMsaa ? static_cast<uint8_t>(numSamples) : static_cast<uint8_t>(1);
+    ci.GraphicsPipeline.PrimitiveTopology = PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
 
     auto signatures = std::array{&shaderBindings.GetPerFrameSignature().GetResourceSignature(), &shaderBindings.GetPerPassSignature().GetResourceSignature()};
     ci.ppResourceSignatures = signatures.data();

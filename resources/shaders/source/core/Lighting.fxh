@@ -154,34 +154,40 @@ float PointShadowCalculation(float4 fragPosWorldSpace, float3 lightPosWorldSpace
     float3 fragToLight = fragPosWorldSpace.xyz - lightPosWorldSpace;
     float distance = length(fragToLight);
 
-    // Linearize depth
-    float farPlane = farZ; 
-    distance = distance / farPlane;
+    if (distance < 0.00001f)
+    {
+        return 0.0f;
+    }
+
     float3 sampleDir = normalize(fragToLight);
 
-    float bias = 0.0025f * (1.0f - dot(normal, sampleDir));
-    bias = clamp(bias, 0.001f, 0.01f);
+    // Normalize from shadow map
+    // Shadow map stores: length(worldPos - lightPos) / farZ. format is R32_FLOAT
+    float currentDepth = distance / farZ;
+
+    // Bias. In world space first. Then converted to normalized depth [0,1] used by the shadow map.
+    float nDotL = max(dot(normalize(normal), sampleDir), 0.0f);
+    float worldSpaceBias = lerp(0.05f, 0.005f, nDotL);
+    float bias = worldSpaceBias / farZ;
+
+    float closestDepth = depthTex.Sample(PointShadowMapSinks_sampler, sampleDir).r;
+    return currentDepth - bias > closestDepth ? 1.0f : 0.0f;
 
     // PCF
     float shadow = 0.0f;
     const int sampleCount = 20;
-    float viewDistance = length(cameraPosition - fragPosWorldSpace.xyz);
-    float diskRadius = clamp(viewDistance / 500.0f, 0.015f, 0.03f);
-
+    float diskRadius = 0.025f;
     for (int i = 0; i < sampleCount; ++i)
     {
-        float closestDepth = depthTex.Sample(PointShadowMapSinks_sampler, fragToLight + sampleOffsetDirections[i] * diskRadius).r;
-        if (distance - bias > closestDepth)
+        float3 offsetDir = normalize(sampleDir + sampleOffsetDirections[i] * diskRadius);
+        float closestDepth = depthTex.Sample(PointShadowMapSinks_sampler, offsetDir).r;
+
+        if (currentDepth - bias > closestDepth)
         {
             shadow += 1.0f;
         }
     }
 
-    // Normalize the shadow value
     shadow /= float(sampleCount);
-
-    // Falloff as edge of UV Shadow Map is reached
-    float falloff = 1.0 - smoothstep(0.1, 0.8, distance);
-    shadow *= falloff;
     return shadow;
 }

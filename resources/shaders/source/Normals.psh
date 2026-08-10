@@ -45,12 +45,21 @@ void main(in  PSInput  PSIn, out PSOutput PSOut)
 {
     const float Epsilon = 1e-10;
 
+    MaterialData material = Materials[PSIn.MaterialIndex];
+    uint TexIndex = NonUniformResourceIndex(material.diffuseTexIndex);
+    float4 Diffuse = Textures[TexIndex].Sample(Textures_sampler, PSIn.UV);
+
+    if (Diffuse.a < 0.1f)
+    {
+        discard;
+    }
+
     float4 Color;
     float3 viewDir = normalize(cameraPosition - PSIn.WorldPos.xyz);
 
-    if (Materials[PSIn.MaterialIndex].useTextureNormals)
+    if (material.useTextureNormals)
     {
-        uint normalIndex = Materials[PSIn.MaterialIndex].normalTexIndex;
+        uint normalIndex = material.normalTexIndex;
         float3 textureNormals = normalize(Textures[normalIndex].Sample(Textures_sampler, PSIn.UV)).xyz;
         Color = float4(normalize(textureNormals.xyz * float3(2.0, 2.0, 2.0) - float3(1.0, 1.0, 1.0)), 1.0f);
     }
@@ -61,9 +70,9 @@ void main(in  PSInput  PSIn, out PSOutput PSOut)
     }
 
     float3 colHsv = RGBtoHSV(float3(Color.r, Color.g, Color.b), Epsilon);
-    colHsv.y *=  Materials[PSIn.MaterialIndex].normalIntensity;
+    colHsv.y *=  material.normalIntensity;
     Color.rgb = HSVtoRGB(colHsv.rgb);
 
     PSOut.Color = float4(Color.rgb, 1-dot(PSIn.Normal, viewDir));
-    
+
 }

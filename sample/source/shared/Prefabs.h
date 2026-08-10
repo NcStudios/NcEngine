@@ -32,6 +32,8 @@ extern MaterialDesc blue;
 extern MaterialDesc green;
 extern MaterialDesc guy2;
 extern MaterialDesc ogre;
+extern MaterialDesc tree;
+extern MaterialDesc tree_leaves;
 extern MaterialDesc orange;
 extern MaterialDesc purple;
 extern MaterialDesc red;

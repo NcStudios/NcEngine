@@ -35,8 +35,11 @@ void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
     ncWindow->SetViewport(nc::Viewport{.Size = nc::Vector2{0.8f, 0.8f}, .TopLeft = nc::Vector2{0.1f, 0.00f}});
 
     // Lights
-    auto lvHandle = world.Emplace<Entity>({.position = Vector3{3.1f, 6.2f, 4.5f}, .tag = "Point Light 1"});
+    auto lvHandle = world.Emplace<Entity>({.position = Vector3{3.1f, 6.2f, 4.5f}, .tag = "Point Light"});
     world.Emplace<PointLight>(lvHandle, Vector3(1.0f, 1.0f, 1.0f), Vector3(1.0f, 1.0f, 1.0f), 1.0f, 100.0f);
+
+    auto lvHandle2 = world.Emplace<Entity>({.position = Vector3{0.0f, 0.0f, 0.0f}, .rotation = Quaternion::FromEulerAngles(1.0f, 0.0f, 0.0f), .tag = "Directional Light"});
+    world.Emplace<DirectionalLight>(lvHandle2, Vector3(1.0f, 1.0f, 1.0f), Vector3(1.0f, 1.0f, 1.0f), 1.0f, true);
 
     const auto guy2 = world.Emplace<Entity>({
         .position = Vector3{6.0f, 1.8f, 4.0f},

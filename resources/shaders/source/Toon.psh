@@ -44,6 +44,11 @@ void main(in  PSInput  PSIn, out PSOutput PSOut)
 
     float4 color = Diffuse;
 
+    if (color.a < 0.1f)
+    {
+        discard;
+    }
+
     // Transform colors to limited scheme
     if (useColorOverride) // Global
     {
@@ -168,4 +173,5 @@ void main(in  PSInput  PSIn, out PSOutput PSOut)
     float4 outputColor = gradientCappedByLight;
 
     PSOut.color = outputColor;
+    PSOut.color.a = Diffuse.a;
 }
