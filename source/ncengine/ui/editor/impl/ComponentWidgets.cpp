@@ -1005,7 +1005,6 @@ void TransformUIWidget(Transform& transform, EditorContext& ctx, const std::any&
     auto scl = ToVector3(decomposedMatrix.scale);
     const auto prevScl = scl;
     auto pos = ToVector3(decomposedMatrix.position);
-    const auto prevRot = ctx.eulerRotation;
     auto wasUpdated = false;
 
     if (ui::InputPosition(pos, "position"))
