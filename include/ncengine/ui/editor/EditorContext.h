@@ -48,6 +48,7 @@ struct EditorContext
 
     // Mutable state (for internal use)
     Entity selectedEntity = Entity::Null();
+    Vector3 eulerRotation = Vector3::Zero();
     OpenState openState = OpenState::Closed;
     ImVec2 dimensions = ImVec2{};
     bool rebuildStaticsOnTransformWrite = true;

@@ -79,6 +79,12 @@ void SceneGraph::OnClose(EditorContext& ctx)
 
 void SceneGraph::SetEntitySelection(EditorContext& ctx, Entity entity)
 {
+    if (entity.Valid())
+    {
+        const auto& transform = ctx.world.Get<Transform>(entity);
+        ctx.eulerRotation = transform.LocalRotation().ToEulerAngles();
+    }
+
     ctx.selectedEntity = entity;
     ctx.world.Get<WireframeRenderer>(m_selectedEntityWireframe).target = entity;
     ctx.world.Get<WireframeRenderer>(m_selectedColliderWireframe).target =

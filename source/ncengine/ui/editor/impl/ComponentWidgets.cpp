@@ -1005,8 +1005,6 @@ void TransformUIWidget(Transform& transform, EditorContext& ctx, const std::any&
     auto scl = ToVector3(decomposedMatrix.scale);
     const auto prevScl = scl;
     auto pos = ToVector3(decomposedMatrix.position);
-    auto curRot = ToQuaternion(decomposedMatrix.rotation).ToEulerAngles();
-    const auto prevRot = curRot;
     auto wasUpdated = false;
 
     if (ui::InputPosition(pos, "position"))
@@ -1023,18 +1021,10 @@ void TransformUIWidget(Transform& transform, EditorContext& ctx, const std::any&
         }
     }
 
-    if (ui::InputAngles(curRot, "rotation"))
+    if (ui::InputAngles(ctx.eulerRotation, "rotation"))
     {
         wasUpdated = true;
-        const auto rotationNeeded = [&]()
-        {
-            if      (!FloatEqual(curRot.x, prevRot.x)) return DirectX::XMQuaternionRotationAxis(DirectX::g_XMIdentityR0, curRot.x - prevRot.x);
-            else if (!FloatEqual(curRot.y, prevRot.y)) return DirectX::XMQuaternionRotationAxis(DirectX::g_XMIdentityR1, curRot.y - prevRot.y);
-            else if (!FloatEqual(curRot.z, prevRot.z)) return DirectX::XMQuaternionRotationAxis(DirectX::g_XMIdentityR2, curRot.z - prevRot.z);
-            return DirectX::XMQuaternionIdentity();
-        }();
-
-        const auto newRotation = ToQuaternion(DirectX::XMQuaternionMultiply(decomposedMatrix.rotation, rotationNeeded));
+        const auto newRotation = Quaternion::FromEulerAngles(ctx.eulerRotation);
         if (ctx.world.Contains<RigidBody>(self))
         {
             auto& body = ctx.world.Get<RigidBody>(self);
