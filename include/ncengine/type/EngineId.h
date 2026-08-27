@@ -30,6 +30,7 @@ constexpr size_t FrameLogicId = 11ull;
 constexpr size_t CollisionListenerId = 12ull;
 constexpr size_t WireframeRendererId = 13ull;
 constexpr size_t HierarchyId = 14ull;
+constexpr size_t BoneSnapperId = 15ull;
 /** @} */
 
 /** @{ */
