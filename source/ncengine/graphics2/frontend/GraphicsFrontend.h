@@ -99,6 +99,7 @@ class GraphicsFrontend
         auto GetMaterialRegistry()                 ->       MaterialRegistry&           { return m_materialRegistry;  }
         auto GetPostProcessSubsystem()             ->       PostProcessSubsystem&       { return m_postProcessSystem; }
         auto GetPostProcessSubsystem()       const -> const PostProcessSubsystem&       { return m_postProcessSystem; }
+        auto GetBoneSnapperSubsystem()             ->       BoneSnapperSubsystem&       { return m_boneSnapperSubsystem;   }
         auto GetSkeletalAnimationSubsystem()       ->       SkeletalAnimationSubsystem& { return m_animationSystem;   }
         auto GetParticleSubsystem()                ->       ParticleSubsystem&          { return m_particleSystem;    }
         auto GetUISubsystem()                      ->       UISubsystem&                { return m_uiSystem;          }

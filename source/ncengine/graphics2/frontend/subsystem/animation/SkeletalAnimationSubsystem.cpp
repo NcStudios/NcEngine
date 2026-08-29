@@ -66,6 +66,23 @@ void ISkeletalAnimationSubsystem::NotifyRemove(Entity entity, BoneCacheHandle bo
     }
 }
 
+auto ISkeletalAnimationSubsystem::ContainsBone(uint64_t meshId, const std::string& boneName) -> bool
+{
+    const auto _ = m_storage.AcquireReadLock();
+
+    auto& boneNames = m_storage.HasRig(meshId)
+        ? m_storage.GetRig(meshId).boneNames
+        : std::vector<std::string>{};
+
+    auto pos = std::ranges::find(boneNames, boneName);
+    if (pos == boneNames.end())
+    {
+        return false;
+    }
+
+    return true;
+}
+
 auto ISkeletalAnimationSubsystem::GetRigBoneCount(uint64_t meshId) -> uint32_t
 {
     const auto _ = m_storage.AcquireReadLock();
@@ -103,27 +120,32 @@ void SkeletalAnimationSubsystem::CalculateBoneMatrices()
             m_completedAnimations.push_back(entity);
         }
 
+        auto boneNames = std::vector<std::string>{};
+        boneNames.reserve(m_storage.GetRig(state.meshId).boneNames.size());
+        
         const auto bones = [&]()
         {
             const auto& rig = m_storage.GetRig(state.meshId);
             if (!m_storage.HasAnimation(state.blendFromAnimId))
             {
-                return calculator.Animate(rig, animation, ticks);
+                return calculator.Animate(state.meshId, rig, animation, ticks, boneNames);
             }
 
             const auto& blendFromAnimation = m_storage.GetAnimation(state.blendFromAnimId);
             const auto [blendFromTicks, unused] = StepTransition(state, blendFromAnimation, dt);
             return calculator.Animate(
+                state.meshId,
                 rig,
                 blendFromAnimation,
                 blendFromTicks,
                 animation,
                 ticks,
-                state.blendFactor
+                state.blendFactor,
+                boneNames
             );
         }();
 
-        m_boneCache.UpdateRegion(state.boneIndex, bones);
+        m_boneCache.UpdateRegion(state.boneIndex, bones, boneNames);
     }
 }
 

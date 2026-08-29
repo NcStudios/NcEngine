@@ -1,6 +1,7 @@
 #include "SkeletalAnimationCalculator.h"
 
 #include "ncengine/debug/Profile.h"
+#include "ncutility/Hash.h"
 #include "ncutility/NcError.h"
 
 #include <ranges>
@@ -136,9 +137,11 @@ void BlendOffsets(const std::vector<DecomposedMatrixXM>& fromOffsets,
     );
 }
 
-void AnimateBones(const Rig& rig,
+void AnimateBones(uint64_t meshId,
+                  const Rig& rig,
                   std::vector<XMMATRIX>& offsets,
-                  std::vector<BoneData>& bonesOut)
+                  std::vector<BoneData>& bonesOut,
+                  std::vector<std::string>& boneNamesOut)
 {
     // Multiply each child (siblings are contiguous) with its parent.
     for (auto [parent, childrenIndex] : std::views::zip(offsets, rig.offsetChildren))
@@ -150,43 +153,44 @@ void AnimateBones(const Rig& rig,
     }
 
     // Create a final transform for each bone by multiplying the (vertex-space-to-bone-space matrix) with the (bone-space-to-animated-parent-bone-space matrix) with the (global inverse transform matrix).
-    // This outputs a matrix that can be used to transform a vertex into its final animated position.
-    std::ranges::transform(
-        std::views::zip(rig.vertexToBone, rig.offsetsMap),
-        std::back_inserter(bonesOut),
-            [&globalInverseTransform = rig.globalInverseTransform, &offsets](const auto& in)
-            {
-                const auto& [matrix, offset] = in;
-                return BoneData{matrix * offsets.at(offset) * globalInverseTransform};
-            }
-    );
+    // This outputs a matrix that can be used to transform a vertex into its final animated position, and the name of the bone
+    for (const auto& [matrix, offset, name] : std::views::zip(rig.vertexToBone, rig.offsetsMap, rig.boneNames))
+    {
+        bonesOut.push_back(BoneData{matrix * offsets.at(offset) * rig.globalInverseTransform});
+        boneNamesOut.push_back(std::to_string(meshId) + name);
+    }
+    NC_ASSERT(bonesOut.size() == boneNamesOut.size(), "Bone names must be in lock step with the bone matrices and they are not!");
 }
 } // anonymous namespace
 
 namespace nc::graphics
 {
-auto SkeletalAnimationCalculator::Animate(const Rig& rig,
+auto SkeletalAnimationCalculator::Animate(uint64_t meshId,
+                                          const Rig& rig,
                                           const asset::SkeletalAnimation& animation,
-                                          float timeInTicks) -> std::span<const BoneData>
+                                          float timeInTicks,
+                                          std::vector<std::string>& boneNamesOut) -> std::span<const BoneData>
 {
     Prepare(rig, false);
     CalculateOffsets(rig, animation, timeInTicks, m_offsets);
-    AnimateBones(rig, m_offsets, m_boneBuffer);
+    AnimateBones(meshId, rig, m_offsets, m_boneBuffer, boneNamesOut);
     return std::span<const BoneData>{m_boneBuffer};
 }
 
-auto SkeletalAnimationCalculator::Animate(const Rig& rig,
+auto SkeletalAnimationCalculator::Animate(uint64_t meshId,
+                                          const Rig& rig,
                                           const asset::SkeletalAnimation& blendFromAnimation,
                                           float blendFromTicks,
                                           const asset::SkeletalAnimation& blendToAnimation,
                                           float blendToTicks,
-                                          float blendFactor) -> std::span<const BoneData>
+                                          float blendFactor,
+                                          std::vector<std::string>& boneNamesOut) -> std::span<const BoneData>
 {
     Prepare(rig, true);
     CalculateOffsets(rig, blendToAnimation, blendToTicks, m_toOffsetsDecomposed);
     CalculateOffsets(rig, blendFromAnimation, blendFromTicks, m_fromOffsetsDecomposed);
     BlendOffsets(m_fromOffsetsDecomposed, m_toOffsetsDecomposed, blendFactor, m_offsets);
-    AnimateBones(rig, m_offsets, m_boneBuffer);
+    AnimateBones(meshId, rig, m_offsets, m_boneBuffer, boneNamesOut);
     return std::span<const BoneData>{m_boneBuffer};
 }
 

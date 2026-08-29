@@ -71,7 +71,7 @@ class BoneCache
         void CommitPendingChanges();
 
         // Update a range of bones at the offset owned by boneIndex.
-        void UpdateRegion(BoneCacheHandle boneIndex, std::span<const BoneData> bones);
+        void UpdateRegion(BoneCacheHandle boneIndex, std::span<const BoneData> bones, std::span<const std::string> boneNames);
 
         // Build info specifying modified buffer ranges.
         auto BuildUpdateInfo() -> BufferUpdateInfo<BoneData>;
@@ -79,7 +79,11 @@ class BoneCache
         // Clear the buffer and compress the staging area.
         void Purge();
 
+        // Get a copy of the bone data at a given index
+        auto GetBoneData(uint64_t meshId, const std::string& boneName) const -> BoneData;
+
     private:
+        std::vector<std::string> m_boneNames;
         std::vector<BoneData> m_data;
         BoneCacheStaging m_staging;
 };

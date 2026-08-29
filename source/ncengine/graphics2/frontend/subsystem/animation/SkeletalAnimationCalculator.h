@@ -14,16 +14,20 @@ namespace nc::graphics
 class SkeletalAnimationCalculator
 {
     public:
-        auto Animate(const Rig& rig,
+        auto Animate(uint64_t meshId,
+                     const Rig& rig,
                      const asset::SkeletalAnimation& animation,
-                     float timeInTicks) -> std::span<const BoneData>;
+                     float timeInTicks,
+                     std::vector<std::string>& boneNamesOut) -> std::span<const BoneData>;
 
-        auto Animate(const Rig& rig,
+        auto Animate(uint64_t meshId,
+                     const Rig& rig,
                      const asset::SkeletalAnimation& blendFromAnimation,
                      float blendFromTicks,
                      const asset::SkeletalAnimation& blendToAnimation,
                      float blendToTicks,
-                     float blendFactor) -> std::span<const BoneData>;
+                     float blendFactor,
+                     std::vector<std::string>& boneNamesOut) -> std::span<const BoneData>;
 
     private:
         std::vector<BoneData> m_boneBuffer;

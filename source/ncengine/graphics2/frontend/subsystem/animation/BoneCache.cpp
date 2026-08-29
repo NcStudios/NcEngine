@@ -122,18 +122,23 @@ void BoneCache::CommitPendingChanges()
 {
     NC_PROFILE_SCOPE("BoneCache::CommitPendingChanges", ProfileCategory::Animation);
     std::ranges::fill(m_data, BoneData{});
+    std::ranges::fill(m_boneNames, std::string{});
     const auto newCapacity = m_staging.GetCapacity();
     if (newCapacity > m_data.size())
     {
         m_data.resize(newCapacity);
+        m_boneNames.resize(newCapacity);
     }
 }
 
-void BoneCache::UpdateRegion(BoneCacheHandle boneIndex, std::span<const BoneData> bones)
+void BoneCache::UpdateRegion(BoneCacheHandle boneIndex, std::span<const BoneData> bones, std::span<const std::string> boneNames)
 {
     NC_PROFILE_SCOPE("BoneCache::UpdateRegion", ProfileCategory::Animation);
+    NC_ASSERT(bones.size() == boneNames.size(), "Bone size and bone names mismatch");
     NC_ASSERT(m_data.size() >= bones.size() + boneIndex, "BoneCache write out of bounds");
+    NC_ASSERT(m_boneNames.size() >= boneNames.size() + boneIndex, "BoneCache write out of bounds");
     std::memcpy(m_data.data() + boneIndex, bones.data(), bones.size() * sizeof(BoneData));
+    std::ranges::copy(boneNames, m_boneNames.begin() + boneIndex);
 }
 
 auto BoneCache::BuildUpdateInfo() -> BufferUpdateInfo<BoneData>
@@ -150,5 +155,21 @@ void BoneCache::Purge()
     m_staging.Purge();
     m_data.resize(m_staging.GetCapacity());
     m_data.shrink_to_fit();
+    m_boneNames.resize(m_staging.GetCapacity());
+    m_boneNames.shrink_to_fit();
 }
+
+auto BoneCache::GetBoneData(uint64_t meshId, const std::string& boneName) const -> BoneData
+{
+    auto boneId = std::to_string(meshId) + boneName;
+    auto pos = std::ranges::find(m_boneNames, boneId);
+    if (pos == m_boneNames.end())
+    {
+        throw nc::NcError("Bone does not exist in dataset.");
+    }
+
+    auto index = static_cast<uint32_t>(std::distance(m_boneNames.begin(), pos));
+    return m_data.at(index);
+}
+
 } // namespace nc::graphics

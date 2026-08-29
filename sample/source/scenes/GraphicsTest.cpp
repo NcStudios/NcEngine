@@ -6,6 +6,7 @@
 #include "ncengine/asset/Assets.h"
 #include "ncengine/ecs/FrameLogic.h"
 #include "ncengine/ecs/InvokeFreeComponent.h"
+#include "ncengine/graphics/BoneSnapper.h"
 #include "ncengine/graphics/Light.h"
 #include "ncengine/graphics/Mesh.h"
 #include "ncengine/graphics/NcGraphics.h"
@@ -149,6 +150,22 @@ void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
             .animId = animation::skeleton_jump,
             .enterWhen = [](){ return input::KeyDown(input::KeyCode::Space);}
         });
+
+        auto cube = world.Emplace<Entity>(
+        {
+            .position = Vector3{0.0f, 0.0f, 0.0f},
+            .rotation = Quaternion::FromEulerAngles(0.0f, 0.0f, 0.0f),
+            .scale = Vector3{1.5f, 1.5f, 1.5f},
+            .tag = "cube"
+        });
+
+        world.Emplace<StaticMesh>(cube, mesh::default_cube, material::blue);
+        world.Emplace<BoneSnapper>
+        (
+            cube,
+            "mixamorig:RightHand",
+            skeleton
+        );
     }
 
     // floor

@@ -534,6 +534,15 @@ void NcGraphicsImpl2::OnBuildTaskGraph(task::UpdateTasks& update, task::RenderTa
         {update_task_id::CommitStagedChanges}
     );
 
+    update.Add(
+        update_task_id::BoneSnapperUpdate,
+        "BoneSnapperUpdate",
+        [this]{
+            m_frontend.GetBoneSnapperSubsystem().Update(m_world);
+        },
+        {update_task_id::SkeletalAnimationUpdate, update_task_id::UpdateTransforms}
+    );
+
     render.Add(
         render_task_id::Render,
         "Render",

@@ -47,42 +47,7 @@ auto MakeAnimation() -> nc::asset::SkeletalAnimation
     };
 }
 
-// auto MakeBonesData() -> nc::asset::BonesData
-// {
-//     using namespace nc::asset;
-//     auto bonesData = BonesData{
-//         .boneMapping = std::unordered_map<std::string, uint32_t>{},
-//         .vertexSpaceToBoneSpace = std::vector<VertexSpaceToBoneSpace>(0),
-//         .boneSpaceToParentSpace = std::vector<BoneSpaceToParentSpace>(0)
-//     };
-
-//     const auto matrix1 = DirectX::XMMATRIX{
-//         1, 0, 0, 0,
-//         0, 1, 0, 0,
-//         0, 0, 1, 0,
-//         0, 0, 0, 1
-//     };
-
-//     const auto matrix2 = DirectX::XMMATRIX{
-//         1, 0, 0, 0,
-//         0, 1, 0, 0,
-//         0, 0, 1, 0,
-//         1, 0, 0, 1
-//     };
-
-//     bonesData.vertexSpaceToBoneSpace.emplace_back(std::string("BoneSocket"), matrix1);
-//     bonesData.vertexSpaceToBoneSpace.emplace_back(std::string("Bone1"), matrix1);
-//     bonesData.boneSpaceToParentSpace.emplace_back(std::string("BoneSocket"), matrix2, 0u, 0u);
-//     bonesData.boneSpaceToParentSpace.emplace_back(std::string("Bone1"), matrix2, 0u, 0u);
-//     bonesData.boneSpaceToParentSpace.emplace_back(std::string("Bone2"), matrix2, 0u, 0u);
-//     bonesData.boneMapping.emplace("BoneSocket", 0);
-//     bonesData.boneMapping.emplace("Bone1", 1);
-//     bonesData.boneMapping.emplace("Bone2", 2);
-//     return bonesData;
-// }
-
 const auto g_animation = MakeAnimation();
-// const auto g_bonesData = MakeBonesData();
 
 const auto g_animPaths = std::array{
     std::string{"test.nca"}

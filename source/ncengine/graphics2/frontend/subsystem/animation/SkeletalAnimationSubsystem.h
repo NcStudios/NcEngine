@@ -23,6 +23,8 @@ class ISkeletalAnimationSubsystem
         auto GetStorage() -> SkeletalAnimationStorage& { return m_storage; }
         auto AllocateBones(uint64_t meshId) -> BoneCacheHandle;
         void NotifyRemove(Entity entity, BoneCacheHandle boneIndex);
+        auto GetAnimatedBone(uint64_t meshId, const std::string& boneName) const -> BoneData { return m_boneCache.GetBoneData(meshId, boneName); }
+        auto ContainsBone(uint64_t meshId, const std::string& boneName) -> bool;
 
     protected:
         SkeletalAnimationStorage m_storage;
@@ -53,6 +55,5 @@ class SkeletalAnimationSubsystem : public ISkeletalAnimationSubsystem
 
         void CommitPendingChanges();
         void CalculateBoneMatrices();
-        void NotifyCompletedAnimations(ecs::ComponentPool<SkinnedMesh>& pool);
 };
 } // namespace nc::graphics

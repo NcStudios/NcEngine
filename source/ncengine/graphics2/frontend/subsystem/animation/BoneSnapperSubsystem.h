@@ -9,9 +9,13 @@ namespace nc::graphics
 class BoneSnapperSubsystem
 {
     public:
-        BoneSnapperSubsystem(const ISkeletalAnimationSubsystem& ) {}
+        BoneSnapperSubsystem(ISkeletalAnimationSubsystem& skeletalAnimationSubsystem)
+            : m_skeletalAnimationSubsystem{skeletalAnimationSubsystem}{}
     
         /** Must run after the animations have been calculated and transforms have been moved. */
         void Update(ecs::ExplicitEcs<BoneSnapper, SkinnedMesh, Transform> ecs);
+
+    private:
+        ISkeletalAnimationSubsystem& m_skeletalAnimationSubsystem;
 };
 } // namespace nc::graphics
