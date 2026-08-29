@@ -540,7 +540,7 @@ void NcGraphicsImpl2::OnBuildTaskGraph(task::UpdateTasks& update, task::RenderTa
         [this]{
             m_frontend.GetBoneSnapperSubsystem().Update(m_world);
         },
-        {update_task_id::SkeletalAnimationUpdate, update_task_id::UpdateTransforms}
+        {update_task_id::SkeletalAnimationUpdate}
     );
 
     render.Add(

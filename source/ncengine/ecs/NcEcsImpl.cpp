@@ -50,7 +50,8 @@ void EcsModule::OnBuildTaskGraph(task::UpdateTasks& update, task::RenderTasks&)
         {
             update_task_id::AudioSourceUpdate,
             update_task_id::ParticleEmitterUpdate,
-            update_task_id::PhysicsPipeline
+            update_task_id::PhysicsPipeline,
+            update_task_id::BoneSnapperUpdate
         }
     );
 }

@@ -88,11 +88,51 @@ void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
         });
     }
 
+    const auto gumby = world.Emplace<Entity>({
+        .position = Vector3{0.0f, 0.0f, 0.0f},
+        .rotation = Quaternion::FromEulerAngles(0.0f, 0.0f, 0.0f),
+        .scale = Vector3{1.0f, 1.0f, 1.0f},
+        .tag = "gumby"
+    });
+
+    world.Emplace<SkinnedMesh>(
+        gumby,
+        mesh::gumby,
+        material::white,
+        animation::gumby_forward
+    ).GetAnimationController();
+
+    // auto cubeParent = world.Emplace<Entity>(
+    // {
+    //     .position = Vector3{0.0f, 0.0f, 0.0f},
+    //     .rotation = Quaternion::FromEulerAngles(0.0f, 0.0f, 0.0f),
+    //     .scale = Vector3{1.0f, 1.0f, 1.0f},
+    //     .parent = gumby,
+    //     .tag = "cubeParent"
+    // });
+
+    // auto cube = world.Emplace<Entity>(
+    // {
+    //     .position = Vector3{0.0f, 0.0f, 0.0f},
+    //     .rotation = Quaternion::FromEulerAngles(0.0f, 0.0f, 0.0f),
+    //     .scale = Vector3{4.0f, 4.0f, 4.0f},
+    //     .parent = cubeParent,
+    //     .tag = "cube"
+    // });
+
+    // world.Emplace<StaticMesh>(cube, mesh::default_cube, material::blue);
+    // world.Emplace<BoneSnapper>
+    // (
+    //     cubeParent,
+    //     "Hand L",
+    //     gumby
+    // );
+
     // Skeleton
     {
         const auto skeleton = world.Emplace<Entity>({
-            .position = Vector3{5.3f, 0.0f, -6.4f},
-            .rotation = Quaternion::FromEulerAngles(0.0f, 0.5f, 0.0f),
+            .position = Vector3{0.0f, 0.0f, 0.0f},
+            .rotation = Quaternion::FromEulerAngles(0.0f, 0.0f, 0.0f),
             .scale = Vector3{2.0f, 2.0f, 2.0f},
             .tag = "skeleton"
         });
@@ -151,11 +191,21 @@ void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
             .enterWhen = [](){ return input::KeyDown(input::KeyCode::Space);}
         });
 
+        auto cubeParent = world.Emplace<Entity>(
+        {
+            .position = Vector3{0.0f, 0.0f, 0.0f},
+            .rotation = Quaternion::FromEulerAngles(0.0f, 0.0f, 0.0f),
+            .scale = Vector3{1.0f, 1.0f, 1.0f},
+            .parent = skeleton,
+            .tag = "cubeParent"
+        });
+
         auto cube = world.Emplace<Entity>(
         {
             .position = Vector3{0.0f, 0.0f, 0.0f},
             .rotation = Quaternion::FromEulerAngles(0.0f, 0.0f, 0.0f),
-            .scale = Vector3{1.5f, 1.5f, 1.5f},
+            .scale = Vector3{1.0f, 1.0f, 1.0f},
+            .parent = cubeParent,
             .tag = "cube"
         });
 
@@ -163,20 +213,20 @@ void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
         world.Emplace<BoneSnapper>
         (
             cube,
-            "mixamorig:RightHand",
+            "mixamorig:LeftHand",
             skeleton
         );
     }
 
-    // floor
-    const auto floor = world.Emplace<Entity>({
-        .position = Vector3{0.0f, 0.0f, 0.0f},
-        .rotation = Quaternion::FromEulerAngles(0.0f, 0.0f, 0.0f),
-        .scale = Vector3{100.0f, 1.0f, 100.0f},
-        .tag = "floor"
-    });
+    // // floor
+    // const auto floor = world.Emplace<Entity>({
+    //     .position = Vector3{0.0f, 0.0f, 0.0f},
+    //     .rotation = Quaternion::FromEulerAngles(0.0f, 0.0f, 0.0f),
+    //     .scale = Vector3{100.0f, 1.0f, 100.0f},
+    //     .tag = "floor"
+    // });
 
-    world.Emplace<StaticMesh>(floor, mesh::default_cube, material::red);
+    // world.Emplace<StaticMesh>(floor, mesh::default_cube, material::red);
 
     // Camera
     auto cameraHandle = world.Emplace<Entity>({

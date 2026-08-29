@@ -66,6 +66,10 @@
         {
             "sourcePath": "raw/model/skeleton.fbx",
             "assetName": "mesh/skeleton"
+        },
+        {
+            "sourcePath": "raw/model/gumby.fbx",
+            "assetName": "mesh/gumby"
         }
     ],
     "mesh-collider": [
@@ -114,6 +118,15 @@
                 {
                     "subResourceName": "Armature|WalkRight",
                     "assetName": "skeletal_animation\\skeleton\\walk_right"
+                }
+            ]
+        },
+        {
+            "sourcePath": "raw/model/gumby.fbx",
+            "assetNames": [
+                {
+                    "subResourceName": "Gumby|Forward",
+                    "assetName": "skeletal_animation\\gumby\\forward"
                 }
             ]
         }

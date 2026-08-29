@@ -2,8 +2,10 @@
 
 #include "ncengine/debug/Profile.h"
 #include "ncutility/NcError.h"
+#include "ncengine/utility/Log.h"
 
 #include <cstring>
+#include <iostream>
 #include <ranges>
 
 namespace nc::graphics
@@ -165,6 +167,10 @@ auto BoneCache::GetBoneData(uint64_t meshId, const std::string& boneName) const 
     auto pos = std::ranges::find(m_boneNames, boneId);
     if (pos == m_boneNames.end())
     {
+        for (const auto& bone : m_boneNames)
+        {
+            std::cout << bone << std::endl;
+        }
         throw nc::NcError("Bone does not exist in dataset.");
     }
 

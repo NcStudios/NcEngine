@@ -154,10 +154,10 @@ void AnimateBones(uint64_t meshId,
 
     // Create a final transform for each bone by multiplying the (vertex-space-to-bone-space matrix) with the (bone-space-to-animated-parent-bone-space matrix) with the (global inverse transform matrix).
     // This outputs a matrix that can be used to transform a vertex into its final animated position, and the name of the bone
-    for (const auto& [matrix, offset, name] : std::views::zip(rig.vertexToBone, rig.offsetsMap, rig.boneNames))
+    for (const auto& [matrix, offset] : std::views::zip(rig.vertexToBone, rig.offsetsMap))
     {
         bonesOut.push_back(BoneData{matrix * offsets.at(offset) * rig.globalInverseTransform});
-        boneNamesOut.push_back(std::to_string(meshId) + name);
+        boneNamesOut.push_back(std::to_string(meshId) + rig.boneNames.at(offset));
     }
     NC_ASSERT(bonesOut.size() == boneNamesOut.size(), "Bone names must be in lock step with the bone matrices and they are not!");
 }

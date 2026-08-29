@@ -26,40 +26,25 @@ void BoneSnapperSubsystem::Update(ecs::ExplicitEcs<BoneSnapper, SkinnedMesh, Tra
         auto parentEntity =  ecs.GetParent(&boneSnapper);
         if (parentEntity.IsStatic())
         {
-            NC_LOG_WARNING("A BoneSnapper component cannot transform a static entity.");
-            continue;
+            throw nc::NcError("A BoneSnapper component cannot transform a static entity.");
         }
 
         if(!ecs.Contains<SkinnedMesh>(boneSnapper.target))
         {
-            NC_LOG_WARNING("Target entity on BoneSnapper must contain a valid SkinnedMesh component");
-            continue;
+            throw nc::NcError("Target entity on BoneSnapper must contain a valid SkinnedMesh component");
         }
 
         const auto& skinnedMesh = ecs.Get<SkinnedMesh>(boneSnapper.target);
         if (!m_skeletalAnimationSubsystem.ContainsBone(skinnedMesh.GetMeshId(), boneSnapper.boneName))
         {
-            NC_LOG_WARNING("The bone specified was not present in the chosen SkinnedMesh component. This BoneSnapper will be skipped.");
-            continue;
+            throw nc::NcError("The bone specified was not present in the chosen SkinnedMesh component. This BoneSnapper will be skipped.");
         }
 
         const auto& animatedBoneTransform = m_skeletalAnimationSubsystem.GetAnimatedBone(skinnedMesh.GetMeshId(), boneSnapper.boneName).animatedBoneMatrix;
-
         auto& transform = ecs.Get<Transform>(parentEntity);
-        auto& targetEntityTransform = ecs.Get<Transform>(boneSnapper.target);
 
-        // transform.UpdateWorldMatrix(targetEntityTransform.TransformationMatrix());
-
-        // auto& transform = ecs.Get<Transform>(parentEntity);
-        // auto& targetEntityTransform = ecs.Get<Transform>(boneSnapper.target);
-
-        transform.SetTransformationMatrix(
-            animatedBoneTransform
-        );
-
-        transform.UpdateWorldMatrix(
-            targetEntityTransform.TransformationMatrix()
-        );
+        transform.SetTransformationMatrix(DirectX::XMMatrixIdentity());
+        transform.SetTransformationMatrix(transform.LocalTransformationMatrix() * animatedBoneTransform);
     }
 }
 }
