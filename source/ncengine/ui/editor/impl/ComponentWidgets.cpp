@@ -1428,13 +1428,6 @@ void RigidBodyUIWidget(RigidBody& body, EditorContext& ctx, const std::any&)
 void BoneSnapperUIWidget(BoneSnapper& boneSnapper, EditorContext& ctx, const std::any&)
 {
     IMGUI_SCOPE(ui::ImGuiId, "BoneSnapper");
-
-    /** Todo:
-     * 1. Need to clear out the bone when the target entity is changed
-     * 2. Investigate why changing the bone after changing target entity is showing up in the subsystem as not finding the bone
-     * 3. Investigate why the selected items are not showing up in the controls
-     * 4. DragAndDrop in wrong scope
-     */
     
     const auto self = ctx.selectedEntity;
     constexpr auto nullTargetName = std::string_view{"Null"};
@@ -1443,9 +1436,7 @@ void BoneSnapperUIWidget(BoneSnapper& boneSnapper, EditorContext& ctx, const std
         ? ctx.world.Get<nc::Tag>(boneSnapper.target).value
         : std::string{nullTargetName};
 
-    if (nc::ui::InputText(targetName, "target"))
-    {
-    }
+    nc::ui::InputText(targetName, "target");
 
     nc::ui::DragAndDropTarget<nc::Entity>([&boneSnapper, self, &ctx](nc::Entity* source)
     {
@@ -1453,10 +1444,12 @@ void BoneSnapperUIWidget(BoneSnapper& boneSnapper, EditorContext& ctx, const std
         {
             boneSnapper.target = *source;
             boneSnapper.boneName = std::string{};
+            ctx.world.SetParent(self, boneSnapper.target);
         }
     });
 
     ImGui::Text("Target Bone");
+
     auto emptyBones = std::vector<std::string>{};
     auto& boneNames = emptyBones;
     if (boneSnapper.target != nc::Entity::Null() && boneSnapper.target.Valid())
@@ -1465,9 +1458,7 @@ void BoneSnapperUIWidget(BoneSnapper& boneSnapper, EditorContext& ctx, const std
         boneNames = skinnedMesh.GetBoneNames();
     }
 
-    if (nc::ui::ComboboxStr(boneSnapper.boneName, "Target Bone", boneNames))
-    {
-    }
+    nc::ui::ComboboxStr(boneSnapper.boneName, "Target Bone", boneNames);
 }
 
 } // namespace nc::ui::editor

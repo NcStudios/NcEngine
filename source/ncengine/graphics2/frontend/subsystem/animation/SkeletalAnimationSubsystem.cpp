@@ -133,6 +133,10 @@ void SkeletalAnimationSubsystem::CalculateBoneMatrices()
     const auto dt = time::DeltaTime();
     const auto _ = m_storage.AcquireReadLock();
     auto inFlightAnimations = std::views::zip(m_stateOrchestrator.GetEntities(), m_stateOrchestrator.GetAnimations());
+
+    m_offsets.clear();
+    m_offsetBoneNames.clear();
+
     for (auto [entity, state] : inFlightAnimations)
     {
         const auto& animation = m_storage.GetAnimation(state.animId);
@@ -164,10 +168,9 @@ void SkeletalAnimationSubsystem::CalculateBoneMatrices()
         }();
 
         m_boneCache.UpdateRegion(state.boneIndex, bones);
+        m_offsets.append_range(calculator.GetBoneOffsets());
+        m_offsetBoneNames.append_range(calculator.GetBoneNames());
     }
-
-    m_offsets = calculator.GetBoneOffsets();
-    m_offsetBoneNames = calculator.GetBoneNames();
 }
 
 /** Need to move bone names and offsets to Subsystem.

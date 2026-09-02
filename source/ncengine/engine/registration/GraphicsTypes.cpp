@@ -89,7 +89,9 @@ void RegisterGraphicsTypes(ecs::ComponentRegistry& registry, size_t maxEntities)
         BoneSnapperId,
         "BoneSnapper",
         ui::editor::BoneSnapperUIWidget,
-        CreateBoneSnapper
+        CreateBoneSnapper,
+        SerializeBoneSnapper,
+        DeserializeBoneSnapper
     );
 };
 } // namespace nc
