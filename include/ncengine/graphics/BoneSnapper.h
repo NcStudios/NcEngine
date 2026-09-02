@@ -39,7 +39,7 @@
  {
     struct BoneSnapper
     {
-        std::string boneName;
-        Entity target;
+        std::string boneName = std::string{};
+        Entity target = Entity::Null();
     };
  } // namespace nc

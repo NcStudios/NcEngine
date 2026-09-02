@@ -7,6 +7,7 @@
 #include "ncengine/audio/AudioSource.h"
 #include "ncengine/ecs/Tag.h"
 #include "ncengine/ecs/Transform.h"
+#include "ncengine/graphics/BoneSnapper.h"
 #include "ncengine/graphics/Light.h"
 #include "ncengine/graphics/GraphicsUtility.h"
 #include "ncengine/graphics/Mesh.h"
@@ -1423,4 +1424,50 @@ void RigidBodyUIWidget(RigidBody& body, EditorContext& ctx, const std::any&)
         ImGui::TreePop();
     }
 }
+
+void BoneSnapperUIWidget(BoneSnapper& boneSnapper, EditorContext& ctx, const std::any&)
+{
+    IMGUI_SCOPE(ui::ImGuiId, "BoneSnapper");
+
+    /** Todo:
+     * 1. Need to clear out the bone when the target entity is changed
+     * 2. Investigate why changing the bone after changing target entity is showing up in the subsystem as not finding the bone
+     * 3. Investigate why the selected items are not showing up in the controls
+     * 4. DragAndDrop in wrong scope
+     */
+    
+    const auto self = ctx.selectedEntity;
+    constexpr auto nullTargetName = std::string_view{"Null"};
+    auto target = boneSnapper.target;
+    auto targetName = boneSnapper.target.Valid()
+        ? ctx.world.Get<nc::Tag>(boneSnapper.target).value
+        : std::string{nullTargetName};
+
+    if (nc::ui::InputText(targetName, "target"))
+    {
+    }
+
+    nc::ui::DragAndDropTarget<nc::Entity>([&boneSnapper, self, &ctx](nc::Entity* source)
+    {
+        if (*source != self && ctx.world.Contains<nc::SkinnedMesh>(*source))
+        {
+            boneSnapper.target = *source;
+            boneSnapper.boneName = std::string{};
+        }
+    });
+
+    ImGui::Text("Target Bone");
+    auto emptyBones = std::vector<std::string>{};
+    auto& boneNames = emptyBones;
+    if (boneSnapper.target != nc::Entity::Null() && boneSnapper.target.Valid())
+    {
+        auto& skinnedMesh = ctx.world.Get<nc::SkinnedMesh>(boneSnapper.target);
+        boneNames = skinnedMesh.GetBoneNames();
+    }
+
+    if (nc::ui::ComboboxStr(boneSnapper.boneName, "Target Bone", boneNames))
+    {
+    }
+}
+
 } // namespace nc::ui::editor

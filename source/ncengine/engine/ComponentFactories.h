@@ -11,6 +11,7 @@ auto CreateFrameLogic(Entity entity, const std::any&) -> FrameLogic;
 auto CreateParticleEmitter(Entity entity, const std::any&) -> ParticleEmitter;
 auto CreatePointLight(Entity entity, const std::any&) -> PointLight;
 auto CreateSkinnedMesh(Entity entity, const std::any&) -> SkinnedMesh;
+auto CreateBoneSnapper(Entity entity, const std::any&) -> BoneSnapper;
 auto CreateStaticMesh(Entity entity, const std::any&) -> StaticMesh;
 auto CreateSpotLight(Entity entity, const std::any&) -> SpotLight;
 auto CreateRigidBody(Entity entity, const std::any&) -> RigidBody;

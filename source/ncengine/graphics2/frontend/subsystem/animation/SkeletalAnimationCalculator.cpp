@@ -5,6 +5,7 @@
 #include "ncutility/NcError.h"
 
 #include <ranges>
+#include <iostream>
 
 namespace
 {
@@ -76,18 +77,22 @@ auto GetInterpolatedScale(float timeInTicks, const std::vector<asset::ScaleFrame
 
 // Blended animations use DecomposedMatrixXM for OutType, otherwise offsets are XMMATRIX
 template<class OutType>
-void CalculateOffsets(const Rig& rig,
+void CalculateOffsets(uint64_t meshId,
+                      const Rig& rig,
                       const asset::SkeletalAnimation& animation,
                       float timeInTicks,
-                      std::vector<OutType>& offsetsOut)
+                      std::vector<OutType>& offsetsOut,
+                      std::vector<std::string>& offsetBoneNamesOut)
 {
     for (const auto [boneName, parent] : std::views::zip(rig.boneNames, rig.boneToParent))
     {
+        const auto boneAndMeshName = std::to_string(meshId) + boneName;
         const auto iter = animation.framesPerBone.find(boneName);
         if (iter != animation.framesPerBone.end())
         {
             if constexpr (std::same_as<OutType, DecomposedMatrixXM>)
             {
+                offsetBoneNamesOut.push_back(boneAndMeshName);
                 offsetsOut.emplace_back(
                     GetInterpolatedScale(timeInTicks, iter->second.scaleFrames),
                     GetInterpolatedRotation(timeInTicks, iter->second.rotationFrames),
@@ -96,6 +101,7 @@ void CalculateOffsets(const Rig& rig,
             }
             else
             {
+                offsetBoneNamesOut.push_back(boneAndMeshName);
                 offsetsOut.push_back(ComposeMatrix(
                     GetInterpolatedScale(timeInTicks, iter->second.scaleFrames),
                     GetInterpolatedRotation(timeInTicks, iter->second.rotationFrames),
@@ -108,10 +114,12 @@ void CalculateOffsets(const Rig& rig,
 
         if constexpr (std::same_as<OutType, DecomposedMatrixXM>)
         {
+            offsetBoneNamesOut.push_back(boneAndMeshName);
             offsetsOut.push_back(DecomposeMatrix(parent));
         }
         else
         {
+            offsetBoneNamesOut.push_back(boneAndMeshName);
             offsetsOut.push_back(parent);
         }
     }
@@ -137,11 +145,9 @@ void BlendOffsets(const std::vector<DecomposedMatrixXM>& fromOffsets,
     );
 }
 
-void AnimateBones(uint64_t meshId,
-                  const Rig& rig,
+void AnimateBones(const Rig& rig,
                   std::vector<XMMATRIX>& offsets,
-                  std::vector<BoneData>& bonesOut,
-                  std::vector<std::string>& boneNamesOut)
+                  std::vector<BoneData>& bonesOut)
 {
     // Multiply each child (siblings are contiguous) with its parent.
     for (auto [parent, childrenIndex] : std::views::zip(offsets, rig.offsetChildren))
@@ -153,13 +159,11 @@ void AnimateBones(uint64_t meshId,
     }
 
     // Create a final transform for each bone by multiplying the (vertex-space-to-bone-space matrix) with the (bone-space-to-animated-parent-bone-space matrix) with the (global inverse transform matrix).
-    // This outputs a matrix that can be used to transform a vertex into its final animated position, and the name of the bone
+    // This outputs a matrix that can be used to transform a vertex into its final animated position.
     for (const auto& [matrix, offset] : std::views::zip(rig.vertexToBone, rig.offsetsMap))
     {
         bonesOut.push_back(BoneData{matrix * offsets.at(offset) * rig.globalInverseTransform});
-        boneNamesOut.push_back(std::to_string(meshId) + rig.boneNames.at(offset));
     }
-    NC_ASSERT(bonesOut.size() == boneNamesOut.size(), "Bone names must be in lock step with the bone matrices and they are not!");
 }
 } // anonymous namespace
 
@@ -168,12 +172,11 @@ namespace nc::graphics
 auto SkeletalAnimationCalculator::Animate(uint64_t meshId,
                                           const Rig& rig,
                                           const asset::SkeletalAnimation& animation,
-                                          float timeInTicks,
-                                          std::vector<std::string>& boneNamesOut) -> std::span<const BoneData>
+                                          float timeInTicks) -> std::span<const BoneData>
 {
     Prepare(rig, false);
-    CalculateOffsets(rig, animation, timeInTicks, m_offsets);
-    AnimateBones(meshId, rig, m_offsets, m_boneBuffer, boneNamesOut);
+    CalculateOffsets(meshId, rig, animation, timeInTicks, m_offsets, m_offsetBoneNames);
+    AnimateBones(rig, m_offsets, m_boneBuffer);
     return std::span<const BoneData>{m_boneBuffer};
 }
 
@@ -183,14 +186,13 @@ auto SkeletalAnimationCalculator::Animate(uint64_t meshId,
                                           float blendFromTicks,
                                           const asset::SkeletalAnimation& blendToAnimation,
                                           float blendToTicks,
-                                          float blendFactor,
-                                          std::vector<std::string>& boneNamesOut) -> std::span<const BoneData>
+                                          float blendFactor) -> std::span<const BoneData>
 {
     Prepare(rig, true);
-    CalculateOffsets(rig, blendToAnimation, blendToTicks, m_toOffsetsDecomposed);
-    CalculateOffsets(rig, blendFromAnimation, blendFromTicks, m_fromOffsetsDecomposed);
+    CalculateOffsets(meshId, rig, blendToAnimation, blendToTicks, m_toOffsetsDecomposed, m_offsetBoneNames);
+    CalculateOffsets(meshId, rig, blendFromAnimation, blendFromTicks, m_fromOffsetsDecomposed, m_offsetBoneNames);
     BlendOffsets(m_fromOffsetsDecomposed, m_toOffsetsDecomposed, blendFactor, m_offsets);
-    AnimateBones(meshId, rig, m_offsets, m_boneBuffer, boneNamesOut);
+    AnimateBones(rig, m_offsets, m_boneBuffer);
     return std::span<const BoneData>{m_boneBuffer};
 }
 
@@ -205,12 +207,14 @@ void SkeletalAnimationCalculator::Prepare(const Rig& rig, bool blended)
     }
 
     m_offsets.clear();
+    m_offsetBoneNames.clear();
     m_fromOffsetsDecomposed.clear();
     m_toOffsetsDecomposed.clear();
 
     if (boneCapacity > m_offsets.capacity())
     {
         m_offsets.reserve(boneCapacity);
+        m_offsetBoneNames.reserve(boneCapacity);
         if (blended)
         {
             m_fromOffsetsDecomposed.reserve(boneCapacity);

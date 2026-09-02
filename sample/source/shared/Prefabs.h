@@ -38,6 +38,7 @@ extern MaterialDesc orange;
 extern MaterialDesc purple;
 extern MaterialDesc red;
 extern MaterialDesc skeleton;
+extern MaterialDesc sword;
 extern MaterialDesc teal;
 extern MaterialDesc white;
 extern MaterialDesc yellow;

@@ -113,10 +113,8 @@ TEST(BoneCacheTest, UpdateRegion_validCall_writesData)
 
     const auto matrix = DirectX::XMMatrixScaling(1.0f, 2.0f, 3.0f);
     const auto data = nc::graphics::BoneData{matrix};
-    const auto name = std::string{"Bone"};
     const auto range = std::array{data, data, data};
-    const auto boneNames = std::array{name, name, name};
-    uut.UpdateRegion(handle, range, boneNames);
+    uut.UpdateRegion(handle, range);
 
     const auto [instances, _] = uut.BuildUpdateInfo();
     ASSERT_EQ(range.size(), instances.size());
@@ -132,10 +130,8 @@ TEST(BoneCacheTest, UpdateRegion_outOfBounds_throws)
     uut.CommitPendingChanges();
 
     const auto data = nc::graphics::BoneData{};
-    const auto name = std::string{"Bone"};
     const auto range = std::array{data, data, data};
-    const auto boneNames = std::array{name, name, name};
-    EXPECT_THROW(uut.UpdateRegion(handle, range, boneNames), nc::NcError);
+    EXPECT_THROW(uut.UpdateRegion(handle, range), nc::NcError);
 }
 
 TEST(BoneCacheTest, CommitPendingChanges_newAllocationsExceedCapacity_resizes)

@@ -3,6 +3,7 @@
 #include "ncengine/audio/AudioSource.h"
 #include "ncengine/ecs/FrameLogic.h"
 #include "ncengine/ecs/ComponentRegistry.h"
+#include "ncengine/graphics/BoneSnapper.h"
 #include "ncengine/graphics/Light.h"
 #include "ncengine/graphics/Mesh.h"
 #include "ncengine/graphics/ParticleEmitter.h"
@@ -38,6 +39,7 @@ auto CreateParticleEmitter(Entity entity, const std::any&) -> ParticleEmitter
 
 auto CreatePointLight(Entity, const std::any&) -> PointLight
 {
+
     return PointLight{};
 }
 
@@ -76,6 +78,13 @@ auto CreateSkinnedMesh(Entity entity, const std::any&) -> SkinnedMesh
                 .hatchTex = textureService->Acquire(asset::DefaultBaseColor)
             }
         }
+    };
+}
+
+auto CreateBoneSnapper(Entity, const std::any&) -> BoneSnapper
+{
+    return BoneSnapper
+    {
     };
 }
 

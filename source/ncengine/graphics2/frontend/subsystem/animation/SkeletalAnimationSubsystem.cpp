@@ -5,6 +5,8 @@
 #include "ncengine/time/Time.h"
 #include "ncutility/NcError.h"
 
+#include <iostream>
+
 namespace
 {
 struct StepResult
@@ -66,21 +68,41 @@ void ISkeletalAnimationSubsystem::NotifyRemove(Entity entity, BoneCacheHandle bo
     }
 }
 
+auto ISkeletalAnimationSubsystem::GetAnimatedBone(uint64_t meshId, const std::string& boneName) const -> DirectX::XMMATRIX
+{
+    auto boneId = std::to_string(meshId) + boneName;
+    auto pos = std::ranges::find(m_offsetBoneNames, boneId);
+    if (pos == m_offsetBoneNames.end())
+    {
+        for (const auto& bone : m_offsetBoneNames)
+        {
+            std::cout << bone << std::endl;
+        }
+        throw nc::NcError("Bone does not exist in dataset.");
+    }
+
+    auto index = static_cast<uint32_t>(std::distance(m_offsetBoneNames.begin(), pos));
+    return m_offsets.at(index);
+}
+
 auto ISkeletalAnimationSubsystem::ContainsBone(uint64_t meshId, const std::string& boneName) -> bool
 {
     const auto _ = m_storage.AcquireReadLock();
 
-    auto& boneNames = m_storage.HasRig(meshId)
-        ? m_storage.GetRig(meshId).boneNames
-        : std::vector<std::string>{};
-
-    auto pos = std::ranges::find(boneNames, boneName);
-    if (pos == boneNames.end())
+    auto boneId = std::to_string(meshId) + boneName;
+    auto pos = std::ranges::find(m_offsetBoneNames, boneId);
+    if (pos == m_offsetBoneNames.end())
     {
         return false;
     }
 
     return true;
+}
+
+auto ISkeletalAnimationSubsystem::GetRig(uint64_t meshId) -> const Rig&
+{
+    const auto _ = m_storage.AcquireReadLock();
+    return m_storage.GetRig(meshId);
 }
 
 auto ISkeletalAnimationSubsystem::GetRigBoneCount(uint64_t meshId) -> uint32_t
@@ -120,15 +142,12 @@ void SkeletalAnimationSubsystem::CalculateBoneMatrices()
             m_completedAnimations.push_back(entity);
         }
 
-        auto boneNames = std::vector<std::string>{};
-        boneNames.reserve(m_storage.GetRig(state.meshId).boneNames.size());
-        
         const auto bones = [&]()
         {
             const auto& rig = m_storage.GetRig(state.meshId);
             if (!m_storage.HasAnimation(state.blendFromAnimId))
             {
-                return calculator.Animate(state.meshId, rig, animation, ticks, boneNames);
+                return calculator.Animate(state.meshId, rig, animation, ticks);
             }
 
             const auto& blendFromAnimation = m_storage.GetAnimation(state.blendFromAnimId);
@@ -140,14 +159,21 @@ void SkeletalAnimationSubsystem::CalculateBoneMatrices()
                 blendFromTicks,
                 animation,
                 ticks,
-                state.blendFactor,
-                boneNames
+                state.blendFactor
             );
         }();
 
-        m_boneCache.UpdateRegion(state.boneIndex, bones, boneNames);
+        m_boneCache.UpdateRegion(state.boneIndex, bones);
     }
+
+    m_offsets = calculator.GetBoneOffsets();
+    m_offsetBoneNames = calculator.GetBoneNames();
 }
+
+/** Need to move bone names and offsets to Subsystem.
+ * SkeletalAnimationCalculator has offsets
+ * 
+ */
 
 void SkeletalAnimationSubsystem::CommitPendingChanges()
 {

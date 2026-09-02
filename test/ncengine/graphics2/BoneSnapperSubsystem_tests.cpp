@@ -2,65 +2,39 @@
 
 #include "../AssetServiceStub.h"
 #include "../EcsFixture.inl"
-#include "ncengine/Events.h"
+#include "ncutility/Hash.h"
+
 #include "graphics2/frontend/subsystem/animation/BoneSnapperSubsystem.h"
 #include "graphics2/frontend/subsystem/animation/SkeletalAnimationSubsystem.h"
 #include "graphics2/frontend/subsystem/MeshSubsystem.h"
+
 #include "ncengine/ecs/Ecs.h"
+#include "ncengine/Events.h"
 #include "ncutility/Hash.h"
 
-auto MakeAnimation() -> nc::asset::SkeletalAnimation
-{
-    using namespace nc;
-    using namespace nc::asset;
-    auto positionFrame = PositionFrame{0.0f, Vector3{1.0f, 1.0f, 1.0f}};
-    auto positionFrame2 = PositionFrame{1.0f, Vector3{2.0f, 2.0f, 2.0f}};
-    auto positionFrame3 = PositionFrame{2.0f, Vector3{3.0f, 3.0f, 3.0f}};
-    auto positionFrames = std::vector<PositionFrame>{positionFrame, positionFrame2, positionFrame3};
-
-    auto rotationFrame = RotationFrame{0.0f, Quaternion::Identity()};
-    auto rotationFrame2 = RotationFrame{1.0f, Quaternion::Identity()};
-    auto rotationFrame3 = RotationFrame{2.0f, Quaternion::Identity()};
-    auto rotationFrames = std::vector<RotationFrame>{rotationFrame, rotationFrame2, rotationFrame3};
-
-    auto scaleFrame = ScaleFrame{0.0f, Vector3{1.0f, 1.0f, 1.0f}};
-    auto scaleFrame2 = ScaleFrame{1.0f, Vector3{2.0f, 2.0f, 2.0f}};
-    auto scaleFrame3 = ScaleFrame{2.0f, Vector3{3.0f, 3.0f, 3.0f}};
-    auto scaleFrames = std::vector<ScaleFrame>{scaleFrame, scaleFrame2, scaleFrame3};
-
-    auto frames = SkeletalAnimationFrames{
-        .positionFrames = std::move(positionFrames),
-        .rotationFrames = std::move(rotationFrames),
-        .scaleFrames = std::move(scaleFrames),
-    };
-
-    auto framesPerBones = std::unordered_map<std::string, SkeletalAnimationFrames>{};
-    framesPerBones.emplace("BoneSocket", frames);
-    framesPerBones.emplace("Bone1", frames);
-    framesPerBones.emplace("Bone3", SkeletalAnimationFrames{});
-
-    return SkeletalAnimation{
-        .name = "test",
-        .durationInTicks = 1,
-        .ticksPerSecond = 1,
-        .framesPerBone = std::move(framesPerBones)
-    };
-}
-
-const auto g_animation = MakeAnimation();
-
-const auto g_animPaths = std::array{
-    std::string{"test.nca"}
+const auto g_bonePaths = std::array{
+    std::to_string(nc::utility::Fnv1a("1"))
 };
 
-const auto g_animId1 = nc::utility::Fnv1a(g_animPaths[0]);
+const auto g_bonesData = nc::asset::BonesData
+{
+    .boneMapping = std::unordered_map<std::string, uint32_t>{{"Bone01", 0}},
+    .vertexSpaceToBoneSpace = std::vector<nc::asset::VertexSpaceToBoneSpace>
+    {
+        nc::asset::VertexSpaceToBoneSpace{"Bone01", DirectX::XMMatrixIdentity()}
+    },
+    .boneSpaceToParentSpace = std::vector<nc::asset::BoneSpaceToParentSpace>
+    {
+        nc::asset::BoneSpaceToParentSpace{"Bone01", DirectX::XMMatrixIdentity(), 0, 0}
+    }
+};
 
 const auto g_materialDesc = nc::MaterialDesc{
     .passes = nc::MaterialPassFlag::UniShadow | nc::MaterialPassFlag::PointShadow |nc::MaterialPassFlag::Depth | nc::MaterialPassFlag::Toon | nc::MaterialPassFlag::Normals
 };
 
 constexpr auto g_meshView = nc::asset::MeshView{
-    .id = 42
+    .id = nc::utility::Fnv1a("1")
 };
 
 DEFINE_ASSET_SERVICE_STUB(meshAssetManager, nc::asset::AssetType::Mesh, nc::asset::MeshView, std::string);
@@ -106,6 +80,9 @@ class BoneSnapperSubsystemTest : public testing::Test, public EcsFixture
 
         auto AddSkinnedMesh(nc::ecs::Ecs& world) -> nc::Entity
         {
+            auto& boneStorage = animationSystem.GetStorage();
+            boneStorage.LoadBones(g_bonePaths, std::vector<nc::asset::BonesData>{g_bonesData});
+
             const auto entity = world.Emplace<nc::Entity>({});
             world.Emplace<nc::SkinnedMesh>(
                 entity,
@@ -113,23 +90,21 @@ class BoneSnapperSubsystemTest : public testing::Test, public EcsFixture
                 g_materialDesc
             );
 
-            auto& boneStorage = animationSystem.GetStorage();
-            boneStorage.LoadAnimations(g_animPaths, std::vector<nc::asset::SkeletalAnimation>{g_animation});
 
             return entity;
         }
 
-        auto AddBoneSnapper(nc::ecs::Ecs& world, nc::Entity target) -> nc::Entity
+        auto AddBoneSnapper(nc::ecs::Ecs& world, nc::Entity targetEntity) -> nc::Entity
         {
-            const auto entity = world.Emplace<nc::Entity>({});
+            const auto sourceEntity = world.Emplace<nc::Entity>({});
             world.Emplace<nc::BoneSnapper>
             (
-                entity,
+                sourceEntity,
                 "BoneSocket",
-                target
+                targetEntity
             );
 
-            return entity;
+            return targetEntity;
         }
 
         static constexpr auto MaxEntities = 20ull;
@@ -139,13 +114,40 @@ class BoneSnapperSubsystemTest : public testing::Test, public EcsFixture
         nc::graphics::BoneSnapperSubsystem uut;
 };
 
+// TEST_F(BoneSnapperSubsystemTest, Update_targetEntityDoesNotHaveSkinnedMesh_throws)
+// {
+//     auto world = GetTestWorld();
 
-TEST_F(BoneSnapperSubsystemTest, Update_entityDoesNotHaveSkinnedMesh_Skipped)
+//     auto sourceEntity = AddStaticMesh(world);
+//     auto targetEntity = AddStaticMesh(world);
+
+//     world.Emplace<nc::BoneSnapper>
+//     (
+//         sourceEntity,
+//         "Bone01",
+//         targetEntity
+//     );
+
+//     GetTestComponentRegistry().CommitPendingChanges();
+
+//     EXPECT_THROW(uut.Update(world), nc::NcError);
+// }
+
+TEST_F(BoneSnapperSubsystemTest, Update_targetEntityDoesHaveSkinnedMesh_doesNotThrow)
 {
     auto world = GetTestWorld();
-    AddStaticMesh(world);
-    AddSkinnedMesh(world);
-    const auto entity = world.Emplace<nc::Entity>({});
-    auto entityWithBoneSnapper = AddBoneSnapper(world, entity);
-    uut.Update(world);
+
+    auto sourceEntity = AddStaticMesh(world);
+    auto targetEntity = AddSkinnedMesh(world);
+
+    world.Emplace<nc::BoneSnapper>
+    (
+        sourceEntity,
+        "Bone01",
+        targetEntity
+    );
+
+    GetTestComponentRegistry().CommitPendingChanges();
+
+    EXPECT_NO_THROW(uut.Update(world));
 }

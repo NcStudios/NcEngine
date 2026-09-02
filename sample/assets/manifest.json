@@ -68,8 +68,8 @@
             "assetName": "mesh/skeleton"
         },
         {
-            "sourcePath": "raw/model/gumby.fbx",
-            "assetName": "mesh/gumby"
+            "sourcePath": "raw/model/sword.fbx",
+            "assetName": "mesh/sword"
         }
     ],
     "mesh-collider": [
@@ -120,15 +120,6 @@
                     "assetName": "skeletal_animation\\skeleton\\walk_right"
                 }
             ]
-        },
-        {
-            "sourcePath": "raw/model/gumby.fbx",
-            "assetNames": [
-                {
-                    "subResourceName": "Gumby|Forward",
-                    "assetName": "skeletal_animation\\gumby\\forward"
-                }
-            ]
         }
     ],
     "texture" : {
@@ -172,6 +163,10 @@
             {
                 "sourcePath": "raw/image/diffuse/yellow.png",
                 "assetName": "texture/diffuse/yellow"
+            },
+            {
+                "sourcePath": "raw/image/diffuse/sword.png",
+                "assetName": "texture/diffuse/sword"
             }
         ],
         "normal" : [
@@ -187,6 +182,10 @@
             {
                 "sourcePath": "raw/image/normal/skeleton.png",
                 "assetName": "texture/normal/skeleton"
+            },
+            {
+                "sourcePath": "raw/image/normal/sword.png",
+                "assetName": "texture/normal/sword"
             }
         ],
         "particle" : [

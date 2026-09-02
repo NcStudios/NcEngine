@@ -1,5 +1,6 @@
 #include "ncengine/graphics/Mesh.h"
 #include "frontend/subsystem/MeshSubsystem.h"
+#include "frontend/subsystem/animation/Rig.h"
 
 namespace nc
 {
@@ -39,5 +40,8 @@ void SkinnedMesh::SetMesh(const asset::MeshView& meshAsset)
     MeshBase::SetMesh(meshAsset);
     m_controller.RefreshAnimation();
 }
+
+auto SkinnedMesh::GetBoneNames() -> const std::vector<std::string>& { return s_subsystem->GetRig(GetContext().meshId).boneNames; }
+
 } // namespace nc
 

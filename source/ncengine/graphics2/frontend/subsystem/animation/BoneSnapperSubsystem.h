@@ -12,7 +12,7 @@ class BoneSnapperSubsystem
         BoneSnapperSubsystem(ISkeletalAnimationSubsystem& skeletalAnimationSubsystem)
             : m_skeletalAnimationSubsystem{skeletalAnimationSubsystem}{}
     
-        /** Must run after the animations have been calculated and transforms have been moved. */
+        /** Must run after the animations have been calculated and before transforms have been applied. */
         void Update(ecs::ExplicitEcs<BoneSnapper, SkinnedMesh, Transform> ecs);
 
     private:

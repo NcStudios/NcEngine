@@ -19,4 +19,5 @@ void SpotLightUIWidget(SpotLight&, EditorContext&, const std::any&) {}
 void SkinnedMeshUIWidget(SkinnedMesh&, EditorContext&, const std::any&) {}
 void CollisionListenerUIWidget(CollisionListener&, EditorContext&, const std::any&) {}
 void RigidBodyUIWidget(RigidBody&, EditorContext&, const std::any&) {}
+void BoneSnapperUIWidget(BoneSnapper& boneSnapper, EditorContext&, const std::any&) {}
 } // namespace nc::ui::editor

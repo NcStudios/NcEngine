@@ -168,6 +168,8 @@ void MeshSubsystem::SetInstanceMaterial(const MeshInstanceContext& ctx,
     }
 }
 
+auto MeshSubsystem::GetRig(uint64_t meshId) -> const Rig& { return m_animationSystem->GetRig(meshId); }
+
 auto MeshSubsystem::BuildState(ecs::ExplicitEcs<Transform> ecs) -> MeshRenderState
 {
     NC_PROFILE_SCOPE("MeshSubsystem::BuildState()", ProfileCategory::Rendering);

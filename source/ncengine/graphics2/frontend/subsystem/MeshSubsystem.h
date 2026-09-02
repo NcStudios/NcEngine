@@ -18,6 +18,7 @@ class Transform;
 namespace graphics
 {
 class ISkeletalAnimationSubsystem;
+struct Rig;
 
 class MeshSubsystem
 {
@@ -42,6 +43,8 @@ class MeshSubsystem
         void SetInstanceMaterial(const MeshInstanceContext& ctx,
                                  const MaterialInstance& material,
                                  MaterialPassFlags oldPasses);
+        
+        auto GetRig(uint64_t meshId) -> const graphics::Rig&;
 
         auto BuildState(ecs::ExplicitEcs<Transform> ecs) -> MeshRenderState;
         void OnBeforeSceneLoad();
