@@ -1,6 +1,6 @@
 /**
  * @file Quaternion.h
- * @copyright Jaremie Romer and McCallister Romer 2025
+ * @copyright Jaremie Romer and McCallister Romer 2026
  */
 #pragma once
 
