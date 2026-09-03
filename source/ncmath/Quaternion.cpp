@@ -1,7 +1,29 @@
 #include "ncmath/Quaternion.h"
+#include "ncmath/MatrixUtilities.h"
 #include "ncutility/NcError.h"
 
 #include "DirectXMath.h"
+
+using namespace DirectX;
+
+namespace
+{
+auto GetRotation4x4(FXMVECTOR quat) -> XMFLOAT4X4
+{
+    const auto matrixXM = XMMatrixRotationQuaternion(quat);
+    auto matrix = XMFLOAT4X4{};
+    XMStoreFloat4x4(&matrix, matrixXM);
+    return matrix;
+}
+
+auto IsPitchNear90(float pitch) -> bool
+{
+    constexpr auto epsilon = 5.0e-5f;
+    constexpr auto pi_2 = std::numbers::pi_v<float> / 2.0f;
+    const auto absPitch = std::fabs(pitch);
+    return std::fabs(absPitch - pi_2) <= epsilon;
+}
+} // anonymous namespace
 
 namespace nc
 {
@@ -15,91 +37,89 @@ Quaternion::Quaternion(float X, float Y, float Z, float W)
     );
 }
 
-Vector3 Quaternion::ToEulerAngles() const noexcept
+auto Quaternion::ToEulerAngles() const noexcept -> Vector3
 {
-    float roll = std::atan2(2.0f * (w * x + y * z), 1.0f - 2.0f * (x * x + y * y));
-    float sinp = 2.0f * (w * y - z * x);
-    float pitch = std::abs(sinp) >= 1.0f ? std::copysign(std::numbers::pi_v<float> / 2.0f, sinp) : std::asin(sinp);
-    float yaw = std::atan2(2.0f * (w * z + x * y), 1.0f - 2.0f * (y * y + z * z));
-    return Vector3{roll, pitch, yaw};
+    const auto m = GetRotation4x4(ToXMVector(*this));
+    auto out = Vector3{};
+    auto& [pitch, yaw, roll] = out;
+
+    pitch = -std::asin(Clamp(m._32, -1.0f, 1.0f));
+    if (!IsPitchNear90(pitch))
+    {
+        yaw = std::atan2(m._31, m._33);
+        roll = std::atan2(m._12, m._22);
+    }
+    else
+    {
+        // Gimbal lock case
+        yaw = std::atan2(-m._13, m._11);
+        roll = 0.0f;
+    }
+
+    return out;
 }
 
 void Quaternion::ToAxisAngle(Vector3* axisOut, float* angleOut) const noexcept
 {
-    DirectX::XMVECTOR axis_v;
-    DirectX::XMQuaternionToAxisAngle(&axis_v, angleOut, DirectX::XMVectorSet(x, y, z, w));
-    DirectX::XMStoreVector3(axisOut, axis_v);
+    auto axis_v = XMVECTOR{};
+    XMQuaternionToAxisAngle(&axis_v, angleOut, ToXMVector(*this));
+    axis_v = XMVector3Normalize(axis_v);
+    XMStoreVector3(axisOut, axis_v);
 }
 
-Quaternion Quaternion::FromEulerAngles(const Vector3& angles)
+auto Quaternion::FromEulerAngles(const Vector3& angles) -> Quaternion
 {
-    auto quat_v = DirectX::XMQuaternionRotationRollPitchYaw(angles.x, angles.y, angles.z);
-    auto out = Quaternion::Identity();
-    DirectX::XMStoreQuaternion(&out, quat_v);
-    return out;
+    return FromEulerAngles(angles.x, angles.y, angles.z);
 }
 
-Quaternion Quaternion::FromEulerAngles(float x, float y, float z)
+auto Quaternion::FromEulerAngles(float x, float y, float z) -> Quaternion
 {
-    auto quat_v = DirectX::XMQuaternionRotationRollPitchYaw(x, y, z);
-    auto out = Quaternion::Identity();
-    DirectX::XMStoreQuaternion(&out, quat_v);
-    return out;
+    const auto quat_v = XMQuaternionRotationRollPitchYaw(x, y, z);
+    return ToQuaternion(quat_v);
 }
 
-Quaternion Quaternion::FromAxisAngle(const Vector3& axis, float radians)
+auto Quaternion::FromAxisAngle(const Vector3& axis, float radians) -> Quaternion
 {
-    NC_ASSERT(axis != Vector3::Zero(), "Axis cannot be zero");
-    auto axis_v = DirectX::XMVectorSet(axis.x, axis.y, axis.z, 0.0f);
-    auto quat_v = DirectX::XMQuaternionRotationAxis(axis_v, radians);
-    auto out = Quaternion::Identity();
-    DirectX::XMStoreQuaternion(&out, quat_v);
-    return out;
+    NC_ASSERT(axis != Vector3::Zero(), "Invalid Rotation Axis");
+
+    const auto quat_v = XMQuaternionRotationAxis(ToXMVector(axis), radians);
+    return ToQuaternion(quat_v);
 }
 
-Quaternion Normalize(const Quaternion& quat)
+auto Normalize(const Quaternion& quat) -> Quaternion
 {
-    float magInv = 1.0f / sqrt(quat.x * quat.x + quat.y * quat.y + quat.z * quat.z + quat.w * quat.w);
+    const auto magInv = 1.0f / sqrt(quat.x * quat.x + quat.y * quat.y + quat.z * quat.z + quat.w * quat.w);
     return Quaternion{magInv * quat.x, magInv * quat.y, magInv * quat.z, magInv * quat.w};
 }
 
-Quaternion Multiply(const Quaternion& lhs, const Quaternion& rhs)
+auto Multiply(const Quaternion& lhs, const Quaternion& rhs) -> Quaternion
 {
-    auto lhs_v = DirectX::XMVectorSet(lhs.x, lhs.y, lhs.z, lhs.w);
-    auto rhs_v = DirectX::XMVectorSet(rhs.x, rhs.y, rhs.z, rhs.w);
-    auto out_v = DirectX::XMQuaternionMultiply(lhs_v, rhs_v); // returns rhs_v * lhs_v
-    auto out = Quaternion::Identity();
-    DirectX::XMStoreQuaternion(&out, out_v);
-    return out;
+    const auto lhs_v = ToXMVector(lhs);
+    const auto rhs_v = ToXMVector(rhs);
+    const auto out_v = XMQuaternionMultiply(lhs_v, rhs_v); // returns rhs_v * lhs_s
+    return ToQuaternion(out_v);
 }
 
-Quaternion Difference(const Quaternion& lhs, const Quaternion& rhs)
+auto Difference(const Quaternion& lhs, const Quaternion& rhs) -> Quaternion
 {
-    auto lhs_v = DirectX::XMVectorSet(lhs.x, lhs.y, lhs.z, lhs.w);
-    auto rhs_v = DirectX::XMVectorSet(rhs.x, rhs.y, rhs.z, rhs.w);
-    lhs_v = DirectX::XMQuaternionConjugate(lhs_v);
-    auto out_v = DirectX::XMQuaternionMultiply(lhs_v, rhs_v);
-    auto out = Quaternion::Identity();
-    DirectX::XMStoreQuaternion(&out, out_v);
-    return out;
+    const auto lhs_v = XMQuaternionConjugate(ToXMVector(lhs));
+    const auto rhs_v = ToXMVector(rhs);
+    const auto out_v = XMQuaternionMultiply(lhs_v, rhs_v);
+    return ToQuaternion(out_v);
 }
 
-Quaternion Slerp(const Quaternion& lhs, const Quaternion& rhs, float factor)
+auto Slerp(const Quaternion& lhs, const Quaternion& rhs, float factor) -> Quaternion
 {
-    auto lhs_v = DirectX::XMVectorSet(lhs.x, lhs.y, lhs.z, lhs.w);
-    auto rhs_v = DirectX::XMVectorSet(rhs.x, rhs.y, rhs.z, rhs.w);
-    auto out_v = DirectX::XMQuaternionSlerp(lhs_v, rhs_v, factor);
-    auto out = Quaternion::Identity();
-    DirectX::XMStoreQuaternion(&out, out_v);
-    return out;
+    const auto lhs_v = ToXMVector(lhs);
+    const auto rhs_v = ToXMVector(rhs);
+    const auto out_v = XMQuaternionSlerp(lhs_v, rhs_v, factor);
+    return ToQuaternion(out_v);
 }
 
-Quaternion Scale(const Quaternion& quat, float factor)
+auto Scale(const Quaternion& quat, float factor) -> Quaternion
 {
-    auto quat_v = DirectX::XMVectorSet(quat.x, quat.y, quat.z, quat.w);
-    auto out_v = DirectX::XMQuaternionSlerp(DirectX::g_XMIdentityR3, quat_v, factor);
-    auto out = Quaternion::Identity();
-    DirectX::XMStoreQuaternion(&out, out_v);
-    return out;
+    const auto quat_v = ToXMVector(quat);
+    const auto out_v = XMQuaternionSlerp(g_XMIdentityR3, quat_v, factor);
+    return ToQuaternion(out_v);
 }
 } // namespace nc
