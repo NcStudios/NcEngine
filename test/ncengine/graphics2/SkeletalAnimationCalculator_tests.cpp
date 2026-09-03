@@ -151,17 +151,20 @@ TEST(SkeletalAnimationCalculatorTest, Animate_single_succeeds)
     const auto rig = nc::graphics::Rig{g_bonesData};
     auto uut = nc::graphics::SkeletalAnimationCalculator{};
 
-    auto actual = uut.Animate(rig, g_animation, 0.0f);
+    const auto meshId = uint64_t{10};
+    auto boneNames = std::vector<std::string>{};
+
+    auto actual = uut.Animate(meshId, rig, g_animation, 0.0f);
     ASSERT_EQ(rig.vertexToBone.size(), actual.size());
     EXPECT_TRUE(MatrixEqual(expectedMatrixT0, actual[0].animatedBoneMatrix));
     EXPECT_TRUE(MatrixEqual(expectedMatrixT0, actual[1].animatedBoneMatrix));
 
-    actual = uut.Animate(rig, g_animation, 0.5f);
+    actual = uut.Animate(meshId, rig, g_animation, 0.5f);
     ASSERT_EQ(rig.vertexToBone.size(), actual.size());
     EXPECT_TRUE(MatrixEqual(expectedMatrixT0_5, actual[0].animatedBoneMatrix));
     EXPECT_TRUE(MatrixEqual(expectedMatrixT0_5, actual[1].animatedBoneMatrix));
 
-    actual = uut.Animate(rig, g_animation, 1.0f);
+    actual = uut.Animate(meshId, rig, g_animation, 1.0f);
     ASSERT_EQ(rig.vertexToBone.size(), actual.size());
     EXPECT_TRUE(MatrixEqual(expectedMatrixT1, actual[0].animatedBoneMatrix));
     EXPECT_TRUE(MatrixEqual(expectedMatrixT1, actual[1].animatedBoneMatrix));
@@ -177,21 +180,24 @@ TEST(SkeletalAnimationCalculatorTest, Animate_blended_succeeds)
     // expect a blend factor of 0.5 to be equivalent to the interpolated frame at t=0.5).
     constexpr auto blendFromTicks = 0.0f;
     constexpr auto blendToTicks = 1.0f;
+    
+    const auto meshId = uint64_t{10};
+    auto boneNames = std::vector<std::string>{};
 
     auto blendFactor = 0.0f;
-    auto actual = uut.Animate(rig, g_animation, blendFromTicks, g_animation, blendToTicks, blendFactor);
+    auto actual = uut.Animate(meshId, rig, g_animation, blendFromTicks, g_animation, blendToTicks, blendFactor);
     ASSERT_EQ(rig.vertexToBone.size(), actual.size());
     EXPECT_TRUE(MatrixEqual(expectedMatrixT0, actual[0].animatedBoneMatrix));
     EXPECT_TRUE(MatrixEqual(expectedMatrixT0, actual[1].animatedBoneMatrix));
 
     blendFactor = 0.5f;
-    actual = uut.Animate(rig, g_animation, blendFromTicks, g_animation, blendToTicks, blendFactor);
+    actual = uut.Animate(meshId, rig, g_animation, blendFromTicks, g_animation, blendToTicks, blendFactor);
     ASSERT_EQ(rig.vertexToBone.size(), actual.size());
     EXPECT_TRUE(MatrixEqual(expectedMatrixT0_5, actual[0].animatedBoneMatrix));
     EXPECT_TRUE(MatrixEqual(expectedMatrixT0_5, actual[1].animatedBoneMatrix));
 
     blendFactor = 1.0f;
-    actual = uut.Animate(rig, g_animation, blendFromTicks, g_animation, blendToTicks, blendFactor);
+    actual = uut.Animate(meshId, rig, g_animation, blendFromTicks, g_animation, blendToTicks, blendFactor);
     ASSERT_EQ(rig.vertexToBone.size(), actual.size());
     EXPECT_TRUE(MatrixEqual(expectedMatrixT1, actual[0].animatedBoneMatrix));
     EXPECT_TRUE(MatrixEqual(expectedMatrixT1, actual[1].animatedBoneMatrix));

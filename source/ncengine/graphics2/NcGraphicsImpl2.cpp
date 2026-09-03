@@ -228,8 +228,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .shaderPaths = ShaderPaths{.vertexShaderPath = shader::ToonVertex},
                     .depthSink = DepthTarget::Main,
                     .isMsaa = false,
-                    .useDepthTest = true,
-                    .alphaBlend = true
+                    .useDepthTest = true
                 },
                 PassDesc{
                     .flag = MaterialPassFlag::Depth,
@@ -239,8 +238,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .shaderPaths = ShaderPaths{.vertexShaderPath = shader::ToonSkinnedVertex},
                     .depthSink = DepthTarget::Main,
                     .isMsaa = false,
-                    .useDepthTest = true,
-                    .alphaBlend = true
+                    .useDepthTest = true
                 },
                 PassDesc{
                     .flag = MaterialPassFlag::Toon,
@@ -272,8 +270,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .shaderPaths = ShaderPaths{shader::NormalsPixel, shader::ToonVertex},
                     .colorSink = ColorTarget::Normals,
                     .depthSink = DepthTarget::Main,
-                    .useDepthTest = true,
-                    .alphaBlend = true
+                    .useDepthTest = true
                 },
                 PassDesc{
                     .flag = MaterialPassFlag::Normals,
@@ -283,8 +280,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .shaderPaths = ShaderPaths{shader::NormalsPixel, shader::ToonSkinnedVertex},
                     .colorSink = ColorTarget::Normals,
                     .depthSink = DepthTarget::Main,
-                    .useDepthTest = true,
-                    .alphaBlend = true
+                    .useDepthTest = true
                 },
                 PassDesc{
                     .flag = PostProcessPassFlag::Outline,
@@ -532,6 +528,15 @@ void NcGraphicsImpl2::OnBuildTaskGraph(task::UpdateTasks& update, task::RenderTa
             m_frontend.GetSkeletalAnimationSubsystem().Update(m_world);
         },
         {update_task_id::CommitStagedChanges}
+    );
+
+    update.Add(
+        update_task_id::BoneSnapperUpdate,
+        "BoneSnapperUpdate",
+        [this]{
+            m_frontend.GetBoneSnapperSubsystem().Update(m_world);
+        },
+        {update_task_id::SkeletalAnimationUpdate}
     );
 
     render.Add(

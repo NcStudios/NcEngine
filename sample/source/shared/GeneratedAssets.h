@@ -63,6 +63,7 @@ constexpr auto halfpipe = "halfpipe.nca";
 constexpr auto ogre = "ogre.nca";
 constexpr auto ramp = "ramp.nca";
 constexpr auto skeleton = "skeleton.nca";
+constexpr auto sword = "sword.nca";
 } // namespace path
 
 extern nc::asset::MeshView default_plane;
@@ -76,6 +77,7 @@ extern nc::asset::MeshView halfpipe;
 extern nc::asset::MeshView ogre;
 extern nc::asset::MeshView ramp;
 extern nc::asset::MeshView skeleton;
+extern nc::asset::MeshView sword;
 
 void Load();
 void Acquire();
@@ -140,11 +142,13 @@ constexpr auto diffuse_purple = "diffuse/purple.nca";
 constexpr auto diffuse_red = "diffuse/red.nca";
 constexpr auto diffuse_teal = "diffuse/teal.nca";
 constexpr auto diffuse_yellow = "diffuse/yellow.nca";
+constexpr auto diffuse_sword = "diffuse/sword.nca";
 constexpr auto effect_linear_hatch = "effect/linear_hatch.nca";
 constexpr auto effect_noise = "effect/noise.nca";
 constexpr auto normal_guy = "normal/guy.nca";
 constexpr auto normal_ogre = "normal/ogre.nca";
 constexpr auto normal_skeleton = "normal/skeleton.nca";
+constexpr auto normal_sword = "normal/sword.nca";
 } // namespace path
 
 extern nc::asset::TextureView default_color;
@@ -160,11 +164,13 @@ extern nc::asset::TextureView diffuse_purple;
 extern nc::asset::TextureView diffuse_red;
 extern nc::asset::TextureView diffuse_teal;
 extern nc::asset::TextureView diffuse_yellow;
+extern nc::asset::TextureView diffuse_sword;
 extern nc::asset::TextureView effect_linear_hatch;
 extern nc::asset::TextureView effect_noise;
 extern nc::asset::TextureView normal_guy;
 extern nc::asset::TextureView normal_ogre;
 extern nc::asset::TextureView normal_skeleton;
+extern nc::asset::TextureView normal_sword;
 
 void Load();
 void Acquire();

@@ -26,4 +26,6 @@ void SerializeSpotLight(std::ostream& stream, const SpotLight& out, const Serial
 auto DeserializeSpotLight(std::istream& stream, const DeserializationContext& ctx, const std::any&) -> SpotLight;
 void SerializeRigidBody(std::ostream& stream, const RigidBody& out, const SerializationContext&, const std::any&);
 auto DeserializeRigidBody(std::istream& stream, const DeserializationContext&, const std::any&) -> RigidBody;
+void SerializeBoneSnapper(std::ostream& stream, const BoneSnapper& out, const SerializationContext&, const std::any&);
+auto DeserializeBoneSnapper(std::istream& stream, const DeserializationContext&, const std::any&) -> BoneSnapper;
 } // namespace nc

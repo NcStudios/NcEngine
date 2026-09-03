@@ -27,6 +27,7 @@ MaterialDesc orange{"OrangeMaterial"};
 MaterialDesc purple{"PurpleMaterial"};
 MaterialDesc red{"RedMaterial"};
 MaterialDesc skeleton{"SkeletonMaterial"};
+MaterialDesc sword{"SwordMaterial"};
 MaterialDesc teal{"TealMaterial"};
 MaterialDesc white{"WhileMaterial"};
 MaterialDesc yellow{"YellowMaterial"};
@@ -127,6 +128,12 @@ void ReloadPrefabs()
     material::skeleton.properties.diffuseTex = texture::diffuse_skeleton;
     material::skeleton.properties.normalIntensity = .420f;
     material::skeleton.properties.useFlatShading = 1;
+
+    material::sword.properties = materialDefaults;
+    material::sword.properties.diffuseTex = texture::diffuse_sword;
+    material::sword.properties.normalTex = texture::normal_sword;
+    material::sword.properties.useFlatShading = 1;
+    material::sword.properties.useTextureNormals = 1;
 
     material::teal.properties = materialDefaults;
     material::teal.properties.diffuseTex = texture::diffuse_teal;

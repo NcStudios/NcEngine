@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ncengine/scene/NcScene.h"
+#include "subsystem/animation/BoneSnapperSubsystem.h"
 #include "subsystem/animation/SkeletalAnimationSubsystem.h"
 #include "subsystem/AssetDispatch.h"
 #include "subsystem/CameraSubsystem.h"
@@ -43,6 +44,7 @@ class GraphicsFrontend
                          Signal<const asset::SkeletalAnimationUpdateEventData&>& onAnimationEvent,
                          Signal<const asset::BoneUpdateEventData&>& onBoneEvent)
             : m_animationSystem{maxBones},
+              m_boneSnapperSubsystem{m_animationSystem},
               m_assetDispatch{
                 context,
                 device,
@@ -97,6 +99,7 @@ class GraphicsFrontend
         auto GetMaterialRegistry()                 ->       MaterialRegistry&           { return m_materialRegistry;  }
         auto GetPostProcessSubsystem()             ->       PostProcessSubsystem&       { return m_postProcessSystem; }
         auto GetPostProcessSubsystem()       const -> const PostProcessSubsystem&       { return m_postProcessSystem; }
+        auto GetBoneSnapperSubsystem()             ->       BoneSnapperSubsystem&       { return m_boneSnapperSubsystem;   }
         auto GetSkeletalAnimationSubsystem()       ->       SkeletalAnimationSubsystem& { return m_animationSystem;   }
         auto GetParticleSubsystem()                ->       ParticleSubsystem&          { return m_particleSystem;    }
         auto GetUISubsystem()                      ->       UISubsystem&                { return m_uiSystem;          }
@@ -105,6 +108,7 @@ class GraphicsFrontend
 
     private:
         SkeletalAnimationSubsystem m_animationSystem;
+        BoneSnapperSubsystem m_boneSnapperSubsystem;
         AssetDispatch m_assetDispatch;
         MaterialRegistry m_materialRegistry;
         UISubsystem m_uiSystem;

@@ -14,6 +14,7 @@ namespace nc
 namespace graphics
 {
 class MeshSubsystem;
+struct Rig;
 } // namespace graphics
 
 /** @brief Type of mesh components. */
@@ -88,9 +89,9 @@ class MeshBase
         {
             Release();
         }
+        inline static graphics::MeshSubsystem* s_subsystem = nullptr;
 
     private:
-        inline static graphics::MeshSubsystem* s_subsystem = nullptr;
         MeshInstanceContext m_ctx;
         MaterialInstance m_material;
 
@@ -124,6 +125,7 @@ class SkinnedMesh : public MeshBase
 
         /** @name Mesh Functions */
         void SetMesh(const asset::MeshView& meshAsset);
+        auto GetBoneNames() -> const std::vector<std::string>&;
 
         /** @name Animation Functions */
         auto GetAnimationController() const -> const SkeletalAnimationController& { return m_controller; }

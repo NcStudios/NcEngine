@@ -7,6 +7,7 @@
 #include "ncengine/audio/AudioSource.h"
 #include "ncengine/ecs/Tag.h"
 #include "ncengine/ecs/Transform.h"
+#include "ncengine/graphics/BoneSnapper.h"
 #include "ncengine/graphics/Light.h"
 #include "ncengine/graphics/GraphicsUtility.h"
 #include "ncengine/graphics/Mesh.h"
@@ -1413,4 +1414,41 @@ void RigidBodyUIWidget(RigidBody& body, EditorContext& ctx, const std::any&)
         ImGui::TreePop();
     }
 }
+
+void BoneSnapperUIWidget(BoneSnapper& boneSnapper, EditorContext& ctx, const std::any&)
+{
+    IMGUI_SCOPE(ui::ImGuiId, "BoneSnapper");
+    
+    const auto self = ctx.selectedEntity;
+    constexpr auto nullTargetName = std::string_view{"Null"};
+    auto target = boneSnapper.target;
+    auto targetName = boneSnapper.target.Valid()
+        ? ctx.world.Get<nc::Tag>(boneSnapper.target).value
+        : std::string{nullTargetName};
+
+    nc::ui::InputText(targetName, "target");
+
+    nc::ui::DragAndDropTarget<nc::Entity>([&boneSnapper, self, &ctx](nc::Entity* source)
+    {
+        if (*source != self && ctx.world.Contains<nc::SkinnedMesh>(*source))
+        {
+            boneSnapper.target = *source;
+            boneSnapper.boneName = std::string{};
+            ctx.world.SetParent(self, boneSnapper.target);
+        }
+    });
+
+    ImGui::Text("Target Bone");
+
+    auto emptyBones = std::vector<std::string>{};
+    auto& boneNames = emptyBones;
+    if (boneSnapper.target != nc::Entity::Null() && boneSnapper.target.Valid())
+    {
+        auto& skinnedMesh = ctx.world.Get<nc::SkinnedMesh>(boneSnapper.target);
+        boneNames = skinnedMesh.GetBoneNames();
+    }
+
+    nc::ui::ComboboxStr(boneSnapper.boneName, "Target Bone", boneNames);
+}
+
 } // namespace nc::ui::editor

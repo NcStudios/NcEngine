@@ -1,4 +1,5 @@
 #include "GraphicsTypes.h"
+#include "ncengine/graphics/BoneSnapper.h"
 #include "ncengine/graphics/Camera.h"
 #include "ncengine/graphics/Light.h"
 #include "ncengine/graphics/Mesh.h"
@@ -81,5 +82,16 @@ void RegisterGraphicsTypes(ecs::ComponentRegistry& registry, size_t maxEntities)
         WireframeRendererId,
         "WireframeRenderer"
     );
-}
+
+    Register<BoneSnapper>(
+        registry,
+        maxEntities,
+        BoneSnapperId,
+        "BoneSnapper",
+        ui::editor::BoneSnapperUIWidget,
+        CreateBoneSnapper,
+        SerializeBoneSnapper,
+        DeserializeBoneSnapper
+    );
+};
 } // namespace nc

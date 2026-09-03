@@ -30,6 +30,7 @@ constexpr size_t FrameLogicId = 11ull;
 constexpr size_t CollisionListenerId = 12ull;
 constexpr size_t WireframeRendererId = 13ull;
 constexpr size_t HierarchyId = 14ull;
+constexpr size_t BoneSnapperId = 15ull;
 /** @} */
 
 /** @{ */
@@ -56,6 +57,7 @@ constexpr size_t SkeletalAnimationUpdate = 5ull; // Depends on CommitStagedChang
 constexpr size_t AudioSourceUpdate = 6ull; // Depends on CommitStagedChanges
 constexpr size_t PhysicsPipeline = 7ull; // Depends on CommitStagedChanges
 constexpr size_t UpdateTransforms = 8ull; // Depends on physics, audio, and particle update
+constexpr size_t BoneSnapperUpdate = 9ull; // Depends on skeletal animation
 /** @} */
 } // namespace update_task_id
 

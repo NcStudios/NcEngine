@@ -66,6 +66,41 @@ void ISkeletalAnimationSubsystem::NotifyRemove(Entity entity, BoneCacheHandle bo
     }
 }
 
+auto ISkeletalAnimationSubsystem::GetAnimatedBone(uint64_t meshId, const std::string& boneName) -> DirectX::XMMATRIX
+{
+    const auto _ = m_storage.AcquireReadLock();
+
+    auto boneId = std::to_string(meshId) + boneName;
+    auto pos = std::ranges::find(m_offsetBoneNames, boneId);
+    if (pos == m_offsetBoneNames.end())
+    {
+        throw nc::NcError("Bone does not exist in dataset.");
+    }
+
+    auto index = static_cast<uint32_t>(std::distance(m_offsetBoneNames.begin(), pos));
+    return m_offsets.at(index);
+}
+
+auto ISkeletalAnimationSubsystem::ContainsBone(uint64_t meshId, const std::string& boneName) -> bool
+{
+    const auto _ = m_storage.AcquireReadLock();
+
+    auto boneId = std::to_string(meshId) + boneName;
+    auto pos = std::ranges::find(m_offsetBoneNames, boneId);
+    if (pos == m_offsetBoneNames.end())
+    {
+        return false;
+    }
+
+    return true;
+}
+
+auto ISkeletalAnimationSubsystem::GetRig(uint64_t meshId) -> const Rig&
+{
+    const auto _ = m_storage.AcquireReadLock();
+    return m_storage.GetRig(meshId);
+}
+
 auto ISkeletalAnimationSubsystem::GetRigBoneCount(uint64_t meshId) -> uint32_t
 {
     const auto _ = m_storage.AcquireReadLock();
@@ -94,6 +129,10 @@ void SkeletalAnimationSubsystem::CalculateBoneMatrices()
     const auto dt = time::DeltaTime();
     const auto _ = m_storage.AcquireReadLock();
     auto inFlightAnimations = std::views::zip(m_stateOrchestrator.GetEntities(), m_stateOrchestrator.GetAnimations());
+
+    m_offsets.clear();
+    m_offsetBoneNames.clear();
+
     for (auto [entity, state] : inFlightAnimations)
     {
         const auto& animation = m_storage.GetAnimation(state.animId);
@@ -108,12 +147,13 @@ void SkeletalAnimationSubsystem::CalculateBoneMatrices()
             const auto& rig = m_storage.GetRig(state.meshId);
             if (!m_storage.HasAnimation(state.blendFromAnimId))
             {
-                return calculator.Animate(rig, animation, ticks);
+                return calculator.Animate(state.meshId, rig, animation, ticks);
             }
 
             const auto& blendFromAnimation = m_storage.GetAnimation(state.blendFromAnimId);
             const auto [blendFromTicks, unused] = StepTransition(state, blendFromAnimation, dt);
             return calculator.Animate(
+                state.meshId,
                 rig,
                 blendFromAnimation,
                 blendFromTicks,
@@ -124,12 +164,16 @@ void SkeletalAnimationSubsystem::CalculateBoneMatrices()
         }();
 
         m_boneCache.UpdateRegion(state.boneIndex, bones);
+        auto boneOffsets = calculator.GetBoneOffsets();
+        auto boneNames = calculator.GetBoneNames();
+        m_offsets.insert(m_offsets.end(), boneOffsets.begin(), boneOffsets.end());
+        m_offsetBoneNames.insert(m_offsetBoneNames.end(), boneNames.begin(), boneNames.end());
     }
 }
 
 void SkeletalAnimationSubsystem::CommitPendingChanges()
 {
-    NC_PROFILE_SCOPE("SkeletalAnimationSubsystem::CommitPendingChanges", ProfileCategory::Animation);
+    NC_PROFILE_SCOPE("SkeletalAnimationSubsystem::CommitPendingChanges", Profil1eCategory::Animation);
     m_stateOrchestrator.Remove(m_removed);
     m_removed.clear();
     m_boneCache.CommitPendingChanges();
@@ -151,5 +195,9 @@ void SkeletalAnimationSubsystem::OnBeforeSceneLoad()
     m_removed.shrink_to_fit();
     m_completedAnimations.clear();
     m_completedAnimations.shrink_to_fit();
+    m_offsets.clear();
+    m_offsets.shrink_to_fit();
+    m_offsetBoneNames.clear();
+    m_offsetBoneNames.shrink_to_fit();
 }
 } // namespace nc::graphics

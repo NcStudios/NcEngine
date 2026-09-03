@@ -112,6 +112,9 @@ auto InputGradient(Gradient& value, const char* lable) -> bool;
 /** @brief Combobox UI widget. */
 auto Combobox(std::string& value, const char* label, std::span<const std::string_view> items);
 
+/** @brief Combobox UI widget. */
+inline auto ComboboxStr(std::string& value, const char* label, const std::vector<std::string>& items);
+
 /** @brief Combobox UI widget that allows disabling selection of entries. */
 auto FilteredCombobox(std::string& value, const char* label, std::span<const std::string_view> items, auto&& disableIf);
 
@@ -456,6 +459,27 @@ inline auto InputGradient(Gradient& value, const char* label) -> bool
 }
 
 inline auto Combobox(std::string& value, const char* label, std::span<const std::string_view> items)
+{
+    if (ImGui::BeginCombo(label, value.c_str()))
+    {
+        const auto selected = std::ranges::find_if(items, [](const auto& text)
+        {
+            return ImGui::Selectable(text.data());
+        });
+
+        ImGui::EndCombo();
+
+        if (selected != std::cend(items))
+        {
+            value = selected->data();
+            return true;
+        }
+    }
+
+    return false;
+}
+
+inline auto ComboboxStr(std::string& value, const char* label, const std::vector<std::string>& items)
 {
     if (ImGui::BeginCombo(label, value.c_str()))
     {

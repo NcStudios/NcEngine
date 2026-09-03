@@ -4,8 +4,9 @@
 
 #include "ncengine/Events.h"
 #include "ncengine/audio/AudioSource.h"
-#include "ncengine/graphics/Mesh.h"
+#include "ncengine/graphics/BoneSnapper.h"
 #include "ncengine/graphics/Light.h"
+#include "ncengine/graphics/Mesh.h"
 #include "ncengine/graphics/ParticleEmitter.h"
 #include "ncengine/physics/Constraints.h"
 #include "ncengine/physics/RigidBody.h"
@@ -51,8 +52,12 @@ void ParticleSubsystem::UpdateEmitterInfo(Entity, const ParticleInfo&) {}
 void ParticleSubsystem::UpdateEmitterTexture(Entity, uint32_t) {}
 void ParticleSubsystem::Emit(Entity, size_t) {}
 
+Rig::Rig(const asset::BonesData&) {}
+
+auto g_rig = Rig{nc::asset::BonesData{}};
 auto ISkeletalAnimationSubsystem::AllocateBones(asset::AssetId) -> BoneCacheHandle { return 0; }
 void ISkeletalAnimationSubsystem::NotifyRemove(Entity, BoneCacheHandle) {}
+auto ISkeletalAnimationSubsystem::GetRig(uint64_t) -> const Rig& { return g_rig; }
 
 struct MockAnimationSubsystem : public ISkeletalAnimationSubsystem
 {
@@ -565,4 +570,27 @@ TEST(ComponentSerializationTests, RoundTrip_constraints_queuesToUserData)
     EXPECT_NO_THROW((void)std::get<nc::HingeConstraintInfo>(actualConstraint4.info));
     EXPECT_NO_THROW((void)std::get<nc::SliderConstraintInfo>(actualConstraint5.info));
     EXPECT_NO_THROW((void)std::get<nc::SwingTwistConstraintInfo>(actualConstraint6.info));
+}
+
+TEST(ComponentSerializationTests, RoundTrip_boneSnapper_preservesValues)
+{
+    auto stream = std::stringstream{};
+    constexpr auto entity1 = nc::Entity{0u, 0, 0};
+    auto entityToFragmentIdMap = nc::EntityToFragmentIdMap{{entity1, 0u}};
+    auto fragmentIdToEntityMap = nc::FragmentIdToEntityMap{{0u, entity1}};
+    const auto serializationContext = nc::SerializationContext{entityToFragmentIdMap, g_ecs};
+    const auto deserializationContext = nc::DeserializationContext{fragmentIdToEntityMap, g_ecs};
+
+    const auto expected = nc::BoneSnapper
+    {
+        .boneName = "MyBone",
+        .target = entity1
+    };
+
+    nc::SerializeBoneSnapper(stream, expected, serializationContext, nullptr);
+
+    const auto actual = nc::DeserializeBoneSnapper(stream, deserializationContext, nullptr);
+
+    EXPECT_EQ(expected.target, actual.target);
+    EXPECT_EQ(expected.boneName, actual.boneName);
 }

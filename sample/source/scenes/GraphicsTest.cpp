@@ -6,6 +6,7 @@
 #include "ncengine/asset/Assets.h"
 #include "ncengine/ecs/FrameLogic.h"
 #include "ncengine/ecs/InvokeFreeComponent.h"
+#include "ncengine/graphics/BoneSnapper.h"
 #include "ncengine/graphics/Light.h"
 #include "ncengine/graphics/Mesh.h"
 #include "ncengine/graphics/NcGraphics.h"
@@ -90,8 +91,8 @@ void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
     // Skeleton
     {
         const auto skeleton = world.Emplace<Entity>({
-            .position = Vector3{5.3f, 0.0f, -6.4f},
-            .rotation = Quaternion::FromEulerAngles(0.0f, 0.5f, 0.0f),
+            .position = Vector3{0.0f, 0.0f, 0.0f},
+            .rotation = Quaternion::FromEulerAngles(0.0f, 0.0f, 0.0f),
             .scale = Vector3{2.0f, 2.0f, 2.0f},
             .tag = "skeleton"
         });
@@ -149,6 +150,32 @@ void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
             .animId = animation::skeleton_jump,
             .enterWhen = [](){ return input::KeyDown(input::KeyCode::Space);}
         });
+
+        auto swordParent = world.Emplace<Entity>(
+        {
+            .position = Vector3{0.0f, 0.0f, 0.0f},
+            .rotation = Quaternion::FromEulerAngles(0.0f, 0.0f, 0.0f),
+            .scale = Vector3{1.0f, 1.0f, 1.0f},
+            .parent = skeleton,
+            .tag = "swordParent"
+        });
+
+        auto sword = world.Emplace<Entity>(
+        {
+            .position = Vector3{0.0f, 0.0f, 0.0f},
+            .rotation = Quaternion::FromEulerAngles(1.0f, 1.0f, 1.0f),
+            .scale = Vector3{0.05f, 0.05f, 0.05f},
+            .parent = swordParent,
+            .tag = "sword"
+        });
+
+        world.Emplace<StaticMesh>(sword, mesh::sword, material::sword);
+        world.Emplace<BoneSnapper>
+        (
+            swordParent,
+            "mixamorig:LeftHand",
+            skeleton
+        );
     }
 
     // floor

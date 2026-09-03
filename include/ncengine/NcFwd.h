@@ -35,6 +35,7 @@ struct Shape;
 
 // Graphics Types
 struct NcGraphics;
+struct BoneSnapper;
 class Camera;
 struct DirectionalLight;
 struct PointLight;

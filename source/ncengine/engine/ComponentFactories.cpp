@@ -3,6 +3,7 @@
 #include "ncengine/audio/AudioSource.h"
 #include "ncengine/ecs/FrameLogic.h"
 #include "ncengine/ecs/ComponentRegistry.h"
+#include "ncengine/graphics/BoneSnapper.h"
 #include "ncengine/graphics/Light.h"
 #include "ncengine/graphics/Mesh.h"
 #include "ncengine/graphics/ParticleEmitter.h"
@@ -77,6 +78,11 @@ auto CreateSkinnedMesh(Entity entity, const std::any&) -> SkinnedMesh
             }
         }
     };
+}
+
+auto CreateBoneSnapper(Entity, const std::any&) -> BoneSnapper
+{
+    return BoneSnapper{};
 }
 
 auto CreateSpotLight(Entity, const std::any&) -> SpotLight

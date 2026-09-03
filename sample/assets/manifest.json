@@ -66,6 +66,10 @@
         {
             "sourcePath": "raw/model/skeleton.fbx",
             "assetName": "mesh/skeleton"
+        },
+        {
+            "sourcePath": "raw/model/sword.fbx",
+            "assetName": "mesh/sword"
         }
     ],
     "mesh-collider": [
@@ -159,6 +163,10 @@
             {
                 "sourcePath": "raw/image/diffuse/yellow.png",
                 "assetName": "texture/diffuse/yellow"
+            },
+            {
+                "sourcePath": "raw/image/diffuse/sword.png",
+                "assetName": "texture/diffuse/sword"
             }
         ],
         "normal" : [
@@ -174,6 +182,10 @@
             {
                 "sourcePath": "raw/image/normal/skeleton.png",
                 "assetName": "texture/normal/skeleton"
+            },
+            {
+                "sourcePath": "raw/image/normal/sword.png",
+                "assetName": "texture/normal/sword"
             }
         ],
         "particle" : [
