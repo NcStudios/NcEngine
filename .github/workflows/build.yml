@@ -28,7 +28,7 @@ jobs:
           - os: windows-2022
             generator: "Visual Studio 17 2022"
             shortName: Windows
-          - os: ubuntu-25.04
+          - os: ubuntu-24.04
             shortName: Linux
             generator: "Ninja"
           - variant: Dev

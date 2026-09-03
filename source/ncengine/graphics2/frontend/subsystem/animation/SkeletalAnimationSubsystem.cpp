@@ -164,14 +164,16 @@ void SkeletalAnimationSubsystem::CalculateBoneMatrices()
         }();
 
         m_boneCache.UpdateRegion(state.boneIndex, bones);
-        m_offsets.append_range(calculator.GetBoneOffsets());
-        m_offsetBoneNames.append_range(calculator.GetBoneNames());
+        auto boneOffsets = calculator.GetBoneOffsets();
+        auto boneNames = calculator.GetBoneNames();
+        m_offsets.insert(m_offsets.end(), boneOffsets.begin(), boneOffsets.end());
+        m_offsetBoneNames.insert(m_offsetBoneNames.end(), boneNames.begin(), boneNames.end());
     }
 }
 
 void SkeletalAnimationSubsystem::CommitPendingChanges()
 {
-    NC_PROFILE_SCOPE("SkeletalAnimationSubsystem::CommitPendingChanges", ProfileCategory::Animation);
+    NC_PROFILE_SCOPE("SkeletalAnimationSubsystem::CommitPendingChanges", Profil1eCategory::Animation);
     m_stateOrchestrator.Remove(m_removed);
     m_removed.clear();
     m_boneCache.CommitPendingChanges();
