@@ -5,8 +5,6 @@
 #include "ncengine/time/Time.h"
 #include "ncutility/NcError.h"
 
-#include <iostream>
-
 namespace
 {
 struct StepResult
@@ -68,16 +66,14 @@ void ISkeletalAnimationSubsystem::NotifyRemove(Entity entity, BoneCacheHandle bo
     }
 }
 
-auto ISkeletalAnimationSubsystem::GetAnimatedBone(uint64_t meshId, const std::string& boneName) const -> DirectX::XMMATRIX
+auto ISkeletalAnimationSubsystem::GetAnimatedBone(uint64_t meshId, const std::string& boneName) -> DirectX::XMMATRIX
 {
+    const auto _ = m_storage.AcquireReadLock();
+
     auto boneId = std::to_string(meshId) + boneName;
     auto pos = std::ranges::find(m_offsetBoneNames, boneId);
     if (pos == m_offsetBoneNames.end())
     {
-        for (const auto& bone : m_offsetBoneNames)
-        {
-            std::cout << bone << std::endl;
-        }
         throw nc::NcError("Bone does not exist in dataset.");
     }
 
@@ -173,11 +169,6 @@ void SkeletalAnimationSubsystem::CalculateBoneMatrices()
     }
 }
 
-/** Need to move bone names and offsets to Subsystem.
- * SkeletalAnimationCalculator has offsets
- * 
- */
-
 void SkeletalAnimationSubsystem::CommitPendingChanges()
 {
     NC_PROFILE_SCOPE("SkeletalAnimationSubsystem::CommitPendingChanges", ProfileCategory::Animation);
@@ -202,5 +193,9 @@ void SkeletalAnimationSubsystem::OnBeforeSceneLoad()
     m_removed.shrink_to_fit();
     m_completedAnimations.clear();
     m_completedAnimations.shrink_to_fit();
+    m_offsets.clear();
+    m_offsets.shrink_to_fit();
+    m_offsetBoneNames.clear();
+    m_offsetBoneNames.shrink_to_fit();
 }
 } // namespace nc::graphics

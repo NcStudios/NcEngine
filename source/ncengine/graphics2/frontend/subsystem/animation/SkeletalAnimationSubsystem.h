@@ -23,7 +23,7 @@ class ISkeletalAnimationSubsystem
         auto GetStorage() -> SkeletalAnimationStorage& { return m_storage; }
         auto AllocateBones(uint64_t meshId) -> BoneCacheHandle;
         void NotifyRemove(Entity entity, BoneCacheHandle boneIndex);
-        auto GetAnimatedBone(uint64_t meshId, const std::string& boneName) const -> DirectX::XMMATRIX;
+        auto GetAnimatedBone(uint64_t meshId, const std::string& boneName) -> DirectX::XMMATRIX;
         auto ContainsBone(uint64_t meshId, const std::string& boneName) -> bool;
         auto GetRig(uint64_t meshId) -> const Rig&;
 

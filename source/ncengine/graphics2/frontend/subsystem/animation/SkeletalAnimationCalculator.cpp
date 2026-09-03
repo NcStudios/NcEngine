@@ -160,10 +160,15 @@ void AnimateBones(const Rig& rig,
 
     // Create a final transform for each bone by multiplying the (vertex-space-to-bone-space matrix) with the (bone-space-to-animated-parent-bone-space matrix) with the (global inverse transform matrix).
     // This outputs a matrix that can be used to transform a vertex into its final animated position.
-    for (const auto& [matrix, offset] : std::views::zip(rig.vertexToBone, rig.offsetsMap))
-    {
-        bonesOut.push_back(BoneData{matrix * offsets.at(offset) * rig.globalInverseTransform});
-    }
+    std::ranges::transform(
+        std::views::zip(rig.vertexToBone, rig.offsetsMap),
+        std::back_inserter(bonesOut),
+            [&globalInverseTransform = rig.globalInverseTransform, &offsets](const auto& in)
+            {
+                const auto& [matrix, offset] = in;
+                return BoneData{matrix * offsets.at(offset) * globalInverseTransform};
+            }
+    );
 }
 } // anonymous namespace
 

@@ -17,10 +17,6 @@ namespace ecs
 {
 class EcsModule;
 }
-namespace graphics
-{
-class BoneSnapperSubsystem;
-}
 
 /** @brief Component with translation, rotation, and scale properties.
  * 
@@ -185,7 +181,6 @@ class Transform final : public ComponentBase
 
     private:
         friend class ecs::EcsModule;
-        friend class graphics::BoneSnapperSubsystem;
         bool m_dirty = false;
         DirectX::XMMATRIX m_localMatrix;
         DirectX::XMMATRIX m_worldMatrix;

@@ -1,6 +1,6 @@
 /**
  * @file WireframeRenderer.h
- * @copyright Jaremie Romer and McCallister Romer 2026
+ * @copyright Jaremie Romer and McCallister Romer 2024
  */
 #pragma once
 

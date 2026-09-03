@@ -39,7 +39,6 @@ auto CreateParticleEmitter(Entity entity, const std::any&) -> ParticleEmitter
 
 auto CreatePointLight(Entity, const std::any&) -> PointLight
 {
-
     return PointLight{};
 }
 
@@ -83,9 +82,7 @@ auto CreateSkinnedMesh(Entity entity, const std::any&) -> SkinnedMesh
 
 auto CreateBoneSnapper(Entity, const std::any&) -> BoneSnapper
 {
-    return BoneSnapper
-    {
-    };
+    return BoneSnapper{};
 }
 
 auto CreateSpotLight(Entity, const std::any&) -> SpotLight

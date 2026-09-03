@@ -152,7 +152,6 @@ TEST(SkeletalAnimationCalculatorTest, Animate_single_succeeds)
     auto uut = nc::graphics::SkeletalAnimationCalculator{};
 
     const auto meshId = uint64_t{10};
-
     auto boneNames = std::vector<std::string>{};
 
     auto actual = uut.Animate(meshId, rig, g_animation, 0.0f);
@@ -177,7 +176,7 @@ TEST(SkeletalAnimationCalculatorTest, Animate_blended_succeeds)
     auto uut = nc::graphics::SkeletalAnimationCalculator{};
 
     // Since we're blending between the same animation, this allows using blend factors 0/0.5/1 to get the same
-    // interpolated results as the above test (e.g. if blend from uses frames at t=0, and blend at t=1, then we1
+    // interpolated results as the above test (e.g. if blend from uses frames at t=0, and blend at t=1, then we
     // expect a blend factor of 0.5 to be equivalent to the interpolated frame at t=0.5).
     constexpr auto blendFromTicks = 0.0f;
     constexpr auto blendToTicks = 1.0f;
