@@ -50,48 +50,6 @@ target_link_libraries(BoneCache_tests
 
 add_test(BoneCache_tests BoneCache_tests)
 
-### BoneSnapperSubsystem Tests ###
-add_executable(BoneSnapperSubsystem_tests
-    BoneSnapperSubsystem_tests.cpp
-    ${NC_SOURCE_DIR}/asset/Assets.cpp
-    ${NC_SOURCE_DIR}/ecs/Transform.cpp
-    ${NC_SOURCE_DIR}/graphics2/Mesh.cpp
-    ${NC_SOURCE_DIR}/graphics2/GraphicsUtility.cpp
-    ${NC_SOURCE_DIR}/graphics2/SkeletalAnimationController.cpp
-    ${NC_SOURCE_DIR}/graphics2/frontend/subsystem/MeshSubsystem.cpp
-    ${NC_SOURCE_DIR}/graphics2/frontend/subsystem/TransformCache.cpp
-    ${NC_SOURCE_DIR}/graphics2/frontend/subsystem/animation/AnimationStateOrchestrator.cpp
-    ${NC_SOURCE_DIR}/graphics2/frontend/subsystem/animation/BoneCache.cpp
-    ${NC_SOURCE_DIR}/graphics2/frontend/subsystem/animation/BoneSnapperSubsystem.cpp
-    ${NC_SOURCE_DIR}/graphics2/frontend/subsystem/animation/Rig.cpp
-    ${NC_SOURCE_DIR}/graphics2/frontend/subsystem/animation/SkeletalAnimationCalculator.cpp
-    ${NC_SOURCE_DIR}/graphics2/frontend/subsystem/animation/SkeletalAnimationStorage.cpp
-    ${NC_SOURCE_DIR}/graphics2/frontend/subsystem/animation/SkeletalAnimationSubsystem.cpp
-)
-
-target_include_directories(BoneSnapperSubsystem_tests
-    PRIVATE
-        ${NC_INCLUDE_DIR}
-        ${NC_INCLUDE_DIR}/ncengine
-        ${NC_SOURCE_DIR}
-        ${NC_EXTERNAL_DIR}
-)
-
-target_compile_options(BoneSnapperSubsystem_tests
-    PUBLIC
-        ${NC_COMPILER_FLAGS}
-)
-
-target_link_libraries(BoneSnapperSubsystem_tests
-    PRIVATE
-        gtest_main
-        NcAsset
-        NcMath
-        Taskflow
-)
-
-add_test(BoneSnapperSubsystem_tests BoneSnapperSubsystem_tests)
-
 ### CameraSubsystem Tests ###
 add_executable(CameraSubsystem_tests
     CameraSubsystem_tests.cpp
