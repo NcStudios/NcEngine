@@ -125,7 +125,6 @@ class SkinnedMesh : public MeshBase
 
         /** @name Mesh Functions */
         void SetMesh(const asset::MeshView& meshAsset);
-        auto GetBoneNames() -> const std::vector<std::string>&;
 
         /** @name Animation Functions */
         auto GetAnimationController() const -> const SkeletalAnimationController& { return m_controller; }

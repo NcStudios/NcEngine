@@ -57,7 +57,6 @@ Rig::Rig(const asset::BonesData&) {}
 auto g_rig = Rig{nc::asset::BonesData{}};
 auto ISkeletalAnimationSubsystem::AllocateBones(asset::AssetId) -> BoneCacheHandle { return 0; }
 void ISkeletalAnimationSubsystem::NotifyRemove(Entity, BoneCacheHandle) {}
-auto ISkeletalAnimationSubsystem::GetRig(uint64_t) -> const Rig& { return g_rig; }
 
 struct MockAnimationSubsystem : public ISkeletalAnimationSubsystem
 {

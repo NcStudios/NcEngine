@@ -1438,17 +1438,9 @@ void BoneSnapperUIWidget(BoneSnapper& boneSnapper, EditorContext& ctx, const std
         }
     });
 
-    ImGui::Text("Target Bone");
-
-    auto emptyBones = std::vector<std::string>{};
-    auto& boneNames = emptyBones;
     if (boneSnapper.target != nc::Entity::Null() && boneSnapper.target.Valid())
     {
-        auto& skinnedMesh = ctx.world.Get<nc::SkinnedMesh>(boneSnapper.target);
-        boneNames = skinnedMesh.GetBoneNames();
+        nc::ui::InputText(boneSnapper.boneName, "target bone");
     }
-
-    nc::ui::ComboboxStr(boneSnapper.boneName, "Target Bone", boneNames);
 }
-
 } // namespace nc::ui::editor

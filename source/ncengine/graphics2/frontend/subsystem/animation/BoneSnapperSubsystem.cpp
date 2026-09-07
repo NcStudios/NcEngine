@@ -36,7 +36,7 @@ void BoneSnapperSubsystem::Update(ecs::ExplicitEcs<BoneSnapper, SkinnedMesh, Tra
             continue;
         }
 
-        const auto& targetBoneTransform = m_skeletalAnimationSubsystem.GetAnimatedBone(skinnedMesh.GetMeshId(), boneSnapper.boneName);
+        const auto& targetBoneTransform = m_skeletalAnimationSubsystem.GetBoneSnapperOffset(boneSnapper.target);
         auto& sourceTransform = ecs.Get<Transform>(sourceEntity);
         const auto sourceLocalScale = sourceTransform.LocalScale();
 

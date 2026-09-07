@@ -7,7 +7,10 @@
 #include "SkeletalAnimationStorage.h"
 
 #include "ncengine/ecs/Ecs.h"
+#include "ncengine/graphics/BoneSnapper.h"
 #include "ncengine/graphics/Mesh.h"
+
+#include <unordered_map>
 
 namespace nc::graphics
 {
@@ -23,15 +26,15 @@ class ISkeletalAnimationSubsystem
         auto GetStorage() -> SkeletalAnimationStorage& { return m_storage; }
         auto AllocateBones(uint64_t meshId) -> BoneCacheHandle;
         void NotifyRemove(Entity entity, BoneCacheHandle boneIndex);
-        auto GetAnimatedBone(uint64_t meshId, const std::string& boneName) -> DirectX::XMMATRIX;
+        auto GetBoneSnapperOffset(Entity entity) -> DirectX::XMMATRIX;
         auto ContainsBone(uint64_t meshId, const std::string& boneName) -> bool;
-        auto GetRig(uint64_t meshId) -> const Rig&;
+
 
     protected:
         SkeletalAnimationStorage m_storage;
         BoneCache m_boneCache;
-        std::vector<DirectX::XMMATRIX> m_offsets;
-        std::vector<std::string> m_offsetBoneNames;
+        std::unordered_map<Entity::index_type, std::string> m_boneSnapperTargets;
+        std::unordered_map<Entity::index_type, DirectX::XMMATRIX> m_boneSnapperOffsets;
         std::vector<Entity> m_removed;
 
         ~ISkeletalAnimationSubsystem() = default;
@@ -48,7 +51,7 @@ class SkeletalAnimationSubsystem : public ISkeletalAnimationSubsystem
 
         // Update graph task
         // IMPORTANT: This must not run concurrently with game logic.
-        void Update(ecs::ExplicitEcs<SkinnedMesh> ecs);
+        void Update(ecs::ExplicitEcs<SkinnedMesh, BoneSnapper> ecs);
         auto BuildState() -> SkeletalAnimationRenderState;
         void OnBeforeSceneLoad();
 

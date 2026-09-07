@@ -40,7 +40,5 @@ void SkinnedMesh::SetMesh(const asset::MeshView& meshAsset)
     MeshBase::SetMesh(meshAsset);
     m_controller.RefreshAnimation();
 }
-
-auto SkinnedMesh::GetBoneNames() -> const std::vector<std::string>& { return s_subsystem->GetRig(GetContext().meshId).boneNames; }
 } // namespace nc
 
