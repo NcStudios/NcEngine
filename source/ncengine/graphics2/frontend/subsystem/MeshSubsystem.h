@@ -44,8 +44,6 @@ class MeshSubsystem
                                  const MaterialInstance& material,
                                  MaterialPassFlags oldPasses);
         
-        auto GetRig(uint64_t meshId) -> const graphics::Rig&;
-
         auto BuildState(ecs::ExplicitEcs<Transform> ecs) -> MeshRenderState;
         void OnBeforeSceneLoad();
 

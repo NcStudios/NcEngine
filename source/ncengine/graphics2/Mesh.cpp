@@ -1,5 +1,4 @@
 #include "ncengine/graphics/Mesh.h"
-#include "frontend/subsystem/animation/Rig.h"
 #include "frontend/subsystem/MeshSubsystem.h"
 
 namespace nc

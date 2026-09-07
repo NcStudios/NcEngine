@@ -70,8 +70,7 @@ void ISkeletalAnimationSubsystem::NotifyRemove(Entity entity, BoneCacheHandle bo
 
 auto ISkeletalAnimationSubsystem::GetBoneSnapperOffset(Entity targetEntity) -> DirectX::XMMATRIX
 {
-    const auto _ = m_storage.AcquireReadLock();
-    return m_boneSnapperOffsets.at(static_cast<Entity::index_type>(targetEntity));
+    return m_boneSnapperOffsets.at(targetEntity.Index());
 }
 
 auto ISkeletalAnimationSubsystem::ContainsBone(uint64_t meshId, const std::string& boneName) -> bool
@@ -86,6 +85,7 @@ auto ISkeletalAnimationSubsystem::ContainsBone(uint64_t meshId, const std::strin
 auto ISkeletalAnimationSubsystem::GetRigBoneCount(uint64_t meshId) -> uint32_t
 {
     const auto _ = m_storage.AcquireReadLock();
+
     return m_storage.HasRig(meshId)
         ? static_cast<uint32_t>(m_storage.GetRig(meshId).vertexToBone.size())
         : 0u;
@@ -215,7 +215,7 @@ void SkeletalAnimationSubsystem::CalculateBoneMatrices()
 
 void SkeletalAnimationSubsystem::CommitPendingChanges()
 {
-    NC_PROFILE_SCOPE("SkeletalAnimationSubsystem::CommitPendingChanges", Profil1eCategory::Animation);
+    NC_PROFILE_SCOPE("SkeletalAnimationSubsystem::CommitPendingChanges", ProfileCategory::Animation);
     m_stateOrchestrator.Remove(m_removed);
     m_removed.clear();
     m_boneCache.CommitPendingChanges();

@@ -1421,7 +1421,6 @@ void BoneSnapperUIWidget(BoneSnapper& boneSnapper, EditorContext& ctx, const std
     
     const auto self = ctx.selectedEntity;
     constexpr auto nullTargetName = std::string_view{"Null"};
-    auto target = boneSnapper.target;
     auto targetName = boneSnapper.target.Valid()
         ? ctx.world.Get<nc::Tag>(boneSnapper.target).value
         : std::string{nullTargetName};

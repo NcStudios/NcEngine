@@ -151,8 +151,6 @@ TEST(SkeletalAnimationCalculatorTest, Animate_single_succeeds)
     const auto rig = nc::graphics::Rig{g_bonesData};
     auto uut = nc::graphics::SkeletalAnimationCalculator{};
 
-    auto boneNames = std::vector<std::string>{};
-
     auto actual = uut.Animate(rig, g_animation, 0.0f);
     ASSERT_EQ(rig.vertexToBone.size(), actual.size());
     EXPECT_TRUE(MatrixEqual(expectedMatrixT0, actual[0].animatedBoneMatrix));
@@ -180,8 +178,6 @@ TEST(SkeletalAnimationCalculatorTest, Animate_blended_succeeds)
     constexpr auto blendFromTicks = 0.0f;
     constexpr auto blendToTicks = 1.0f;
     
-    auto boneNames = std::vector<std::string>{};
-
     auto blendFactor = 0.0f;
     auto actual = uut.Animate(rig, g_animation, blendFromTicks, g_animation, blendToTicks, blendFactor);
     ASSERT_EQ(rig.vertexToBone.size(), actual.size());

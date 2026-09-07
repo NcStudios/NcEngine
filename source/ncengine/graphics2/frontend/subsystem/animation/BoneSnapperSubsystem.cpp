@@ -10,10 +10,6 @@ void BoneSnapperSubsystem::Update(ecs::ExplicitEcs<BoneSnapper, SkinnedMesh, Tra
 {
     NC_PROFILE_TASK("BoneSnapperSubsystem::Update()", ProfileCategory::Animation);
 
-#ifdef NC_BUILD_TESTS
-        m_numUpdatedBoneSnappers = 0u;
-#endif
-
     auto& boneSnappers = ecs.GetPool<BoneSnapper>();
     for (auto& boneSnapper : boneSnappers)
     {
@@ -43,10 +39,6 @@ void BoneSnapperSubsystem::Update(ecs::ExplicitEcs<BoneSnapper, SkinnedMesh, Tra
         sourceTransform.SetTransformationMatrix(DirectX::XMMatrixIdentity());
         sourceTransform.SetTransformationMatrix(sourceTransform.LocalTransformationMatrix() * targetBoneTransform);
         sourceTransform.SetScale(sourceLocalScale);
-
-#ifdef NC_BUILD_TESTS
-        m_numUpdatedBoneSnappers++;
-#endif
     }
 }
 }
