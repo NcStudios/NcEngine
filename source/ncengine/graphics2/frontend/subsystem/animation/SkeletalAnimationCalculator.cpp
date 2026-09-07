@@ -78,7 +78,8 @@ template<class OutType>
 void CalculateOffsets(const Rig& rig,
                       const asset::SkeletalAnimation& animation,
                       float timeInTicks,
-                      std::vector<OutType>& offsetsOut)
+                      std::vector<OutType>& offsetsOut,
+                      std::vector<std::string>& offsetBoneNamesOut)
 {
     for (const auto [boneName, parent] : std::views::zip(rig.boneNames, rig.boneToParent))
     {
@@ -87,6 +88,7 @@ void CalculateOffsets(const Rig& rig,
         {
             if constexpr (std::same_as<OutType, DecomposedMatrixXM>)
             {
+                offsetBoneNamesOut.push_back(boneName);
                 offsetsOut.emplace_back(
                     GetInterpolatedScale(timeInTicks, iter->second.scaleFrames),
                     GetInterpolatedRotation(timeInTicks, iter->second.rotationFrames),
@@ -95,6 +97,7 @@ void CalculateOffsets(const Rig& rig,
             }
             else
             {
+                offsetBoneNamesOut.push_back(boneName);
                 offsetsOut.push_back(ComposeMatrix(
                     GetInterpolatedScale(timeInTicks, iter->second.scaleFrames),
                     GetInterpolatedRotation(timeInTicks, iter->second.rotationFrames),
@@ -107,10 +110,12 @@ void CalculateOffsets(const Rig& rig,
 
         if constexpr (std::same_as<OutType, DecomposedMatrixXM>)
         {
+            offsetBoneNamesOut.push_back(boneName);
             offsetsOut.push_back(DecomposeMatrix(parent));
         }
         else
         {
+            offsetBoneNamesOut.push_back(boneName);
             offsetsOut.push_back(parent);
         }
     }
@@ -170,7 +175,7 @@ auto SkeletalAnimationCalculator::Animate(const Rig& rig,
                                           float timeInTicks) -> std::span<const BoneData>
 {
     Prepare(rig, false);
-    CalculateOffsets(rig, animation, timeInTicks, m_offsets);
+    CalculateOffsets(rig, animation, timeInTicks, m_offsets, m_offsetBoneNames);
     AnimateBones(rig, m_offsets, m_boneBuffer);
     return std::span<const BoneData>{m_boneBuffer};
 }
@@ -183,8 +188,8 @@ auto SkeletalAnimationCalculator::Animate(const Rig& rig,
                                           float blendFactor) -> std::span<const BoneData>
 {
     Prepare(rig, true);
-    CalculateOffsets(rig, blendToAnimation, blendToTicks, m_toOffsetsDecomposed);
-    CalculateOffsets(rig, blendFromAnimation, blendFromTicks, m_fromOffsetsDecomposed);
+    CalculateOffsets(rig, blendToAnimation, blendToTicks, m_toOffsetsDecomposed, m_offsetBoneNames);
+    CalculateOffsets(rig, blendFromAnimation, blendFromTicks, m_fromOffsetsDecomposed, m_offsetBoneNames);
     BlendOffsets(m_fromOffsetsDecomposed, m_toOffsetsDecomposed, blendFactor, m_offsets);
     AnimateBones(rig, m_offsets, m_boneBuffer);
     return std::span<const BoneData>{m_boneBuffer};
@@ -201,12 +206,14 @@ void SkeletalAnimationCalculator::Prepare(const Rig& rig, bool blended)
     }
 
     m_offsets.clear();
+    m_offsetBoneNames.clear();
     m_fromOffsetsDecomposed.clear();
     m_toOffsetsDecomposed.clear();
 
     if (boneCapacity > m_offsets.capacity())
     {
         m_offsets.reserve(boneCapacity);
+        m_offsetBoneNames.reserve(boneCapacity);
         if (blended)
         {
             m_fromOffsetsDecomposed.reserve(boneCapacity);
@@ -214,4 +221,17 @@ void SkeletalAnimationCalculator::Prepare(const Rig& rig, bool blended)
         }
     }
 }
+
+auto SkeletalAnimationCalculator::GetBoneOffset(const std::string& name) const -> DirectX::XMMATRIX
+{
+    auto pos = std::ranges::find(m_offsetBoneNames, name);
+    if (pos == m_offsetBoneNames.end())
+    {
+        return DirectX::XMMatrixIdentity();
+    }
+    auto index = std::distance(m_offsetBoneNames.begin(), pos);
+
+    return m_offsets.at(index);
+}
+
 } // namespace nc::graphics

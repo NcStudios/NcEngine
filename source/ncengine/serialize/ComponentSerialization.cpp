@@ -2,6 +2,7 @@
 #include "ncengine/asset/Assets.h"
 #include "ncengine/asset/AssetViews.h"
 #include "ncengine/audio/AudioSource.h"
+#include "ncengine/graphics/BoneSnapper.h"
 #include "ncengine/graphics/Light.h"
 #include "ncengine/graphics/ParticleEmitter.h"
 #include "ncengine/graphics/Mesh.h"
@@ -374,5 +375,22 @@ auto DeserializeRigidBody(std::istream& stream, const DeserializationContext& ct
     }();
 
     return RigidBody{entity, shape, info};
+}
+
+void SerializeBoneSnapper(std::ostream& stream, const BoneSnapper& out, const SerializationContext& ctx, const std::any&)
+{
+    serialize::Serialize(stream, std::string{out.boneName});
+    const auto targetId = out.target.Valid() ? ctx.entityMap.at(out.target) : Entity::NullIndex;
+    serialize::Serialize(stream, targetId);
+}
+
+auto DeserializeBoneSnapper(std::istream& stream, const DeserializationContext& ctx, const std::any&) -> BoneSnapper
+{
+    auto out = BoneSnapper{};
+    auto targetId = uint32_t{};
+    serialize::Deserialize(stream, out.boneName);
+    serialize::Deserialize(stream, targetId);
+    out.target = targetId == Entity::NullIndex ? Entity::Null() : ctx.entityMap.at(targetId);
+    return out;
 }
 } // namespace nc

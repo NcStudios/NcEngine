@@ -177,7 +177,7 @@ TEST(SkeletalAnimationCalculatorTest, Animate_blended_succeeds)
     // expect a blend factor of 0.5 to be equivalent to the interpolated frame at t=0.5).
     constexpr auto blendFromTicks = 0.0f;
     constexpr auto blendToTicks = 1.0f;
-
+    
     auto blendFactor = 0.0f;
     auto actual = uut.Animate(rig, g_animation, blendFromTicks, g_animation, blendToTicks, blendFactor);
     ASSERT_EQ(rig.vertexToBone.size(), actual.size());

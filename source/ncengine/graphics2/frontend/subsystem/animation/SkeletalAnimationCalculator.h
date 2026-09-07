@@ -25,9 +25,12 @@ class SkeletalAnimationCalculator
                      float blendToTicks,
                      float blendFactor) -> std::span<const BoneData>;
 
+        auto GetBoneOffset(const std::string& name) const -> DirectX::XMMATRIX;
+
     private:
         std::vector<BoneData> m_boneBuffer;
         std::vector<DirectX::XMMATRIX> m_offsets;
+        std::vector<std::string> m_offsetBoneNames;
         std::vector<DecomposedMatrixXM> m_fromOffsetsDecomposed;
         std::vector<DecomposedMatrixXM> m_toOffsetsDecomposed;
 

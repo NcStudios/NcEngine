@@ -49,6 +49,8 @@ auto StepTransition(nc::graphics::InFlightAnimation& state,
 
 namespace nc::graphics
 {
+using EntityAnimation = std::pair<nc::Entity&, nc::graphics::InFlightAnimation&>;
+
 auto ISkeletalAnimationSubsystem::AllocateBones(uint64_t meshId) -> BoneCacheHandle
 {
     const auto boneCount = GetRigBoneCount(meshId);
@@ -66,17 +68,38 @@ void ISkeletalAnimationSubsystem::NotifyRemove(Entity entity, BoneCacheHandle bo
     }
 }
 
+auto ISkeletalAnimationSubsystem::GetBoneSnapperOffset(Entity targetEntity) -> DirectX::XMMATRIX
+{
+    return m_boneSnapperOffsets.at(targetEntity.Index());
+}
+
+auto ISkeletalAnimationSubsystem::ContainsBone(uint64_t meshId, const std::string& boneName) -> bool
+{
+    const auto _ = m_storage.AcquireReadLock();
+
+    const auto& rig = m_storage.GetRig(meshId);
+    auto pos = std::ranges::find(rig.boneNames, boneName);
+    return pos != rig.boneNames.end();
+}
+
 auto ISkeletalAnimationSubsystem::GetRigBoneCount(uint64_t meshId) -> uint32_t
 {
     const auto _ = m_storage.AcquireReadLock();
+
     return m_storage.HasRig(meshId)
         ? static_cast<uint32_t>(m_storage.GetRig(meshId).vertexToBone.size())
         : 0u;
 }
 
-void SkeletalAnimationSubsystem::Update(ecs::ExplicitEcs<SkinnedMesh> ecs)
+void SkeletalAnimationSubsystem::Update(ecs::ExplicitEcs<SkinnedMesh, BoneSnapper> ecs)
 {
     NC_PROFILE_TASK("SkeletalAnimationSubsystem::Update()", ProfileCategory::Animation);
+
+    const auto& boneSnappers = ecs.GetPool<BoneSnapper>();
+    for (auto& boneSnapper : boneSnappers)
+    {
+        m_boneSnapperTargets.emplace(boneSnapper.target, boneSnapper.boneName);
+    }
 
     auto& pool = ecs.GetPool<SkinnedMesh>();
     CommitPendingChanges();
@@ -84,17 +107,79 @@ void SkeletalAnimationSubsystem::Update(ecs::ExplicitEcs<SkinnedMesh> ecs)
     CalculateBoneMatrices();
     m_stateOrchestrator.NotifyCompleted(pool, m_completedAnimations);
     m_completedAnimations.clear();
+    m_boneSnapperTargets.clear();
 }
 
 void SkeletalAnimationSubsystem::CalculateBoneMatrices()
 {
     NC_PROFILE_SCOPE("SkeletalAnimationSubsystem::CalculateBoneMatrices()", ProfileCategory::Animation);
 
+    m_boneSnapperOffsets.clear();
+
     auto calculator = SkeletalAnimationCalculator{};
     const auto dt = time::DeltaTime();
     const auto _ = m_storage.AcquireReadLock();
     auto inFlightAnimations = std::views::zip(m_stateOrchestrator.GetEntities(), m_stateOrchestrator.GetAnimations());
-    for (auto [entity, state] : inFlightAnimations)
+
+    auto animationsToSnap = std::vector<EntityAnimation>{};
+    auto animationsToNotSnap = std::vector<EntityAnimation>{};
+
+    // Split the collection of animations into two categories:
+    // Those that need to produce an animated bone offset for
+    // a BoneSnapper component and those that don't
+    for (auto&& [entity, animation] : inFlightAnimations)
+    {
+        if (m_boneSnapperTargets.contains(entity.Index()))
+        {
+            animationsToSnap.emplace_back(entity, animation);
+        }
+        else
+        {
+            animationsToNotSnap.emplace_back(entity, animation);
+        }
+    }
+
+    // Has BoneSnapper loop
+    for (auto [entity, state] : animationsToSnap)
+    {
+        auto snapBone = m_boneSnapperTargets.at(entity.Index());
+
+        const auto& animation = m_storage.GetAnimation(state.animId);
+        const auto [ticks, completed] = StepAnimationTime(state.time, animation, dt);
+        if (completed)
+        {
+            m_completedAnimations.push_back(entity);
+        }
+
+        const auto bones = [&]()
+        {
+            const auto& rig = m_storage.GetRig(state.meshId);
+
+            if (!m_storage.HasAnimation(state.blendFromAnimId))
+            {
+                auto boneData = calculator.Animate(rig, animation, ticks);
+                m_boneSnapperOffsets.emplace(entity, calculator.GetBoneOffset(snapBone));
+                return boneData;
+            }
+
+            const auto& blendFromAnimation = m_storage.GetAnimation(state.blendFromAnimId);
+            const auto [blendFromTicks, unused] = StepTransition(state, blendFromAnimation, dt);
+            return calculator.Animate(
+                rig,
+                blendFromAnimation,
+                blendFromTicks,
+                animation,
+                ticks,
+                state.blendFactor
+            );
+        }();
+
+        m_boneCache.UpdateRegion(state.boneIndex, bones);
+        m_boneSnapperOffsets.emplace(entity, calculator.GetBoneOffset(snapBone));
+    }
+
+    // Does not have BoneSnapper loop
+    for (auto [entity, state] : animationsToNotSnap)
     {
         const auto& animation = m_storage.GetAnimation(state.animId);
         const auto [ticks, completed] = StepAnimationTime(state.time, animation, dt);
@@ -106,6 +191,7 @@ void SkeletalAnimationSubsystem::CalculateBoneMatrices()
         const auto bones = [&]()
         {
             const auto& rig = m_storage.GetRig(state.meshId);
+
             if (!m_storage.HasAnimation(state.blendFromAnimId))
             {
                 return calculator.Animate(rig, animation, ticks);

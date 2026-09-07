@@ -7,6 +7,7 @@
 #include "ncengine/ecs/Tag.h"
 #include "ncengine/ecs/Transform.h"
 #include "ncengine/ecs/detail/FreeComponentGroup.h"
+#include "ncengine/graphics/BoneSnapper.h"
 #include "ncengine/graphics/Camera.h"
 #include "ncengine/graphics/Light.h"
 #include "ncengine/graphics/Mesh.h"
@@ -22,21 +23,22 @@ REGISTER_TYPE(Vector4, PROPERTY(Vector4, x), PROPERTY(Vector4, y), PROPERTY(Vect
 REGISTER_TYPE(Quaternion, PROPERTY(Quaternion, x), PROPERTY(Quaternion, y), PROPERTY(Quaternion, z), PROPERTY(Quaternion, w));
 
 /** @todo Only registering names of these: */
+REGISTER_TYPE(AudioSource);
+REGISTER_TYPE(BoneSnapper);
+REGISTER_TYPE(Camera);
+REGISTER_TYPE(CollisionListener);
+REGISTER_TYPE(Constraint);
+REGISTER_TYPE(ecs::detail::FreeComponentGroup);
+REGISTER_TYPE(DirectionalLight);
 REGISTER_TYPE(Entity);
 REGISTER_TYPE(FrameLogic);
-REGISTER_TYPE(Tag);
-REGISTER_TYPE(Transform);
-REGISTER_TYPE(AudioSource);
-REGISTER_TYPE(ecs::detail::FreeComponentGroup);
-REGISTER_TYPE(Camera);
-REGISTER_TYPE(DirectionalLight);
 REGISTER_TYPE(ParticleEmitter);
 REGISTER_TYPE(PointLight);
 REGISTER_TYPE(SpotLight);
-REGISTER_TYPE(StaticMesh);
 REGISTER_TYPE(SkinnedMesh);
-REGISTER_TYPE(CollisionListener);
-REGISTER_TYPE(Constraint);
+REGISTER_TYPE(StaticMesh);
 REGISTER_TYPE(RigidBody);
 REGISTER_TYPE(Shape);
+REGISTER_TYPE(Tag);
+REGISTER_TYPE(Transform);
 } // namespace nc::type

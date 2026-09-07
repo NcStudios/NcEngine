@@ -2,6 +2,7 @@ target_sources(${NC_ENGINE_LIB}
     PRIVATE
         AnimationStateOrchestrator.cpp
         BoneCache.cpp
+        BoneSnapperSubsystem.cpp
         Rig.cpp
         SkeletalAnimationCalculator.cpp
         SkeletalAnimationSubsystem.cpp
