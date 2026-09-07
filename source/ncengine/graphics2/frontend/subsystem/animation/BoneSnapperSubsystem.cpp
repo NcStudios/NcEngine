@@ -36,8 +36,7 @@ void BoneSnapperSubsystem::Update(ecs::ExplicitEcs<BoneSnapper, SkinnedMesh, Tra
         auto& sourceTransform = ecs.Get<Transform>(sourceEntity);
         const auto sourceLocalScale = sourceTransform.LocalScale();
 
-        sourceTransform.SetTransformationMatrix(DirectX::XMMatrixIdentity());
-        sourceTransform.SetTransformationMatrix(sourceTransform.LocalTransformationMatrix() * targetBoneTransform);
+        sourceTransform.SetTransformationMatrix(targetBoneTransform);
         sourceTransform.SetScale(sourceLocalScale);
     }
 }
