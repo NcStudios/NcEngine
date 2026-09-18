@@ -3,6 +3,7 @@
 #include "ncengine/debug/Profile.h"
 #include "imgui.h"
 #include "ImGuizmo.h"
+#include "im_anim.h"
 
 namespace nc::graphics
 {
@@ -20,6 +21,8 @@ void UIBackend::FrameBegin(Diligent::ISwapChain& swapChain)
     NC_PROFILE_SCOPE("UIBackend::FrameBegin", ProfileCategory::Rendering);
     const auto& scDesc = swapChain.GetDesc();
     m_imguiBackend.NewFrame(scDesc.Width, scDesc.Height, scDesc.PreTransform);
+    iam_update_begin_frame(); // ImAnim: Reset per-frame state
+    iam_clip_update(ImGui::GetIO().DeltaTime); //  ImAnim: Advance clip timelines
     ImGuizmo::BeginFrame();
 }
 

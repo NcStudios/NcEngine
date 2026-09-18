@@ -11,6 +11,7 @@
 #include "ncengine/ui/ImGuiStyle.h"
 #include "ncengine/window/Window.h"
 #include "imgui.h"
+#include "im_anim.h"
 
 namespace
 {
@@ -123,19 +124,59 @@ namespace nc::sample
         if (ImGui::BeginChild("SceneList", { 0,0 }, true))
         {
             auto buttonSize = ImVec2{ ImGui::GetWindowWidth() - 20, 0 };
-            if (ImGui::Button("PhysicsTest", buttonSize))
+
+            auto pos = ImGui::GetCursorScreenPos();
+            const bool isPhysicsHovered = ImGui::IsMouseHoveringRect(pos, ImVec2{pos.x + buttonSize.x, pos.y + 20.0f});
+            const auto physicsScale = iam_tween_float
+            (
+                ImGui::GetID("PhysicsScale"),
+                0,
+                isPhysicsHovered ? 1.025f : 1.0f,
+                0.15f,
+                iam_ease_preset(iam_ease_out_back),
+                iam_policy_crossfade,
+                ImGui::GetIO().DeltaTime
+            );
+
+            if (ImGui::Button("PhysicsTest", buttonSize * physicsScale))
             {
                 m_ncScene->Queue(std::make_unique<PhysicsTest>(this));
                 m_ncScene->ScheduleTransition();
             }
 
-            if (ImGui::Button("GraphicsTest", buttonSize))
+            pos = ImGui::GetCursorScreenPos();
+            const bool isGraphicsHovered = ImGui::IsMouseHoveringRect(pos, ImVec2{pos.x + buttonSize.x, pos.y + 20.0f});
+            const auto graphicsScale = iam_tween_float
+            (
+                ImGui::GetID("GraphicsScale"),
+                0,
+                isGraphicsHovered ? 1.025f : 1.0f,
+                0.15f,
+                iam_ease_preset(iam_ease_out_back),
+                iam_policy_crossfade,
+                ImGui::GetIO().DeltaTime
+            );
+
+            if (ImGui::Button("GraphicsTest", buttonSize * graphicsScale))
             {
                 m_ncScene->Queue(std::make_unique<GraphicsTest>(this, GraphicsTest::Extents));
                 m_ncScene->ScheduleTransition();
             }
 
-            if (ImGui::Button("Benchmarks", buttonSize))
+            pos = ImGui::GetCursorScreenPos();
+            const bool isBenchmarksHovered = ImGui::IsMouseHoveringRect(pos, ImVec2{pos.x + buttonSize.x, pos.y + 20.0f});
+            const auto benchmarkScale = iam_tween_float
+            (
+                ImGui::GetID("BenchmarksScale"),
+                0,
+                isBenchmarksHovered ? 1.025f : 1.0f,
+                0.15f,
+                iam_ease_preset(iam_ease_out_back),
+                iam_policy_crossfade,
+                ImGui::GetIO().DeltaTime
+            );
+
+            if (ImGui::Button("Benchmarks", buttonSize * benchmarkScale))
             {
                 m_ncScene->Queue(std::make_unique<Benchmarks>(this));
                 m_ncScene->ScheduleTransition();
