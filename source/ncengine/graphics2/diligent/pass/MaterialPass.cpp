@@ -55,10 +55,38 @@ auto CreatePipeline(Diligent::IRenderDevice& device,
     ci.GraphicsPipeline.DSVFormat                         = depthFormat;
     ci.GraphicsPipeline.RasterizerDesc.CullMode           = ToDiligentCullMode(passDesc.cullMode);
     ci.GraphicsPipeline.RasterizerDesc.DepthClipEnable    = passDesc.shadowMapSink != ShadowMapTarget::None ? false : true;
-    ci.GraphicsPipeline.DepthStencilDesc.DepthEnable      = passDesc.useDepthTest;
+
     ci.GraphicsPipeline.DepthStencilDesc.DepthWriteEnable = passDesc.depthSink != DepthTarget::None || passDesc.shadowMapSink != ShadowMapTarget::None;
     ci.GraphicsPipeline.InputLayout.LayoutElements        = layoutElements.data();
     ci.GraphicsPipeline.InputLayout.NumElements           = static_cast<uint32_t>(layoutElements.size());
+    ci.GraphicsPipeline.DSVFormat = Diligent::TEX_FORMAT_D32_FLOAT_S8X24_UINT;
+
+    if (passDesc.useStencil)
+    {
+        ci.GraphicsPipeline.DepthStencilDesc.DepthEnable   = true;
+        ci.GraphicsPipeline.DepthStencilDesc.StencilEnable = true;
+        ci.GraphicsPipeline.DepthStencilDesc.FrontFace = StencilOpDesc
+        {
+            STENCIL_OP_KEEP,
+            STENCIL_OP_KEEP,
+            STENCIL_OP_REPLACE,
+            COMPARISON_FUNC_ALWAYS
+        };
+        ci.GraphicsPipeline.DepthStencilDesc.BackFace = ci.GraphicsPipeline.DepthStencilDesc.FrontFace;
+    }
+    else
+    {
+        ci.GraphicsPipeline.DepthStencilDesc.DepthEnable = passDesc.useDepthTest;
+        ci.GraphicsPipeline.DepthStencilDesc.StencilEnable = false;
+        ci.GraphicsPipeline.DepthStencilDesc.FrontFace = StencilOpDesc
+        {
+            STENCIL_OP_KEEP,
+            STENCIL_OP_KEEP,
+            STENCIL_OP_KEEP,
+            COMPARISON_FUNC_NOT_EQUAL
+        };
+        ci.GraphicsPipeline.DepthStencilDesc.BackFace = ci.GraphicsPipeline.DepthStencilDesc.FrontFace;
+    }
 
      if (passDesc.alphaBlend)
     {

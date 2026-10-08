@@ -249,7 +249,8 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .colorSink = ColorTarget::Main,
                     .depthSink = DepthTarget::Main,
                     .useDepthTest = true,
-                    .alphaBlend = true
+                    .alphaBlend = true,
+                    .useStencil = true
                 },
                 PassDesc{
                     .flag = MaterialPassFlag::Toon,
@@ -260,7 +261,8 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .colorSink = ColorTarget::Main,
                     .depthSink = DepthTarget::Main,
                     .useDepthTest = true,
-                    .alphaBlend = true
+                    .alphaBlend = true,
+                    .useStencil = true
                 },
                 PassDesc{
                     .flag = MaterialPassFlag::Normals,
@@ -281,6 +283,26 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .colorSink = ColorTarget::Normals,
                     .depthSink = DepthTarget::Main,
                     .useDepthTest = true
+                },
+                PassDesc{
+                    .flag = MaterialPassFlag::StencilOutline,
+                    .name = "StencilOutline",
+                    .type = PassType::Material,
+                    .layoutElements = VertexAttribute::Texturing,
+                    .shaderPaths = ShaderPaths{shader::StencilOutlinePixel, shader::StencilOutlineVertex},
+                    .colorSink = ColorTarget::Main,
+                    .useDepthTest = false,
+                    .alphaBlend = false
+                },
+                PassDesc{
+                    .flag = MaterialPassFlag::StencilOutline,
+                    .name = "StencilOutlineSkinned",
+                    .type = PassType::SkinnedMaterial,
+                    .layoutElements = VertexAttribute::All,
+                    .shaderPaths = ShaderPaths{shader::StencilOutlinePixel, shader::StencilOutlineSkinnedVertex},
+                    .colorSink = ColorTarget::Main,
+                    .useDepthTest = false,
+                    .alphaBlend = false
                 },
                 PassDesc{
                     .flag = PostProcessPassFlag::Outline,
