@@ -444,7 +444,10 @@ void PassBackend::RenderMaterial(IDeviceContext& context,
             continue;
         }
 
-        if (staticPass.flag & MaterialPassFlag::StencilOutline || skinnedPass.flag & MaterialPassFlag::StencilOutline)
+        if (staticPass.flag & MaterialPassFlag::StencilOutline ||
+            skinnedPass.flag & MaterialPassFlag::StencilOutline ||
+            staticPass.flag & MaterialPassFlag::Toon ||
+            skinnedPass.flag & MaterialPassFlag::Toon)
         {
             context.SetStencilRef(1);
         }
@@ -453,9 +456,15 @@ void PassBackend::RenderMaterial(IDeviceContext& context,
             context.SetStencilRef(0);
         }
 
+        auto clearStencil = false;
+        if (staticPass.flag == MaterialPassFlag::Depth) // Pick an early pass
+        {
+            clearStencil = true;
+        }
+
         // PassManifest verifies static/skinned pass pairs specify the same render targets, so we can just choose from either here.
         BindRenderTarget(context, swapChain, *m_perPassResourceSignature, staticPass.sinks.color, staticPass.sinks.depth, staticPass.isMsaa && m_numSamples > 1);
-        ClearRenderTarget(context, swapChain, *m_perPassResourceSignature, staticPass.sinks.color, staticPass.sinks.depth, staticPass.isMsaa && m_numSamples > 1, staticPass.useStencil);
+        ClearRenderTarget(context, swapChain, *m_perPassResourceSignature, staticPass.sinks.color, staticPass.sinks.depth, staticPass.isMsaa && m_numSamples > 1, clearStencil);
         SetViewportAndScissor(context, swapChain.GetDesc(), viewport);
 
         context.SetPipelineState(staticPass.pso);
