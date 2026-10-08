@@ -76,7 +76,7 @@ auto CreatePipeline(Diligent::IRenderDevice& device,
     else
     {
         ci.GraphicsPipeline.DepthStencilDesc.DepthEnable = passDesc.useDepthTest;
-        ci.GraphicsPipeline.DepthStencilDesc.StencilEnable = false;
+        ci.GraphicsPipeline.DepthStencilDesc.StencilEnable = true;
         ci.GraphicsPipeline.DepthStencilDesc.FrontFace = StencilOpDesc
         {
             STENCIL_OP_KEEP,

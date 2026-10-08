@@ -444,7 +444,7 @@ void PassBackend::RenderMaterial(IDeviceContext& context,
             continue;
         }
 
-        if (staticPass.useStencil || skinnedPass.useStencil)
+        if (staticPass.flag & MaterialPassFlag::StencilOutline || skinnedPass.flag & MaterialPassFlag::StencilOutline)
         {
             context.SetStencilRef(1);
         }

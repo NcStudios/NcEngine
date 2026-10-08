@@ -271,6 +271,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .layoutElements = VertexAttribute::Texturing,
                     .shaderPaths = ShaderPaths{shader::StencilOutlinePixel, shader::StencilOutlineVertex},
                     .colorSink = ColorTarget::Main,
+                    .depthSink = DepthTarget::Main,
                     .useDepthTest = false,
                     .alphaBlend = false
                 },
@@ -281,6 +282,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .layoutElements = VertexAttribute::All,
                     .shaderPaths = ShaderPaths{shader::StencilOutlinePixel, shader::StencilOutlineSkinnedVertex},
                     .colorSink = ColorTarget::Main,
+                    .depthSink = DepthTarget::Main,
                     .useDepthTest = false,
                     .alphaBlend = false
                 },
