@@ -25,5 +25,6 @@ struct MaterialPass : public Pass
                           uint32_t numSamples);
     MaterialPassFlag::type flag;
     bool isMsaa;
+    bool useStencil;
 };
 } // namespace nc::graphics

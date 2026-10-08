@@ -59,7 +59,6 @@ auto CreatePipeline(Diligent::IRenderDevice& device,
     ci.GraphicsPipeline.DepthStencilDesc.DepthWriteEnable = passDesc.depthSink != DepthTarget::None || passDesc.shadowMapSink != ShadowMapTarget::None;
     ci.GraphicsPipeline.InputLayout.LayoutElements        = layoutElements.data();
     ci.GraphicsPipeline.InputLayout.NumElements           = static_cast<uint32_t>(layoutElements.size());
-    ci.GraphicsPipeline.DSVFormat = Diligent::TEX_FORMAT_D32_FLOAT_S8X24_UINT;
 
     if (passDesc.useStencil)
     {
@@ -129,7 +128,8 @@ MaterialPass::MaterialPass(Diligent::IRenderDevice& device,
         GetSources(passManifest, passDesc)
       },
       flag{passDesc.flag},
-      isMsaa{passDesc.isMsaa}
+      isMsaa{passDesc.isMsaa},
+      useStencil{passDesc.useStencil}
 {
 }
 

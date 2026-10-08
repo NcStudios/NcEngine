@@ -444,6 +444,15 @@ void PassBackend::RenderMaterial(IDeviceContext& context,
             continue;
         }
 
+        if (staticPass.useStencil || skinnedPass.useStencil)
+        {
+            context.SetStencilRef(1);
+        }
+        else
+        {
+            context.SetStencilRef(0);
+        }
+
         // PassManifest verifies static/skinned pass pairs specify the same render targets, so we can just choose from either here.
         BindRenderTarget(context, swapChain, *m_perPassResourceSignature, staticPass.sinks.color, staticPass.sinks.depth, staticPass.isMsaa && m_numSamples > 1);
         ClearRenderTarget(context, swapChain, *m_perPassResourceSignature, staticPass.sinks.color, staticPass.sinks.depth, staticPass.isMsaa && m_numSamples > 1);
