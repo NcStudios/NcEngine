@@ -46,7 +46,7 @@ void main(in VSInput VSIn, uint InstanceID : SV_InstanceID, out PSInput PSIn)
     float4 normal = float4(VSIn.Normal, 0.0);
 
     // Scale vertex position along normals
-    float outlineWidth = 1.1f;
+    float outlineWidth = 1.05f;
     float4 scaledPos = pos + normal * outlineWidth;
 
 #ifdef ENABLE_SKINNING

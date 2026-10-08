@@ -60,7 +60,7 @@ auto CreatePipeline(Diligent::IRenderDevice& device,
     ci.GraphicsPipeline.InputLayout.LayoutElements        = layoutElements.data();
     ci.GraphicsPipeline.InputLayout.NumElements           = static_cast<uint32_t>(layoutElements.size());
 
-    if (passDesc.useStencil)
+    if (passDesc.writeStencil)
     {
         ci.GraphicsPipeline.DepthStencilDesc.DepthEnable   = true;
         ci.GraphicsPipeline.DepthStencilDesc.StencilEnable = true;
@@ -129,7 +129,7 @@ MaterialPass::MaterialPass(Diligent::IRenderDevice& device,
       },
       flag{passDesc.flag},
       isMsaa{passDesc.isMsaa},
-      useStencil{passDesc.useStencil}
+      useStencil{passDesc.writeStencil}
 {
 }
 

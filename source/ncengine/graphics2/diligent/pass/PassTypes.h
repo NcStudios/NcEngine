@@ -115,6 +115,6 @@ struct PassDesc
     bool isMsaa = true;
     bool useDepthTest = true;
     bool alphaBlend = false;
-    bool useStencil = false;
+    bool writeStencil = false;
 };
 } // namespace nc::graphics

@@ -68,10 +68,10 @@ auto MakeDepthSinkBufferDesc(uint32_t maxTextures) -> SinkBufferResourceDesc
     return SinkBufferResourceDesc{
         .name = "Depth Render Target",
         .viewType = Diligent::TEXTURE_VIEW_DEPTH_STENCIL,
-        .format = Diligent::TEX_FORMAT_D24_UNORM_S8_UINT,
+        .format = OffScreenDepthRTFormat,
         .bindFlags = Diligent::BIND_SHADER_RESOURCE | Diligent::BIND_DEPTH_STENCIL,
         .clearValue = Diligent::OptimizedClearValue{
-            .Format = Diligent::TEX_FORMAT_D24_UNORM_S8_UINT,
+            .Format = OffScreenDepthRTFormat,
             .DepthStencil = Diligent::DepthStencilClearValue{1.0f, 0}
         },
         .maxTextures = maxTextures

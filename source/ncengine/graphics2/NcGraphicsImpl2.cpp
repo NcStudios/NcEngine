@@ -250,7 +250,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .depthSink = DepthTarget::Main,
                     .useDepthTest = true,
                     .alphaBlend = true,
-                    .useStencil = true
+                    .writeStencil = true
                 },
                 PassDesc{
                     .flag = MaterialPassFlag::Toon,
@@ -262,7 +262,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .depthSink = DepthTarget::Main,
                     .useDepthTest = true,
                     .alphaBlend = true,
-                    .useStencil = true
+                    .writeStencil = true
                 },
                 PassDesc{
                     .flag = MaterialPassFlag::StencilOutline,
