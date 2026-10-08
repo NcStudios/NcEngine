@@ -22,8 +22,8 @@ constexpr auto g_materialPassFlags = std::array{
     nc::MaterialPassFlag::PointShadow,
     nc::MaterialPassFlag::Depth,
     nc::MaterialPassFlag::Toon,
-    nc::MaterialPassFlag::Normals,
-    nc::MaterialPassFlag::StencilOutline
+    nc::MaterialPassFlag::StencilOutline,
+    nc::MaterialPassFlag::Normals
 };
 
 constexpr auto g_miscPassFlags = std::array{

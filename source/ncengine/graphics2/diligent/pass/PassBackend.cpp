@@ -455,7 +455,7 @@ void PassBackend::RenderMaterial(IDeviceContext& context,
 
         // PassManifest verifies static/skinned pass pairs specify the same render targets, so we can just choose from either here.
         BindRenderTarget(context, swapChain, *m_perPassResourceSignature, staticPass.sinks.color, staticPass.sinks.depth, staticPass.isMsaa && m_numSamples > 1);
-        ClearRenderTarget(context, swapChain, *m_perPassResourceSignature, staticPass.sinks.color, staticPass.sinks.depth, staticPass.isMsaa && m_numSamples > 1);
+        ClearRenderTarget(context, swapChain, *m_perPassResourceSignature, staticPass.sinks.color, staticPass.sinks.depth, staticPass.isMsaa && m_numSamples > 1, staticPass.useStencil);
         SetViewportAndScissor(context, swapChain.GetDesc(), viewport);
 
         context.SetPipelineState(staticPass.pso);

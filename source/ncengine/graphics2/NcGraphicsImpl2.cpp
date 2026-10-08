@@ -265,26 +265,6 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .useStencil = true
                 },
                 PassDesc{
-                    .flag = MaterialPassFlag::Normals,
-                    .name = "Normals",
-                    .type = PassType::Material,
-                    .layoutElements = VertexAttribute::Texturing,
-                    .shaderPaths = ShaderPaths{shader::NormalsPixel, shader::ToonVertex},
-                    .colorSink = ColorTarget::Normals,
-                    .depthSink = DepthTarget::Main,
-                    .useDepthTest = true
-                },
-                PassDesc{
-                    .flag = MaterialPassFlag::Normals,
-                    .name = "NormalsSkinned",
-                    .type = PassType::SkinnedMaterial,
-                    .layoutElements = VertexAttribute::All,
-                    .shaderPaths = ShaderPaths{shader::NormalsPixel, shader::ToonSkinnedVertex},
-                    .colorSink = ColorTarget::Normals,
-                    .depthSink = DepthTarget::Main,
-                    .useDepthTest = true
-                },
-                PassDesc{
                     .flag = MaterialPassFlag::StencilOutline,
                     .name = "StencilOutline",
                     .type = PassType::Material,
@@ -303,6 +283,26 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .colorSink = ColorTarget::Main,
                     .useDepthTest = false,
                     .alphaBlend = false
+                },
+                PassDesc{
+                    .flag = MaterialPassFlag::Normals,
+                    .name = "Normals",
+                    .type = PassType::Material,
+                    .layoutElements = VertexAttribute::Texturing,
+                    .shaderPaths = ShaderPaths{shader::NormalsPixel, shader::ToonVertex},
+                    .colorSink = ColorTarget::Normals,
+                    .depthSink = DepthTarget::Main,
+                    .useDepthTest = true
+                },
+                PassDesc{
+                    .flag = MaterialPassFlag::Normals,
+                    .name = "NormalsSkinned",
+                    .type = PassType::SkinnedMaterial,
+                    .layoutElements = VertexAttribute::All,
+                    .shaderPaths = ShaderPaths{shader::NormalsPixel, shader::ToonSkinnedVertex},
+                    .colorSink = ColorTarget::Normals,
+                    .depthSink = DepthTarget::Main,
+                    .useDepthTest = true
                 },
                 PassDesc{
                     .flag = PostProcessPassFlag::Outline,

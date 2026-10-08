@@ -25,7 +25,8 @@ void ClearRenderTarget(Diligent::IDeviceContext& context,
                        PerPassResourceSignature& perPassResourceSignature,
                        uint32_t colorRenderTargetIndex,
                        uint32_t depthRenderTargetIndex,
-                       bool isMsaa)
+                       bool isMsaa,
+                       bool clearStencil)
 {
     Diligent::ITextureView* pRTV = ToColorRenderTargetView(swapChain, perPassResourceSignature.GetColorSinksResource(), colorRenderTargetIndex, isMsaa);
     Diligent::ITextureView* pDSV = ToDepthRenderTargetView(swapChain, perPassResourceSignature.GetDepthSinksResource(), depthRenderTargetIndex, isMsaa);
@@ -37,7 +38,8 @@ void ClearRenderTarget(Diligent::IDeviceContext& context,
 
     if (pDSV)
     {
-        context.ClearDepthStencil(pDSV, Diligent::CLEAR_DEPTH_FLAG | Diligent::CLEAR_STENCIL_FLAG, 1.f, 0, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
+        const auto clearFlag = clearStencil ? Diligent::CLEAR_DEPTH_FLAG | Diligent::CLEAR_STENCIL_FLAG : Diligent::CLEAR_DEPTH_FLAG;
+        context.ClearDepthStencil(pDSV, clearFlag, 1.f, 0, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
     }
 }
 

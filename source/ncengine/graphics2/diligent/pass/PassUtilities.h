@@ -30,7 +30,8 @@ void ClearRenderTarget(Diligent::IDeviceContext& context,
                        PerPassResourceSignature& perPassResourceSignature,
                        uint32_t colorIndex,
                        uint32_t depthIndex,
-                       bool isMsaa);
+                       bool isMsaa,
+                       bool clearStencil = false);
 
 void ClearPostProcessRenderTarget(Diligent::IDeviceContext& context,
                                   Diligent::ISwapChain& swapChain,
