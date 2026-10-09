@@ -25,20 +25,21 @@ void ClearRenderTarget(Diligent::IDeviceContext& context,
                        PerPassResourceSignature& perPassResourceSignature,
                        uint32_t colorRenderTargetIndex,
                        uint32_t depthRenderTargetIndex,
-                       bool isMsaa,
-                       bool clearStencil)
+                       IsMsaa isMsaa,
+                       ClearStencil clearStencil,
+                       ClearRT clearRenderTarget)
 {
     Diligent::ITextureView* pRTV = ToColorRenderTargetView(swapChain, perPassResourceSignature.GetColorSinksResource(), colorRenderTargetIndex, isMsaa);
     Diligent::ITextureView* pDSV = ToDepthRenderTargetView(swapChain, perPassResourceSignature.GetDepthSinksResource(), depthRenderTargetIndex, isMsaa);
 
-    if (pRTV)
+    if (pRTV && clearRenderTarget.value)
     {
         context.ClearRenderTarget(pRTV, &ClearColor.x, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
     }
 
     if (pDSV)
     {
-        const auto clearFlag = clearStencil ? Diligent::CLEAR_DEPTH_FLAG | Diligent::CLEAR_STENCIL_FLAG : Diligent::CLEAR_DEPTH_FLAG;
+        const auto clearFlag = clearStencil.value ? Diligent::CLEAR_DEPTH_FLAG | Diligent::CLEAR_STENCIL_FLAG : Diligent::CLEAR_DEPTH_FLAG;
         context.ClearDepthStencil(pDSV, clearFlag, 1.f, 0, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
     }
 }
@@ -87,7 +88,7 @@ void BindRenderTarget(Diligent::IDeviceContext& context,
                       PerPassResourceSignature& perPassResourceSignature,
                       uint32_t colorRenderTargetIndex,
                       uint32_t depthRenderTargetIndex,
-                      bool isMsaa)
+                      IsMsaa isMsaa)
 {
     Diligent::ITextureView* pRTV = ToColorRenderTargetView(swapChain, perPassResourceSignature.GetColorSinksResource(), colorRenderTargetIndex, isMsaa);
     Diligent::ITextureView* pDSV = ToDepthRenderTargetView(swapChain, perPassResourceSignature.GetDepthSinksResource(), depthRenderTargetIndex, isMsaa);
@@ -170,7 +171,7 @@ auto ToPassBaseId(const ShaderPaths& shaderPaths, std::string_view name) -> size
     return HashCombine(hashCode, shaderPaths.vertexShaderPath);
 }
 
-auto ToColorRenderTargetView(Diligent::ISwapChain& swapChain, SinkBufferResource& colorSinkBufferResource, uint32_t index, bool isMsaa) -> Diligent::ITextureView*
+auto ToColorRenderTargetView(Diligent::ISwapChain& swapChain, SinkBufferResource& colorSinkBufferResource, uint32_t index, IsMsaa isMsaa) -> Diligent::ITextureView*
 {
     if (index == SwapChainTarget)
     {
@@ -182,10 +183,10 @@ auto ToColorRenderTargetView(Diligent::ISwapChain& swapChain, SinkBufferResource
         return nullptr;
     }
 
-    return isMsaa ? colorSinkBufferResource.GetMsaaRenderTargetView(index) : colorSinkBufferResource.GetRenderTargetView(index);
+    return isMsaa.value ? colorSinkBufferResource.GetMsaaRenderTargetView(index) : colorSinkBufferResource.GetRenderTargetView(index);
 }
 
-auto ToDepthRenderTargetView(Diligent::ISwapChain& swapChain, SinkBufferResource& depthSinkBufferResource, uint32_t index, bool isMsaa) -> Diligent::ITextureView*
+auto ToDepthRenderTargetView(Diligent::ISwapChain& swapChain, SinkBufferResource& depthSinkBufferResource, uint32_t index, IsMsaa isMsaa) -> Diligent::ITextureView*
 {
     if (index == DepthStencilTarget)
     {
@@ -197,7 +198,7 @@ auto ToDepthRenderTargetView(Diligent::ISwapChain& swapChain, SinkBufferResource
         return nullptr;
     }
 
-    return isMsaa ? depthSinkBufferResource.GetMsaaRenderTargetView(index) : depthSinkBufferResource.GetRenderTargetView(index);
+    return isMsaa.value ? depthSinkBufferResource.GetMsaaRenderTargetView(index) : depthSinkBufferResource.GetRenderTargetView(index);
 }
 
 auto ToPostProcessRenderTargetView(Diligent::ISwapChain& swapChain, SinkBufferResource& postProcessSinkBufferResource, uint32_t postProcessRenderTargetIndex) -> Diligent::ITextureView*

@@ -30,8 +30,9 @@ void ClearRenderTarget(Diligent::IDeviceContext& context,
                        PerPassResourceSignature& perPassResourceSignature,
                        uint32_t colorIndex,
                        uint32_t depthIndex,
-                       bool isMsaa,
-                       bool clearStencil = false);
+                       IsMsaa isMsaa,
+                       ClearStencil clearStencil = ClearStencil{},
+                       ClearRT clearRenderTarget = ClearRT{});
 
 void ClearPostProcessRenderTarget(Diligent::IDeviceContext& context,
                                   Diligent::ISwapChain& swapChain,
@@ -52,7 +53,7 @@ void BindRenderTarget(Diligent::IDeviceContext& context,
                       PerPassResourceSignature& perPassResourceSignature,
                       uint32_t colorIndex,
                       uint32_t depthIndex,
-                      bool isMsaa);
+                      IsMsaa isMsaa);
 
 void BindPostProcessRenderTarget(Diligent::IDeviceContext& context,
                                  Diligent::ISwapChain& swapChain,
@@ -71,7 +72,7 @@ void BindUniShadowMapRenderTarget(Diligent::IDeviceContext& context,
 auto ToDepthRenderTargetView(Diligent::ISwapChain& swapChain,
                              SinkBufferResource& depthSinkBufferResource,
                              uint32_t index,
-                             bool isMsaa) -> Diligent::ITextureView*;
+                             IsMsaa isMsaa) -> Diligent::ITextureView*;
 
 auto ToPostProcessRenderTargetView(Diligent::ISwapChain& swapChain,
                                    SinkBufferResource& postProcessSinkBufferResource,
@@ -84,5 +85,5 @@ auto ToPostProcessCubeRenderTargetView(Diligent::ISwapChain& swapChain,
 auto ToColorRenderTargetView(Diligent::ISwapChain& swapChain,
                              SinkBufferResource& colorSinkBufferResource,
                              uint32_t index,
-                             bool isMsaa) -> Diligent::ITextureView*;
+                             IsMsaa isMsaa) -> Diligent::ITextureView*;
 } // namespace nc::graphics

@@ -185,7 +185,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .layoutElements = VertexAttribute::Pos,
                     .shaderPaths = ShaderPaths{.vertexShaderPath = shader::UniShadowMapVertex},
                     .shadowMapSink = ShadowMapTarget::Uni,
-                    .isMsaa = false,
+                    .isMsaa = IsMsaa{false},
                     .useDepthTest = true
                 },
                 PassDesc{
@@ -195,7 +195,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .layoutElements = VertexAttribute::Skinning,
                     .shaderPaths = ShaderPaths{.vertexShaderPath =  shader::UniShadowMapSkinnedVertex},
                     .shadowMapSink = ShadowMapTarget::Uni,
-                    .isMsaa = false,
+                    .isMsaa =  IsMsaa{false},
                     .useDepthTest = true
                 },
                 PassDesc{
@@ -206,7 +206,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .shaderPaths = ShaderPaths{.pixelShaderPath = shader::PointShadowMapPixel, .vertexShaderPath = shader::PointShadowMapVertex},
                     .shadowMapSink = ShadowMapTarget::Point,
                     .cullMode = CullMode::Back,
-                    .isMsaa = false,
+                    .isMsaa =  IsMsaa{false},
                     .useDepthTest = true
                 },
                 PassDesc{
@@ -217,7 +217,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .shaderPaths = ShaderPaths{ .pixelShaderPath = shader::PointShadowMapPixel, .vertexShaderPath = shader::PointShadowMapSkinnedVertex},
                     .shadowMapSink = ShadowMapTarget::Point,
                     .cullMode = CullMode::Back,
-                    .isMsaa = false,
+                    .isMsaa =  IsMsaa{false},
                     .useDepthTest = true
                 },
                 PassDesc{
@@ -227,7 +227,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .layoutElements = VertexAttribute::Texturing,
                     .shaderPaths = ShaderPaths{.vertexShaderPath = shader::ToonVertex},
                     .depthSink = DepthTarget::Main,
-                    .isMsaa = false,
+                    .isMsaa =  IsMsaa{false},
                     .useDepthTest = true
                 },
                 PassDesc{
@@ -237,7 +237,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .layoutElements = VertexAttribute::All,
                     .shaderPaths = ShaderPaths{.vertexShaderPath = shader::ToonSkinnedVertex},
                     .depthSink = DepthTarget::Main,
-                    .isMsaa = false,
+                    .isMsaa =  IsMsaa{false},
                     .useDepthTest = true
                 },
                 PassDesc{
@@ -315,7 +315,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .colorSources = std::vector{ColorTarget::Main, ColorTarget::Normals},
                     .depthSources = std::vector{DepthTarget::Main},
                     .postProcessSink = PostProcessTarget::PPOutline,
-                    .isMsaa = false,
+                    .isMsaa =  IsMsaa{false},
                     .useDepthTest = false
                 },
                 PassDesc{
@@ -326,7 +326,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .shaderPaths = ShaderPaths{shader::PPFxaaPixel, shader::PostProcessVertex},
                     .postProcessSource = PostProcessTarget::PPOutline,
                     .postProcessSink = PostProcessTarget::PPFxaa,
-                    .isMsaa = false,
+                    .isMsaa =  IsMsaa{false},
                     .useDepthTest = false
                 },
                 PassDesc{
@@ -337,7 +337,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .shaderPaths = ShaderPaths{shader::PPNoisePixel, shader::PostProcessVertex},
                     .postProcessSource = PostProcessTarget::PPFxaa,
                     .postProcessSink = PostProcessTarget::PPNoise,
-                    .isMsaa = false,
+                    .isMsaa =  IsMsaa{false},
                     .useDepthTest = false
                 },
                 PassDesc{

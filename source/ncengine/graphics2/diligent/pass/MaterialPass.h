@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Pass.h"
+#include "PassTypes.h"
 #include "PassManifest.h"
 #include "ncengine/graphics/Material.h"
 
@@ -24,7 +25,7 @@ struct MaterialPass : public Pass
                           const PassDesc& passDesc,
                           uint32_t numSamples);
     MaterialPassFlag::type flag;
-    bool isMsaa;
+    IsMsaa isMsaa;
     bool useStencil;
 };
 } // namespace nc::graphics

@@ -113,6 +113,7 @@ PostProcessPass::PostProcessPass(IRenderDevice& device,
         GetSources(passManifest, passDesc)
         },
       instances{isFinalPass ? std::vector<PostProcessPipelineInstance>{} : MakePostProcessPassInstances(passDesc.flag)},
+      name{passDesc.name},
       flag{passDesc.flag}
 {
 }

@@ -21,6 +21,22 @@ constexpr auto OffScreenColorRTFormat = Diligent::TEX_FORMAT_RGBA8_UNORM_SRGB;
 constexpr auto OffScreenDepthRTFormat = Diligent::TEX_FORMAT_D24_UNORM_S8_UINT;
 constexpr auto OffScreenShadowMapRTFormat = Diligent::TEX_FORMAT_R32_FLOAT;
 
+struct IsMsaa
+{
+    bool value = false;
+};
+
+struct ClearStencil
+{
+    bool value = false;
+};
+
+struct ClearRT
+{
+    bool value = true;
+};
+
+
 enum class ColorTarget : uint8_t
 {
     None,
@@ -112,7 +128,7 @@ struct PassDesc
     ShadowMapTarget shadowMapSink = ShadowMapTarget::None;
     PostProcessTarget postProcessSink = PostProcessTarget::None;
     CullMode cullMode = CullMode::Back;
-    bool isMsaa = true;
+    IsMsaa isMsaa = IsMsaa{true};
     bool useDepthTest = true;
     bool alphaBlend = false;
     bool writeStencil = false;

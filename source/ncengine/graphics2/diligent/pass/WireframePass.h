@@ -23,6 +23,6 @@ struct WireframePass : public Pass
                            const PassDesc& passDesc,
                            uint32_t numSamples = 1u);
     WireframeBufferResource* buffer;
-    bool isMsaa;
+    IsMsaa isMsaa;
 };
 } // namespace nc::graphics

@@ -99,7 +99,7 @@ auto CreatePipeline(Diligent::IRenderDevice& device,
         renderTarget.BlendOpAlpha   = BLEND_OPERATION_ADD;
     }
 
-    ci.GraphicsPipeline.SmplDesc.Count    = passDesc.isMsaa ? static_cast<uint8_t>(numSamples) : static_cast<uint8_t>(1);
+    ci.GraphicsPipeline.SmplDesc.Count    = passDesc.isMsaa.value ? static_cast<uint8_t>(numSamples) : static_cast<uint8_t>(1);
     ci.GraphicsPipeline.PrimitiveTopology = PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
 
     auto signatures = std::array{&shaderBindings.GetPerFrameSignature().GetResourceSignature(), &shaderBindings.GetPerPassSignature().GetResourceSignature()};

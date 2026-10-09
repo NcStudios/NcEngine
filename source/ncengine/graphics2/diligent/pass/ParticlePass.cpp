@@ -37,7 +37,7 @@ auto CreatePipeline(Diligent::IRenderDevice& device,
     ci.GraphicsPipeline.InputLayout.LayoutElements        = layoutElements.data();
     ci.GraphicsPipeline.InputLayout.NumElements           = static_cast<uint32_t>(layoutElements.size());
     ci.GraphicsPipeline.RasterizerDesc.FillMode           = FILL_MODE_SOLID;
-    ci.GraphicsPipeline.SmplDesc.Count                    = passDesc.isMsaa ? static_cast<uint8_t>(numSamples) : static_cast<uint8_t>(1);
+    ci.GraphicsPipeline.SmplDesc.Count                    = passDesc.isMsaa.value ? static_cast<uint8_t>(numSamples) : static_cast<uint8_t>(1);
     ci.GraphicsPipeline.PrimitiveTopology                 = PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
 
     if (passDesc.alphaBlend)
