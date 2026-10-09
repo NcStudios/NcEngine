@@ -49,18 +49,26 @@ struct MaterialProperties
     Vector4 gradientEnd = Vector4::One();
     Vector4 primaryColor = Vector4::One();
     Vector4 secondaryColor = Vector4::One();
+
     Vector4 tertiaryColor = Vector4::One();
+    Vector4 stencilOutlineColor = Vector4::One();
+
     float normalIntensity = 1.0f;
     float hatchTiling = 1.0f;
     float gradientAmount = 0.1f;
     float reflectivity = 0.0f;
+
+    float stencilOutlineWidth = 0.0f;
     asset::TextureView diffuseTex = asset::TextureView{};
     asset::TextureView normalTex = asset::TextureView{};
     asset::TextureView hatchTex = asset::TextureView{};
+
     bool useTextureNormals = true;
     bool useFlatShading = true;
     bool useColorOverride = false;
     bool useHatchTexture = false;
+
+    bool useStencilOutline = false;
 };
 
 /** @brief Properties for constructing a MaterialInstance. */

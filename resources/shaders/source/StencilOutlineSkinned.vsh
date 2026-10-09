@@ -20,6 +20,7 @@ struct PSInput
 };
 
 StructuredBuffer<TransformData> Transforms;
+StructuredBuffer<MaterialData> Materials : register(t1);
 
 // todo: #802 Define this at compile time
 #define ENABLE_SKINNING 1
@@ -44,10 +45,11 @@ void main(in VSInput VSIn, uint InstanceID : SV_InstanceID, out PSInput PSIn)
     INSTANCE_DATA instance = INSTANCE_BUFFER[InstanceID];
     float4 pos = float4(VSIn.Pos, 1.0);
     float4 normal = float4(VSIn.Normal, 0.0);
+    uint materialIndex = SkinnedInstances[InstanceID].materialIndex;
 
     // Scale vertex position along normals
-    float outlineWidth =  0.025f;
-    float4 scaledPos = pos + normalize(normal) * outlineWidth;
+    MaterialData material = Materials[materialIndex];
+    float4 scaledPos = pos + normalize(normal) * material.stencilOutlineWidth;
 
 #ifdef ENABLE_SKINNING
     if (IsValidBoneIndex(instance.boneIndex))

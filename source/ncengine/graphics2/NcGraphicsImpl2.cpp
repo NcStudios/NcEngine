@@ -265,28 +265,6 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .writeStencil = true
                 },
                 PassDesc{
-                    .flag = MaterialPassFlag::StencilOutline,
-                    .name = "StencilOutline",
-                    .type = PassType::Material,
-                    .layoutElements = VertexAttribute::Texturing,
-                    .shaderPaths = ShaderPaths{shader::StencilOutlinePixel, shader::StencilOutlineVertex},
-                    .colorSink = ColorTarget::Main,
-                    .depthSink = DepthTarget::Main,
-                    .useDepthTest = false,
-                    .alphaBlend = false
-                },
-                PassDesc{
-                    .flag = MaterialPassFlag::StencilOutline,
-                    .name = "StencilOutlineSkinned",
-                    .type = PassType::SkinnedMaterial,
-                    .layoutElements = VertexAttribute::All,
-                    .shaderPaths = ShaderPaths{shader::StencilOutlinePixel, shader::StencilOutlineSkinnedVertex},
-                    .colorSink = ColorTarget::Main,
-                    .depthSink = DepthTarget::Main,
-                    .useDepthTest = false,
-                    .alphaBlend = false
-                },
-                PassDesc{
                     .flag = MaterialPassFlag::Normals,
                     .name = "Normals",
                     .type = PassType::Material,
@@ -361,6 +339,28 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .useDepthTest = true,
                     .alphaBlend = true
                 },
+                PassDesc{
+                    .flag = MaterialPassFlag::StencilOutline,
+                    .name = "StencilOutline",
+                    .type = PassType::Material,
+                    .layoutElements = VertexAttribute::Texturing,
+                    .shaderPaths = ShaderPaths{shader::StencilOutlinePixel, shader::StencilOutlineVertex},
+                    .colorSink = ColorTarget::Swapchain,
+                    .depthSink = DepthTarget::Main,
+                    .useDepthTest = false,
+                    .alphaBlend = false
+                },
+                PassDesc{
+                    .flag = MaterialPassFlag::StencilOutline,
+                    .name = "StencilOutlineSkinned",
+                    .type = PassType::SkinnedMaterial,
+                    .layoutElements = VertexAttribute::All,
+                    .shaderPaths = ShaderPaths{shader::StencilOutlinePixel, shader::StencilOutlineSkinnedVertex},
+                    .colorSink = ColorTarget::Swapchain,
+                    .depthSink = DepthTarget::Main,
+                    .useDepthTest = false,
+                    .alphaBlend = false
+                }
             },
             GetMaterialPassFlags(),
             GetPostProcessPassFlags(),
@@ -630,6 +630,7 @@ void NcGraphicsImpl2::Run()
         swapChain
     );
 
+
     m_passBackend.RenderWireframe(
         context,
         swapChain,
@@ -641,6 +642,14 @@ void NcGraphicsImpl2::Run()
         context,
         swapChain,
         renderState.particleRenderState,
+        m_viewport
+    );
+
+    m_passBackend.RenderStencilOutlineMaterial(
+        context,
+        swapChain,
+        renderState.meshRenderState.staticMeshBatches,
+        renderState.meshRenderState.skinnedMeshBatches,
         m_viewport
     );
 

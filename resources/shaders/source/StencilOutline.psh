@@ -23,5 +23,6 @@ StructuredBuffer<MaterialData> Materials : register(t1);
 
 void main(in  PSInput  PSIn, out PSOutput PSOut)
 {
-    PSOut.color = float4(1.0f, 1.0f, 0.0f, 1.0f);
+    MaterialData material = Materials[PSIn.MaterialIndex];
+    PSOut.color = material.stencilOutlineColor;
 }

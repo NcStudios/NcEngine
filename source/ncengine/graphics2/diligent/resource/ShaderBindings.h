@@ -28,7 +28,7 @@ class ShaderBindings
                 StructuredBufferDesc{"StaticInstances",    Diligent::SHADER_TYPE_VERTEX, memorySettings.maxRenderers,        memorySettings.maxRenderers / 2},
                 StructuredBufferDesc{"SkinnedInstances",   Diligent::SHADER_TYPE_VERTEX, memorySettings.maxRenderers,        memorySettings.maxRenderers / 2},
                 StructuredBufferDesc{"Lights",             Diligent::SHADER_TYPE_VS_PS,  GetTotalLightCount(memorySettings), GetTotalLightCount(memorySettings)},
-                StructuredBufferDesc{"Materials",          Diligent::SHADER_TYPE_PIXEL,  memorySettings.maxRenderers,        memorySettings.maxRenderers / 2},
+                StructuredBufferDesc{"Materials",          Diligent::SHADER_TYPE_VS_PS,  memorySettings.maxRenderers,        memorySettings.maxRenderers / 2},
                 StructuredBufferDesc{"Bones",              Diligent::SHADER_TYPE_VERTEX, memorySettings.maxBones,            memorySettings.maxBones / 4},
                 StructuredBufferDesc{"Particles",          Diligent::SHADER_TYPE_VS_PS,  memorySettings.maxParticles,        memorySettings.maxParticles / 4},
                 StructuredBufferDesc{"LightMatrices",      Diligent::SHADER_TYPE_VS_PS,  GetTotalLightMatricesCount(memorySettings), GetTotalLightMatricesCount(memorySettings)},

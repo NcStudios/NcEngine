@@ -145,6 +145,19 @@ auto MaterialColorWidget(nc::MaterialProperties& properties) -> bool
     return modified;
 }
 
+auto MaterialStencilOutlineWidget(nc::MaterialProperties& properties) -> bool
+{
+    auto modified = false;
+    modified = nc::ui::Checkbox(properties.useStencilOutline, "useStencilOutline") || modified;
+    if (properties.useStencilOutline)
+    {
+        modified = nc::ui::InputColor4(properties.stencilOutlineColor, "stencilOutlineColor") || modified;
+        modified = nc::ui::DragFloat(properties.stencilOutlineWidth, "stencilOutlineWidth", 0.001f, 0.0f, 1.0f) || modified;
+    }
+    return modified;
+}
+
+
 auto MaterialNodeWidget(nc::MeshBase& baseMesh, nc::asset::NcAsset& ncAsset)
 {
     if (ImGui::TreeNodeEx("Material"))
@@ -186,6 +199,13 @@ auto MaterialNodeWidget(nc::MeshBase& baseMesh, nc::asset::NcAsset& ncAsset)
         if (ImGui::TreeNodeEx("Color"))
         {
             modified = MaterialColorWidget(properties) || modified;
+            ImGui::TreePop();
+        }
+
+        ImGui::Separator();
+        if (ImGui::TreeNodeEx("Stencil Outline"))
+        {
+            modified = MaterialStencilOutlineWidget(properties) || modified;
             ImGui::TreePop();
         }
 

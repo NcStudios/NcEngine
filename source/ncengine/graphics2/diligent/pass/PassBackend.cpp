@@ -147,6 +147,7 @@ auto MaterialPassToString(MaterialPassFlag::type flags) -> std::string
     AppendFlagIf(MaterialPassFlag::PointShadow,    "PointShadow");
     AppendFlagIf(MaterialPassFlag::Depth,          "Depth");
     AppendFlagIf(MaterialPassFlag::Toon,           "Toon");
+    AppendFlagIf(MaterialPassFlag::StencilOutline, "StencilOutline");
     AppendFlagIf(MaterialPassFlag::Normals,        "Normals");
 
     if (result.empty())
@@ -455,8 +456,55 @@ void PassBackend::RenderSkybox(Diligent::IDeviceContext& context,
     context.EndDebugGroup();
 }
 
-void PassBackend::RenderMaterial(IDeviceContext& context,
-                                 ISwapChain& swapChain,
+void PassBackend::RenderStencilOutlineMaterial(IDeviceContext& context,
+                                               ISwapChain& swapChain,
+                                               const std::vector<std::vector<Batch>>& staticPassBatches,
+                                               const std::vector<std::vector<Batch>>& skinnedPassBatches,
+                                               const Viewport& viewport)
+{
+    NC_PROFILE_SCOPE("PassBackend::RenderStencilOutlineMaterial()", ProfileCategory::Rendering);
+    NC_ASSERT(
+        m_staticMaterialPasses.size() == staticPassBatches.size() &&
+        m_skinnedMaterialPasses.size() == skinnedPassBatches.size(),
+        "Frontend/Backend passes out of sync."
+    );
+
+    auto passView = std::views::zip(
+        m_staticMaterialPasses,
+        m_skinnedMaterialPasses,
+        staticPassBatches,
+        skinnedPassBatches
+    );
+
+    for (auto [staticPass, skinnedPass, staticBatches, skinnedBatches] : passView)
+    {
+        if (!(staticPass.flag & MaterialPassFlag::StencilOutline) && !(staticPass.flag & MaterialPassFlag::StencilOutline))
+        {
+            continue;
+        }
+
+        if (staticBatches.)
+
+        context.BeginDebugGroup(fmt::format("Material Pass: {}", MaterialPassToString(staticPass.flag)).c_str());
+        context.SetStencilRef(1);
+        auto clearRenderTarget = ClearRT{false};
+
+        // PassManifest verifies static/skinned pass pairs specify the same render targets, so we can just choose from either here.
+        BindRenderTarget(context, swapChain, *m_perPassResourceSignature, staticPass.sinks.color, staticPass.sinks.depth, IsMsaa{staticPass.isMsaa.value && m_numSamples > 1});
+        ClearRenderTarget(context, swapChain, *m_perPassResourceSignature, staticPass.sinks.color, staticPass.sinks.depth,  IsMsaa{staticPass.isMsaa.value && m_numSamples > 1}, ClearStencil{false}, ClearRT{false});
+        SetViewportAndScissor(context, swapChain.GetDesc(), viewport);
+
+        context.SetPipelineState(staticPass.pso);
+        DrawIndexed(context, staticBatches);
+        context.SetPipelineState(skinnedPass.pso);
+        DrawIndexed(context, skinnedBatches);
+
+        context.EndDebugGroup();
+    }
+}
+
+void PassBackend::RenderMaterial(Diligent::IDeviceContext& context,
+                                 Diligent::ISwapChain& swapChain,
                                  const std::vector<std::vector<Batch>>& staticPassBatches,
                                  const std::vector<std::vector<Batch>>& skinnedPassBatches,
                                  const std::span<const LightData>& lights,
@@ -486,11 +534,14 @@ void PassBackend::RenderMaterial(IDeviceContext& context,
             continue;
         }
 
+        if (staticPass.flag & MaterialPassFlag::StencilOutline || staticPass.flag & MaterialPassFlag::StencilOutline)
+        {
+            continue;
+        }
+
         context.BeginDebugGroup(fmt::format("Material Pass: {}", MaterialPassToString(staticPass.flag)).c_str());
 
-        if (staticPass.flag & MaterialPassFlag::StencilOutline ||
-            skinnedPass.flag & MaterialPassFlag::StencilOutline ||
-            staticPass.flag & MaterialPassFlag::Toon ||
+        if (staticPass.flag & MaterialPassFlag::Toon ||
             skinnedPass.flag & MaterialPassFlag::Toon)
         {
             context.SetStencilRef(1);
@@ -506,16 +557,9 @@ void PassBackend::RenderMaterial(IDeviceContext& context,
             clearStencil.value = true;
         }
 
-        auto clearRenderTarget = ClearRT{};
-        if (staticPass.flag & MaterialPassFlag::StencilOutline ||
-            skinnedPass.flag & MaterialPassFlag::StencilOutline)
-        {
-            clearRenderTarget.value = false;
-        }
-
         // PassManifest verifies static/skinned pass pairs specify the same render targets, so we can just choose from either here.
         BindRenderTarget(context, swapChain, *m_perPassResourceSignature, staticPass.sinks.color, staticPass.sinks.depth, IsMsaa{staticPass.isMsaa.value && m_numSamples > 1});
-        ClearRenderTarget(context, swapChain, *m_perPassResourceSignature, staticPass.sinks.color, staticPass.sinks.depth,  IsMsaa{staticPass.isMsaa.value && m_numSamples > 1}, ClearStencil{clearStencil}, clearRenderTarget);
+        ClearRenderTarget(context, swapChain, *m_perPassResourceSignature, staticPass.sinks.color, staticPass.sinks.depth,  IsMsaa{staticPass.isMsaa.value && m_numSamples > 1}, ClearStencil{clearStencil}, ClearRT{});
         SetViewportAndScissor(context, swapChain.GetDesc(), viewport);
 
         context.SetPipelineState(staticPass.pso);

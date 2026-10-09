@@ -15,17 +15,20 @@ auto ToMaterialData(const nc::MaterialProperties& properties) -> nc::graphics::M
         .primaryColor = properties.primaryColor,
         .secondaryColor = properties.secondaryColor,
         .tertiaryColor = properties.tertiaryColor,
+        .stencilOutlineColor = properties.stencilOutlineColor,
         .normalIntensity = properties.normalIntensity,
         .hatchTiling = properties.hatchTiling,
         .gradientAmount = properties.gradientAmount,
         .reflectivity = properties.reflectivity,
+        .stencilOutlineWidth = properties.stencilOutlineWidth,
         .diffuseTexIndex = properties.diffuseTex.index,
         .normalTexIndex = properties.normalTex.index,
         .hatchTexIndex = properties.hatchTex.index,
         .useTextureNormals = properties.useTextureNormals,
         .useFlatShading = properties.useFlatShading,
         .useColorOverride = properties.useColorOverride,
-        .useHatchTexture = properties.useHatchTexture
+        .useHatchTexture = properties.useHatchTexture,
+        .useStencilOutline = properties.useStencilOutline
     };
 }
 } // anonymous namespace
