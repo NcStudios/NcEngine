@@ -32,7 +32,7 @@ auto CreatePipeline(Diligent::IRenderDevice& device,
     auto depthFormat = TEX_FORMAT_UNKNOWN;
     if (passDesc.depthSink != DepthTarget::None)
     {
-        depthFormat = OffScreenDepthRTFormat;
+        depthFormat = OffScreenDepthStencilRTFormat;
     }
 
     ci.GraphicsPipeline.NumRenderTargets                  = 1;

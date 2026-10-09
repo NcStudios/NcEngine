@@ -71,7 +71,7 @@ auto CreatePipeline(Diligent::IRenderDevice& device,
     }
     else if (passDesc.depthSink != DepthTarget::None)
     {
-        ci.GraphicsPipeline.DSVFormat = OffScreenDepthRTFormat;
+        ci.GraphicsPipeline.DSVFormat = OffScreenDepthStencilRTFormat;
     }
     else
     {

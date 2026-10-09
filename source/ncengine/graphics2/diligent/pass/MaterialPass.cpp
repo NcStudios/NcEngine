@@ -45,7 +45,11 @@ auto CreatePipeline(Diligent::IRenderDevice& device,
     }
 
     auto depthFormat = TEX_FORMAT_UNKNOWN;
-    if (passDesc.depthSink != DepthTarget::None || passDesc.shadowMapSink != ShadowMapTarget::None)
+    if (passDesc.depthSink != DepthTarget::None)
+    {
+        depthFormat = OffScreenDepthStencilRTFormat;
+    }
+    else if (passDesc.shadowMapSink != ShadowMapTarget::None)
     {
         depthFormat = OffScreenDepthRTFormat;
     }
