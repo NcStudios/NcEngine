@@ -41,6 +41,7 @@ struct PostProcessPass : public Pass
                     bool isFinalPass = false);
     std::vector<PostProcessPipelineInstance> instances;
     bool anyEnabled = false;
+    std::string_view name = {};
     uint64_t flag = 0;
 };
 } // namespace nc::graphics
