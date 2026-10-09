@@ -683,4 +683,9 @@ void PassBackend::MakePassesAndPipelines(IRenderDevice& device,
     }, true);
     m_finalPass->sources.postProcess = m_finalPostProcessTarget.value();
 }
+
+void PassBackend::BindSwapchain(Diligent::IDeviceContext& context, Diligent::ISwapChain& swapChain)
+{
+    BindRenderTarget(context, swapChain, *m_perPassResourceSignature, SwapChainTarget, DepthStencilTarget, false);
+}
 } // namespace nc::graphics

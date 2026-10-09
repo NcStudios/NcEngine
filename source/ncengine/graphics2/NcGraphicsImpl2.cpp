@@ -644,6 +644,8 @@ void NcGraphicsImpl2::Run()
         m_viewport
     );
 
+    m_passBackend.BindSwapchain(context, swapChain);
+
     m_ui.Render(context);
 
     swapChain.Present();

@@ -27,8 +27,8 @@ void main(in  VSInput VSIn, uint InstanceID : SV_InstanceID,  out PSInput PSIn)
     uint materialIndex = StaticInstances[InstanceID].materialIndex;
 
     // Scale vertex position along normals
-    float outlineWidth = 1.01f;
-    float4 scaledPos = float4(VSIn.Pos, 1.0f) + float4(VSIn.Normal, 0.0f) * outlineWidth;
+    float outlineWidth = 0.025f;
+    float4 scaledPos = float4(VSIn.Pos, 1.0f) + normalize(float4(VSIn.Normal, 0.0f)) * outlineWidth;
 
     float4 TransformedPos = mul(scaledPos, Transforms[transformIndex].model);
     PSIn.Pos = mul(TransformedPos, cameraViewProjection);

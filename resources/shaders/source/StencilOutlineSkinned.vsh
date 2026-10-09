@@ -46,8 +46,8 @@ void main(in VSInput VSIn, uint InstanceID : SV_InstanceID, out PSInput PSIn)
     float4 normal = float4(VSIn.Normal, 0.0);
 
     // Scale vertex position along normals
-    float outlineWidth = 1.01f;
-    float4 scaledPos = pos + normal * outlineWidth;
+    float outlineWidth =  0.025f;
+    float4 scaledPos = pos + normalize(normal) * outlineWidth;
 
 #ifdef ENABLE_SKINNING
     if (IsValidBoneIndex(instance.boneIndex))
