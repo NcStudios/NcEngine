@@ -49,35 +49,15 @@ auto CreatePipeline(Diligent::IRenderDevice& device,
     ci.pPS = shaders.pixelShader;
     ci.pVS = shaders.vertexShader;
 
-    if (passDesc.colorSink == ColorTarget::Swapchain)
-    {
-        ci.GraphicsPipeline.NumRenderTargets = 1;
-        ci.GraphicsPipeline.RTVFormats[0] = swapChain.GetDesc().ColorBufferFormat;
-    }
-    else if (passDesc.postProcessSink != PostProcessTarget::None)
-    {
-        ci.GraphicsPipeline.NumRenderTargets = 1;
-        ci.GraphicsPipeline.RTVFormats[0] = OffScreenColorRTFormat;
-    }
-    else
-    {
-        ci.GraphicsPipeline.NumRenderTargets = 0u;
-        ci.GraphicsPipeline.RTVFormats[0] = TEX_FORMAT_UNKNOWN;
-    }
+    const auto textureFormat = ToTextureFormat(swapChain, 
+                                               passDesc.colorSink,
+                                               passDesc.depthSink,
+                                               passDesc.shadowMapSink,
+                                               passDesc.postProcessSink);
 
-    if (passDesc.depthSink == DepthTarget::DepthStencil)
-    {
-        ci.GraphicsPipeline.DSVFormat = swapChain.GetDesc().DepthBufferFormat;
-    }
-    else if (passDesc.depthSink != DepthTarget::None)
-    {
-        ci.GraphicsPipeline.DSVFormat = OffScreenDepthStencilRTFormat;
-    }
-    else
-    {
-        ci.GraphicsPipeline.DSVFormat = TEX_FORMAT_UNKNOWN;
-    }
-
+    ci.GraphicsPipeline.NumRenderTargets                  = passDesc.numRenderTargets;
+    ci.GraphicsPipeline.RTVFormats[0]                     = textureFormat.colorFormat;
+    ci.GraphicsPipeline.DSVFormat                         = textureFormat.depthFormat;
     ci.GraphicsPipeline.PrimitiveTopology                 = PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP;
     ci.GraphicsPipeline.RasterizerDesc.CullMode           = ToDiligentCullMode(passDesc.cullMode);
     ci.GraphicsPipeline.DepthStencilDesc.DepthEnable      = passDesc.useDepthTest;

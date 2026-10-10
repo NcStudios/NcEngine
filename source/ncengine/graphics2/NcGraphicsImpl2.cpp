@@ -176,6 +176,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .shaderPaths = ShaderPaths{shader::SkyboxPixel, shader::SkyboxVertex},
                     .colorSink = ColorTarget::Main,
                     .depthSink = DepthTarget::Main,
+                    .numRenderTargets = 1,
                     .useDepthTest = true
                 },
                 PassDesc{
@@ -185,6 +186,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .layoutElements = VertexAttribute::Pos,
                     .shaderPaths = ShaderPaths{.vertexShaderPath = shader::UniShadowMapVertex},
                     .shadowMapSink = ShadowMapTarget::Uni,
+                    .numRenderTargets = 0,
                     .isMsaa = IsMsaa{false},
                     .useDepthTest = true
                 },
@@ -195,6 +197,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .layoutElements = VertexAttribute::Skinning,
                     .shaderPaths = ShaderPaths{.vertexShaderPath =  shader::UniShadowMapSkinnedVertex},
                     .shadowMapSink = ShadowMapTarget::Uni,
+                    .numRenderTargets = 0,
                     .isMsaa =  IsMsaa{false},
                     .useDepthTest = true
                 },
@@ -205,6 +208,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .layoutElements = VertexAttribute::Pos,
                     .shaderPaths = ShaderPaths{.pixelShaderPath = shader::PointShadowMapPixel, .vertexShaderPath = shader::PointShadowMapVertex},
                     .shadowMapSink = ShadowMapTarget::Point,
+                    .numRenderTargets = 1,
                     .cullMode = CullMode::Back,
                     .isMsaa =  IsMsaa{false},
                     .useDepthTest = true
@@ -216,6 +220,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .layoutElements = VertexAttribute::Skinning,
                     .shaderPaths = ShaderPaths{ .pixelShaderPath = shader::PointShadowMapPixel, .vertexShaderPath = shader::PointShadowMapSkinnedVertex},
                     .shadowMapSink = ShadowMapTarget::Point,
+                    .numRenderTargets = 1,
                     .cullMode = CullMode::Back,
                     .isMsaa =  IsMsaa{false},
                     .useDepthTest = true
@@ -227,6 +232,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .layoutElements = VertexAttribute::Texturing,
                     .shaderPaths = ShaderPaths{.vertexShaderPath = shader::ToonVertex},
                     .depthSink = DepthTarget::Main,
+                    .numRenderTargets = 0,
                     .isMsaa =  IsMsaa{false},
                     .useDepthTest = true
                 },
@@ -237,8 +243,35 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .layoutElements = VertexAttribute::All,
                     .shaderPaths = ShaderPaths{.vertexShaderPath = shader::ToonSkinnedVertex},
                     .depthSink = DepthTarget::Main,
+                    .numRenderTargets = 0,
                     .isMsaa =  IsMsaa{false},
                     .useDepthTest = true
+                },
+                PassDesc{
+                    .flag = MaterialPassFlag::ToonStencilWrite,
+                    .name = "ToonStencilWrite",
+                    .type = PassType::Material,
+                    .layoutElements = VertexAttribute::Texturing,
+                    .shaderPaths = ShaderPaths{shader::ToonPixel, shader::ToonVertex},
+                    .colorSink = ColorTarget::Main,
+                    .depthSink = DepthTarget::Main,
+                    .numRenderTargets = 1,
+                    .useDepthTest = true,
+                    .alphaBlend = true,
+                    .writeStencil = true
+                },
+                PassDesc{
+                    .flag = MaterialPassFlag::ToonStencilWrite,
+                    .name = "ToonStencilWriteSkinned",
+                    .type = PassType::SkinnedMaterial,
+                    .layoutElements = VertexAttribute::All,
+                    .shaderPaths = ShaderPaths{shader::ToonPixel, shader::ToonSkinnedVertex},
+                    .colorSink = ColorTarget::Main,
+                    .depthSink = DepthTarget::Main,
+                    .numRenderTargets = 1,
+                    .useDepthTest = true,
+                    .alphaBlend = true,
+                    .writeStencil = true
                 },
                 PassDesc{
                     .flag = MaterialPassFlag::Toon,
@@ -248,9 +281,9 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .shaderPaths = ShaderPaths{shader::ToonPixel, shader::ToonVertex},
                     .colorSink = ColorTarget::Main,
                     .depthSink = DepthTarget::Main,
+                    .numRenderTargets = 1,
                     .useDepthTest = true,
-                    .alphaBlend = true,
-                    .writeStencil = true
+                    .alphaBlend = true
                 },
                 PassDesc{
                     .flag = MaterialPassFlag::Toon,
@@ -260,9 +293,9 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .shaderPaths = ShaderPaths{shader::ToonPixel, shader::ToonSkinnedVertex},
                     .colorSink = ColorTarget::Main,
                     .depthSink = DepthTarget::Main,
+                    .numRenderTargets = 1,
                     .useDepthTest = true,
-                    .alphaBlend = true,
-                    .writeStencil = true
+                    .alphaBlend = true
                 },
                 PassDesc{
                     .flag = MaterialPassFlag::Normals,
@@ -272,6 +305,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .shaderPaths = ShaderPaths{shader::NormalsPixel, shader::ToonVertex},
                     .colorSink = ColorTarget::Normals,
                     .depthSink = DepthTarget::Main,
+                    .numRenderTargets = 1,
                     .useDepthTest = true
                 },
                 PassDesc{
@@ -282,6 +316,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .shaderPaths = ShaderPaths{shader::NormalsPixel, shader::ToonSkinnedVertex},
                     .colorSink = ColorTarget::Normals,
                     .depthSink = DepthTarget::Main,
+                    .numRenderTargets = 1,
                     .useDepthTest = true
                 },
                 PassDesc{
@@ -293,6 +328,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .colorSources = std::vector{ColorTarget::Main, ColorTarget::Normals},
                     .depthSources = std::vector{DepthTarget::Main},
                     .postProcessSink = PostProcessTarget::PPOutline,
+                    .numRenderTargets = 1,
                     .isMsaa =  IsMsaa{false},
                     .useDepthTest = false
                 },
@@ -304,6 +340,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .shaderPaths = ShaderPaths{shader::PPFxaaPixel, shader::PostProcessVertex},
                     .postProcessSource = PostProcessTarget::PPOutline,
                     .postProcessSink = PostProcessTarget::PPFxaa,
+                    .numRenderTargets = 1,
                     .isMsaa =  IsMsaa{false},
                     .useDepthTest = false
                 },
@@ -315,6 +352,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .shaderPaths = ShaderPaths{shader::PPNoisePixel, shader::PostProcessVertex},
                     .postProcessSource = PostProcessTarget::PPFxaa,
                     .postProcessSink = PostProcessTarget::PPNoise,
+                    .numRenderTargets = 1,
                     .isMsaa =  IsMsaa{false},
                     .useDepthTest = false
                 },
@@ -326,6 +364,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .shaderPaths = ShaderPaths{shader::WireframePixel, shader::WireframeVertex},
                     .colorSink = ColorTarget::Swapchain,
                     .depthSink = DepthTarget::Main,
+                    .numRenderTargets = 1,
                     .useDepthTest = true
                 },
                 PassDesc{
@@ -336,6 +375,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .shaderPaths = ShaderPaths{shader::ParticlePixel, shader::ParticleVertex},
                     .colorSink = ColorTarget::Swapchain,
                     .depthSink = DepthTarget::Main,
+                    .numRenderTargets = 1,
                     .useDepthTest = true,
                     .alphaBlend = true
                 },
@@ -347,6 +387,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .shaderPaths = ShaderPaths{shader::StencilOutlinePixel, shader::StencilOutlineVertex},
                     .colorSink = ColorTarget::Swapchain,
                     .depthSink = DepthTarget::Main,
+                    .numRenderTargets = 1,
                     .useDepthTest = false,
                     .alphaBlend = false
                 },
@@ -358,6 +399,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .shaderPaths = ShaderPaths{shader::StencilOutlinePixel, shader::StencilOutlineSkinnedVertex},
                     .colorSink = ColorTarget::Swapchain,
                     .depthSink = DepthTarget::Main,
+                    .numRenderTargets = 1,
                     .useDepthTest = false,
                     .alphaBlend = false
                 }
@@ -629,7 +671,6 @@ void NcGraphicsImpl2::Run()
         context,
         swapChain
     );
-
 
     m_passBackend.RenderWireframe(
         context,

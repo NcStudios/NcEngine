@@ -86,4 +86,10 @@ auto ToColorRenderTargetView(Diligent::ISwapChain& swapChain,
                              SinkBufferResource& colorSinkBufferResource,
                              uint32_t index,
                              IsMsaa isMsaa) -> Diligent::ITextureView*;
+
+auto ToTextureFormat(Diligent::ISwapChain& swapChain,
+                      const ColorTarget& colorTarget,
+                      const DepthTarget& depthTarget,
+                      const ShadowMapTarget& shadowMapTarget,
+                      const PostProcessTarget& postProcessTarget) -> TextureFormat;
 } // namespace nc::graphics

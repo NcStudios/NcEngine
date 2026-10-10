@@ -13,6 +13,7 @@ using namespace Diligent;
 using namespace nc::graphics;
 
 auto CreatePipeline(Diligent::IRenderDevice& device,
+                    Diligent::ISwapChain& swapChain,
                     const PipelineShaders& shaders,
                     ShaderBindings& shaderBindings,
                     const PassDesc& passDesc,
@@ -28,35 +29,15 @@ auto CreatePipeline(Diligent::IRenderDevice& device,
     ci.pPS = shaders.pixelShader;
     ci.pVS = shaders.vertexShader;
 
-    auto colorFormat = TEX_FORMAT_UNKNOWN;
-    if (passDesc.colorSink != ColorTarget::None)
-    {
-        colorFormat = OffScreenColorRTFormat;
-    }
-    else if (passDesc.shadowMapSink == ShadowMapTarget::Point)
-    {
-        colorFormat = OffScreenShadowMapRTFormat;
-    }
+    const auto textureFormat = ToTextureFormat(swapChain, 
+                                               passDesc.colorSink,
+                                               passDesc.depthSink,
+                                               passDesc.shadowMapSink,
+                                               passDesc.postProcessSink);
 
-    auto numColorTargets = 0u;
-    if (passDesc.colorSink != ColorTarget::None || passDesc.shadowMapSink == ShadowMapTarget::Point)
-    {
-        numColorTargets = 1;
-    }
-
-    auto depthFormat = TEX_FORMAT_UNKNOWN;
-    if (passDesc.depthSink != DepthTarget::None)
-    {
-        depthFormat = OffScreenDepthStencilRTFormat;
-    }
-    else if (passDesc.shadowMapSink != ShadowMapTarget::None)
-    {
-        depthFormat = OffScreenDepthRTFormat;
-    }
-
-    ci.GraphicsPipeline.NumRenderTargets                  = static_cast<uint8_t>(numColorTargets);
-    ci.GraphicsPipeline.RTVFormats[0]                     = colorFormat;
-    ci.GraphicsPipeline.DSVFormat                         = depthFormat;
+    ci.GraphicsPipeline.NumRenderTargets                  = passDesc.numRenderTargets;
+    ci.GraphicsPipeline.RTVFormats[0]                     = textureFormat.colorFormat;
+    ci.GraphicsPipeline.DSVFormat                         = textureFormat.depthFormat;
     ci.GraphicsPipeline.RasterizerDesc.CullMode           = ToDiligentCullMode(passDesc.cullMode);
     ci.GraphicsPipeline.RasterizerDesc.DepthClipEnable    = passDesc.shadowMapSink != ShadowMapTarget::None ? false : true;
 
@@ -121,13 +102,14 @@ auto CreatePipeline(Diligent::IRenderDevice& device,
 namespace nc::graphics
 {
 MaterialPass::MaterialPass(Diligent::IRenderDevice& device,
+                           Diligent::ISwapChain& swapChain,
                            const PipelineShaders& shaders,
                            ShaderBindings& shaderBindings,
                            const PassManifest& passManifest,
                            const PassDesc& passDesc,
                            uint32_t numSamples)
     : Pass{
-        CreatePipeline(device, shaders, shaderBindings, passDesc, numSamples),
+        CreatePipeline(device, swapChain, shaders, shaderBindings, passDesc, numSamples),
         GetSinks(passManifest, passDesc),
         GetSources(passManifest, passDesc)
       },

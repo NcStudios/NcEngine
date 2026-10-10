@@ -37,6 +37,11 @@ struct ClearRT
     bool value = true;
 };
 
+struct TextureFormat
+{
+    Diligent::TEXTURE_FORMAT colorFormat = Diligent::TEX_FORMAT_UNKNOWN;
+    Diligent::TEXTURE_FORMAT depthFormat = Diligent::TEX_FORMAT_UNKNOWN;
+};
 
 enum class ColorTarget : uint8_t
 {
@@ -128,10 +133,12 @@ struct PassDesc
     DepthTarget depthSink = DepthTarget::None;
     ShadowMapTarget shadowMapSink = ShadowMapTarget::None;
     PostProcessTarget postProcessSink = PostProcessTarget::None;
+    uint8_t numRenderTargets = 0;
     CullMode cullMode = CullMode::Back;
     IsMsaa isMsaa = IsMsaa{true};
     bool useDepthTest = true;
     bool alphaBlend = false;
     bool writeStencil = false;
+
 };
 } // namespace nc::graphics

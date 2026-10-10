@@ -17,6 +17,7 @@ using namespace Diligent;
 using namespace nc::graphics;
 
 auto CreatePipeline(Diligent::IRenderDevice& device,
+                    Diligent::ISwapChain& swapChain,
                     const PipelineShaders& shaders,
                     ShaderBindings& shaderBindings,
                     const PassDesc& passDesc,
@@ -32,9 +33,15 @@ auto CreatePipeline(Diligent::IRenderDevice& device,
     ci.pPS = shaders.pixelShader;
     ci.pVS = shaders.vertexShader;
 
-    ci.GraphicsPipeline.NumRenderTargets                  = passDesc.colorSink == ColorTarget::None ? 0 : 1;
-    ci.GraphicsPipeline.RTVFormats[0]                     = passDesc.colorSink == ColorTarget::None ? TEX_FORMAT_UNKNOWN : OffScreenColorRTFormat;
-    ci.GraphicsPipeline.DSVFormat                         = OffScreenDepthStencilRTFormat;
+    const auto textureFormat = ToTextureFormat(swapChain, 
+                                            passDesc.colorSink,
+                                            passDesc.depthSink,
+                                            passDesc.shadowMapSink,
+                                            passDesc.postProcessSink);
+
+    ci.GraphicsPipeline.NumRenderTargets                  = passDesc.numRenderTargets;
+    ci.GraphicsPipeline.RTVFormats[0]                     = textureFormat.colorFormat;
+    ci.GraphicsPipeline.DSVFormat                         = textureFormat.depthFormat;
     ci.GraphicsPipeline.RasterizerDesc.CullMode           = ToDiligentCullMode(passDesc.cullMode);
     ci.GraphicsPipeline.DepthStencilDesc.DepthEnable      = passDesc.useDepthTest;
     ci.GraphicsPipeline.DepthStencilDesc.DepthWriteEnable = false;
@@ -60,13 +67,14 @@ auto CreatePipeline(Diligent::IRenderDevice& device,
 namespace nc::graphics
 {
 WireframePass::WireframePass(Diligent::IRenderDevice& device,
+                             Diligent::ISwapChain& swapChain,
                              const PipelineShaders& shaders,
                              ShaderBindings& shaderBindings,
                              const PassManifest& passManifest,
                              const PassDesc& passDesc,
                              uint32_t numSamples)
     : Pass{
-        CreatePipeline(device, shaders, shaderBindings, passDesc, numSamples),
+        CreatePipeline(device, swapChain, shaders, shaderBindings, passDesc, numSamples),
         GetSinks(passManifest, passDesc),
         GetSources(passManifest, passDesc)
       },

@@ -243,4 +243,55 @@ auto ToDiligentCullMode(CullMode cullMode) -> Diligent::CULL_MODE
     }
     return Diligent::CULL_MODE_BACK;
 }
+
+auto ToTextureFormat(Diligent::ISwapChain& swapChain,
+                     const ColorTarget& colorTarget,
+                     const DepthTarget& depthTarget,
+                     const ShadowMapTarget& shadowMapTarget,
+                     const PostProcessTarget& postProcessTarget) -> TextureFormat
+{
+    auto textureFormat = TextureFormat{};
+
+    // Color format
+    if (colorTarget == ColorTarget::Swapchain)
+    {
+        textureFormat.colorFormat = swapChain.GetDesc().ColorBufferFormat;
+    }
+    else if (postProcessTarget != PostProcessTarget::None)
+    {
+        textureFormat.colorFormat = OffScreenColorRTFormat;
+    }
+    else if (colorTarget != ColorTarget::None)
+    {
+        textureFormat.colorFormat = OffScreenColorRTFormat;
+    }
+    else if (shadowMapTarget == ShadowMapTarget::Point)
+    {
+        textureFormat.colorFormat = OffScreenShadowMapRTFormat;
+    }
+    else
+    {
+        textureFormat.colorFormat = Diligent::TEX_FORMAT_UNKNOWN;
+    }
+
+    // Depth format
+    if (depthTarget == DepthTarget::DepthStencil)
+    {
+        textureFormat.depthFormat = swapChain.GetDesc().DepthBufferFormat;
+    }
+    else if (depthTarget != DepthTarget::None)
+    {
+        textureFormat.depthFormat = OffScreenDepthStencilRTFormat;
+    }
+    else if (shadowMapTarget != ShadowMapTarget::None)
+    {
+        textureFormat.depthFormat = OffScreenDepthRTFormat;
+    }
+    else
+    {
+        textureFormat.depthFormat = Diligent::TEX_FORMAT_UNKNOWN;
+    }
+
+    return textureFormat;
+}
 } // namespace nc::graphics

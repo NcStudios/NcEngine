@@ -13,6 +13,7 @@ constexpr auto g_materialPassNames = std::array{
     std::string_view{"PointShadow"},
     std::string_view{"Depth"},
     std::string_view{"Toon"},
+    std::string_view{"ToonStencilWrite"},
     std::string_view{"StencilOutline"},
     std::string_view{"Normals"}
 };
@@ -22,6 +23,7 @@ constexpr auto g_materialPassFlags = std::array{
     nc::MaterialPassFlag::PointShadow,
     nc::MaterialPassFlag::Depth,
     nc::MaterialPassFlag::Toon,
+    nc::MaterialPassFlag::ToonStencilWrite,
     nc::MaterialPassFlag::StencilOutline,
     nc::MaterialPassFlag::Normals
 };

@@ -19,6 +19,7 @@ class ShaderBindings;
 struct MaterialPass : public Pass
 {
     explicit MaterialPass(Diligent::IRenderDevice& device,
+                          Diligent::ISwapChain& swapChain,
                           const PipelineShaders& shaders,
                           ShaderBindings& shaderBindings,
                           const PassManifest& passManifest,
