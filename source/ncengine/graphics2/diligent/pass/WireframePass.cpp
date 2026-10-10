@@ -76,10 +76,10 @@ WireframePass::WireframePass(Diligent::IRenderDevice& device,
     : Pass{
         CreatePipeline(device, swapChain, shaders, shaderBindings, passDesc, numSamples),
         GetSinks(passManifest, passDesc),
-        GetSources(passManifest, passDesc)
+        GetSources(passManifest, passDesc),
+        passDesc
       },
-      buffer{&shaderBindings.GetPerFrameSignature().GetWireframeBuffer()},
-      isMsaa{numSamples > 1}
+      buffer{&shaderBindings.GetPerFrameSignature().GetWireframeBuffer()}
 {
 }
 } // namespace nc::graphics

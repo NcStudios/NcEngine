@@ -75,9 +75,9 @@ ParticlePass::ParticlePass(Diligent::IRenderDevice& device,
     : Pass{
         CreatePipeline(device, shaders, shaderBindings, passDesc, numSamples),
         GetSinks(passManifest, passDesc),
-        GetSources(passManifest, passDesc)
-      },
-      isMsaa{numSamples > 1}
+        GetSources(passManifest, passDesc),
+        passDesc
+      }
 {
 }
 } // namespace nc::graphics

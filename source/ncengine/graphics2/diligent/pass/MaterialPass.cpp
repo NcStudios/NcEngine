@@ -111,12 +111,9 @@ MaterialPass::MaterialPass(Diligent::IRenderDevice& device,
     : Pass{
         CreatePipeline(device, swapChain, shaders, shaderBindings, passDesc, numSamples),
         GetSinks(passManifest, passDesc),
-        GetSources(passManifest, passDesc)
-      },
-      flag{passDesc.flag},
-      isMsaa{passDesc.isMsaa},
-      useStencil{passDesc.writeStencil}
-{
-}
+        GetSources(passManifest, passDesc),
+        passDesc
+      }
+{}
 
 } // namespace nc::graphics

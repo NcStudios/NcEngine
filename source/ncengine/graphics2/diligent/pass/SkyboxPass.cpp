@@ -67,7 +67,10 @@ SkyboxPass::SkyboxPass(Diligent::IRenderDevice& device,
                        ShaderBindings& shaderBindings,
                        const PassManifest& passManifest,
                        const PassDesc& passDesc)
-    : Pass{CreatePipeline(device, shaders, shaderBindings, passDesc), GetSinks(passManifest, passDesc), GetSources(passManifest, passDesc)}
+    : Pass{CreatePipeline(device, shaders, shaderBindings, passDesc), 
+           GetSinks(passManifest, passDesc),
+           GetSources(passManifest, passDesc),
+           passDesc}
 {
 }
 

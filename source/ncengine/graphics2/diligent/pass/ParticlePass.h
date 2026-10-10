@@ -20,6 +20,5 @@ struct ParticlePass : public Pass
                           const PassManifest& passManifest,
                           const PassDesc& passDesc,
                           uint32_t numSamples);
-    bool isMsaa;
 };
 } // namespace nc::graphics

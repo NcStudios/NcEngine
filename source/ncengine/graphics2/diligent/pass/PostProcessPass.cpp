@@ -90,11 +90,9 @@ PostProcessPass::PostProcessPass(IRenderDevice& device,
     : Pass{
         CreatePipeline(device, swapChain, shaders, shaderBindings, passDesc),
         GetSinks(passManifest, passDesc),
-        GetSources(passManifest, passDesc)
+        GetSources(passManifest, passDesc),
+        passDesc
         },
-      instances{isFinalPass ? std::vector<PostProcessPipelineInstance>{} : MakePostProcessPassInstances(passDesc.flag)},
-      name{passDesc.name},
-      flag{passDesc.flag}
-{
-}
+      instances{isFinalPass ? std::vector<PostProcessPipelineInstance>{} : MakePostProcessPassInstances(desc.flag)}
+{}
 } // namespace nc::graphics

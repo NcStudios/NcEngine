@@ -65,7 +65,7 @@ auto FindInstance(std::vector<PostProcessPass>& passes,
                   PostProcessEffectId effectId,
                   PostProcessPassFlag::type passFlag) -> PostProcessPipelineInstance&
 {
-    auto pass = std::ranges::find_if(passes, [passFlag](auto& ppPass) { return ppPass.flag == passFlag; });
+    auto pass = std::ranges::find_if(passes, [passFlag](auto& ppPass) { return ppPass.desc.flag == passFlag; });
     if (pass != passes.end())
     {
         auto instance = std::ranges::find(pass->instances, effectId, &PostProcessPipelineInstance::effectId);
@@ -239,7 +239,7 @@ void PassBackend::Update(IRenderDevice& device,
     {
         for (auto& pass : m_postProcessPasses)
         {
-            if (pass.flag & effectPasses)
+            if (pass.desc.flag & effectPasses)
             {
                 enabled ? EnableInstance(effectId, pass) : DisableInstance(effectId, pass);
             }
@@ -354,7 +354,7 @@ void PassBackend::RenderShadowPass(IDeviceContext& context,
 
         hasSomeShadowCaster = true;
 
-        if (staticPass.flag & MaterialPassFlag::UniShadow && light.type != LightType::Point && m_uniSinksToCreate == 0)
+        if (staticPass.desc.flag & MaterialPassFlag::UniShadow && light.type != LightType::Point && m_uniSinksToCreate == 0)
         {
             context.BeginDebugGroup("Material Pass: UniShadow", DebugA.data());
 
@@ -372,7 +372,7 @@ void PassBackend::RenderShadowPass(IDeviceContext& context,
 
             context.EndDebugGroup();
         }
-        else if (staticPass.flag & MaterialPassFlag::PointShadow && light.type == LightType::Point && m_pointSinksToCreate == 0) // Point lights have six faces to render, not one
+        else if (staticPass.desc.flag & MaterialPassFlag::PointShadow && light.type == LightType::Point && m_pointSinksToCreate == 0) // Point lights have six faces to render, not one
         {
             context.BeginDebugGroup("Material Pass: PointShadow", DebugB.data());
 
@@ -489,18 +489,18 @@ void PassBackend::RenderStencilOutlineMaterial(IDeviceContext& context,
 
     for (auto [staticPass, skinnedPass, staticBatches, skinnedBatches] : passView)
     {
-        if (!(staticPass.flag & MaterialPassFlag::StencilOutline) && !(staticPass.flag & MaterialPassFlag::StencilOutline))
+        if (!(staticPass.desc.flag & MaterialPassFlag::StencilOutline) && !(staticPass.desc.flag & MaterialPassFlag::StencilOutline))
         {
             continue;
         }
 
-        context.BeginDebugGroup(fmt::format("Material Pass: {}", MaterialPassToString(staticPass.flag)).c_str(), DebugD.data());
+        context.BeginDebugGroup(fmt::format("Material Pass: {}", MaterialPassToString(staticPass.desc.flag)).c_str(), DebugD.data());
         context.SetStencilRef(1);
         auto clearRenderTarget = ClearRT{false};
 
         // PassManifest verifies static/skinned pass pairs specify the same render targets, so we can just choose from either here.
-        BindRenderTarget(context, swapChain, *m_perPassResourceSignature, staticPass.sinks.color, staticPass.sinks.depth, IsMsaa{staticPass.isMsaa.value && m_numSamples > 1});
-        ClearRenderTarget(context, swapChain, *m_perPassResourceSignature, staticPass.sinks.color, staticPass.sinks.depth,  IsMsaa{staticPass.isMsaa.value && m_numSamples > 1}, ClearStencil{false}, ClearRT{false});
+        BindRenderTarget(context, swapChain, *m_perPassResourceSignature, staticPass.sinks.color, staticPass.sinks.depth, IsMsaa{staticPass.desc.isMsaa.value && m_numSamples > 1});
+        ClearRenderTarget(context, swapChain, *m_perPassResourceSignature, staticPass.sinks.color, staticPass.sinks.depth,  IsMsaa{staticPass.desc.isMsaa.value && m_numSamples > 1}, ClearStencil{false}, ClearRT{false});
         SetViewportAndScissor(context, swapChain.GetDesc(), viewport);
 
         context.SetPipelineState(staticPass.pso);
@@ -537,21 +537,21 @@ void PassBackend::RenderMaterial(Diligent::IDeviceContext& context,
     {
         m_finalColorTarget = m_finalColorTarget.has_value() ? std::min(staticPass.sinks.color, m_finalColorTarget.value()) : staticPass.sinks.color;
 
-        if (staticPass.flag & MaterialPassFlag::UniShadow || staticPass.flag & MaterialPassFlag::PointShadow)
+        if (staticPass.desc.flag & MaterialPassFlag::UniShadow || staticPass.desc.flag & MaterialPassFlag::PointShadow)
         {
             RenderShadowPass(context, staticPass, skinnedPass, staticBatches, skinnedBatches, lights);
             continue;
         }
 
-        if (staticPass.flag & MaterialPassFlag::StencilOutline || staticPass.flag & MaterialPassFlag::StencilOutline)
+        if (staticPass.desc.flag & MaterialPassFlag::StencilOutline || staticPass.desc.flag & MaterialPassFlag::StencilOutline)
         {
             continue;
         }
 
-        context.BeginDebugGroup(fmt::format("Material Pass: {}", MaterialPassToString(staticPass.flag)).c_str(), DebugE.data());
+        context.BeginDebugGroup(fmt::format("Material Pass: {}", MaterialPassToString(staticPass.desc.flag)).c_str(), DebugE.data());
 
-        if (staticPass.flag & MaterialPassFlag::ToonStencilWrite ||
-            skinnedPass.flag & MaterialPassFlag::ToonStencilWrite)
+        if (staticPass.desc.flag & MaterialPassFlag::ToonStencilWrite ||
+            skinnedPass.desc.flag & MaterialPassFlag::ToonStencilWrite)
         {
             context.SetStencilRef(1);
         }
@@ -561,14 +561,14 @@ void PassBackend::RenderMaterial(Diligent::IDeviceContext& context,
         }
 
         auto clearStencil = ClearStencil{};
-        if (staticPass.flag == MaterialPassFlag::ToonStencilWrite ||  skinnedPass.flag & MaterialPassFlag::ToonStencilWrite) // Pick an early pass
+        if (staticPass.desc.flag == MaterialPassFlag::ToonStencilWrite ||  skinnedPass.desc.flag & MaterialPassFlag::ToonStencilWrite) // Pick an early pass
         {
             clearStencil.value = true;
         }
 
         // PassManifest verifies static/skinned pass pairs specify the same render targets, so we can just choose from either here.
-        BindRenderTarget(context, swapChain, *m_perPassResourceSignature, staticPass.sinks.color, staticPass.sinks.depth, IsMsaa{staticPass.isMsaa.value && m_numSamples > 1});
-        ClearRenderTarget(context, swapChain, *m_perPassResourceSignature, staticPass.sinks.color, staticPass.sinks.depth,  IsMsaa{staticPass.isMsaa.value && m_numSamples > 1}, ClearStencil{clearStencil}, ClearRT{});
+        BindRenderTarget(context, swapChain, *m_perPassResourceSignature, staticPass.sinks.color, staticPass.sinks.depth, IsMsaa{staticPass.desc.isMsaa.value && m_numSamples > 1});
+        ClearRenderTarget(context, swapChain, *m_perPassResourceSignature, staticPass.sinks.color, staticPass.sinks.depth,  IsMsaa{staticPass.desc.isMsaa.value && m_numSamples > 1}, ClearStencil{clearStencil}, ClearRT{});
         SetViewportAndScissor(context, swapChain.GetDesc(), viewport);
 
         context.SetPipelineState(staticPass.pso);
@@ -593,7 +593,7 @@ void PassBackend::RenderWireframe(IDeviceContext& context,
     context.BeginDebugGroup("Wireframe Pass", DebugF.data());
 
     m_finalColorTarget = m_wireframePass->sinks.color;
-    BindRenderTarget(context, swapChain, *m_perPassResourceSignature, m_wireframePass->sinks.color, m_wireframePass->sinks.depth, IsMsaa{m_wireframePass->isMsaa.value && m_numSamples > 1});
+    BindRenderTarget(context, swapChain, *m_perPassResourceSignature, m_wireframePass->sinks.color, m_wireframePass->sinks.depth, IsMsaa{m_wireframePass->desc.isMsaa.value && m_numSamples > 1});
     SetViewportAndScissor(context, swapChain.GetDesc(), viewport);
     context.SetPipelineState(m_wireframePass->pso);
 
@@ -630,7 +630,7 @@ void PassBackend::RenderParticle(IDeviceContext& context,
     context.BeginDebugGroup("Particle Pass", DebugG.data());
 
     m_finalColorTarget = m_particlePass->sinks.color;
-    BindRenderTarget(context, swapChain, *m_perPassResourceSignature, m_particlePass->sinks.color, m_particlePass->sinks.depth, IsMsaa{m_particlePass->isMsaa && m_numSamples > 1});
+    BindRenderTarget(context, swapChain, *m_perPassResourceSignature, m_particlePass->sinks.color, m_particlePass->sinks.depth, IsMsaa{m_particlePass->desc.isMsaa.value && m_numSamples > 1});
     SetViewportAndScissor(context, swapChain.GetDesc(), viewport);
     context.SetPipelineState(m_particlePass->pso);
     const auto attribs = DrawIndexedAttribs{
@@ -665,7 +665,7 @@ void PassBackend::RenderPostProcess(IDeviceContext& context,
     {
         if (!pass.anyEnabled) continue;
 
-        context.BeginDebugGroup(fmt::format("Post Process Pass: {}", pass.name).c_str(), DebugH.data());
+        context.BeginDebugGroup(fmt::format("Post Process Pass: {}", pass.desc.name).c_str(), DebugH.data());
 
         m_finalPostProcessTarget = pass.sinks.postProcess;
 
