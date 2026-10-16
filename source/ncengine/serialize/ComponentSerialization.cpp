@@ -61,8 +61,11 @@ void SerializeMaterialDesc(std::ostream& stream, const MaterialInstance& out)
     serialize::Serialize(stream, properties.useTextureNormals);
     serialize::Serialize(stream, properties.tertiaryColor);
     serialize::Serialize(stream, properties.useFlatShading);
+    serialize::Serialize(stream, properties.stencilOutlineColor);
     serialize::Serialize(stream, properties.useColorOverride);
     serialize::Serialize(stream, properties.useHatchTexture);
+    serialize::Serialize(stream, properties.stencilOutlineWidth);
+    serialize::Serialize(stream, properties.useStencilOutline);
 }
 
 auto DeserializeMaterialDesc(std::istream& stream) -> MaterialDesc
@@ -84,8 +87,11 @@ auto DeserializeMaterialDesc(std::istream& stream) -> MaterialDesc
     serialize::Deserialize(stream, out.properties.useTextureNormals);
     serialize::Deserialize(stream, out.properties.tertiaryColor);
     serialize::Deserialize(stream, out.properties.useFlatShading);
+    serialize::Deserialize(stream, out.properties.stencilOutlineColor);
     serialize::Deserialize(stream, out.properties.useColorOverride);
     serialize::Deserialize(stream, out.properties.useHatchTexture);
+    serialize::Deserialize(stream, out.properties.stencilOutlineWidth);
+    serialize::Deserialize(stream, out.properties.useStencilOutline);
     return out;
 }
 

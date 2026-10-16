@@ -167,6 +167,7 @@ auto MaterialNodeWidget(nc::MeshBase& baseMesh, nc::asset::NcAsset& ncAsset)
         auto properties = material.GetProperties();
         auto passesModified = false;
         auto modified = false;
+        auto prevUseStencilOutline = properties.useStencilOutline;
 
         ImGui::Separator();
         if (ImGui::TreeNodeEx("Metadata"))
@@ -216,7 +217,7 @@ auto MaterialNodeWidget(nc::MeshBase& baseMesh, nc::asset::NcAsset& ncAsset)
             ImGui::TreePop();
         }
 
-        if (passesModified)
+        if (passesModified || prevUseStencilOutline != properties.useStencilOutline)
         {
             baseMesh.SetMaterial(nc::MaterialDesc{std::string{material.GetName()}, passes, properties});
         }
