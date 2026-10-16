@@ -389,7 +389,8 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .depthSink = DepthTarget::Main,
                     .numRenderTargets = 1,
                     .useDepthTest = false,
-                    .alphaBlend = false
+                    .alphaBlend = false,
+                    .useStencilTest = true
                 },
                 PassDesc{
                     .flag = MaterialPassFlag::StencilOutline,
@@ -401,7 +402,8 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .depthSink = DepthTarget::Main,
                     .numRenderTargets = 1,
                     .useDepthTest = false,
-                    .alphaBlend = false
+                    .alphaBlend = false,
+                    .useStencilTest = true
                 }
             },
             GetMaterialPassFlags(),

@@ -34,7 +34,7 @@ struct ClearStencil
 
 struct ClearRT
 {
-    bool value = true;
+    bool value = false;
 };
 
 struct TextureFormat

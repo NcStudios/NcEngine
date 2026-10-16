@@ -112,6 +112,9 @@ void ReloadPrefabs()
     material::ogre.properties.diffuseTex = texture::diffuse_ogre;
     material::ogre.properties.normalIntensity = .280f;
     material::ogre.properties.useFlatShading = 1;
+    material::ogre.properties.useStencilOutline = 1;
+    material::ogre.properties.stencilOutlineWidth = 0.2f;
+    material::ogre.properties.stencilOutlineColor = Vector4{1.0f, 1.0f, 0.0f, 1.0f};
 
     material::orange.properties = materialDefaults;
     material::orange.properties.diffuseTex = texture::diffuse_orange;

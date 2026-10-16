@@ -551,7 +551,10 @@ void PassBackend::RenderMaterial(Diligent::IDeviceContext& context,
         context.BeginDebugGroup(fmt::format("Material Pass: {}", MaterialPassToString(staticPass.desc.flag)).c_str(), DebugE.data());
 
         if (staticPass.desc.flag & MaterialPassFlag::ToonStencilWrite ||
-            skinnedPass.desc.flag & MaterialPassFlag::ToonStencilWrite)
+            skinnedPass.desc.flag & MaterialPassFlag::ToonStencilWrite ||
+            staticPass.desc.flag & MaterialPassFlag::StencilOutline ||
+            skinnedPass.desc.flag & MaterialPassFlag::StencilOutline
+        )
         {
             context.SetStencilRef(1);
         }
@@ -560,15 +563,17 @@ void PassBackend::RenderMaterial(Diligent::IDeviceContext& context,
             context.SetStencilRef(0);
         }
 
+        auto clearRT = ClearRT{true};
         auto clearStencil = ClearStencil{};
         if (staticPass.desc.flag == MaterialPassFlag::ToonStencilWrite ||  skinnedPass.desc.flag & MaterialPassFlag::ToonStencilWrite) // Pick an early pass
         {
             clearStencil.value = true;
+            clearRT.value = false;
         }
 
         // PassManifest verifies static/skinned pass pairs specify the same render targets, so we can just choose from either here.
         BindRenderTarget(context, swapChain, *m_perPassResourceSignature, staticPass.sinks.color, staticPass.sinks.depth, IsMsaa{staticPass.desc.isMsaa.value && m_numSamples > 1});
-        ClearRenderTarget(context, swapChain, *m_perPassResourceSignature, staticPass.sinks.color, staticPass.sinks.depth,  IsMsaa{staticPass.desc.isMsaa.value && m_numSamples > 1}, ClearStencil{clearStencil}, ClearRT{});
+        ClearRenderTarget(context, swapChain, *m_perPassResourceSignature, staticPass.sinks.color, staticPass.sinks.depth,  IsMsaa{staticPass.desc.isMsaa.value && m_numSamples > 1}, ClearStencil{clearStencil}, ClearRT{clearRT});
         SetViewportAndScissor(context, swapChain.GetDesc(), viewport);
 
         context.SetPipelineState(staticPass.pso);

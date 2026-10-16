@@ -41,16 +41,39 @@ MaterialRegistry::MaterialRegistry(uint32_t maxInstances)
     MaterialInstance::s_registry = this;
 }
 
-auto MaterialRegistry::CreateInstance(const MaterialDesc& desc) -> MaterialInstanceHandle
+auto MaterialRegistry::CreateInstance(MaterialDesc desc) -> MaterialInstanceHandle
 {
-    const auto index = m_buffer.GetStagingArea().Emplace(ToMaterialData(desc.properties));
-    if (index >= m_descriptions.size())
+    if (desc.properties.useStencilOutline)
     {
-        m_descriptions.push_back(desc);
+        desc.passes &= ~MaterialPassFlag::Toon;
+        if (!(desc.passes & MaterialPassFlag::ToonStencilWrite))
+        {
+            desc.passes |= MaterialPassFlag::ToonStencilWrite;
+        }
+
+        if (!(desc.passes & MaterialPassFlag::StencilOutline))
+        {
+            desc.passes |= MaterialPassFlag::StencilOutline;
+        }
     }
     else
     {
-        m_descriptions[index] = desc;
+        desc.passes &= ~MaterialPassFlag::ToonStencilWrite;
+        desc.passes &= ~MaterialPassFlag::StencilOutline;
+        if (!(desc.passes & MaterialPassFlag::Toon))
+        {
+            desc.passes |= MaterialPassFlag::Toon;
+        }
+    }
+
+    const auto index = m_buffer.GetStagingArea().Emplace(ToMaterialData(desc.properties));
+    if (index >= m_descriptions.size())
+    {
+        m_descriptions.push_back(std::move(desc));
+    }
+    else
+    {
+        m_descriptions[index] = std::move(desc);
     }
 
     return index;
@@ -72,6 +95,29 @@ auto MaterialRegistry::GetInstanceDesc(MaterialInstanceHandle index) const -> co
 void MaterialRegistry::SetInstanceProperties(MaterialInstanceHandle index, const MaterialProperties& properties)
 {
     NC_ASSERT(index < m_descriptions.size(), "Invalid MaterialInstanceHandle");
+
+    if (properties.useStencilOutline)
+    {
+        m_descriptions[index].passes &= ~MaterialPassFlag::Toon;
+        if (!(m_descriptions[index].passes & MaterialPassFlag::ToonStencilWrite))
+        {
+            m_descriptions[index].passes |= MaterialPassFlag::ToonStencilWrite;
+        }
+        if (!(m_descriptions[index].passes & MaterialPassFlag::StencilOutline))
+        {
+            m_descriptions[index].passes |= MaterialPassFlag::StencilOutline;
+        }
+    }
+    else
+    {
+        m_descriptions[index].passes &= ~MaterialPassFlag::ToonStencilWrite;
+        m_descriptions[index].passes &= ~MaterialPassFlag::StencilOutline;
+        if (!(m_descriptions[index].passes & MaterialPassFlag::Toon))
+        {
+            m_descriptions[index].passes |= MaterialPassFlag::Toon;
+        }
+    }
+
     m_buffer.GetStagingArea().Update(index, ToMaterialData(properties));
     m_descriptions[index].properties = properties;
 }

@@ -27,5 +27,6 @@ struct PassDesc
     bool useDepthTest = true;
     bool alphaBlend = false;
     bool writeStencil = false;
+    bool useStencilTest = false;
 };
 } // namespace nc::graphics

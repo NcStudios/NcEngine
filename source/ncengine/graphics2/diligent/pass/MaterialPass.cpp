@@ -58,7 +58,7 @@ auto CreatePipeline(Diligent::IRenderDevice& device,
         };
         ci.GraphicsPipeline.DepthStencilDesc.BackFace = ci.GraphicsPipeline.DepthStencilDesc.FrontFace;
     }
-    else
+    else if (passDesc.useStencilTest)
     {
         ci.GraphicsPipeline.DepthStencilDesc.DepthEnable = passDesc.useDepthTest;
         ci.GraphicsPipeline.DepthStencilDesc.StencilEnable = true;
@@ -70,6 +70,11 @@ auto CreatePipeline(Diligent::IRenderDevice& device,
             COMPARISON_FUNC_NOT_EQUAL
         };
         ci.GraphicsPipeline.DepthStencilDesc.BackFace = ci.GraphicsPipeline.DepthStencilDesc.FrontFace;
+    }
+    else
+    {
+        ci.GraphicsPipeline.DepthStencilDesc.DepthEnable = passDesc.useDepthTest;
+        ci.GraphicsPipeline.DepthStencilDesc.StencilEnable = false;
     }
 
      if (passDesc.alphaBlend)
