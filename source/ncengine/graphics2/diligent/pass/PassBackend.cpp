@@ -496,7 +496,6 @@ void PassBackend::RenderStencilOutlineMaterial(IDeviceContext& context,
 
         context.BeginDebugGroup(fmt::format("Material Pass: {}", MaterialPassToString(staticPass.desc.flag)).c_str(), DebugD.data());
         context.SetStencilRef(1);
-        auto clearRenderTarget = ClearRT{false};
 
         // PassManifest verifies static/skinned pass pairs specify the same render targets, so we can just choose from either here.
         BindRenderTarget(context, swapChain, *m_perPassResourceSignature, staticPass.sinks.color, staticPass.sinks.depth, IsMsaa{staticPass.desc.isMsaa.value && m_numSamples > 1});
