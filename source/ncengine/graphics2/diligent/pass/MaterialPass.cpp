@@ -45,7 +45,7 @@ auto CreatePipeline(Diligent::IRenderDevice& device,
     ci.GraphicsPipeline.InputLayout.LayoutElements        = layoutElements.data();
     ci.GraphicsPipeline.InputLayout.NumElements           = static_cast<uint32_t>(layoutElements.size());
 
-    if (passDesc.writeStencil)
+    if (passDesc.writeStencil.value)
     {
         ci.GraphicsPipeline.DepthStencilDesc.DepthEnable   = true;
         ci.GraphicsPipeline.DepthStencilDesc.StencilEnable = true;
@@ -58,9 +58,9 @@ auto CreatePipeline(Diligent::IRenderDevice& device,
         };
         ci.GraphicsPipeline.DepthStencilDesc.BackFace = ci.GraphicsPipeline.DepthStencilDesc.FrontFace;
     }
-    else if (passDesc.useStencilTest)
+    else if (passDesc.useStencilTest.value)
     {
-        ci.GraphicsPipeline.DepthStencilDesc.DepthEnable = passDesc.useDepthTest;
+        ci.GraphicsPipeline.DepthStencilDesc.DepthEnable = passDesc.useDepthTest.value;
         ci.GraphicsPipeline.DepthStencilDesc.StencilEnable = true;
         ci.GraphicsPipeline.DepthStencilDesc.FrontFace = StencilOpDesc
         {
@@ -73,11 +73,11 @@ auto CreatePipeline(Diligent::IRenderDevice& device,
     }
     else
     {
-        ci.GraphicsPipeline.DepthStencilDesc.DepthEnable = passDesc.useDepthTest;
+        ci.GraphicsPipeline.DepthStencilDesc.DepthEnable = passDesc.useDepthTest.value;
         ci.GraphicsPipeline.DepthStencilDesc.StencilEnable = false;
     }
 
-     if (passDesc.alphaBlend)
+     if (passDesc.isAlphaBlend.value)
     {
         auto& renderTarget          = ci.GraphicsPipeline.BlendDesc.RenderTargets[0];
         renderTarget.BlendEnable    = true;

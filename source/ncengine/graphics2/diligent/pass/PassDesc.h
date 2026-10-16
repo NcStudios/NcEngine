@@ -24,9 +24,9 @@ struct PassDesc
     LoadOp stencilLoadOp = LoadOp::DontCare;
     CullMode cullMode = CullMode::Back;
     IsMsaa isMsaa = IsMsaa{true};
-    bool useDepthTest = true;
-    bool alphaBlend = false;
-    bool writeStencil = false;
-    bool useStencilTest = false;
+    UseDepthTest useDepthTest = UseDepthTest{true};
+    IsAlphaBlend isAlphaBlend = IsAlphaBlend{false};
+    WriteStencil writeStencil = WriteStencil{false};
+    UseStencilTest useStencilTest = UseStencilTest{false};
 };
 } // namespace nc::graphics

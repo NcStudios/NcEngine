@@ -22,6 +22,26 @@ constexpr auto OffScreenDepthRTFormat = Diligent::TEX_FORMAT_D32_FLOAT;
 constexpr auto OffScreenDepthStencilRTFormat = Diligent::TEX_FORMAT_D24_UNORM_S8_UINT;
 constexpr auto OffScreenShadowMapRTFormat = Diligent::TEX_FORMAT_R32_FLOAT;
 
+struct UseDepthTest
+{
+    bool value = false;
+};
+
+struct IsAlphaBlend
+{
+    bool value = false;
+};
+
+struct WriteStencil
+{
+    bool value = false;
+};
+
+struct UseStencilTest
+{
+    bool value = false;
+};
+
 struct IsMsaa
 {
     bool value = false;

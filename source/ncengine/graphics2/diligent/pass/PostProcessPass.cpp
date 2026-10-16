@@ -60,7 +60,7 @@ auto CreatePipeline(Diligent::IRenderDevice& device,
     ci.GraphicsPipeline.DSVFormat                         = textureFormat.depthFormat;
     ci.GraphicsPipeline.PrimitiveTopology                 = PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP;
     ci.GraphicsPipeline.RasterizerDesc.CullMode           = ToDiligentCullMode(passDesc.cullMode);
-    ci.GraphicsPipeline.DepthStencilDesc.DepthEnable      = passDesc.useDepthTest;
+    ci.GraphicsPipeline.DepthStencilDesc.DepthEnable      = passDesc.useDepthTest.value;
     ci.GraphicsPipeline.DepthStencilDesc.DepthWriteEnable = passDesc.depthSink != DepthTarget::None;
     ci.GraphicsPipeline.InputLayout.LayoutElements        = nullptr;
     ci.GraphicsPipeline.InputLayout.NumElements           = 0;

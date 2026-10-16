@@ -177,7 +177,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .colorSink = ColorTarget::Main,
                     .depthSink = DepthTarget::Main,
                     .numRenderTargets = 1,
-                    .useDepthTest = true
+                    .useDepthTest = UseDepthTest{true}
                 },
                 PassDesc{
                     .flag = MaterialPassFlag::UniShadow,
@@ -188,7 +188,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .shadowMapSink = ShadowMapTarget::Uni,
                     .numRenderTargets = 0,
                     .isMsaa = IsMsaa{false},
-                    .useDepthTest = true
+                    .useDepthTest = UseDepthTest{true}
                 },
                 PassDesc{
                     .flag = MaterialPassFlag::UniShadow,
@@ -199,7 +199,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .shadowMapSink = ShadowMapTarget::Uni,
                     .numRenderTargets = 0,
                     .isMsaa =  IsMsaa{false},
-                    .useDepthTest = true
+                    .useDepthTest = UseDepthTest{true}
                 },
                 PassDesc{
                     .flag = MaterialPassFlag::PointShadow,
@@ -211,7 +211,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .numRenderTargets = 1,
                     .cullMode = CullMode::Back,
                     .isMsaa =  IsMsaa{false},
-                    .useDepthTest = true
+                    .useDepthTest = UseDepthTest{true}
                 },
                 PassDesc{
                     .flag = MaterialPassFlag::PointShadow,
@@ -223,7 +223,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .numRenderTargets = 1,
                     .cullMode = CullMode::Back,
                     .isMsaa =  IsMsaa{false},
-                    .useDepthTest = true
+                    .useDepthTest = UseDepthTest{true}
                 },
                 PassDesc{
                     .flag = MaterialPassFlag::Depth,
@@ -234,7 +234,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .depthSink = DepthTarget::Main,
                     .numRenderTargets = 0,
                     .isMsaa =  IsMsaa{false},
-                    .useDepthTest = true
+                    .useDepthTest = UseDepthTest{true}
                 },
                 PassDesc{
                     .flag = MaterialPassFlag::Depth,
@@ -245,7 +245,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .depthSink = DepthTarget::Main,
                     .numRenderTargets = 0,
                     .isMsaa =  IsMsaa{false},
-                    .useDepthTest = true
+                    .useDepthTest = UseDepthTest{true}
                 },
                 PassDesc{
                     .flag = MaterialPassFlag::ToonStencilWrite,
@@ -256,9 +256,9 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .colorSink = ColorTarget::Main,
                     .depthSink = DepthTarget::Main,
                     .numRenderTargets = 1,
-                    .useDepthTest = true,
-                    .alphaBlend = true,
-                    .writeStencil = true
+                    .useDepthTest = UseDepthTest{true},
+                    .isAlphaBlend = IsAlphaBlend{true},
+                    .writeStencil = WriteStencil{true}
                 },
                 PassDesc{
                     .flag = MaterialPassFlag::ToonStencilWrite,
@@ -269,9 +269,9 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .colorSink = ColorTarget::Main,
                     .depthSink = DepthTarget::Main,
                     .numRenderTargets = 1,
-                    .useDepthTest = true,
-                    .alphaBlend = true,
-                    .writeStencil = true
+                    .useDepthTest = UseDepthTest{true},
+                    .isAlphaBlend = IsAlphaBlend{true},
+                    .writeStencil = WriteStencil{true}
                 },
                 PassDesc{
                     .flag = MaterialPassFlag::Toon,
@@ -282,8 +282,8 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .colorSink = ColorTarget::Main,
                     .depthSink = DepthTarget::Main,
                     .numRenderTargets = 1,
-                    .useDepthTest = true,
-                    .alphaBlend = true
+                    .useDepthTest = UseDepthTest{true},
+                    .isAlphaBlend = IsAlphaBlend{true}
                 },
                 PassDesc{
                     .flag = MaterialPassFlag::Toon,
@@ -294,8 +294,8 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .colorSink = ColorTarget::Main,
                     .depthSink = DepthTarget::Main,
                     .numRenderTargets = 1,
-                    .useDepthTest = true,
-                    .alphaBlend = true
+                    .useDepthTest = UseDepthTest{true},
+                    .isAlphaBlend = IsAlphaBlend{true}
                 },
                 PassDesc{
                     .flag = MaterialPassFlag::Normals,
@@ -306,7 +306,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .colorSink = ColorTarget::Normals,
                     .depthSink = DepthTarget::Main,
                     .numRenderTargets = 1,
-                    .useDepthTest = true
+                    .useDepthTest = UseDepthTest{true}
                 },
                 PassDesc{
                     .flag = MaterialPassFlag::Normals,
@@ -317,7 +317,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .colorSink = ColorTarget::Normals,
                     .depthSink = DepthTarget::Main,
                     .numRenderTargets = 1,
-                    .useDepthTest = true
+                    .useDepthTest = UseDepthTest{true}
                 },
                 PassDesc{
                     .flag = PostProcessPassFlag::Outline,
@@ -330,7 +330,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .postProcessSink = PostProcessTarget::PPOutline,
                     .numRenderTargets = 1,
                     .isMsaa =  IsMsaa{false},
-                    .useDepthTest = false
+                    .useDepthTest = UseDepthTest{false}
                 },
                 PassDesc{
                     .flag = PostProcessPassFlag::Fxaa,
@@ -342,7 +342,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .postProcessSink = PostProcessTarget::PPFxaa,
                     .numRenderTargets = 1,
                     .isMsaa =  IsMsaa{false},
-                    .useDepthTest = false
+                    .useDepthTest = UseDepthTest{false}
                 },
                 PassDesc{
                     .flag = PostProcessPassFlag::Noise,
@@ -354,7 +354,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .postProcessSink = PostProcessTarget::PPNoise,
                     .numRenderTargets = 1,
                     .isMsaa =  IsMsaa{false},
-                    .useDepthTest = false
+                    .useDepthTest = UseDepthTest{false}
                 },
                 PassDesc{
                     .flag = MiscPassFlag::Wireframe,
@@ -365,7 +365,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .colorSink = ColorTarget::Swapchain,
                     .depthSink = DepthTarget::Main,
                     .numRenderTargets = 1,
-                    .useDepthTest = true
+                    .useDepthTest = UseDepthTest{true}
                 },
                 PassDesc{
                     .flag = MiscPassFlag::Particle,
@@ -376,8 +376,8 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .colorSink = ColorTarget::Swapchain,
                     .depthSink = DepthTarget::Main,
                     .numRenderTargets = 1,
-                    .useDepthTest = true,
-                    .alphaBlend = true
+                    .useDepthTest = UseDepthTest{true},
+                    .isAlphaBlend = IsAlphaBlend{true}
                 },
                 PassDesc{
                     .flag = MaterialPassFlag::StencilOutline,
@@ -388,9 +388,9 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .colorSink = ColorTarget::Swapchain,
                     .depthSink = DepthTarget::Main,
                     .numRenderTargets = 1,
-                    .useDepthTest = false,
-                    .alphaBlend = false,
-                    .useStencilTest = true
+                    .useDepthTest = UseDepthTest{false},
+                    .isAlphaBlend = IsAlphaBlend{false},
+                    .useStencilTest = UseStencilTest{true}
                 },
                 PassDesc{
                     .flag = MaterialPassFlag::StencilOutline,
@@ -401,9 +401,9 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .colorSink = ColorTarget::Swapchain,
                     .depthSink = DepthTarget::Main,
                     .numRenderTargets = 1,
-                    .useDepthTest = false,
-                    .alphaBlend = false,
-                    .useStencilTest = true
+                    .useDepthTest = UseDepthTest{false},
+                    .isAlphaBlend = IsAlphaBlend{false},
+                    .useStencilTest = UseStencilTest{true}
                 }
             },
             GetMaterialPassFlags(),
