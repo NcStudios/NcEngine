@@ -111,9 +111,6 @@ struct MaterialData
     Vector3 padding = Vector3::One();
 };
 
-constexpr auto matSize = sizeof(MaterialData);
-constexpr auto matAlign = alignof(MaterialData);
-
 // Object model for animated bones (type: StructuredBuffer element type).
 struct BoneData
 {
