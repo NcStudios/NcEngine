@@ -19,9 +19,6 @@ struct PassDesc
     ShadowMapTarget shadowMapSink = ShadowMapTarget::None;
     PostProcessTarget postProcessSink = PostProcessTarget::None;
     uint8_t numRenderTargets = 0;
-    LoadOp colorLoadOp = LoadOp::DontCare;
-    LoadOp depthLoadOp = LoadOp::DontCare;
-    LoadOp stencilLoadOp = LoadOp::DontCare;
     CullMode cullMode = CullMode::Back;
     IsMsaa isMsaa = IsMsaa{true};
     UseDepthTest useDepthTest = UseDepthTest{true};

@@ -32,7 +32,8 @@ void ClearRenderTarget(Diligent::IDeviceContext& context,
                        uint32_t depthIndex,
                        IsMsaa isMsaa,
                        ClearStencil clearStencil = ClearStencil{},
-                       ClearRT clearRenderTarget = ClearRT{});
+                       ClearRT clearRenderTarget = ClearRT{},
+                       ClearDepth clearDepth = ClearDepth{});
 
 void ClearPostProcessRenderTarget(Diligent::IDeviceContext& context,
                                   Diligent::ISwapChain& swapChain,

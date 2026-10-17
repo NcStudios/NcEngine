@@ -8,7 +8,9 @@ MeshBase::MeshBase(Entity self,
                    const MaterialDesc& materialDesc,
                    MeshInstanceType type)
     : m_ctx{self, meshAsset.id, 0, 0, type},
-      m_material{MaterialInstance{materialDesc}}
+      m_material{MaterialInstance{materialDesc}},
+      m_onMaterialPassesChangedConnection{MaterialInstance::OnPassesChanged().Connect(this, &MeshBase::OnMaterialPassesChangedConnection)}
+
 {
     s_subsystem->AddInstance(m_ctx, m_material, meshAsset);
 }
@@ -33,6 +35,17 @@ void MeshBase::Release() noexcept
         s_subsystem->RemoveInstance(m_ctx, m_material);
     }
 }
+
+void MeshBase::OnMaterialPassesChangedConnection(MaterialInstanceHandle handle, MaterialPassFlags oldPasses)
+{
+    if (handle != m_material.GetHandle())
+    {
+        return;
+    }
+
+    s_subsystem->SetInstanceMaterial(m_ctx, m_material, oldPasses);
+}
+
 
 void SkinnedMesh::SetMesh(const asset::MeshView& meshAsset)
 {

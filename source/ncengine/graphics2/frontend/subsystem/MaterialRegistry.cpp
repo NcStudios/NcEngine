@@ -96,30 +96,30 @@ void MaterialRegistry::SetInstanceProperties(MaterialInstanceHandle index, const
 {
     NC_ASSERT(index < m_descriptions.size(), "Invalid MaterialInstanceHandle");
 
+    const auto oldPasses = m_descriptions[index].passes;
+    auto newPasses = oldPasses;
+
     if (properties.useStencilOutline)
     {
-        m_descriptions[index].passes &= ~MaterialPassFlag::Toon;
-        if (!(m_descriptions[index].passes & MaterialPassFlag::ToonStencilWrite))
-        {
-            m_descriptions[index].passes |= MaterialPassFlag::ToonStencilWrite;
-        }
-        if (!(m_descriptions[index].passes & MaterialPassFlag::StencilOutline))
-        {
-            m_descriptions[index].passes |= MaterialPassFlag::StencilOutline;
-        }
+        newPasses &= ~MaterialPassFlag::Toon;
+        newPasses |= MaterialPassFlag::ToonStencilWrite;
+        newPasses |= MaterialPassFlag::StencilOutline;
     }
     else
     {
-        m_descriptions[index].passes &= ~MaterialPassFlag::ToonStencilWrite;
-        m_descriptions[index].passes &= ~MaterialPassFlag::StencilOutline;
-        if (!(m_descriptions[index].passes & MaterialPassFlag::Toon))
-        {
-            m_descriptions[index].passes |= MaterialPassFlag::Toon;
-        }
+        newPasses &= ~MaterialPassFlag::ToonStencilWrite;
+        newPasses &= ~MaterialPassFlag::StencilOutline;
+        newPasses |= MaterialPassFlag::Toon;
     }
 
     m_buffer.GetStagingArea().Update(index, ToMaterialData(properties));
     m_descriptions[index].properties = properties;
+    m_descriptions[index].passes = newPasses;
+
+    if (newPasses != oldPasses)
+    {
+        m_onPassesChanged.Emit(index, oldPasses);
+    }
 }
 
 auto MaterialRegistry::GetInstanceData(MaterialInstanceHandle index) const -> const MaterialData&

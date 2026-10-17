@@ -48,6 +48,7 @@ void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
         .scale = Vector3{3.0f, 3.0f, 3.0f},
         .tag = "guy2"
     });
+
     world.Emplace<StaticMesh>(guy2, mesh::guy2, material::guy2);
 
     // Ogre
@@ -85,6 +86,26 @@ void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
             .enterFrom = stopState,
             .exitWhen = [](){ return input::KeyDown(input::KeyCode::One);},
             .exitTo = stopState
+        });
+
+        world.Emplace<FrameLogic>(ogre, [](Entity ogreEntity, ecs::Ecs ecsWorld, float) mutable
+        {
+            if (input::KeyDown(input::KeyCode::Two))
+            {
+                auto& mesh = ecsWorld.Get<nc::SkinnedMesh>(ogreEntity);
+
+                auto materialProperties = mesh.GetMaterial().GetProperties();
+                auto prevUseStencilOutline = materialProperties.useStencilOutline;
+                materialProperties.useStencilOutline = !prevUseStencilOutline;
+
+                if (materialProperties.useStencilOutline)
+                {
+                    materialProperties.stencilOutlineColor = nc::Vector4{1.0f, 1.0f, 0.0f, 1.0f};
+                    materialProperties.stencilOutlineWidth = 0.05f;
+                }
+
+                mesh.GetMaterial().SetProperties(materialProperties);
+            }
         });
     }
 

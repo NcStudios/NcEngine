@@ -12,14 +12,24 @@ const auto g_testBonesData = nc::asset::BonesData{};
 
 namespace nc
 {
+auto signal = nc::Signal<MaterialInstanceHandle, MaterialPassFlags>{};
 MaterialInstance::MaterialInstance(const MaterialDesc&) {}
 void MaterialInstance::Release() noexcept {}
+auto MaterialInstance::OnPassesChanged() -> nc::Signal<MaterialInstanceHandle, MaterialPassFlags>&
+{
+    return signal;
+}
 
 MeshBase::MeshBase(Entity self,
                    const asset::MeshView& mesh,
                    const MaterialDesc&,
                    MeshInstanceType type)
-    : m_ctx{self, mesh.id, 0, 0, type}
+    : m_ctx{self, mesh.id, 0, 0, type},
+      m_onMaterialPassesChangedConnection{MaterialInstance::OnPassesChanged().Connect(this, &MeshBase::OnMaterialPassesChangedConnection)}
+{
+}
+
+void MeshBase::OnMaterialPassesChangedConnection(MaterialInstanceHandle, MaterialPassFlags)
 {
 }
 

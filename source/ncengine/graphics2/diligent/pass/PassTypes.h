@@ -57,6 +57,11 @@ struct ClearRT
     bool value = false;
 };
 
+struct ClearDepth
+{
+    bool value = false;
+};
+
 struct TextureFormat
 {
     Diligent::TEXTURE_FORMAT colorFormat = Diligent::TEX_FORMAT_UNKNOWN;
@@ -98,12 +103,6 @@ enum class CullMode : uint8_t
     None,
     Front,
     Back
-};
-
-enum class LoadOp : uint8_t
-{
-    Clear,
-    DontCare
 };
 
 struct Sources
