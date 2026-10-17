@@ -5,6 +5,7 @@
 #pragma once
 
 #include "ncengine/asset/AssetViews.h"
+#include "ncengine/utility/Signal.h"
 #include "ncmath/Vector.h"
 
 #include <limits>
@@ -111,6 +112,9 @@ class MaterialInstance
         {
             return m_handle;
         }
+
+        /** @brief Raised when passes change. */
+        static auto OnPassesChanged() -> nc::Signal<MaterialInstanceHandle, MaterialPassFlags>&;
 
     private:
         friend class graphics::MaterialRegistry;

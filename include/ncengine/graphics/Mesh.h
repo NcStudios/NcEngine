@@ -8,6 +8,7 @@
 #include "ncengine/ecs/Component.h"
 #include "ncengine/graphics/Material.h"
 #include "ncengine/graphics/SkeletalAnimationController.h"
+#include "ncengine/utility/Signal.h"
 
 namespace nc
 {
@@ -44,8 +45,10 @@ class MeshBase
 
         MeshBase(MeshBase&& other) noexcept
             : m_ctx{std::exchange(other.m_ctx, MeshInstanceContext{})},
-              m_material{std::move(other.m_material)}
+              m_material{std::move(other.m_material)},
+              m_onMaterialPassesChangedConnection{MaterialInstance::OnPassesChanged().Connect(this, &MeshBase::OnMaterialPassesChangedConnection)}
         {
+            other.m_onMaterialPassesChangedConnection.Disconnect();
         }
 
         MeshBase& operator=(MeshBase&& other) noexcept
@@ -55,6 +58,8 @@ class MeshBase
                 Release();
                 m_ctx = std::exchange(other.m_ctx, MeshInstanceContext{});
                 m_material = std::move(other.m_material);
+                other.m_onMaterialPassesChangedConnection.Disconnect();
+                m_onMaterialPassesChangedConnection = MaterialInstance::OnPassesChanged().Connect(this, &MeshBase::OnMaterialPassesChangedConnection);
             }
 
             return *this;
@@ -93,8 +98,11 @@ class MeshBase
         inline static graphics::MeshSubsystem* s_subsystem = nullptr;
         MeshInstanceContext m_ctx;
         MaterialInstance m_material;
+        Connection m_onMaterialPassesChangedConnection;
 
         void Release() noexcept;
+
+        void OnMaterialPassesChangedConnection(MaterialInstanceHandle handle, MaterialPassFlags oldPasses);
 };
 
 /** @brief Component enabling rendering of an Entity with a given mesh and material. */

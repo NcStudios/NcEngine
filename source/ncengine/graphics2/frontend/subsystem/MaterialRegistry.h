@@ -4,6 +4,7 @@
 #include "graphics2/ShaderTypes.h"
 #include "ncengine/graphics/Material.h"
 #include "ncengine/type/StableAddress.h"
+#include "ncengine/utility/Signal.h"
 
 #include <vector>
 
@@ -21,6 +22,7 @@ class MaterialRegistry : public StableAddress
         void SetInstanceProperties(MaterialInstanceHandle index, const MaterialProperties& properties);
         auto GetInstanceData(MaterialInstanceHandle index) const -> const MaterialData&;
         void SetInstanceName(MaterialInstanceHandle index, std::string_view name);
+        auto OnPassesChanged() -> Signal<MaterialInstanceHandle, MaterialPassFlags>& { return m_onPassesChanged; }
 
         // Graphics Frontend Functions
         auto BuildState() -> BufferUpdateInfo<MaterialData>;
@@ -28,5 +30,6 @@ class MaterialRegistry : public StableAddress
     private:
         HostStructuredBuffer<MaterialData> m_buffer;
         std::vector<MaterialDesc> m_descriptions;
+        Signal<MaterialInstanceHandle, MaterialPassFlags> m_onPassesChanged;
 };
 } // namespace nc::graphics

@@ -45,4 +45,9 @@ void MaterialInstance::Release() noexcept
         s_registry->DestroyInstance(m_handle);
     }
 }
+
+auto MaterialInstance::OnPassesChanged() -> nc::Signal<MaterialInstanceHandle, MaterialPassFlags>&
+{
+    return s_registry->OnPassesChanged();
+}
 } // namespace nc

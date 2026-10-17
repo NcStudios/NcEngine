@@ -24,11 +24,15 @@ DEFINE_ASSET_SERVICE_STUB(meshAssetManager, nc::asset::AssetType::Mesh, nc::asse
 
 namespace nc
 {
+auto signal = nc::Signal<MaterialInstanceHandle, MaterialPassFlags>{};
 MaterialInstance::MaterialInstance(const MaterialDesc&){}
 auto MaterialInstance::GetPasses()     const ->       MaterialPassFlags   { return g_materialDesc.passes;     }
 auto MaterialInstance::GetProperties() const -> const MaterialProperties& { return g_materialDesc.properties; }
 void MaterialInstance::Release() noexcept {}
-
+auto MaterialInstance::OnPassesChanged() -> nc::Signal<MaterialInstanceHandle, MaterialPassFlags>&
+{
+    return signal;
+}
 namespace time
 {
 auto DeltaTime() -> float { return 1.0f / 60.0f; }
