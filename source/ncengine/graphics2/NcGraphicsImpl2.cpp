@@ -388,7 +388,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .colorSink = ColorTarget::Swapchain,
                     .depthSink = DepthTarget::Main,
                     .numRenderTargets = 1,
-                    .useDepthTest = UseDepthTest{false},
+                    .useDepthTest = UseDepthTest{true},
                     .isAlphaBlend = IsAlphaBlend{false},
                     .useStencilTest = UseStencilTest{true}
                 },
@@ -401,7 +401,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .colorSink = ColorTarget::Swapchain,
                     .depthSink = DepthTarget::Main,
                     .numRenderTargets = 1,
-                    .useDepthTest = UseDepthTest{false},
+                    .useDepthTest = UseDepthTest{true},
                     .isAlphaBlend = IsAlphaBlend{false},
                     .useStencilTest = UseStencilTest{true}
                 }
