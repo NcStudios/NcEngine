@@ -19,7 +19,49 @@ constexpr auto NoTarget = std::numeric_limits<uint32_t>::max() - 1;
 
 constexpr auto OffScreenColorRTFormat = Diligent::TEX_FORMAT_RGBA8_UNORM_SRGB;
 constexpr auto OffScreenDepthRTFormat = Diligent::TEX_FORMAT_D32_FLOAT;
+constexpr auto OffScreenDepthStencilRTFormat = Diligent::TEX_FORMAT_D24_UNORM_S8_UINT;
 constexpr auto OffScreenShadowMapRTFormat = Diligent::TEX_FORMAT_R32_FLOAT;
+
+struct UseDepthTest
+{
+    bool value = false;
+};
+
+struct IsAlphaBlend
+{
+    bool value = false;
+};
+
+struct WriteStencil
+{
+    bool value = false;
+};
+
+struct UseStencilTest
+{
+    bool value = false;
+};
+
+struct IsMsaa
+{
+    bool value = false;
+};
+
+struct ClearStencil
+{
+    bool value = false;
+};
+
+struct ClearRT
+{
+    bool value = false;
+};
+
+struct TextureFormat
+{
+    Diligent::TEXTURE_FORMAT colorFormat = Diligent::TEX_FORMAT_UNKNOWN;
+    Diligent::TEXTURE_FORMAT depthFormat = Diligent::TEX_FORMAT_UNKNOWN;
+};
 
 enum class ColorTarget : uint8_t
 {
@@ -56,6 +98,12 @@ enum class CullMode : uint8_t
     None,
     Front,
     Back
+};
+
+enum class LoadOp : uint8_t
+{
+    Clear,
+    DontCare
 };
 
 struct Sources
@@ -96,24 +144,4 @@ enum class VertexAttribute : uint8_t
     Skinning    = Pos | BoneWeights | BoneIds,
     All         = Texturing | Skinning
 }; DEFINE_BITWISE_OPERATORS(VertexAttribute);
-
-struct PassDesc
-{
-    uint64_t flag = 0;
-    std::string_view name  = "";
-    PassType type = PassType::None;
-    VertexAttribute layoutElements = VertexAttribute::None;
-    ShaderPaths shaderPaths = ShaderPaths{};
-    std::vector<ColorTarget> colorSources = std::vector<ColorTarget>{};
-    std::vector<DepthTarget> depthSources = std::vector<DepthTarget>{};
-    PostProcessTarget postProcessSource = PostProcessTarget::None;
-    ColorTarget colorSink = ColorTarget::None;
-    DepthTarget depthSink = DepthTarget::None;
-    ShadowMapTarget shadowMapSink = ShadowMapTarget::None;
-    PostProcessTarget postProcessSink = PostProcessTarget::None;
-    CullMode cullMode = CullMode::Back;
-    bool isMsaa = true;
-    bool useDepthTest = true;
-    bool alphaBlend = false;
-};
 } // namespace nc::graphics

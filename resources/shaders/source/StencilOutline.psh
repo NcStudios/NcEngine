@@ -1,0 +1,20 @@
+#include "core/PerFrameTypes.fxh"
+
+struct PSInput
+{
+    float4 Pos           : SV_POSITION;
+    uint   MaterialIndex : MAT_INDEX;
+};
+
+struct PSOutput
+{
+    float4 color : SV_TARGET;
+};
+
+StructuredBuffer<MaterialData> Materials : register(t1);
+
+void main(in  PSInput  PSIn, out PSOutput PSOut)
+{
+    MaterialData material = Materials[PSIn.MaterialIndex];
+    PSOut.color = material.stencilOutlineColor;
+}

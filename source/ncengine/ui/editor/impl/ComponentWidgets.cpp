@@ -145,6 +145,19 @@ auto MaterialColorWidget(nc::MaterialProperties& properties) -> bool
     return modified;
 }
 
+auto MaterialStencilOutlineWidget(nc::MaterialProperties& properties) -> bool
+{
+    auto modified = false;
+    modified = nc::ui::Checkbox(properties.useStencilOutline, "useStencilOutline") || modified;
+    if (properties.useStencilOutline)
+    {
+        modified = nc::ui::InputColor4(properties.stencilOutlineColor, "stencilOutlineColor") || modified;
+        modified = nc::ui::DragFloat(properties.stencilOutlineWidth, "stencilOutlineWidth", 0.001f, 0.0f, 1.0f) || modified;
+    }
+    return modified;
+}
+
+
 auto MaterialNodeWidget(nc::MeshBase& baseMesh, nc::asset::NcAsset& ncAsset)
 {
     if (ImGui::TreeNodeEx("Material"))
@@ -154,6 +167,7 @@ auto MaterialNodeWidget(nc::MeshBase& baseMesh, nc::asset::NcAsset& ncAsset)
         auto properties = material.GetProperties();
         auto passesModified = false;
         auto modified = false;
+        auto prevUseStencilOutline = properties.useStencilOutline;
 
         ImGui::Separator();
         if (ImGui::TreeNodeEx("Metadata"))
@@ -190,13 +204,20 @@ auto MaterialNodeWidget(nc::MeshBase& baseMesh, nc::asset::NcAsset& ncAsset)
         }
 
         ImGui::Separator();
+        if (ImGui::TreeNodeEx("Stencil Outline"))
+        {
+            modified = MaterialStencilOutlineWidget(properties) || modified;
+            ImGui::TreePop();
+        }
+
+        ImGui::Separator();
         if (ImGui::TreeNodeEx("Gradient"))
         {
             modified = MaterialGradientWidget(properties) || modified;
             ImGui::TreePop();
         }
 
-        if (passesModified)
+        if (passesModified || prevUseStencilOutline != properties.useStencilOutline)
         {
             baseMesh.SetMaterial(nc::MaterialDesc{std::string{material.GetName()}, passes, properties});
         }

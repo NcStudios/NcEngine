@@ -28,18 +28,20 @@ struct MaterialPassFlag
 {
     using type = uint64_t;
 
-    static constexpr auto UniShadow   = type{1 << 0};
-    static constexpr auto PointShadow = type{1 << 1};
-    static constexpr auto Depth       = type{1 << 2};
-    static constexpr auto Toon        = type{1 << 3};
-    static constexpr auto Normals     = type{1 << 4};
+    static constexpr auto UniShadow        = type{1 << 0};
+    static constexpr auto PointShadow      = type{1 << 1};
+    static constexpr auto Depth            = type{1 << 2};
+    static constexpr auto Toon             = type{1 << 3};
+    static constexpr auto ToonStencilWrite = type{1 << 4};
+    static constexpr auto StencilOutline   = type{1 << 5};
+    static constexpr auto Normals          = type{1 << 6};
 };
 
 /** @brief Set of flags indicating a MaterialInstance's enabled passes. */
 using MaterialPassFlags = MaterialPassFlag::type;
 
 /** @brief Default passes for a toon material. */
-constexpr auto ShadowedToonMaterial = MaterialPassFlag::UniShadow | MaterialPassFlag::PointShadow | MaterialPassFlag::Depth | MaterialPassFlag::Toon | MaterialPassFlag::Normals;
+constexpr auto ShadowedToonMaterial = MaterialPassFlag::UniShadow | MaterialPassFlag::PointShadow | MaterialPassFlag::Depth | MaterialPassFlag::Toon | MaterialPassFlag::ToonStencilWrite | MaterialPassFlag::StencilOutline | MaterialPassFlag::Normals;
 
 /** @brief Properties of a MaterialInstance passed to shaders. */
 struct MaterialProperties
@@ -48,18 +50,26 @@ struct MaterialProperties
     Vector4 gradientEnd = Vector4::One();
     Vector4 primaryColor = Vector4::One();
     Vector4 secondaryColor = Vector4::One();
+
     Vector4 tertiaryColor = Vector4::One();
+    Vector4 stencilOutlineColor = Vector4::One();
+
     float normalIntensity = 1.0f;
     float hatchTiling = 1.0f;
     float gradientAmount = 0.1f;
     float reflectivity = 0.0f;
+
+    float stencilOutlineWidth = 0.0f;
     asset::TextureView diffuseTex = asset::TextureView{};
     asset::TextureView normalTex = asset::TextureView{};
     asset::TextureView hatchTex = asset::TextureView{};
+
     bool useTextureNormals = true;
     bool useFlatShading = true;
     bool useColorOverride = false;
     bool useHatchTexture = false;
+
+    bool useStencilOutline = false;
 };
 
 /** @brief Properties for constructing a MaterialInstance. */

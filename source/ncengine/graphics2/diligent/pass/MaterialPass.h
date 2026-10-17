@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Pass.h"
+#include "PassTypes.h"
 #include "PassManifest.h"
 #include "ncengine/graphics/Material.h"
 
@@ -18,12 +19,11 @@ class ShaderBindings;
 struct MaterialPass : public Pass
 {
     explicit MaterialPass(Diligent::IRenderDevice& device,
+                          Diligent::ISwapChain& swapChain,
                           const PipelineShaders& shaders,
                           ShaderBindings& shaderBindings,
                           const PassManifest& passManifest,
                           const PassDesc& passDesc,
                           uint32_t numSamples);
-    MaterialPassFlag::type flag;
-    bool isMsaa;
 };
 } // namespace nc::graphics

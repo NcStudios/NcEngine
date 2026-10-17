@@ -70,6 +70,12 @@ class PassBackend
                             const std::span<const LightData>& lights,
                             const Viewport& viewport);
 
+        void RenderStencilOutlineMaterial(Diligent::IDeviceContext& context,
+                                          Diligent::ISwapChain& swapChain,
+                                          const std::vector<std::vector<Batch>>& staticPassBatches,
+                                          const std::vector<std::vector<Batch>>& skinnedPassBatches,
+                                          const Viewport& viewport);
+
         void RenderWireframe(Diligent::IDeviceContext& context,
                              Diligent::ISwapChain& swapChain,
                              const WireframeRendererRenderState& state,
@@ -85,6 +91,9 @@ class PassBackend
 
         void RenderOutputToSwapchain(Diligent::IDeviceContext& context,
                                      Diligent::ISwapChain& swapChain);
+
+        // If rendering stencils, we need a depth format different than what ImGui is expecting. Rebind the swapchain depth buffer.
+        void BindSwapchain(Diligent::IDeviceContext& context, Diligent::ISwapChain& swapChain);
 
     private:
         void MakePassesAndPipelines(Diligent::IRenderDevice& device,

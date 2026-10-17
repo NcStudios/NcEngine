@@ -15,7 +15,7 @@ class MaterialRegistry : public StableAddress
         explicit MaterialRegistry(uint32_t maxInstances);
 
         // API-Facing Functions
-        auto CreateInstance(const MaterialDesc& desc = MaterialDesc{}) -> MaterialInstanceHandle;
+        auto CreateInstance(MaterialDesc desc = MaterialDesc{}) -> MaterialInstanceHandle;
         void DestroyInstance(MaterialInstanceHandle index);
         auto GetInstanceDesc(MaterialInstanceHandle index) const -> const MaterialDesc&;
         void SetInstanceProperties(MaterialInstanceHandle index, const MaterialProperties& properties);

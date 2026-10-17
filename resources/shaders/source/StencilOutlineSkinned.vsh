@@ -1,0 +1,68 @@
+#include "core/PerFrameTypes.fxh"
+
+struct VSInput
+{
+    float3 Pos         : ATTRIB0;
+    float3 Normal      : ATTRIB1;
+    float2 UV          : ATTRIB2;
+    float4 BoneWeights : ATTRIB3;
+    uint4  BoneIds     : ATTRIB4;
+};
+
+struct PSInput
+{
+    float4 Pos           : SV_POSITION;
+    uint   MaterialIndex : MAT_INDEX;
+    float2 UV            : TEX_COORD;
+};
+
+StructuredBuffer<TransformData> Transforms;
+StructuredBuffer<MaterialData> Materials : register(t1);
+
+// todo: #802 Define this at compile time
+#define ENABLE_SKINNING 1
+
+#ifdef ENABLE_SKINNING
+StructuredBuffer<SkinnedMeshInstanceData> SkinnedInstances;
+StructuredBuffer<BoneData> Bones;
+
+#define INSTANCE_DATA SkinnedMeshInstanceData
+#define INSTANCE_BUFFER SkinnedInstances
+
+#include "core/Animation.fxh"
+#else
+StructuredBuffer<StaticMeshInstanceData> StaticInstances;
+
+#define INSTANCE_DATA StaticMeshInstanceData
+#define INSTANCE_BUFFER StaticInstances
+#endif // ENABLE_SKINNING
+
+void main(in VSInput VSIn, uint InstanceID : SV_InstanceID, out PSInput PSIn)
+{
+    INSTANCE_DATA instance = INSTANCE_BUFFER[InstanceID];
+    float4 pos = float4(VSIn.Pos, 1.0);
+    float4 normal = float4(VSIn.Normal, 0.0);
+    uint materialIndex = SkinnedInstances[InstanceID].materialIndex;
+
+    // Scale vertex position along normals
+    MaterialData material = Materials[materialIndex];
+    float4 scaledPos = pos + normalize(normal) * material.stencilOutlineWidth;
+
+#ifdef ENABLE_SKINNING
+    if (IsValidBoneIndex(instance.boneIndex))
+    {
+        float4x4 animatedTransform = CombineBoneMatrices(instance.boneIndex, VSIn.BoneIds, VSIn.BoneWeights);
+        if (IsValidAnimationTransform(animatedTransform))
+        {
+            pos = mul(scaledPos, animatedTransform);
+            normal = mul(animatedTransform, normal);
+        }
+    }
+#endif // ENABLE_SKINNING
+
+    uint transformIndex = instance.transformIndex;
+    float4 worldPos = mul(pos, Transforms[transformIndex].model);
+    PSIn.UV  = VSIn.UV;
+    PSIn.MaterialIndex = materialIndex;
+    PSIn.Pos = mul(worldPos, cameraViewProjection);
+}

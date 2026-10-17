@@ -32,14 +32,14 @@ auto CreatePipeline(Diligent::IRenderDevice& device,
     auto depthFormat = TEX_FORMAT_UNKNOWN;
     if (passDesc.depthSink != DepthTarget::None)
     {
-        depthFormat = OffScreenDepthRTFormat;
+        depthFormat = OffScreenDepthStencilRTFormat;
     }
 
     ci.GraphicsPipeline.NumRenderTargets                  = 1;
     ci.GraphicsPipeline.RTVFormats[0]                     = colorFormat;
     ci.GraphicsPipeline.DSVFormat                         = depthFormat;
     ci.GraphicsPipeline.RasterizerDesc.CullMode           = ToDiligentCullMode(passDesc.cullMode);
-    ci.GraphicsPipeline.DepthStencilDesc.DepthEnable      = passDesc.useDepthTest;
+    ci.GraphicsPipeline.DepthStencilDesc.DepthEnable      = passDesc.useDepthTest.value;
     ci.GraphicsPipeline.DepthStencilDesc.DepthWriteEnable = false;
     ci.GraphicsPipeline.DepthStencilDesc.DepthFunc        = COMPARISON_FUNC_LESS_EQUAL; // Forces everything less than 1.0 (depth set in vertex shader) to render in front of the skybox
     ci.GraphicsPipeline.InputLayout.LayoutElements        = layoutElements.data();
@@ -67,7 +67,10 @@ SkyboxPass::SkyboxPass(Diligent::IRenderDevice& device,
                        ShaderBindings& shaderBindings,
                        const PassManifest& passManifest,
                        const PassDesc& passDesc)
-    : Pass{CreatePipeline(device, shaders, shaderBindings, passDesc), GetSinks(passManifest, passDesc), GetSources(passManifest, passDesc)}
+    : Pass{CreatePipeline(device, shaders, shaderBindings, passDesc), 
+           GetSinks(passManifest, passDesc),
+           GetSources(passManifest, passDesc),
+           passDesc}
 {
 }
 

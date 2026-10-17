@@ -2,8 +2,9 @@
 
 #include "ncengine/graphics/GraphicsUtility.h"
 #include "ncengine/graphics/Material.h"
+#include "graphics2/diligent/pass/PassDesc.h"
+#include "graphics2/diligent/pass/PassTypes.h"
 #include "ncengine/graphics/PostProcess.h"
-#include "PassTypes.h"
 
 #include <vector>
 

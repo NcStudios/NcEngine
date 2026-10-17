@@ -50,7 +50,9 @@ ForEach-Object {
         '-fspv-target-env=vulkan1.2',                     # target Vulkan 1.2
         '-fspv-extension=SPV_GOOGLE_hlsl_functionality1', # SPIR-V HLSL semantics
         '-fspv-extension=SPV_KHR_non_semantic_info',      # SPIR-V HLSL semantics
+        '-fspv-extension=SPV_GOOGLE_user_type',
         '-fspv-extension=SPV_EXT_descriptor_indexing',    # Allow for descriptor indexing
+        '-fspv-reflect',
         '-Zpr',                                           # pack matrices in row-major order
         '-E', 'main',                                     # entry point
         '-T', $Profile,                                   # shader profile (vs_6_0, ps_6_0)

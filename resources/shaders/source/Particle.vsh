@@ -2,8 +2,8 @@
 
 struct VSInput
 {
-    float3 Pos : POSITION;
-    float2 UV  : TEXCOORD0;
+    float3 Pos : ATTRIB0;
+    float2 UV  : ATTRIB1;
 };
 
 struct PSOutput

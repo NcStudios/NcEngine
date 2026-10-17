@@ -40,19 +40,27 @@ struct MaterialData
     float4 gradientEnd;
     float4 primaryColor;
     float4 secondaryColor;
+
     float4 tertiaryColor;
+    float4 stencilOutlineColor;
+
     float normalIntensity;
     float hatchTiling;
     float gradientAmount;
     float reflectivity;
+
+    float stencilOutlineWidth;
     uint diffuseTexIndex;
     uint normalTexIndex;
     uint hatchTexIndex;
+
     bool useTextureNormals;
     bool useFlatShading;
     bool useColorOverride;
     bool useHatchTexture;
-    float padding;
+
+    uint useStencilOutline;
+    float3 padding;
 };
 
 struct BoneData

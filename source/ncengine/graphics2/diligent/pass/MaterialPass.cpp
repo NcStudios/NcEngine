@@ -13,6 +13,7 @@ using namespace Diligent;
 using namespace nc::graphics;
 
 auto CreatePipeline(Diligent::IRenderDevice& device,
+                    Diligent::ISwapChain& swapChain,
                     const PipelineShaders& shaders,
                     ShaderBindings& shaderBindings,
                     const PassDesc& passDesc,
@@ -28,39 +29,55 @@ auto CreatePipeline(Diligent::IRenderDevice& device,
     ci.pPS = shaders.pixelShader;
     ci.pVS = shaders.vertexShader;
 
-    auto colorFormat = TEX_FORMAT_UNKNOWN;
-    if (passDesc.colorSink != ColorTarget::None)
-    {
-        colorFormat = OffScreenColorRTFormat;
-    }
-    else if (passDesc.shadowMapSink == ShadowMapTarget::Point)
-    {
-        colorFormat = OffScreenShadowMapRTFormat;
-    }
+    const auto textureFormat = ToTextureFormat(swapChain, 
+                                               passDesc.colorSink,
+                                               passDesc.depthSink,
+                                               passDesc.shadowMapSink,
+                                               passDesc.postProcessSink);
 
-    auto numColorTargets = 0u;
-    if (passDesc.colorSink != ColorTarget::None || passDesc.shadowMapSink == ShadowMapTarget::Point)
-    {
-        numColorTargets = 1;
-    }
-
-    auto depthFormat = TEX_FORMAT_UNKNOWN;
-    if (passDesc.depthSink != DepthTarget::None || passDesc.shadowMapSink != ShadowMapTarget::None)
-    {
-        depthFormat = OffScreenDepthRTFormat;
-    }
-
-    ci.GraphicsPipeline.NumRenderTargets                  = static_cast<uint8_t>(numColorTargets);
-    ci.GraphicsPipeline.RTVFormats[0]                     = colorFormat;
-    ci.GraphicsPipeline.DSVFormat                         = depthFormat;
+    ci.GraphicsPipeline.NumRenderTargets                  = passDesc.numRenderTargets;
+    ci.GraphicsPipeline.RTVFormats[0]                     = textureFormat.colorFormat;
+    ci.GraphicsPipeline.DSVFormat                         = textureFormat.depthFormat;
     ci.GraphicsPipeline.RasterizerDesc.CullMode           = ToDiligentCullMode(passDesc.cullMode);
     ci.GraphicsPipeline.RasterizerDesc.DepthClipEnable    = passDesc.shadowMapSink != ShadowMapTarget::None ? false : true;
-    ci.GraphicsPipeline.DepthStencilDesc.DepthEnable      = passDesc.useDepthTest;
+
     ci.GraphicsPipeline.DepthStencilDesc.DepthWriteEnable = passDesc.depthSink != DepthTarget::None || passDesc.shadowMapSink != ShadowMapTarget::None;
     ci.GraphicsPipeline.InputLayout.LayoutElements        = layoutElements.data();
     ci.GraphicsPipeline.InputLayout.NumElements           = static_cast<uint32_t>(layoutElements.size());
 
-     if (passDesc.alphaBlend)
+    if (passDesc.writeStencil.value)
+    {
+        ci.GraphicsPipeline.DepthStencilDesc.DepthEnable   = true;
+        ci.GraphicsPipeline.DepthStencilDesc.StencilEnable = true;
+        ci.GraphicsPipeline.DepthStencilDesc.FrontFace = StencilOpDesc
+        {
+            STENCIL_OP_KEEP,
+            STENCIL_OP_KEEP,
+            STENCIL_OP_REPLACE,
+            COMPARISON_FUNC_ALWAYS
+        };
+        ci.GraphicsPipeline.DepthStencilDesc.BackFace = ci.GraphicsPipeline.DepthStencilDesc.FrontFace;
+    }
+    else if (passDesc.useStencilTest.value)
+    {
+        ci.GraphicsPipeline.DepthStencilDesc.DepthEnable = passDesc.useDepthTest.value;
+        ci.GraphicsPipeline.DepthStencilDesc.StencilEnable = true;
+        ci.GraphicsPipeline.DepthStencilDesc.FrontFace = StencilOpDesc
+        {
+            STENCIL_OP_KEEP,
+            STENCIL_OP_KEEP,
+            STENCIL_OP_KEEP,
+            COMPARISON_FUNC_NOT_EQUAL
+        };
+        ci.GraphicsPipeline.DepthStencilDesc.BackFace = ci.GraphicsPipeline.DepthStencilDesc.FrontFace;
+    }
+    else
+    {
+        ci.GraphicsPipeline.DepthStencilDesc.DepthEnable = passDesc.useDepthTest.value;
+        ci.GraphicsPipeline.DepthStencilDesc.StencilEnable = false;
+    }
+
+     if (passDesc.isAlphaBlend.value)
     {
         auto& renderTarget          = ci.GraphicsPipeline.BlendDesc.RenderTargets[0];
         renderTarget.BlendEnable    = true;
@@ -72,7 +89,7 @@ auto CreatePipeline(Diligent::IRenderDevice& device,
         renderTarget.BlendOpAlpha   = BLEND_OPERATION_ADD;
     }
 
-    ci.GraphicsPipeline.SmplDesc.Count    = passDesc.isMsaa ? static_cast<uint8_t>(numSamples) : static_cast<uint8_t>(1);
+    ci.GraphicsPipeline.SmplDesc.Count    = passDesc.isMsaa.value ? static_cast<uint8_t>(numSamples) : static_cast<uint8_t>(1);
     ci.GraphicsPipeline.PrimitiveTopology = PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
 
     auto signatures = std::array{&shaderBindings.GetPerFrameSignature().GetResourceSignature(), &shaderBindings.GetPerPassSignature().GetResourceSignature()};
@@ -90,19 +107,18 @@ auto CreatePipeline(Diligent::IRenderDevice& device,
 namespace nc::graphics
 {
 MaterialPass::MaterialPass(Diligent::IRenderDevice& device,
+                           Diligent::ISwapChain& swapChain,
                            const PipelineShaders& shaders,
                            ShaderBindings& shaderBindings,
                            const PassManifest& passManifest,
                            const PassDesc& passDesc,
                            uint32_t numSamples)
     : Pass{
-        CreatePipeline(device, shaders, shaderBindings, passDesc, numSamples),
+        CreatePipeline(device, swapChain, shaders, shaderBindings, passDesc, numSamples),
         GetSinks(passManifest, passDesc),
-        GetSources(passManifest, passDesc)
-      },
-      flag{passDesc.flag},
-      isMsaa{passDesc.isMsaa}
-{
-}
+        GetSources(passManifest, passDesc),
+        passDesc
+      }
+{}
 
 } // namespace nc::graphics

@@ -18,6 +18,7 @@ constexpr auto g_pixelShaderPaths = std::array{
     PPNoisePixel,
     PPOutlinePixel,
     SkyboxPixel,
+    StencilOutlinePixel,
     ToonPixel,
     WireframePixel
 };
@@ -28,6 +29,8 @@ constexpr auto g_vertexShaderPaths = std::array{
     PointShadowMapSkinnedVertex,
     PostProcessVertex,
     SkyboxVertex,
+    StencilOutlineVertex,
+    StencilOutlineSkinnedVertex,
     ToonVertex,
     ToonSkinnedVertex,
     UniShadowMapVertex,

@@ -30,17 +30,17 @@ auto CreatePipeline(Diligent::IRenderDevice& device,
 
     ci.GraphicsPipeline.NumRenderTargets                  = passDesc.colorSink == ColorTarget::None ? 0 : 1;
     ci.GraphicsPipeline.RTVFormats[0]                     = passDesc.colorSink == ColorTarget::None ? TEX_FORMAT_UNKNOWN : OffScreenColorRTFormat;
-    ci.GraphicsPipeline.DSVFormat                         = passDesc.depthSink == DepthTarget::None ? TEX_FORMAT_UNKNOWN : OffScreenDepthRTFormat;
+    ci.GraphicsPipeline.DSVFormat                         = passDesc.depthSink == DepthTarget::None ? TEX_FORMAT_UNKNOWN : OffScreenDepthStencilRTFormat;
     ci.GraphicsPipeline.RasterizerDesc.CullMode           = ToDiligentCullMode(passDesc.cullMode);
-    ci.GraphicsPipeline.DepthStencilDesc.DepthEnable      = passDesc.useDepthTest;
+    ci.GraphicsPipeline.DepthStencilDesc.DepthEnable      = passDesc.useDepthTest.value;
     ci.GraphicsPipeline.DepthStencilDesc.DepthWriteEnable = false;
     ci.GraphicsPipeline.InputLayout.LayoutElements        = layoutElements.data();
     ci.GraphicsPipeline.InputLayout.NumElements           = static_cast<uint32_t>(layoutElements.size());
     ci.GraphicsPipeline.RasterizerDesc.FillMode           = FILL_MODE_SOLID;
-    ci.GraphicsPipeline.SmplDesc.Count                    = passDesc.isMsaa ? static_cast<uint8_t>(numSamples) : static_cast<uint8_t>(1);
+    ci.GraphicsPipeline.SmplDesc.Count                    = passDesc.isMsaa.value ? static_cast<uint8_t>(numSamples) : static_cast<uint8_t>(1);
     ci.GraphicsPipeline.PrimitiveTopology                 = PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
 
-    if (passDesc.alphaBlend)
+    if (passDesc.isAlphaBlend.value)
     {
         auto& renderTarget          = ci.GraphicsPipeline.BlendDesc.RenderTargets[0];
         renderTarget.BlendEnable    = true;
@@ -75,9 +75,9 @@ ParticlePass::ParticlePass(Diligent::IRenderDevice& device,
     : Pass{
         CreatePipeline(device, shaders, shaderBindings, passDesc, numSamples),
         GetSinks(passManifest, passDesc),
-        GetSources(passManifest, passDesc)
-      },
-      isMsaa{numSamples > 1}
+        GetSources(passManifest, passDesc),
+        passDesc
+      }
 {
 }
 } // namespace nc::graphics

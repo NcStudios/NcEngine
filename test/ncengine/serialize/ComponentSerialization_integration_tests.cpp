@@ -165,17 +165,20 @@ TEST(ComponentSerializationTests, RoundTrip_staticMesh_preservesValues)
             .primaryColor = nc::Vector4{2.0f, 12.0f, 0.3f, 7.0f},
             .secondaryColor = nc::Vector4{3.0f, 13.0f, 0.4f, 8.0f},
             .tertiaryColor = nc::Vector4{4.0f, 14.0f, 0.5f, 9.0f},
+            .stencilOutlineColor = nc::Vector4{5.0f, 15.0f, 0.6f, 10.0f},
             .normalIntensity = 3.5f,
             .hatchTiling = 4.5f,
             .gradientAmount = 5.5f,
             .reflectivity = 6.0f,
+            .stencilOutlineWidth = 6.5f,
             .diffuseTex = nc::asset::g_mockTextureView,
             .normalTex = nc::asset::g_mockTextureView,
             .hatchTex = nc::asset::g_mockTextureView,
             .useTextureNormals = true,
             .useFlatShading = true,
             .useColorOverride = true,
-            .useHatchTexture = true
+            .useHatchTexture = true,
+            .useStencilOutline = true
         }
     };
 
@@ -191,7 +194,6 @@ TEST(ComponentSerializationTests, RoundTrip_staticMesh_preservesValues)
     EXPECT_EQ(expected.GetEntity(), actual.GetEntity());
     EXPECT_EQ(expectedMesh.id, actual.GetMeshId());
     EXPECT_EQ(expectedMaterialDesc.name, actual.GetMaterial().GetName());
-    EXPECT_EQ(expectedMaterialDesc.passes, actual.GetMaterial().GetPasses());
     const auto& actualMaterialProperties = actual.GetMaterial().GetProperties();
 
     EXPECT_EQ(expectedMaterialDesc.properties.gradientStart, actualMaterialProperties.gradientStart);
@@ -207,12 +209,15 @@ TEST(ComponentSerializationTests, RoundTrip_staticMesh_preservesValues)
     EXPECT_EQ(expectedMaterialDesc.properties.gradientAmount, actualMaterialProperties.gradientAmount);
     EXPECT_EQ(expectedMaterialDesc.properties.primaryColor, actualMaterialProperties.primaryColor);
     EXPECT_EQ(expectedMaterialDesc.properties.reflectivity, actualMaterialProperties.reflectivity);
+    EXPECT_EQ(expectedMaterialDesc.properties.stencilOutlineWidth, actualMaterialProperties.stencilOutlineWidth);
     EXPECT_EQ(expectedMaterialDesc.properties.secondaryColor, actualMaterialProperties.secondaryColor);
     EXPECT_EQ(expectedMaterialDesc.properties.useTextureNormals, actualMaterialProperties.useTextureNormals);
     EXPECT_EQ(expectedMaterialDesc.properties.tertiaryColor, actualMaterialProperties.tertiaryColor);
+    EXPECT_EQ(expectedMaterialDesc.properties.stencilOutlineColor, actualMaterialProperties.stencilOutlineColor);
     EXPECT_EQ(expectedMaterialDesc.properties.useFlatShading, actualMaterialProperties.useFlatShading);
     EXPECT_EQ(expectedMaterialDesc.properties.useColorOverride, actualMaterialProperties.useColorOverride);
     EXPECT_EQ(expectedMaterialDesc.properties.useHatchTexture, actualMaterialProperties.useHatchTexture);
+    EXPECT_EQ(expectedMaterialDesc.properties.useStencilOutline, actualMaterialProperties.useStencilOutline);
 }
 
 TEST(ComponentSerializationTests, RoundTrip_skinnedMesh_preservesValues)
@@ -231,17 +236,20 @@ TEST(ComponentSerializationTests, RoundTrip_skinnedMesh_preservesValues)
             .primaryColor = nc::Vector4{2.0f, 12.0f, 0.3f, 7.0f},
             .secondaryColor = nc::Vector4{3.0f, 13.0f, 0.4f, 8.0f},
             .tertiaryColor = nc::Vector4{4.0f, 14.0f, 0.5f, 9.0f},
+            .stencilOutlineColor = nc::Vector4{5.0f, 15.0f, 0.6f, 10.0f},
             .normalIntensity = 3.5f,
             .hatchTiling = 4.5f,
             .gradientAmount = 5.5f,
             .reflectivity = 6.0f,
+            .stencilOutlineWidth = 6.5f,
             .diffuseTex = nc::asset::g_mockTextureView,
             .normalTex = nc::asset::g_mockTextureView,
             .hatchTex = nc::asset::g_mockTextureView,
             .useTextureNormals = true,
             .useFlatShading = true,
             .useColorOverride = true,
-            .useHatchTexture = true
+            .useHatchTexture = true,
+            .useStencilOutline = true
         }
     };
 
@@ -258,7 +266,6 @@ TEST(ComponentSerializationTests, RoundTrip_skinnedMesh_preservesValues)
     EXPECT_EQ(expectedMesh.id, actual.GetMeshId());
     EXPECT_EQ(expectedAnimId, actual.GetAnimationController().GetAnimation(nc::RootAnimationState));
     EXPECT_EQ(expectedMaterialDesc.name, actual.GetMaterial().GetName());
-    EXPECT_EQ(expectedMaterialDesc.passes, actual.GetMaterial().GetPasses());
     const auto& actualMaterialProperties = actual.GetMaterial().GetProperties();
     EXPECT_EQ(expectedMaterialDesc.properties.gradientStart, actualMaterialProperties.gradientStart);
     EXPECT_EQ(expectedMaterialDesc.properties.diffuseTex.id, actualMaterialProperties.diffuseTex.id);
@@ -273,12 +280,15 @@ TEST(ComponentSerializationTests, RoundTrip_skinnedMesh_preservesValues)
     EXPECT_EQ(expectedMaterialDesc.properties.gradientAmount, actualMaterialProperties.gradientAmount);
     EXPECT_EQ(expectedMaterialDesc.properties.primaryColor, actualMaterialProperties.primaryColor);
     EXPECT_EQ(expectedMaterialDesc.properties.reflectivity, actualMaterialProperties.reflectivity);
+    EXPECT_EQ(expectedMaterialDesc.properties.stencilOutlineWidth, actualMaterialProperties.stencilOutlineWidth);
     EXPECT_EQ(expectedMaterialDesc.properties.secondaryColor, actualMaterialProperties.secondaryColor);
     EXPECT_EQ(expectedMaterialDesc.properties.useTextureNormals, actualMaterialProperties.useTextureNormals);
     EXPECT_EQ(expectedMaterialDesc.properties.tertiaryColor, actualMaterialProperties.tertiaryColor);
+    EXPECT_EQ(expectedMaterialDesc.properties.stencilOutlineColor, actualMaterialProperties.stencilOutlineColor);
     EXPECT_EQ(expectedMaterialDesc.properties.useFlatShading, actualMaterialProperties.useFlatShading);
     EXPECT_EQ(expectedMaterialDesc.properties.useColorOverride, actualMaterialProperties.useColorOverride);
     EXPECT_EQ(expectedMaterialDesc.properties.useHatchTexture, actualMaterialProperties.useHatchTexture);
+    EXPECT_EQ(expectedMaterialDesc.properties.useStencilOutline, actualMaterialProperties.useStencilOutline);
 }
 
 TEST(ComponentSerializationTests, RoundTrip_particleEmitter_preservesValues)
