@@ -88,11 +88,11 @@ void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
             .exitTo = stopState
         });
 
-        world.Emplace<FrameLogic>(ogre, [](Entity ogre, ecs::Ecs world, float) mutable
+        world.Emplace<FrameLogic>(ogre, [](Entity ogreEntity, ecs::Ecs ecsWorld, float) mutable
         {
             if (input::KeyDown(input::KeyCode::Two))
             {
-                auto& mesh = world.Get<nc::SkinnedMesh>(ogre);
+                auto& mesh = ecsWorld.Get<nc::SkinnedMesh>(ogreEntity);
 
                 auto materialProperties = mesh.GetMaterial().GetProperties();
                 auto prevUseStencilOutline = materialProperties.useStencilOutline;
